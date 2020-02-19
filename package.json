@@ -1,0 +1,52 @@
+{
+    "name": "@orbs-network/network-state-reader",
+    "private": true,
+    "version": "0.0.1",
+    "description": "read orbs state from the network and expose it",
+    "author": "Amir Arad <amir@orbs.com>",
+    "license": "MIT",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist/**/*",
+        "!dist/**/*.test.js"
+    ],
+    "engines": {
+        "node": ">=12.13.0"
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint . --ext .js,.ts,.tsx -f codeframe",
+        "pretest": "npm run typecheck && npm run lint",
+        "clean": "rimraf ./dist/",
+        "prebuild": "npm run clean",
+        "build": "tsc -p ./tsconfig.prod.json && docker build -t orbsnetwork/network-state-reader .",
+        "test": "ava --verbose",
+        "test:e2e": "ava --verbose --config ./ava.config.e2e.js",
+        "prepack": "npm run build",
+        "prettify": "npx prettier \"src/**/*.ts\" --write",
+        "start": "node ./dist/index.js"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "npm run prettify"
+        }
+    },
+    "devDependencies": {
+        "@types/node": "^12.12.27",
+        "@types/node-fetch": "^2.5.4",
+        "@typescript-eslint/eslint-plugin": "^2.19.2",
+        "@typescript-eslint/parser": "^2.19.2",
+        "ava": "^3.3.0",
+        "docker-compose-mocha": "^1.2.0",
+        "eslint": "^6.8.0",
+        "eslint-config-prettier": "^6.10.0",
+        "husky": "^4.2.3",
+        "rimraf": "^3.0.2",
+        "ts-node": "^8.6.2",
+        "typescript": "~3.7.5"
+    },
+    "dependencies": {
+        "node-fetch": "^2.6.0"
+    }
+}
