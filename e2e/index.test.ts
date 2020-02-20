@@ -10,7 +10,19 @@ const envName = dockerComposeTool(
     test.serial.after.always.bind(test.serial.after),
     pathToCompose,
     {
-        shouldPullImages: false
+        shouldPullImages: false,
+        healthCheck: {
+            state: true,
+            options: {
+                custom: {
+                    app: (addr: string) =>
+                        fetch('http://' + addr).then(
+                            _ => true,
+                            _ => false
+                        )
+                }
+            }
+        }
     }
 );
 
