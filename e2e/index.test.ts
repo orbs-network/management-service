@@ -1,9 +1,8 @@
 import test from 'ava';
-import { hello } from '../src/index';
 import { dockerComposeTool, getAddressForService } from 'docker-compose-mocha';
 import fetch from 'node-fetch';
 import { join } from 'path';
-
+import { retry } from 'ts-retry-promise';
 const pathToCompose = join(__dirname, 'docker-compose.yml');
 
 const envName = dockerComposeTool(
@@ -20,7 +19,6 @@ test('happy flow', async t => {
 
     console.log('addr', addr);
 
-    const res = await fetch('http://' + addr);
-
+    const res = await retry(() => fetch('http://' + addr), { retries: 10, delay: 300 });
     t.deepEqual(await res.json(), { message: 'hello world' });
 });

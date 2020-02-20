@@ -1,7 +1,6 @@
 version: 2.1
 orbs:
   node: circleci/node@1.1.6
-  docker: circleci/docker@0.5.20
 jobs:
   build-and-test:
     executor:
@@ -9,7 +8,6 @@ jobs:
       tag: '12.13.0'
     steps:
       - setup_remote_docker
-      - docker/install-docker-tools
       - checkout
       - node/with-cache:
           steps:
