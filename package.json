@@ -25,7 +25,7 @@
         "test:e2e": "ava --verbose --config ./ava.config.e2e.js",
         "prepack": "npm run build",
         "prettify": "npx prettier \"src/**/*.ts\" --write",
-        "start": "node ./dist/index.js"
+        "start": "node ./dist/main.js"
     },
     "husky": {
         "hooks": {
