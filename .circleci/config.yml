@@ -9,7 +9,6 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      - run: cat $BASH_ENV
       - run: node --version
       - run: npm --version
       - run: docker --version
