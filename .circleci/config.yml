@@ -10,9 +10,9 @@ jobs:
       - setup_remote_docker
       - checkout
       - run: |
+        cat $BASH_ENV
         node --version
         npm --version
-        cat $BASH_ENV
         docker --version
         env
       - node/with-cache:
