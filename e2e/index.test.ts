@@ -19,9 +19,10 @@ const envName = dockerComposeTool(
 
 async function serviceFetch(envName: string, pathToCompose: string) {
     console.log((await exec(`docker-compose  -p ${envName} -f "${pathToCompose}" ps app`)).stdout);
-    const containerName = (
-        await exec(`docker-compose  -p ${envName} -f "${pathToCompose}" ps app | awk '{print $1}' | tail -n 1`)
-    ).stdout.trim();
+    const containerName = `${envName}_app_1`;
+    // (
+    //     await exec(`docker-compose  -p ${envName} -f "${pathToCompose}" ps app | awk '{print $1}' | tail -n 1`)
+    // ).stdout.trim();
     console.log('containerName', containerName);
     const resStr = (
         await exec(
