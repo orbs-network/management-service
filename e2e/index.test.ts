@@ -1,26 +1,13 @@
 import test from 'ava';
-import { hello } from '../src/index';
-import { dockerComposeTool, getAddressForService } from 'docker-compose-mocha';
-import fetch from 'node-fetch';
 import { join } from 'path';
-
+import { TestEnvironment } from './driver';
 const pathToCompose = join(__dirname, 'docker-compose.yml');
 
-const envName = dockerComposeTool(
-    test.serial.before.bind(test.serial),
-    test.serial.after.always.bind(test.serial.after),
-    pathToCompose,
-    {
-        shouldPullImages: false
-    }
-);
+const env = new TestEnvironment(pathToCompose);
 
-test('happy flow', async t => {
-    const addr = await getAddressForService(envName, pathToCompose, 'app', 80);
+env.init();
 
-    console.log('addr', addr);
-
-    const res = await fetch('http://' + addr);
-
-    t.deepEqual(await res.json(), { message: 'hello world' });
+test.serial('happy flow', async t => {
+    const res = await env.fetch('app');
+    t.deepEqual(res, { message: 'hello world' });
 });

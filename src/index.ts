@@ -14,5 +14,3 @@ export function serve(port: number) {
 export function hello(name: string) {
     return { message: `hello ${name}` };
 }
-
-serve(80);

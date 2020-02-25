@@ -28,6 +28,17 @@
             "port": 9229,
             "outputCapture": "std",
             "skipFiles": ["<node_internals>/**/*.js"]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "name": "Debug E2E AVA test file",
+            "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/ava",
+            "runtimeArgs": ["--config", "./ava.config.e2e.js", "debug", "--break", "${file}"],
+            "port": 9229,
+            "outputCapture": "std",
+            "skipFiles": ["<node_internals>/**/*.js"]
         }
     ]
 }
