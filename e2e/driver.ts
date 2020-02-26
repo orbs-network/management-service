@@ -7,7 +7,7 @@ import { promisify } from 'util';
 const exec = promisify(cb_exec);
 
 export class TestEnvironment {
-    private envName: string;
+    private envName: string = '';
     constructor(private pathToCompose: string) {}
 
     init() {
