@@ -20,6 +20,7 @@
         "pretest": "npm run typecheck && npm run lint",
         "clean": "rimraf ./dist/",
         "prebuild": "npm run clean",
+        "compile": "tsc -p ./tsconfig.prod.json",
         "build": "tsc -p ./tsconfig.prod.json && docker build -t orbsnetwork/network-state-reader .",
         "test": "ava --verbose",
         "test:e2e": "ava --verbose --config ./ava.config.e2e.js",
@@ -48,6 +49,8 @@
         "typescript": "~3.7.5"
     },
     "dependencies": {
-        "node-fetch": "^2.6.0"
+        "@types/yargs": "^15.0.4",
+        "node-fetch": "^2.6.0",
+        "yargs": "^15.1.0"
     }
 }
