@@ -7,11 +7,11 @@ const options = yargs.option('config', {
     description: 'list of config files'
 }).argv;
 
-console.log(options.config)
+console.log(options.config);
 const config: Config = options.config?.reduce((result: any, configFile: any) => {
     return Object.assign(result, JSON.parse(readFileSync(configFile).toString()));
 }, {}) as Config;
 
-console.log(config)
+console.log(config);
 
 serve(7666, config);

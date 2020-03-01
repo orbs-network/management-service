@@ -1,5 +1,5 @@
 import { createServer, ServerResponse } from 'http';
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
 
 export interface Config {
     ethereumEndpoint: string;
