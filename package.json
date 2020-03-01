@@ -23,7 +23,7 @@
         "compile": "tsc -p ./tsconfig.prod.json",
         "build": "tsc -p ./tsconfig.prod.json && docker build -t orbsnetwork/network-state-reader .",
         "test": "ava --verbose",
-        "test:e2e": "ava --verbose --config ./ava.config.e2e.js",
+        "test:e2e": "ava --verbose --config ./ava.config.e2e.js --timeout=1m",
         "prepack": "npm run build",
         "prettify": "npx prettier \"src/**/*.ts\" --write",
         "start": "node ./dist/main.js"
