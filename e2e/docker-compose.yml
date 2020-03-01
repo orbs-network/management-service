@@ -3,4 +3,7 @@ services:
     app:
         image: orbsnetwork/network-state-reader
         ports:
-            - 80
+            - 7666:7666
+        volumes:
+            - ./config.json:/var/run/config.json
+        command: /opt/orbs/service --config /var/run/config.json

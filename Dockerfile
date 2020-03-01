@@ -20,4 +20,4 @@ COPY service .
 
 # Start
 CMD [ "./service" ]
-EXPOSE 7001
+EXPOSE 7666
