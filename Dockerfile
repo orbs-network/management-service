@@ -16,8 +16,6 @@ RUN npm install
 # Bundle app source
 COPY dist ./dist
 
-COPY service .
-
 # Start
-CMD [ "./service" ]
-EXPOSE 7666
+CMD [ "npm", "start" ]
+EXPOSE 80

@@ -20,7 +20,6 @@
         "pretest": "npm run typecheck && npm run lint",
         "clean": "rimraf ./dist/",
         "prebuild": "npm run clean",
-        "compile": "tsc -p ./tsconfig.prod.json",
         "build": "tsc -p ./tsconfig.prod.json && docker build -t orbsnetwork/network-state-reader .",
         "test": "ava --verbose",
         "test:e2e": "ava --verbose --config ./ava.config.e2e.js --timeout=1m",
@@ -34,8 +33,10 @@
         }
     },
     "devDependencies": {
+        "@types/mock-fs": "^4.10.0",
         "@types/node": "^12.12.27",
         "@types/node-fetch": "^2.5.4",
+        "@types/yargs": "^15.0.4",
         "@typescript-eslint/eslint-plugin": "^2.19.2",
         "@typescript-eslint/parser": "^2.19.2",
         "ava": "^3.3.0",
@@ -43,13 +44,14 @@
         "eslint": "^6.8.0",
         "eslint-config-prettier": "^6.10.0",
         "husky": "^4.2.3",
+        "mock-fs": "^4.11.0",
+        "nock": "^12.0.2",
         "rimraf": "^3.0.2",
         "ts-node": "^8.6.2",
         "ts-retry-promise": "^0.2.0",
         "typescript": "~3.7.5"
     },
     "dependencies": {
-        "@types/yargs": "^15.0.4",
         "node-fetch": "^2.6.0",
         "yargs": "^15.1.0"
     }

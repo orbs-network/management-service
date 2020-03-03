@@ -5,5 +5,5 @@ services:
             context: .
             dockerfile: ./Dockerfile.test
         ports:
-            - 7666:7666
-        command: /opt/orbs/service --config /opt/orbs/config.json
+            - 80
+        command: npm start -- --config /opt/orbs/config.json
