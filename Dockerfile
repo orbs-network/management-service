@@ -3,7 +3,7 @@ FROM node:12-alpine
 ENV NODE_ENV production
 # Set the timezone in docker
 # Create Directory for the Container
-WORKDIR /app
+WORKDIR /opt/orbs
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 # where available (npm@5+)

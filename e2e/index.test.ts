@@ -12,6 +12,7 @@ const env = new TestEnvironment(pathToCompose);
 env.init();
 
 test.serial('[E2E] serves boyarLegacyBootstrap according to config', async t => {
+    t.timeout(60 * 1000);
     const res = await env.fetch('app');
 
     const config = JSON.parse(readFileSync(pathToConfig).toString());
