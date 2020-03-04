@@ -8,7 +8,7 @@ const exec = promisify(cb_exec);
 
 export class TestEnvironment {
     private envName: string = '';
-    constructor(private pathToCompose: string) {}
+    constructor(private pathToCompose: string) { }
 
     init() {
         this.envName = dockerComposeTool(

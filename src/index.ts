@@ -1,5 +1,6 @@
 import { createServer, RequestListener } from 'http';
 import fetch from 'node-fetch';
+import { set } from 'lodash';
 
 export interface ServiceConfiguration {
     boyarLegacyBootstrap: string;
@@ -22,6 +23,9 @@ export function serve(port: number, config: ServiceConfiguration) {
             stage = 1;
             response.writeHead(200, { 'Content-Type': 'application/json' });
             stage = 2;
+
+            set(body, 'services.config.Config', config);
+
             response.end(JSON.stringify(body));
         } catch (err) {
             console.error(err);
