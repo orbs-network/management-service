@@ -33,6 +33,7 @@
         }
     },
     "devDependencies": {
+        "@types/luxon": "^1.21.0",
         "@types/mock-fs": "^4.10.0",
         "@types/node": "^12.12.27",
         "@types/node-fetch": "^2.5.4",
@@ -52,7 +53,9 @@
         "typescript": "~3.7.5"
     },
     "dependencies": {
+        "docker-hub-utils": "^1.10.27",
         "node-fetch": "^2.6.0",
+        "to-semver": "^2.0.0",
         "yargs": "^15.1.0"
     }
 }

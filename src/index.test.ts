@@ -1,5 +1,5 @@
 import test from 'ava';
-import { getBoyarBootstrap, isLegalServiceConfiguration } from './index';
+import { getBoyarBootstrap, isLegalServiceConfiguration, fetchLatestTagElement } from './index';
 import nock from 'nock';
 
 test.serial.afterEach.always(() => {
@@ -29,4 +29,13 @@ test('accepts legal config', t => {
             pollIntervalSeconds: 0.1
         })
     );
+});
+
+// TODO WIP
+test('get latest tag', async t => {
+    const tag = await fetchLatestTagElement({ user: 'orbsnetwork', name: 'node' });
+    if (!tag) {
+        throw new Error('tag not found');
+    }
+    t.deepEqual(tag, 'v1.3.10');
 });

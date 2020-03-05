@@ -1,5 +1,7 @@
 import { createServer, RequestListener } from 'http';
+import { fetchDockerHubToken, DockerHubRepo } from 'docker-hub-utils';
 import fetch from 'node-fetch';
+import toSemver from 'to-semver';
 
 export interface ServiceConfiguration {
     boyarLegacyBootstrap: string;
@@ -15,9 +17,54 @@ export function isLegalServiceConfiguration(c: Partial<ServiceConfiguration>): c
 }
 
 export async function getBoyarBootstrap({ boyarLegacyBootstrap }: { boyarLegacyBootstrap: string }): Promise<object> {
+    return await fetchJson(boyarLegacyBootstrap); // TODO override with fetchLatestTagElement
+}
+
+export type DockerConfig = {
+    ContainerNamePrefix: string;
+    Image: string;
+    Tag: string;
+    Pull: boolean;
+};
+
+export type LegacyBoyarBootstrap = {
+    network: Array<unknown>;
+    orchestrator: {
+        'storage-driver': string;
+        'max-reload-time-delay': string;
+    };
+    chains: Array<{
+        Id: string | number;
+        HttpPort: number;
+        GossipPort: number;
+        DockerConfig: DockerConfig;
+        Config: object;
+    }>;
+};
+
+async function fetchJson(boyarLegacyBootstrap: string) {
     const res = await fetch(boyarLegacyBootstrap);
     const body = await res.text();
     return JSON.parse(body);
+}
+
+export async function fetchLatestTagElement(repository: { name: string; user: string }): Promise<string | undefined> {
+    const token = await fetchDockerHubToken(repository as DockerHubRepo);
+    const res = await fetch(`https://registry.hub.docker.com/v2/${repository.user}/${repository.name}/tags/list`, {
+        headers: { Authorization: 'Bearer ' + token }
+    });
+    const textRes = await res.text();
+    const body = JSON.parse(textRes);
+    const tags = body?.tags;
+    if (!tags || !Array.isArray(tags)) {
+        // todo guard Array<string>
+        return;
+    }
+    const versions = toSemver(tags, { clean: false, includePrereleases: false });
+    if (!versions.length) {
+        return;
+    }
+    return versions[0];
 }
 
 export function serve(port: number, config: ServiceConfiguration) {
