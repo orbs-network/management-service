@@ -78,7 +78,15 @@ export function serve(port: number, config: ServiceConfiguration) {
     const configPoller = setInterval(() => {
         boyarBootstrap = getBoyarBootstrap(config);
     }, config.pollIntervalSeconds * 1000);
-    const server = createServer((async (_request, response) => {
+    const server = createServer((async (request, response) => {
+        request.on('error', err => {
+            // If we don't have a listener for 'error' event, the error will be thrown
+            console.error('request error', err.message, err.stack);
+        });
+        response.on('error', err => {
+            // If we don't have a listener for 'error' event, the error will be thrown
+            console.error('response error', err.message, err.stack);
+        });
         let stage = 0;
         try {
             const body = await boyarBootstrap;
