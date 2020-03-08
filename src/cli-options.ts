@@ -1,4 +1,4 @@
-import { ServiceConfiguration, isLegalServiceConfiguration } from '.';
+import { ServiceConfiguration, isLegalServiceConfiguration } from './data-types';
 import { readFileSync } from 'fs';
 import yargs from 'yargs';
 

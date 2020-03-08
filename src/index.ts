@@ -1,46 +1,44 @@
 import { createServer, RequestListener } from 'http';
-import { fetchDockerHubToken, DockerHubRepo } from 'docker-hub-utils';
 import fetch from 'node-fetch';
-import semver from 'semver';
+import { Processor } from './processor';
+import { LegacyBoyarBootstrap, ServiceConfiguration } from './data-types';
 
-export interface ServiceConfiguration {
+export type NodeManagementConfig = {
+    Orchestration: object;
+    NodeServices: Array<{}>;
+    VirtualChains: Array<{}>;
+};
+
+export async function getNodeConfiguration({
+    boyarLegacyBootstrap
+}: {
     boyarLegacyBootstrap: string;
-    pollIntervalSeconds: number;
+}): Promise<object> {
+    const processor = new Processor();
+    const nodeConfiguration: LegacyBoyarBootstrap = await fetchJson(boyarLegacyBootstrap);
+    const result = { Orchestration: nodeConfiguration.orchestrator } as NodeManagementConfig;
+    if (nodeConfiguration.chains) {
+        const chains = await Promise.all(
+            nodeConfiguration.chains.map(async c => ({
+                ...c,
+                DockerConfig: await processor.updateDockerConfig(c.DockerConfig)
+            }))
+        );
+        result.VirtualChains = chains;
+    }
+    result.NodeServices = [
+        {
+            ExternalPort: 80,
+            InternalPort: 80,
+            DockerConfig: await processor.updateDockerConfig({
+                Image: 'orbsnetwork/network-state-reader',
+                Tag: 'v1.0.0'
+            }),
+            Config: {} // TODO pass config here?
+        }
+    ];
+    return nodeConfiguration;
 }
-export function isLegalServiceConfiguration(c: Partial<ServiceConfiguration>): c is ServiceConfiguration {
-    return (
-        !!c &&
-        typeof c.boyarLegacyBootstrap === 'string' &&
-        typeof c.pollIntervalSeconds == 'number' &&
-        !Number.isNaN(c.pollIntervalSeconds)
-    );
-}
-
-export async function getBoyarBootstrap({ boyarLegacyBootstrap }: { boyarLegacyBootstrap: string }): Promise<object> {
-    return await fetchJson(boyarLegacyBootstrap); // TODO override with fetchLatestTagElement
-}
-
-export type DockerConfig = {
-    ContainerNamePrefix: string;
-    Image: string;
-    Tag: string;
-    Pull: boolean;
-};
-
-export type LegacyBoyarBootstrap = {
-    network: Array<unknown>;
-    orchestrator: {
-        'storage-driver': string;
-        'max-reload-time-delay': string;
-    };
-    chains: Array<{
-        Id: string | number;
-        HttpPort: number;
-        GossipPort: number;
-        DockerConfig: DockerConfig;
-        Config: object;
-    }>;
-};
 
 async function fetchJson(boyarLegacyBootstrap: string) {
     const res = await fetch(boyarLegacyBootstrap);
@@ -48,35 +46,10 @@ async function fetchJson(boyarLegacyBootstrap: string) {
     return JSON.parse(body);
 }
 
-export async function fetchLatestTagElement(repository: { name: string; user: string }): Promise<string | undefined> {
-    const token = await fetchDockerHubToken(repository as DockerHubRepo);
-    const res = await fetch(`https://registry.hub.docker.com/v2/${repository.user}/${repository.name}/tags/list`, {
-        headers: { Authorization: 'Bearer ' + token }
-    });
-    const textRes = await res.text();
-    const body = JSON.parse(textRes);
-    const tags = body?.tags;
-    if (tags && Array.isArray(tags) && tags.every(t => typeof t === 'string')) {
-        const versions = tags
-            .filter(
-                version =>
-                    semver.valid(version, {
-                        loose: true,
-                        includePrerelease: false
-                    }) && !semver.prerelease(version)
-            )
-            .sort(semver.rcompare);
-        if (versions.length) {
-            return versions[0];
-        }
-    }
-    return; // undefined
-}
-
 export function serve(port: number, config: ServiceConfiguration) {
-    let boyarBootstrap = getBoyarBootstrap(config);
+    let boyarBootstrap = getNodeConfiguration(config);
     const configPoller = setInterval(() => {
-        boyarBootstrap = getBoyarBootstrap(config);
+        boyarBootstrap = getNodeConfiguration(config);
     }, config.pollIntervalSeconds * 1000);
     const server = createServer((async (request, response) => {
         request.on('error', err => {
