@@ -22,6 +22,7 @@
         "prebuild": "npm run clean",
         "build": "tsc -p ./tsconfig.prod.json && docker build -t orbsnetwork/network-state-reader .",
         "test": "ava --verbose",
+        "test:quick": "echo '-- TEST --' && ava --verbose",
         "test:e2e": "ava --verbose --config ./ava.config.e2e.js",
         "prepack": "npm run build",
         "prettify": "npx prettier \"src/**/*.ts\" --write",
@@ -37,6 +38,7 @@
         "@types/mock-fs": "^4.10.0",
         "@types/node": "^12.12.27",
         "@types/node-fetch": "^2.5.4",
+        "@types/semver": "^7.1.0",
         "@types/yargs": "^15.0.4",
         "@typescript-eslint/eslint-plugin": "^2.19.2",
         "@typescript-eslint/parser": "^2.19.2",
@@ -55,7 +57,7 @@
     "dependencies": {
         "docker-hub-utils": "^1.10.27",
         "node-fetch": "^2.6.0",
-        "to-semver": "^2.0.0",
+        "semver": "^7.1.3",
         "yargs": "^15.1.0"
     }
 }

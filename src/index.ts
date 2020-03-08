@@ -1,7 +1,7 @@
 import { createServer, RequestListener } from 'http';
 import { fetchDockerHubToken, DockerHubRepo } from 'docker-hub-utils';
 import fetch from 'node-fetch';
-import toSemver from 'to-semver';
+import semver from 'semver';
 
 export interface ServiceConfiguration {
     boyarLegacyBootstrap: string;
@@ -56,15 +56,21 @@ export async function fetchLatestTagElement(repository: { name: string; user: st
     const textRes = await res.text();
     const body = JSON.parse(textRes);
     const tags = body?.tags;
-    if (!tags || !Array.isArray(tags)) {
-        // todo guard Array<string>
-        return;
+    if (tags && Array.isArray(tags) && tags.every(t => typeof t === 'string')) {
+        const versions = tags
+            .filter(
+                version =>
+                    semver.valid(version, {
+                        loose: true,
+                        includePrerelease: false
+                    }) && !semver.prerelease(version)
+            )
+            .sort(semver.rcompare);
+        if (versions.length) {
+            return versions[0];
+        }
     }
-    const versions = toSemver(tags, { clean: false, includePrereleases: false });
-    if (!versions.length) {
-        return;
-    }
-    return versions[0];
+    return; // undefined
 }
 
 export function serve(port: number, config: ServiceConfiguration) {
