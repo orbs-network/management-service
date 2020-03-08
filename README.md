@@ -1,10 +1,16 @@
 # Orbs Network State Reader
 
-An Orbs node service that reads the state of the Orbs network. 
+An Orbs node V2 service that reads the state of the Orbs network. 
+
+## Functionality
+
+This service serves as a source of truth for an Orbs node V2 configuration. It periodically reads several external sources:
+ - A remote source for V1 node's management configuration, provided by Orbs LTD
+ - Docker registry for the latest versions of the node's services
 
 ## How to run
 
- [still missing implementation]
+ [still missing]
 
 ## Developer instructions
 
