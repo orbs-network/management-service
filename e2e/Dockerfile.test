@@ -1,3 +1,3 @@
-FROM orbsnetwork/network-state-reader
+FROM local/network-state-reader
 
 COPY ./config.json ./
