@@ -16,7 +16,7 @@ export async function getNodeConfiguration({
 }): Promise<object> {
     const processor = new Processor();
     const nodeConfiguration: LegacyBoyarBootstrap = await fetchJson(boyarLegacyBootstrap);
-    const result = { Orchestration: nodeConfiguration.orchestrator } as NodeManagementConfig;
+    const result = { Orchestration: nodeConfiguration.orchestrator || {} } as NodeManagementConfig;
     if (nodeConfiguration.chains) {
         const chains = await Promise.all(
             nodeConfiguration.chains.map(async c => ({
@@ -32,12 +32,12 @@ export async function getNodeConfiguration({
             InternalPort: 8080,
             DockerConfig: await processor.updateDockerConfig({
                 Image: 'orbsnetwork/management-service',
-                Tag: 'v1.0.0'
+                Tag: 'G-0-N'
             }),
             Config: {} // TODO pass config here?
         }
     ];
-    return nodeConfiguration;
+    return result;
 }
 
 async function fetchJson(boyarLegacyBootstrap: string) {

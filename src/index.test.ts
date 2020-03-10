@@ -6,7 +6,7 @@ test.serial.afterEach.always(() => {
     nock.cleanAll();
 });
 
-test.serial('polls boyarLegacyBootstrap according to config', async t => {
+test.serial('returns ', async t => {
     const congigUri = 'https://s3.amazonaws.com';
     const configPath = '/orbs-bootstrap-prod/boyar/config.json';
     const body: object = { placeholder: 'hello world' };
@@ -19,6 +19,19 @@ test.serial('polls boyarLegacyBootstrap according to config', async t => {
         boyarLegacyBootstrap: congigUri + configPath
     });
 
-    t.deepEqual(result, body);
+    t.deepEqual(result, {
+        Orchestration: {},
+        NodeServices: [
+            {
+                ExternalPort: 8080,
+                InternalPort: 8080,
+                DockerConfig: {
+                    Image: 'orbsnetwork/management-service',
+                    Tag: 'G-0-N'
+                },
+                Config: {}
+            }
+        ]
+    });
     scope.done();
 });
