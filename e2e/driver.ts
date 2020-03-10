@@ -21,7 +21,7 @@ export class TestEnvironment {
         );
     }
 
-    async fetch(serviceName: string, port: number = 80, path: string = '/') {
+    async fetch(serviceName: string, port: number = 8080, path: string = '/') {
         if (process.env['CIRCLECI']) {
             const { stdout } = await exec(
                 `docker run --network container:${this.envName}_${serviceName}_1 appropriate/curl  -s --retry 10 --retry-delay 1 --retry-connrefused http://localhost:${port}${path}`

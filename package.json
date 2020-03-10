@@ -1,5 +1,5 @@
 {
-    "name": "@orbs-network/network-state-reader",
+    "name": "@orbs-network/management-service",
     "private": true,
     "version": "0.0.1",
     "description": "read orbs state from the network and expose it",
@@ -20,7 +20,7 @@
         "pretest": "npm run typecheck && npm run lint",
         "clean": "rimraf ./dist/",
         "prebuild": "npm run clean",
-        "build": "tsc -p ./tsconfig.prod.json && docker build -t orbsnetwork/network-state-reader .",
+        "build": "tsc -p ./tsconfig.prod.json && docker build -t local/management-service .",
         "test": "ava --verbose",
         "test:quick": "echo '-- TEST --' && ava --verbose",
         "test:e2e": "ava --verbose --config ./ava.config.e2e.js",

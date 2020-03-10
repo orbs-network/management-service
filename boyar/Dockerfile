@@ -1,3 +1,3 @@
 FROM local/management-service
 
-COPY ./config.json ./
+COPY ./service ./
