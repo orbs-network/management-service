@@ -28,10 +28,10 @@ export async function getNodeConfiguration({
     }
     result.NodeServices = [
         {
-            ExternalPort: 80,
-            InternalPort: 80,
+            ExternalPort: 8080,
+            InternalPort: 8080,
             DockerConfig: await processor.updateDockerConfig({
-                Image: 'orbsnetwork/network-state-reader',
+                Image: 'orbsnetwork/management-service',
                 Tag: 'v1.0.0'
             }),
             Config: {} // TODO pass config here?

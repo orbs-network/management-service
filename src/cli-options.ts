@@ -16,7 +16,7 @@ export function parseOptions(argv: string[]): ServiceConfiguration {
     const config = options.config.reduce<Partial<ServiceConfiguration>>(
         (result: Partial<ServiceConfiguration>, configFile: string) =>
             Object.assign(result, JSON.parse(readFileSync(configFile).toString())),
-        {}
+        { pollIntervalSeconds: 1 }
     );
     if (!isLegalServiceConfiguration(config)) {
         throw new Error(`illegal configuration value ${JSON.stringify(config)}`);
