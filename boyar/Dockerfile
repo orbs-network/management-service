@@ -1,3 +1,3 @@
-FROM local/network-state-reader
+FROM local/management-service
 
 COPY ./service ./
