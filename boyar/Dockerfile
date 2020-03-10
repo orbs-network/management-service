@@ -1,3 +1,3 @@
 FROM local/network-state-reader
 
-COPY ./config.json ./
+COPY ./service ./

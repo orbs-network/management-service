@@ -20,7 +20,7 @@
         "pretest": "npm run typecheck && npm run lint",
         "clean": "rimraf ./dist/",
         "prebuild": "npm run clean",
-        "build": "tsc -p ./tsconfig.prod.json && docker build -t orbsnetwork/network-state-reader .",
+        "build": "tsc -p ./tsconfig.prod.json && docker build -t local/network-state-reader .",
         "test": "ava --verbose",
         "test:e2e": "ava --verbose --config ./ava.config.e2e.js",
         "prepack": "npm run build",
