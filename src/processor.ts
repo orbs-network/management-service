@@ -1,6 +1,6 @@
 import { fetchDockerHubToken, DockerHubRepo } from 'docker-hub-utils';
 import fetch from 'node-fetch';
-import semver from 'semver';
+import { isValid, compare } from './versioning';
 import { DockerConfig } from './data-types';
 
 export type LatestTagResult = Promise<string | undefined>;
@@ -14,15 +14,7 @@ export class Processor {
         const body = JSON.parse(textRes);
         const tags = body?.tags;
         if (tags && Array.isArray(tags) && tags.every(t => typeof t === 'string')) {
-            const versions = tags
-                .filter(
-                    version =>
-                        semver.valid(version, {
-                            loose: true,
-                            includePrerelease: false
-                        }) && !semver.prerelease(version)
-                )
-                .sort(semver.rcompare);
+            const versions = tags.filter(isValid).sort(compare);
             if (versions.length) {
                 return versions[0];
             }

@@ -25,17 +25,10 @@ function nockDockerHub(...repositories: { user: string; name: string; tags: stri
 
 test.serial('fetchLatestTagElement gets latest tag from docker hub', async t => {
     const repository = { user: 'orbsnetwork', name: 'node' };
-    const tags = [
-        'audit', // not a legal semver
-        'foo1.2.0', // not a legal semver
-        'v1.1.0-tag', // a legal semver, but pre-release
-        'v1.0.10', // the latest legal semver
-        'v1.0.9', // a legal semver, but not latest
-        '0432a81f' // not a legal semver
-    ];
+    const tags = ['audit', 'G-2-N', 'G-0-N', 'G-1-N', 'foo G-6-N bar', 'v1.0.10', '0432a81f'];
     const scope = nockDockerHub({ ...repository, tags });
     const tag = await Processor.fetchLatestTagElement(repository);
-    t.deepEqual(tag, 'v1.0.10');
+    t.deepEqual(tag, 'foo G-6-N bar');
     scope.done();
 });
 
@@ -47,26 +40,26 @@ test.serial('updateDockerConfig updates tags with minimal requests', async t => 
         },
         {
             Image: 'foo/bar',
-            Tag: '4.5.6'
+            Tag: 'G-1-N'
         },
         {
             Image: 'fizz/baz',
             Tag: 'foo3'
         }
     ] as DockerConfig[];
-    const scope = nockDockerHub({ user: 'foo', name: 'bar', tags: ['1.2.3'] }, { user: 'fizz', name: 'baz', tags: [] });
+    const scope = nockDockerHub({ user: 'foo', name: 'bar', tags: ['G-3-N'] }, { user: 'fizz', name: 'baz', tags: [] });
     const processor = new Processor();
     const newConfig = await Promise.all(originalConfiguration.map(dc => processor.updateDockerConfig(dc)));
 
     t.deepEqual(newConfig, [
         {
             Image: 'foo/bar',
-            Tag: '1.2.3',
+            Tag: 'G-3-N',
             Pull: true
         },
         {
             Image: 'foo/bar',
-            Tag: '1.2.3',
+            Tag: 'G-3-N',
             Pull: true
         },
         {
