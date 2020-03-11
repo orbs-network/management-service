@@ -1,4 +1,5 @@
 {
+    "network": [],
     "orchestrator": {
         "DynamicManagementConfig": {
             "Url": "http:/localhost:7666/node/management",

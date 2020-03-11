@@ -46,6 +46,7 @@ export interface ManagementNodeService extends GenericNodeService {
 }
 
 export type BoyarConfigurationOutput = {
+    network: LegacyBoyarBootstrapInput['network'];
     orchestrator: {
         [name: string]: string | object;
         DynamicManagementConfig: {

@@ -47,6 +47,7 @@ export class Processor {
     async getBoyarConfiguration(config: ServiceConfiguration): Promise<BoyarConfigurationOutput> {
         const nodeConfiguration = await this.getLegacyBoyarBootstrap(config);
         return {
+            network: nodeConfiguration.network || [],
             orchestrator: this.makeOrchestratorConfig(nodeConfiguration),
             chains: await this.makeChainsConfig(nodeConfiguration),
             services: await this.makeServicesConfig(config)

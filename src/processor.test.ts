@@ -87,6 +87,7 @@ test.serial('returns ', async t => {
     const result = await Processor.getBoyarConfiguration(config);
 
     t.deepEqual(result, {
+        network: [],
         orchestrator: {
             DynamicManagementConfig: {
                 Url: 'http:/localhost:7666/node/management',
