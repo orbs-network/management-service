@@ -1,3 +1,4 @@
 {
-    "boyarLegacyBootstrap": "https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json"
+    "boyarLegacyBootstrap": "https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json",
+    "pollIntervalSeconds": 0.1
 }

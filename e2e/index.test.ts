@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 import { readFileSync } from 'fs';
 
 const pathToCompose = join(__dirname, 'docker-compose.yml');
-const pathToConfig = join(__dirname, 'config.json');
+const pathToExpected = join(__dirname, 'expected.json');
 
 const env = new TestEnvironment(pathToCompose);
 
@@ -15,8 +15,7 @@ test.serial('[E2E] serves boyarLegacyBootstrap according to config', async t => 
     t.timeout(60 * 1000);
     const res = await env.fetch('app');
 
-    const config = JSON.parse(readFileSync(pathToConfig).toString());
-    const expectedValue = await (await fetch(config.boyarLegacyBootstrap)).json();
+    const expectedValue = JSON.parse(readFileSync(pathToExpected).toString());
 
     t.deepEqual(res, expectedValue);
 });

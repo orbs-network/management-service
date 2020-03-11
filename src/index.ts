@@ -1,24 +1,24 @@
 import { createServer, RequestListener } from 'http';
-import fetch from 'node-fetch';
-
-export interface ServiceConfiguration {
-    boyarLegacyBootstrap: string;
-}
-export function isLegalServiceConfiguration(c: Partial<ServiceConfiguration>): c is ServiceConfiguration {
-    return !!c && typeof c.boyarLegacyBootstrap === 'string';
-}
-
-export async function getBoyarBootstrap(config: ServiceConfiguration): Promise<object> {
-    const res = await fetch(config.boyarLegacyBootstrap);
-    const body = await res.text();
-    return JSON.parse(body);
-}
+import { ServiceConfiguration } from './data-types';
+import { Processor } from './processor';
 
 export function serve(port: number, config: ServiceConfiguration) {
-    const server = createServer((async (_request, response) => {
+    let boyarBootstrap = Processor.getBoyarConfiguration(config);
+    const configPoller = setInterval(() => {
+        boyarBootstrap = Processor.getBoyarConfiguration(config);
+    }, config.pollIntervalSeconds * 1000);
+    const server = createServer((async (request, response) => {
+        request.on('error', err => {
+            // If we don't have a listener for 'error' event, the error will be thrown
+            console.error('request error', err.message, err.stack);
+        });
+        response.on('error', err => {
+            // If we don't have a listener for 'error' event, the error will be thrown
+            console.error('response error', err.message, err.stack);
+        });
         let stage = 0;
         try {
-            const body = await getBoyarBootstrap(config);
+            const body = await boyarBootstrap;
             stage = 1;
             response.writeHead(200, { 'Content-Type': 'application/json' });
             stage = 2;
@@ -36,6 +36,7 @@ export function serve(port: number, config: ServiceConfiguration) {
             }
         }
     }) as RequestListener);
+    server.on('close', () => clearInterval(configPoller));
     server.listen(port);
     console.log('Server starting..');
     return server;
