@@ -70,3 +70,39 @@ test.serial('updateDockerConfig updates tags with minimal requests', async t => 
 
     scope.done();
 });
+
+test.serial('returns ', async t => {
+    const congigUri = 'https://s3.amazonaws.com';
+    const configPath = '/orbs-bootstrap-prod/boyar/config.json';
+    const body: object = { placeholder: 'hello world' };
+
+    const scope = nock(congigUri)
+        .get(configPath)
+        .reply(200, body);
+
+    const config = {
+        boyarLegacyBootstrap: congigUri + configPath,
+        pollIntervalSeconds: -1
+    };
+    const result = await Processor.getBoyarConfiguration(config);
+
+    t.deepEqual(result, {
+        orchestrator: {
+            DynamicManagementConfig: {
+                Url: 'http:/localhost:7666/node/management',
+                ReadInterval: '1m',
+                ResetTimeout: '30m'
+            }
+        },
+        chains: [],
+        services: {
+            'management-service': {
+                Port: 8080,
+                ExternalPort: 7666,
+                DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'G-0-N' },
+                Config: config
+            }
+        }
+    });
+    scope.done();
+});

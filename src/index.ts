@@ -1,55 +1,11 @@
 import { createServer, RequestListener } from 'http';
-import fetch from 'node-fetch';
+import { ServiceConfiguration } from './data-types';
 import { Processor } from './processor';
-import { LegacyBoyarBootstrap, ServiceConfiguration } from './data-types';
-
-export type NodeManagementConfig = {
-    Orchestration: object;
-    NodeServices: Array<{}>;
-    VirtualChains: Array<{}>;
-};
-
-export async function getNodeConfiguration({
-    boyarLegacyBootstrap
-}: {
-    boyarLegacyBootstrap: string;
-}): Promise<object> {
-    const processor = new Processor();
-    const nodeConfiguration: LegacyBoyarBootstrap = await fetchJson(boyarLegacyBootstrap);
-    const result = { Orchestration: nodeConfiguration.orchestrator || {} } as NodeManagementConfig;
-    if (nodeConfiguration.chains) {
-        const chains = await Promise.all(
-            nodeConfiguration.chains.map(async c => ({
-                ...c,
-                DockerConfig: await processor.updateDockerConfig(c.DockerConfig)
-            }))
-        );
-        result.VirtualChains = chains;
-    }
-    result.NodeServices = [
-        {
-            ExternalPort: 8080,
-            InternalPort: 8080,
-            DockerConfig: await processor.updateDockerConfig({
-                Image: 'orbsnetwork/management-service',
-                Tag: 'G-0-N'
-            }),
-            Config: {} // TODO pass config here?
-        }
-    ];
-    return result;
-}
-
-async function fetchJson(boyarLegacyBootstrap: string) {
-    const res = await fetch(boyarLegacyBootstrap);
-    const body = await res.text();
-    return JSON.parse(body);
-}
 
 export function serve(port: number, config: ServiceConfiguration) {
-    let boyarBootstrap = getNodeConfiguration(config);
+    let boyarBootstrap = Processor.getBoyarConfiguration(config);
     const configPoller = setInterval(() => {
-        boyarBootstrap = getNodeConfiguration(config);
+        boyarBootstrap = Processor.getBoyarConfiguration(config);
     }, config.pollIntervalSeconds * 1000);
     const server = createServer((async (request, response) => {
         request.on('error', err => {

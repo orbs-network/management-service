@@ -1,7 +1,6 @@
 import { ServiceConfiguration, isLegalServiceConfiguration } from './data-types';
 import { readFileSync } from 'fs';
 import yargs from 'yargs';
-
 export function parseOptions(argv: string[]): ServiceConfiguration {
     const options = yargs(argv)
         .option('config', {
@@ -13,11 +12,11 @@ export function parseOptions(argv: string[]): ServiceConfiguration {
         .exitProcess(false)
         .parse();
 
-    const config = options.config.reduce<Partial<ServiceConfiguration>>(
-        (result: Partial<ServiceConfiguration>, configFile: string) =>
-            Object.assign(result, JSON.parse(readFileSync(configFile).toString())),
-        { pollIntervalSeconds: 1 }
+    const config = Object.assign(
+        { pollIntervalSeconds: 1 },
+        ...options.config.map(configFile => JSON.parse(readFileSync(configFile).toString()))
     );
+
     if (!isLegalServiceConfiguration(config)) {
         throw new Error(`illegal configuration value ${JSON.stringify(config)}`);
     }

@@ -11,24 +11,52 @@ export function isLegalServiceConfiguration(c: Partial<ServiceConfiguration>): c
     );
 }
 
-export type DockerConfig = {
+export type DockerConfig<I extends string = string> = {
     ContainerNamePrefix?: string;
-    Image: string;
+    Image: I;
     Tag: string;
     Pull?: boolean;
 };
 
-export type LegacyBoyarBootstrap = {
-    network: Array<unknown>;
+export type LegacyBoyarBootstrapInput = {
+    network?: Array<unknown>;
     orchestrator: {
-        'storage-driver': string;
-        'max-reload-time-delay': string;
+        [name: string]: string;
     };
-    chains: Array<{
-        Id: string | number;
-        HttpPort: number;
-        GossipPort: number;
-        DockerConfig: DockerConfig;
-        Config: object;
-    }>;
+    chains: Array<ChainConfiguration>;
+};
+
+export type ChainConfiguration = {
+    Id: string | number;
+    HttpPort: number;
+    GossipPort: number;
+    DockerConfig: DockerConfig;
+    Config: object;
+};
+
+export interface GenericNodeService {
+    Port: number;
+    ExternalPort: number;
+    DockerConfig: DockerConfig;
+    Config: object;
+}
+export interface ManagementNodeService extends GenericNodeService {
+    DockerConfig: DockerConfig<'orbsnetwork/management-service'>;
+    Config: ServiceConfiguration;
+}
+
+export type BoyarConfigurationOutput = {
+    orchestrator: {
+        [name: string]: string | object;
+        DynamicManagementConfig: {
+            Url: string;
+            ReadInterval: string;
+            ResetTimeout: string;
+        };
+    };
+    chains: Array<ChainConfiguration>;
+    services: {
+        [name: string]: GenericNodeService;
+        'management-service': ManagementNodeService;
+    };
 };
