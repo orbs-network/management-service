@@ -15,18 +15,19 @@
         "node": ">=12.13.0"
     },
     "scripts": {
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsc --noEmit --skipLibCheck",
         "lint": "eslint . --ext .js,.ts,.tsx -f codeframe",
         "pretest": "npm run typecheck && npm run lint",
         "clean": "rimraf ./dist/",
         "prebuild": "npm run clean",
-        "build": "tsc -p ./tsconfig.prod.json && docker build -t local/management-service .",
+        "build": "tsc --skipLibCheck -p ./tsconfig.prod.json && docker build -t local/management-service .",
         "test": "ava --verbose",
         "test:quick": "echo '-- TEST --' && ava --verbose",
         "test:e2e": "ava --verbose --config ./ava.config.e2e.js",
         "prepack": "npm run build",
         "prettify": "npx prettier \"src/**/*.ts\" --write",
-        "start": "node ./dist/main.js"
+        "start": "node ./dist/main.js",
+        "start:eth": "ganache-cli -p 7545 -i 5777 -a 100 -m  \"vanish junk genuine web seminar cook absurd royal ability series taste method identify elevator liquid\" > ganache.log"
     },
     "husky": {
         "hooks": {
@@ -45,9 +46,11 @@
         "docker-compose-mocha": "^1.2.0",
         "eslint": "^6.8.0",
         "eslint-config-prettier": "^6.10.0",
+        "ganache-cli": "^6.9.1",
         "husky": "^4.2.3",
         "mock-fs": "^4.11.0",
         "nock": "^12.0.2",
+        "pos-v2": "^1.0.4",
         "rimraf": "^3.0.2",
         "ts-node": "^8.6.2",
         "ts-retry-promise": "^0.2.0",
