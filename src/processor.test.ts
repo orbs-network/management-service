@@ -95,7 +95,6 @@ test.serial('returns ', async t => {
 
     t.deepEqual(result, {
         placeholder: 'hello world', // passthrough for legacy support
-        // network: [], // FIXME is empty
         orchestrator: {
             DynamicManagementConfig: {
                 Url: 'http:/localhost:7666/node/management',
