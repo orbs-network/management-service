@@ -330,7 +330,8 @@
             "ExternalPort": 7666,
             "DockerConfig": {
                 "Image": "orbsnetwork/management-service",
-                "Tag": "G-0-N"
+                "Tag": "G-0-N",
+                "Pull": true
             },
             "Config": {
                 "boyarLegacyBootstrap": "https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json",
