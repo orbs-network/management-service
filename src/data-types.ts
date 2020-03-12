@@ -24,6 +24,7 @@ export type LegacyBoyarBootstrapInput = {
         [name: string]: string;
     };
     chains: Array<ChainConfiguration>;
+    services: { [name: string]: unknown };
 };
 
 export type ChainConfiguration = {

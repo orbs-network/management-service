@@ -2,10 +2,33 @@ import { fetchDockerHubToken, DockerHubRepo } from 'docker-hub-utils';
 import fetch from 'node-fetch';
 import { isValid, compare } from './versioning';
 import { DockerConfig, ServiceConfiguration, LegacyBoyarBootstrapInput, BoyarConfigurationOutput } from './data-types';
+import merge from 'deepmerge';
 
 export type LatestTagResult = Promise<string | undefined>;
+
+export function arrayMerge<T extends object>(
+    target: T[],
+    source: T[],
+    options: merge.Options & {
+        cloneUnlessOtherwiseSpecified<V>(value: V, options: merge.Options): V;
+    }
+) {
+    const destination = target.slice();
+    source.forEach((item, index) => {
+        if (typeof destination[index] === 'undefined') {
+            destination[index] = options.cloneUnlessOtherwiseSpecified(item, options);
+        } else if (options.isMergeableObject && options.isMergeableObject(item)) {
+            destination[index] = merge(target[index], item, options);
+        } else if (!target.includes(item)) {
+            destination.push(item);
+        }
+    });
+    return destination;
+}
 export class Processor {
-    static getBoyarConfiguration(config: ServiceConfiguration): Promise<BoyarConfigurationOutput> {
+    static getBoyarConfiguration(
+        config: ServiceConfiguration
+    ): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
         return new Processor().getBoyarConfiguration(config);
     }
     static async fetchLatestTagElement(repository: { name: string; user: string }): LatestTagResult {
@@ -44,14 +67,16 @@ export class Processor {
         return dc;
     }
 
-    async getBoyarConfiguration(config: ServiceConfiguration): Promise<BoyarConfigurationOutput> {
+    async getBoyarConfiguration(
+        config: ServiceConfiguration
+    ): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
         const nodeConfiguration = await this.getLegacyBoyarBootstrap(config);
-        return {
-            network: nodeConfiguration.network || [],
+        const configResult = {
             orchestrator: this.makeOrchestratorConfig(nodeConfiguration),
             chains: await this.makeChainsConfig(nodeConfiguration),
             services: await this.makeServicesConfig(config)
         };
+        return merge(nodeConfiguration, configResult, { arrayMerge }); // aggressive passthrough for legacy support as per Tal's decision
     }
 
     private async makeServicesConfig(config: ServiceConfiguration): Promise<BoyarConfigurationOutput['services']> {
