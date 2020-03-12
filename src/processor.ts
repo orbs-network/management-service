@@ -83,7 +83,7 @@ export class Processor {
         return {
             'management-service': {
                 ExternalPort: 7666,
-                Port: 8080,
+                InternalPort: 8080,
                 DockerConfig: await this.updateDockerConfig({
                     Image: 'orbsnetwork/management-service',
                     Tag: 'G-0-N'

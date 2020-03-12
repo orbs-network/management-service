@@ -36,7 +36,7 @@ export type ChainConfiguration = {
 };
 
 export interface GenericNodeService {
-    Port: number;
+    InternalPort: number;
     ExternalPort: number;
     DockerConfig: DockerConfig;
     Config: object;
