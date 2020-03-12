@@ -95,7 +95,7 @@ test.serial('returns ', async t => {
 
     t.deepEqual(result, {
         placeholder: 'hello world', // passthrough for legacy support
-        network: [],
+        // network: [], // FIXME is empty
         orchestrator: {
             DynamicManagementConfig: {
                 Url: 'http:/localhost:7666/node/management',
@@ -106,9 +106,9 @@ test.serial('returns ', async t => {
         chains: [],
         services: {
             'management-service': {
-                Port: 8080,
+                InternalPort: 8080,
                 ExternalPort: 7666,
-                DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'G-0-N' },
+                DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'G-0-N', Pull: true },
                 Config: Object.assign(config, { placeholder: 'hello world' /* passthrough for legacy support */ })
             }
         }
