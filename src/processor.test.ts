@@ -74,7 +74,14 @@ test.serial('updateDockerConfig updates tags with minimal requests', async t => 
 test.serial('returns ', async t => {
     const congigUri = 'https://s3.amazonaws.com';
     const configPath = '/orbs-bootstrap-prod/boyar/config.json';
-    const body: object = { placeholder: 'hello world' };
+    const body: object = {
+        placeholder: 'hello world',
+        services: {
+            'management-service': {
+                Config: { placeholder: 'hello world' }
+            }
+        }
+    };
 
     const scope = nock(congigUri)
         .get(configPath)
@@ -87,7 +94,7 @@ test.serial('returns ', async t => {
     const result = await Processor.getBoyarConfiguration(config);
 
     t.deepEqual(result, {
-        network: [],
+        placeholder: 'hello world', // passthrough for legacy support
         orchestrator: {
             DynamicManagementConfig: {
                 Url: 'http:/localhost:7666/node/management',
@@ -98,12 +105,12 @@ test.serial('returns ', async t => {
         chains: [],
         services: {
             'management-service': {
-                Port: 8080,
+                InternalPort: 8080,
                 ExternalPort: 7666,
-                DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'G-0-N' },
-                Config: config
+                DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'G-0-N', Pull: true },
+                Config: Object.assign(config, { placeholder: 'hello world' /* passthrough for legacy support */ })
             }
         }
-    });
+    } as unknown);
     scope.done();
 });

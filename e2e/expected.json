@@ -9,8 +9,7 @@
         "storage-driver": "rexray/ebs",
         "max-reload-time-delay": "1m"
     },
-    "chains": [
-        {
+    "chains": [{
             "Id": 1000001,
             "HttpPort": 8001,
             "GossipPort": 4001,
@@ -327,9 +326,13 @@
     ],
     "services": {
         "management-service": {
-            "Port": 8080,
+            "InternalPort": 8080,
             "ExternalPort": 7666,
-            "DockerConfig": { "Image": "orbsnetwork/management-service", "Tag": "G-0-N" },
+            "DockerConfig": {
+                "Image": "orbsnetwork/management-service",
+                "Tag": "G-0-N",
+                "Pull": true
+            },
             "Config": {
                 "boyarLegacyBootstrap": "https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json",
                 "pollIntervalSeconds": 0.1

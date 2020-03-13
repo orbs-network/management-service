@@ -24,6 +24,7 @@ export type LegacyBoyarBootstrapInput = {
         [name: string]: string;
     };
     chains: Array<ChainConfiguration>;
+    services: { [name: string]: unknown };
 };
 
 export type ChainConfiguration = {
@@ -35,7 +36,7 @@ export type ChainConfiguration = {
 };
 
 export interface GenericNodeService {
-    Port: number;
+    InternalPort: number;
     ExternalPort: number;
     DockerConfig: DockerConfig;
     Config: object;
