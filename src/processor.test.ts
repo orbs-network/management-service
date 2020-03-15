@@ -71,7 +71,7 @@ test.serial('updateDockerConfig updates tags with minimal requests', async t => 
     scope.done();
 });
 
-test.serial('returns ', async t => {
+test.serial('getBoyarConfiguration returns ', async t => {
     const congigUri = 'https://s3.amazonaws.com';
     const configPath = '/orbs-bootstrap-prod/boyar/config.json';
     const body: object = {
@@ -91,7 +91,14 @@ test.serial('returns ', async t => {
         boyarLegacyBootstrap: congigUri + configPath,
         pollIntervalSeconds: -1
     };
-    const result = await Processor.getBoyarConfiguration(config);
+    const processor = new Processor();
+    // fake method, to avoid docker hub state entering the result
+    function fakeUpdateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
+        return Promise.resolve({ Image: dc.Image, Tag: '123' });
+    }
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    processor.updateDockerConfig = fakeUpdateDockerConfig;
+    const result = await processor.getBoyarConfiguration(config);
 
     t.deepEqual(result, {
         placeholder: 'hello world', // passthrough for legacy support
@@ -107,7 +114,7 @@ test.serial('returns ', async t => {
             'management-service': {
                 InternalPort: 8080,
                 ExternalPort: 7666,
-                DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'G-0-N', Pull: true },
+                DockerConfig: await fakeUpdateDockerConfig({ Image: 'orbsnetwork/management-service' } as DockerConfig),
                 Config: Object.assign(config, { placeholder: 'hello world' /* passthrough for legacy support */ })
             }
         }
