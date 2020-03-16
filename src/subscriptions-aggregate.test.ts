@@ -7,6 +7,7 @@ test.serial.before(() => ganache.startGanache());
 test.serial.after.always(() => ganache.stopGanache());
 
 test.serial('reads VCs from SubscriptionChanged events', async t => {
+    t.timeout(60 * 1000);
     const d = await Driver.new();
     const numnberOfVChains = 5;
 
