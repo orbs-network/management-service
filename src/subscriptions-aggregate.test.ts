@@ -1,10 +1,6 @@
 import test from 'ava';
-import { Driver, ganache, createVC } from 'pos-v2';
-
-import { subscriptionChangedEvents } from 'pos-v2/release/test/event-parsing';
-
-test.serial.before(() => ganache.startGanache());
-test.serial.after.always(() => ganache.stopGanache());
+import { Driver, createVC } from '@orbs-network/orbs-ethereum-contracts-v2';
+import { subscriptionChangedEvents } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/event-parsing';
 
 test.serial('reads VCs from SubscriptionChanged events', async t => {
     t.timeout(60 * 1000);
