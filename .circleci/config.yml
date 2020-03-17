@@ -14,12 +14,13 @@ jobs:
       - run: docker --version
       - run: env
       - run: docker pull appropriate/curl
+      - run:
+        name: spinning up ganache
+        command: npm install -g ganache-cli && npm run start:eth
+        background: true
       - node/with-cache:
           steps:
             - run: npm install
-            - run:
-              command: npm run start:eth
-              background: true
             - run: npm test
             - run: npm run build
             - run: npm run test:e2e
