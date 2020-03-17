@@ -1,14 +1,16 @@
 version: 2.1
 orbs:
   node: circleci/node@1.1.6
+  docker: circleci/docker@0.5.19
 jobs:
   build-and-test:
-    executor:
-      name: node/default
-      tag: '12.13.0'
+    machine: true
     steps:
-      - setup_remote_docker
       - checkout
+      - run: .circleci/setup-machine.sh
+      - node/install
+        - node-version: 12.13.0
+      - docker/install-docker
       - run: node --version
       - run: npm --version
       - run: docker --version
