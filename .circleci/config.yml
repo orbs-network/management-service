@@ -9,7 +9,7 @@ jobs:
       - checkout
       - run: .circleci/setup-machine.sh
       - node/install
-        - node-version: 12.13.0
+        - node-version: '12.13.0'
       - docker/install-docker
       - run: node --version
       - run: npm --version
