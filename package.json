@@ -38,19 +38,19 @@
         "@orbs-network/orbs-ethereum-contracts-v2": "0.0.1",
         "@types/luxon": "^1.21.0",
         "@types/mock-fs": "^4.10.0",
-        "@types/node": "^12.12.27",
-        "@types/node-fetch": "^2.5.4",
+        "@types/node": "^12.12.30",
+        "@types/node-fetch": "^2.5.5",
         "@types/yargs": "^15.0.4",
-        "@typescript-eslint/eslint-plugin": "^2.19.2",
-        "@typescript-eslint/parser": "^2.19.2",
-        "ava": "^3.3.0",
+        "@typescript-eslint/eslint-plugin": "^2.24.0",
+        "@typescript-eslint/parser": "^2.24.0",
+        "ava": "^3.5.0",
         "docker-compose-mocha": "^1.2.0",
         "eslint": "^6.8.0",
         "eslint-config-prettier": "^6.10.0",
         "ganache-cli": "^6.9.1",
         "husky": "^4.2.3",
         "mock-fs": "^4.11.0",
-        "nock": "^12.0.2",
+        "nock": "^12.0.3",
         "rimraf": "^3.0.2",
         "ts-node": "^8.6.2",
         "ts-retry-promise": "^0.2.0",
@@ -58,8 +58,8 @@
     },
     "dependencies": {
         "deepmerge": "^4.2.2",
-        "docker-hub-utils": "^1.10.27",
+        "docker-hub-utils": "^1.10.28",
         "node-fetch": "^2.6.0",
-        "yargs": "^15.1.0"
+        "yargs": "^15.3.1"
     }
 }
