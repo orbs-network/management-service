@@ -2,32 +2,14 @@ import { fetchDockerHubToken, DockerHubRepo } from 'docker-hub-utils';
 import fetch from 'node-fetch';
 import { isValid, compare } from './versioning';
 import { DockerConfig, ServiceConfiguration, LegacyBoyarBootstrapInput, BoyarConfigurationOutput } from './data-types';
-import merge from 'deepmerge';
 import { EthereumReader, EthereumConfig } from './ethereum-reader';
+import { merge } from './merge';
 
 export type LatestTagResult = Promise<string | undefined>;
 export type EthereumState = {
     virtualChains: Array<string>;
 };
-export function arrayMerge<T extends object>(
-    target: T[],
-    source: T[],
-    options: merge.Options & {
-        cloneUnlessOtherwiseSpecified<V>(value: V, options: merge.Options): V;
-    }
-) {
-    const destination = target.slice();
-    source.forEach((item, index) => {
-        if (typeof destination[index] === 'undefined') {
-            destination[index] = options.cloneUnlessOtherwiseSpecified(item, options);
-        } else if (options.isMergeableObject && options.isMergeableObject(item)) {
-            destination[index] = merge(target[index], item, options);
-        } else if (!target.includes(item)) {
-            destination.push(item);
-        }
-    });
-    return destination;
-}
+
 export class Processor {
     static getBoyarConfiguration(
         config: ServiceConfiguration,
@@ -59,7 +41,7 @@ export class Processor {
     }
 
     private cache = new Map<string, LatestTagResult>();
-    async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
+    private async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
         if (!this.cache.has(dc.Image)) {
             const [user, name] = dc.Image.split('/');
             this.cache.set(dc.Image, Processor.fetchLatestTagElement({ user, name }));
@@ -71,7 +53,7 @@ export class Processor {
         return dc;
     }
 
-    async readEthereumState(ethConfig: EthereumConfig): Promise<EthereumState> {
+    private async readEthereumState(ethConfig: EthereumConfig): Promise<EthereumState> {
         const reader = new EthereumReader(ethConfig);
         const virtualChains = await reader.getAllVirtualChains();
         return { virtualChains };
@@ -88,7 +70,7 @@ export class Processor {
             chains: await this.makeChainsConfig(nodeConfiguration, ethState),
             services: await this.makeServicesConfig(config)
         };
-        return merge(nodeConfiguration, configResult, { arrayMerge }); // aggressive passthrough for legacy support as per Tal's decision
+        return merge(nodeConfiguration, configResult); // aggressive passthrough for legacy support as per Tal's decision
     }
 
     private async makeServicesConfig(config: ServiceConfiguration): Promise<BoyarConfigurationOutput['services']> {
@@ -152,11 +134,14 @@ export class Processor {
     }
 
     private async getLegacyBoyarBootstrap(config: ServiceConfiguration): Promise<LegacyBoyarBootstrapInput> {
-        const legacyBoyarBootstrap: LegacyBoyarBootstrapInput = await Processor.fetchJson(config.boyarLegacyBootstrap);
+        const legacyBoyarBootstrap: Partial<LegacyBoyarBootstrapInput> = await Processor.fetchJson(
+            config.boyarLegacyBootstrap
+        );
         return Object.assign(
             {
                 orchestrator: {},
-                chains: []
+                chains: [],
+                services: {}
             },
             legacyBoyarBootstrap
         );

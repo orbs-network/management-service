@@ -21,3 +21,21 @@ export function nockDockerHub(...repositories: { user: string; name: string; tag
     }
     return registryScope;
 }
+
+export function nockBoyarConfig() {
+    const congigUri = 'https://s3.amazonaws.com';
+    const configPath = '/orbs-bootstrap-prod/boyar/config.json';
+    const extraConfig = 'hello world';
+    const body: object = {
+        extraConfig,
+        services: {
+            'management-service': {
+                Config: { extraConfig }
+            }
+        }
+    };
+    const scope = nock(congigUri)
+        .get(configPath)
+        .reply(200, body);
+    return { scope, congigUri, configPath, extraConfig };
+}

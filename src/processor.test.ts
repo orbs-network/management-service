@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/unbound-method */
 import test from 'ava';
 import { Processor } from './processor';
 import nock from 'nock';
 import { DockerConfig, ServiceConfiguration } from './data-types';
 import { EthereumConfig } from './ethereum-reader';
-import { nockDockerHub } from './test-kit';
+import { nockDockerHub, nockBoyarConfig } from './test-kit';
 // import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
 // import { getAddresses } from './test-kit';
 
@@ -37,7 +40,7 @@ test.serial('updateDockerConfig updates tags with minimal requests', async t => 
     ] as DockerConfig[];
     const scope = nockDockerHub({ user: 'foo', name: 'bar', tags: ['G-3-N'] }, { user: 'fizz', name: 'baz', tags: [] });
     const processor = new Processor();
-    const newConfig = await Promise.all(originalConfiguration.map(dc => processor.updateDockerConfig(dc)));
+    const newConfig = await Promise.all(originalConfiguration.map(dc => (processor as any).updateDockerConfig(dc)));
 
     t.deepEqual(newConfig, [
         {
@@ -59,74 +62,44 @@ test.serial('updateDockerConfig updates tags with minimal requests', async t => 
     scope.done();
 });
 
-test.serial('getBoyarConfiguration returns baseline configurations and propagates legacy config', async t => {
-    t.timeout(60 * 1000);
-    const congigUri = 'https://s3.amazonaws.com';
-    const configPath = '/orbs-bootstrap-prod/boyar/config.json';
-    const body: object = {
-        placeholder: 'hello world',
-        services: {
-            'management-service': {
-                Config: { placeholder: 'hello world' }
+test.serial(
+    'getBoyarConfiguration returns baseline configurations and propagates legacy config (no chains)',
+    async t => {
+        const boyarConfigFakeEndpoint = nockBoyarConfig();
+
+        const config: ServiceConfiguration = {
+            boyarLegacyBootstrap: boyarConfigFakeEndpoint.congigUri + boyarConfigFakeEndpoint.configPath,
+            pollIntervalSeconds: -1,
+            EthereumNetwork: 'ganache'
+        };
+
+        const processor = new Processor();
+        (processor as any).updateDockerConfig = async (dc: any) => ({ Image: dc.Image, Tag: '123' }); // skip docker endpoint
+        (processor as any).readEthereumState = async () => ({ virtualChains: [] }); // skip ethereum endpoint
+
+        const result = await processor.getBoyarConfiguration(config, {} as EthereumConfig);
+
+        t.deepEqual(result, {
+            extraConfig: boyarConfigFakeEndpoint.extraConfig, // passthrough for legacy support
+            orchestrator: {
+                DynamicManagementConfig: {
+                    Url: 'http:/localhost:7666/node/management',
+                    ReadInterval: '1m',
+                    ResetTimeout: '30m'
+                }
+            },
+            chains: [],
+            services: {
+                'management-service': {
+                    InternalPort: 8080,
+                    ExternalPort: 7666,
+                    DockerConfig: { Image: 'orbsnetwork/management-service', Tag: '123' },
+                    Config: Object.assign(config, {
+                        extraConfig: boyarConfigFakeEndpoint.extraConfig /* passthrough for legacy support */
+                    })
+                }
             }
-        }
-    };
-
-    const ethUri = 'http://localhost:7545';
-    // const d = await Driver.new();
-
-    const ethConfig: EthereumConfig = {
-        contracts: {
-            Subscriptions: ''
-        },
-        firstBlock: 0,
-        httpEndpoint: ethUri
-    };
-
-    const scope = nock(congigUri)
-        .get(configPath)
-        .reply(200, body);
-
-    const config: ServiceConfiguration = {
-        boyarLegacyBootstrap: congigUri + configPath,
-        pollIntervalSeconds: -1,
-        EthereumNetwork: 'ganache'
-    };
-
-    const processor = new Processor();
-    // fake method, to avoid docker hub state entering the result
-    function fakeUpdateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
-        return Promise.resolve({ Image: dc.Image, Tag: '123' });
+        } as unknown);
+        boyarConfigFakeEndpoint.scope.done();
     }
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    processor.updateDockerConfig = fakeUpdateDockerConfig;
-
-    function fakeReadEthereumState(_ethConfig: EthereumConfig): ReturnType<Processor['readEthereumState']> {
-        return Promise.resolve({ virtualChains: [] });
-    }
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    processor.readEthereumState = fakeReadEthereumState;
-
-    const result = await processor.getBoyarConfiguration(config, ethConfig);
-
-    t.deepEqual(result, {
-        placeholder: 'hello world', // passthrough for legacy support
-        orchestrator: {
-            DynamicManagementConfig: {
-                Url: 'http:/localhost:7666/node/management',
-                ReadInterval: '1m',
-                ResetTimeout: '30m'
-            }
-        },
-        chains: [],
-        services: {
-            'management-service': {
-                InternalPort: 8080,
-                ExternalPort: 7666,
-                DockerConfig: await fakeUpdateDockerConfig({ Image: 'orbsnetwork/management-service' } as DockerConfig),
-                Config: Object.assign(config, { placeholder: 'hello world' /* passthrough for legacy support */ })
-            }
-        }
-    } as unknown);
-    scope.done();
-});
+);
