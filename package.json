@@ -21,6 +21,8 @@
         "clean": "rimraf ./dist/",
         "prebuild": "npm run clean",
         "build": "tsc --skipLibCheck -p ./tsconfig.prod.json && docker build -t local/management-service .",
+        "build:ethers": "typechain --target=ethers './node_modules/@orbs-network/orbs-ethereum-contracts-v2/release/build/contracts/ISubscriptions.json'",
+        "build:web3": "typechain --target=web3-v1 './node_modules/@orbs-network/orbs-ethereum-contracts-v2/release/build/contracts/*.json'",
         "test": "ava --verbose",
         "test:quick": "echo '-- TEST --' && ava --verbose",
         "test:e2e": "ava --verbose --config ./ava.config.e2e.js",
@@ -54,12 +56,17 @@
         "rimraf": "^3.0.2",
         "ts-node": "^8.6.2",
         "ts-retry-promise": "^0.2.0",
+        "typechain": "^1.0.5",
+        "typechain-target-web3-v1": "^1.0.4",
         "typescript": "~3.7.5"
     },
     "dependencies": {
         "deepmerge": "^4.2.2",
         "docker-hub-utils": "^1.10.28",
+        "ethers": "^4.0.46",
         "node-fetch": "^2.6.0",
+        "typechain-target-ethers": "^1.0.3",
+        "web3": "^1.2.6",
         "yargs": "^15.3.1"
     }
 }

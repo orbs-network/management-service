@@ -1,12 +1,13 @@
 import { createServer, RequestListener } from 'http';
 import { ServiceConfiguration } from './data-types';
 import { Processor } from './processor';
+import { EthereumConfig } from './ethereum-reader';
 
-export function serve(port: number, config: ServiceConfiguration) {
-    let boyarBootstrap = Processor.getBoyarConfiguration(config);
+export function serve(port: number, serviceConfig: ServiceConfiguration, ethereumConfig: EthereumConfig) {
+    let boyarBootstrap = Processor.getBoyarConfiguration(serviceConfig, ethereumConfig);
     const configPoller = setInterval(() => {
-        boyarBootstrap = Processor.getBoyarConfiguration(config);
-    }, config.pollIntervalSeconds * 1000);
+        boyarBootstrap = Processor.getBoyarConfiguration(serviceConfig, ethereumConfig);
+    }, serviceConfig.pollIntervalSeconds * 1000);
     const server = createServer((async (request, response) => {
         request.on('error', err => {
             // If we don't have a listener for 'error' event, the error will be thrown

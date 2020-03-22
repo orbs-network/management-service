@@ -1,13 +1,19 @@
 export interface ServiceConfiguration {
     boyarLegacyBootstrap: string;
     pollIntervalSeconds: number;
+    EthereumNetwork: EthereumNetwork;
 }
+
+export type EthereumNetwork = 'ganache' | 'mainnet' | 'ropsten';
+
 export function isLegalServiceConfiguration(c: Partial<ServiceConfiguration>): c is ServiceConfiguration {
     return (
         !!c &&
         typeof c.boyarLegacyBootstrap === 'string' &&
         typeof c.pollIntervalSeconds == 'number' &&
-        !Number.isNaN(c.pollIntervalSeconds)
+        !Number.isNaN(c.pollIntervalSeconds) &&
+        typeof c.EthereumNetwork == 'string' &&
+        ['ganache', 'mainnet', 'ropsten'].includes(c.EthereumNetwork)
     );
 }
 
@@ -16,6 +22,16 @@ export type DockerConfig<I extends string = string> = {
     Image: I;
     Tag: string;
     Pull?: boolean;
+    Resources?: {
+        Limits?: {
+            Memory?: number;
+            CPUs?: number;
+        };
+        Reservations?: {
+            Memory?: number;
+            CPUs?: number;
+        };
+    };
 };
 
 export type LegacyBoyarBootstrapInput = {
@@ -29,10 +45,15 @@ export type LegacyBoyarBootstrapInput = {
 
 export type ChainConfiguration = {
     Id: string | number;
-    HttpPort: number;
-    GossipPort: number;
+    InternalPort: number; // for gossip, identical for all vchains
+    ExternalPort: number; // for gossip, different for all vchains
+    InternalHttpPort: number; // identical for all vchains
     DockerConfig: DockerConfig;
-    Config: object;
+    Config: {
+        ManagementConfigUrl: string; //'http://1.1.1.1/vchains/42/management';
+        SignerUrl: string; //'http://1.1.1.1/signer';
+        'ethereum-endpoint': string; //'http://localhost:8545'; // eventually rename to EthereumEndpoint
+    };
 };
 
 export interface GenericNodeService {

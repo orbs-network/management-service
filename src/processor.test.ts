@@ -1,27 +1,15 @@
 import test from 'ava';
 import { Processor } from './processor';
 import nock from 'nock';
-import { DockerConfig } from './data-types';
+import { DockerConfig, ServiceConfiguration } from './data-types';
+import { EthereumConfig } from './ethereum-reader';
+import { nockDockerHub } from './test-kit';
+// import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
+// import { getAddresses } from './test-kit';
 
 test.serial.afterEach.always(() => {
     nock.cleanAll();
 });
-
-function nockDockerHub(...repositories: { user: string; name: string; tags: string[] }[]) {
-    nock(/docker/); // prevent requests to docker domain from goinig to network
-    nock('https://auth.docker.io') // allow asking for token from auth
-        .get(/token/)
-        .times(repositories.length) // once per repo
-        .reply(200, { token: 'token placeholder' });
-
-    let registryScope = nock('https://registry.hub.docker.com'); // expect polling tags list
-    for (const repository of repositories) {
-        registryScope = registryScope
-            .get(`/v2/${repository.user}/${repository.name}/tags/list`) // for each repo
-            .reply(200, { tags: repository.tags });
-    }
-    return registryScope;
-}
 
 test.serial('fetchLatestTagElement gets latest tag from docker hub', async t => {
     const repository = { user: 'orbsnetwork', name: 'node' };
@@ -71,7 +59,8 @@ test.serial('updateDockerConfig updates tags with minimal requests', async t => 
     scope.done();
 });
 
-test.serial('getBoyarConfiguration returns ', async t => {
+test.serial('getBoyarConfiguration returns baseline configurations and propagates legacy config', async t => {
+    t.timeout(60 * 1000);
     const congigUri = 'https://s3.amazonaws.com';
     const configPath = '/orbs-bootstrap-prod/boyar/config.json';
     const body: object = {
@@ -83,14 +72,27 @@ test.serial('getBoyarConfiguration returns ', async t => {
         }
     };
 
+    const ethUri = 'http://localhost:7545';
+    // const d = await Driver.new();
+
+    const ethConfig: EthereumConfig = {
+        contracts: {
+            Subscriptions: ''
+        },
+        firstBlock: 0,
+        httpEndpoint: ethUri
+    };
+
     const scope = nock(congigUri)
         .get(configPath)
         .reply(200, body);
 
-    const config = {
+    const config: ServiceConfiguration = {
         boyarLegacyBootstrap: congigUri + configPath,
-        pollIntervalSeconds: -1
+        pollIntervalSeconds: -1,
+        EthereumNetwork: 'ganache'
     };
+
     const processor = new Processor();
     // fake method, to avoid docker hub state entering the result
     function fakeUpdateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
@@ -98,7 +100,14 @@ test.serial('getBoyarConfiguration returns ', async t => {
     }
     // eslint-disable-next-line @typescript-eslint/unbound-method
     processor.updateDockerConfig = fakeUpdateDockerConfig;
-    const result = await processor.getBoyarConfiguration(config);
+
+    function fakeReadEthereumState(_ethConfig: EthereumConfig): ReturnType<Processor['readEthereumState']> {
+        return Promise.resolve({ virtualChains: [] });
+    }
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    processor.readEthereumState = fakeReadEthereumState;
+
+    const result = await processor.getBoyarConfiguration(config, ethConfig);
 
     t.deepEqual(result, {
         placeholder: 'hello world', // passthrough for legacy support

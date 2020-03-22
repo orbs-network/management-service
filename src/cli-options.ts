@@ -13,7 +13,7 @@ export function parseOptions(argv: string[]): ServiceConfiguration {
         .parse();
 
     const config = Object.assign(
-        { pollIntervalSeconds: 1 },
+        { pollIntervalSeconds: 1, EthereumNetwork: 'ganache' },
         ...options.config.map(configFile => JSON.parse(readFileSync(configFile).toString()))
     );
 

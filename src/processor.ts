@@ -3,9 +3,12 @@ import fetch from 'node-fetch';
 import { isValid, compare } from './versioning';
 import { DockerConfig, ServiceConfiguration, LegacyBoyarBootstrapInput, BoyarConfigurationOutput } from './data-types';
 import merge from 'deepmerge';
+import { EthereumReader, EthereumConfig } from './ethereum-reader';
 
 export type LatestTagResult = Promise<string | undefined>;
-
+export type EthereumState = {
+    virtualChains: Array<string>;
+};
 export function arrayMerge<T extends object>(
     target: T[],
     source: T[],
@@ -27,9 +30,10 @@ export function arrayMerge<T extends object>(
 }
 export class Processor {
     static getBoyarConfiguration(
-        config: ServiceConfiguration
+        config: ServiceConfiguration,
+        ethConfig: EthereumConfig
     ): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
-        return new Processor().getBoyarConfiguration(config);
+        return new Processor().getBoyarConfiguration(config, ethConfig);
     }
     static async fetchLatestTagElement(repository: { name: string; user: string }): LatestTagResult {
         const token = await fetchDockerHubToken(repository as DockerHubRepo);
@@ -67,13 +71,21 @@ export class Processor {
         return dc;
     }
 
+    async readEthereumState(ethConfig: EthereumConfig): Promise<EthereumState> {
+        const reader = new EthereumReader(ethConfig);
+        const virtualChains = await reader.getAllVirtualChains();
+        return { virtualChains };
+    }
+
     async getBoyarConfiguration(
-        config: ServiceConfiguration
+        config: ServiceConfiguration,
+        ethConfig: EthereumConfig
     ): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
         const nodeConfiguration = await this.getLegacyBoyarBootstrap(config);
+        const ethState = await this.readEthereumState(ethConfig);
         const configResult = {
             orchestrator: this.makeOrchestratorConfig(nodeConfiguration),
-            chains: await this.makeChainsConfig(nodeConfiguration),
+            chains: await this.makeChainsConfig(nodeConfiguration, ethState),
             services: await this.makeServicesConfig(config)
         };
         return merge(nodeConfiguration, configResult, { arrayMerge }); // aggressive passthrough for legacy support as per Tal's decision
@@ -94,12 +106,35 @@ export class Processor {
     }
 
     private makeChainsConfig(
-        nodeConfiguration: LegacyBoyarBootstrapInput
+        _nodeConfiguration: LegacyBoyarBootstrapInput,
+        { virtualChains }: EthereumState
     ): Promise<BoyarConfigurationOutput['chains']> {
         return Promise.all(
-            nodeConfiguration.chains.map(async c => ({
-                ...c,
-                DockerConfig: await this.updateDockerConfig(c.DockerConfig)
+            virtualChains.map(async id => ({
+                Id: id,
+                InternalPort: 4400, // for gossip, identical for all vchains
+                ExternalPort: 4001, // for gossip, different for all vchains
+                InternalHttpPort: 8080, // identical for all vchains
+                DockerConfig: await this.updateDockerConfig({
+                    Image: 'orbsnetwork/node',
+                    Tag: 'G-0-N',
+                    Pull: true,
+                    Resources: {
+                        Limits: {
+                            Memory: 1024,
+                            CPUs: 1
+                        },
+                        Reservations: {
+                            Memory: 512,
+                            CPUs: 0.5
+                        }
+                    }
+                }),
+                Config: {
+                    ManagementConfigUrl: 'http://1.1.1.1/vchains/42/management',
+                    SignerUrl: 'http://1.1.1.1/signer',
+                    'ethereum-endpoint': 'http://localhost:8545' // eventually rename to EthereumEndpoint
+                }
             }))
         );
     }

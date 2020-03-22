@@ -1,13 +1,18 @@
 import test from 'ava';
 import { parseOptions } from './cli-options';
 import mock from 'mock-fs';
+import { ServiceConfiguration } from './data-types';
 
 test.serial.afterEach.always(() => {
     mock.restore();
 });
 
 const configPath = 'some/path/config.json';
-const configValue = { boyarLegacyBootstrap: 'https://foo.com./bar/baz', pollIntervalSeconds: 0.5 };
+const configValue: ServiceConfiguration = {
+    boyarLegacyBootstrap: 'https://foo.com./bar/baz',
+    pollIntervalSeconds: 0.5,
+    EthereumNetwork: 'ganache'
+};
 
 test.serial('parseOptions with file', t => {
     mock({
