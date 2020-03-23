@@ -4,6 +4,7 @@ import { isValid, compare } from './versioning';
 import { DockerConfig, ServiceConfiguration, LegacyBoyarBootstrapInput, BoyarConfigurationOutput } from './data-types';
 import { EthereumReader, EthereumConfig } from './ethereum-reader';
 import { merge } from './merge';
+import tier1 from './tier-1.json';
 
 export type LatestTagResult = Promise<string | undefined>;
 export type EthereumState = {
@@ -100,17 +101,7 @@ export class Processor {
                 DockerConfig: await this.updateDockerConfig({
                     Image: 'orbsnetwork/node',
                     Tag: 'G-0-N',
-                    Pull: true,
-                    Resources: {
-                        Limits: {
-                            Memory: 1024,
-                            CPUs: 1
-                        },
-                        Reservations: {
-                            Memory: 512,
-                            CPUs: 0.5
-                        }
-                    }
+                    Resources: tier1
                 }),
                 Config: {
                     ManagementConfigUrl: 'http://1.1.1.1/vchains/42/management',
