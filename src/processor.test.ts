@@ -7,8 +7,8 @@ import nock from 'nock';
 import { DockerConfig, ServiceConfiguration } from './data-types';
 import { EthereumConfig } from './ethereum-reader';
 import { nockDockerHub, nockBoyarConfig } from './test-kit';
-// import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
-// import { getAddresses } from './test-kit';
+import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
+import { getAddresses } from './test-kit';
 
 test.serial.afterEach.always(() => {
     nock.cleanAll();
@@ -103,3 +103,57 @@ test.serial(
         boyarConfigFakeEndpoint.scope.done();
     }
 );
+
+test.serial('getBoyarConfiguration returns 0 chains according to ethereum state', async t => {
+    t.timeout(60 * 1000);
+
+    const ethUri = 'http://localhost:7545';
+    const d = await Driver.new();
+
+    const ethConfig: EthereumConfig = {
+        contracts: getAddresses(d),
+        firstBlock: 0,
+        httpEndpoint: ethUri
+    };
+
+    const config: ServiceConfiguration = {
+        boyarLegacyBootstrap: 'foo',
+        pollIntervalSeconds: -1,
+        EthereumNetwork: 'ganache'
+    };
+
+    const processor = new Processor();
+    (processor as any).updateDockerConfig = async (dc: any) => ({ Image: dc.Image, Tag: '123' }); // skip docker endpoint
+    (processor as any).getLegacyBoyarBootstrap = async () => ({
+        orchestrator: {},
+        chains: [],
+        services: {}
+    }); // skip legacy config
+
+    const result1 = await processor.getBoyarConfiguration(config, ethConfig);
+    t.deepEqual(
+        result1,
+        {
+            orchestrator: {
+                DynamicManagementConfig: {
+                    Url: 'http:/localhost:7666/node/management',
+                    ReadInterval: '1m',
+                    ResetTimeout: '30m'
+                }
+            },
+            chains: [],
+            services: {
+                'management-service': {
+                    InternalPort: 8080,
+                    ExternalPort: 7666,
+                    DockerConfig: { Image: 'orbsnetwork/management-service', Tag: '123' },
+                    Config: config
+                }
+            }
+        } as unknown,
+        '0 chains'
+    );
+
+    // const result2 = await processor.getBoyarConfiguration(config, ethConfig);
+    // t.deepEqual(result2.chains, [], '2 chains');
+});
