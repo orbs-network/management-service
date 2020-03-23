@@ -1,12 +1,11 @@
 import { createServer, RequestListener } from 'http';
 import { ServiceConfiguration } from './data-types';
 import { Processor } from './processor';
-import { EthereumConfig } from './ethereum-reader';
 
-export function serve(port: number, serviceConfig: ServiceConfiguration, ethereumConfig: EthereumConfig) {
-    let boyarBootstrap = Processor.getBoyarConfiguration(serviceConfig, ethereumConfig);
+export function serve(port: number, serviceConfig: ServiceConfiguration) {
+    let boyarBootstrap = Processor.getBoyarConfiguration(serviceConfig);
     const configPoller = setInterval(() => {
-        boyarBootstrap = Processor.getBoyarConfiguration(serviceConfig, ethereumConfig);
+        boyarBootstrap = Processor.getBoyarConfiguration(serviceConfig);
     }, serviceConfig.pollIntervalSeconds * 1000);
     const server = createServer((async (request, response) => {
         request.on('error', err => {

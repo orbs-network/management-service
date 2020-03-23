@@ -1,6 +1,5 @@
 import { serve } from '.';
 import { parseOptions } from './cli-options';
-import { getHardcodedEthereumConfig } from './ethereum-reader';
 
 process.on('uncaughtException', function(e) {
     console.log(e.stack);
@@ -9,8 +8,7 @@ process.on('uncaughtException', function(e) {
 
 try {
     const config = parseOptions(process.argv);
-    const ethConfig = getHardcodedEthereumConfig(config.EthereumNetwork);
-    const server = serve(8080, config, ethConfig);
+    const server = serve(8080, config);
 
     process.on('SIGINT', function() {
         // graceful shutdown

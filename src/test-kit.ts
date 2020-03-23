@@ -3,7 +3,7 @@ import nock from 'nock';
 
 export function getAddresses(driver: Driver) {
     return {
-        Subscriptions: driver.subscriptions.web3Contract.options.address
+        Subscriptions: { address: driver.subscriptions.web3Contract.options.address, firstBlock: 0 }
     };
 }
 export function nockDockerHub(...repositories: { user: string; name: string; tags: string[] }[]) {

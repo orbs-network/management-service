@@ -1,10 +1,13 @@
 export interface ServiceConfiguration {
+    Port: number;
+    EthereumGenesisContract: string;
+    EthereumEndpoint: string;
+    // EthereumNetwork: EthereumNetwork;
     boyarLegacyBootstrap: string;
     pollIntervalSeconds: number;
-    EthereumNetwork: EthereumNetwork;
 }
 
-export type EthereumNetwork = 'ganache' | 'mainnet' | 'ropsten';
+// export type EthereumNetwork = 'ganache' | 'mainnet' | 'ropsten';
 
 export function isLegalServiceConfiguration(c: Partial<ServiceConfiguration>): c is ServiceConfiguration {
     return (
@@ -12,8 +15,12 @@ export function isLegalServiceConfiguration(c: Partial<ServiceConfiguration>): c
         typeof c.boyarLegacyBootstrap === 'string' &&
         typeof c.pollIntervalSeconds == 'number' &&
         !Number.isNaN(c.pollIntervalSeconds) &&
-        typeof c.EthereumNetwork == 'string' &&
-        ['ganache', 'mainnet', 'ropsten'].includes(c.EthereumNetwork)
+        typeof c.Port == 'number' &&
+        !Number.isNaN(c.Port) &&
+        typeof c.EthereumEndpoint == 'string' &&
+        typeof c.EthereumGenesisContract == 'string'
+        // typeof c.EthereumNetwork == 'string' &&
+        // ['ganache', 'mainnet', 'ropsten'].includes(c.EthereumNetwork)
     );
 }
 

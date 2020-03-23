@@ -2,7 +2,7 @@ import { fetchDockerHubToken, DockerHubRepo } from 'docker-hub-utils';
 import fetch from 'node-fetch';
 import { isValid, compare } from './versioning';
 import { DockerConfig, ServiceConfiguration, LegacyBoyarBootstrapInput, BoyarConfigurationOutput } from './data-types';
-import { EthereumReader, EthereumConfig } from './ethereum-reader';
+import { EthereumReader, EthereumConfigReader } from './ethereum-reader';
 import { merge } from './merge';
 import tier1 from './tier-1.json';
 import { getVirtualChainPort } from './ports';
@@ -14,10 +14,9 @@ export type EthereumState = {
 
 export class Processor {
     static getBoyarConfiguration(
-        config: ServiceConfiguration,
-        ethConfig: EthereumConfig
+        config: ServiceConfiguration
     ): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
-        return new Processor().getBoyarConfiguration(config, ethConfig);
+        return new Processor().getBoyarConfiguration(config);
     }
     static async fetchLatestTagElement(repository: { name: string; user: string }): LatestTagResult {
         const token = await fetchDockerHubToken(repository as DockerHubRepo);
@@ -55,18 +54,18 @@ export class Processor {
         return dc;
     }
 
-    private async readEthereumState(ethConfig: EthereumConfig): Promise<EthereumState> {
+    private async readEthereumState(config: ServiceConfiguration): Promise<EthereumState> {
+        const ethConfig = await new EthereumConfigReader(config).readEthereumConfig();
         const reader = new EthereumReader(ethConfig);
         const virtualChains = await reader.getAllVirtualChains();
         return { virtualChains };
     }
 
     async getBoyarConfiguration(
-        config: ServiceConfiguration,
-        ethConfig: EthereumConfig
+        config: ServiceConfiguration
     ): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
         const nodeConfiguration = await this.getLegacyBoyarBootstrap(config);
-        const ethState = await this.readEthereumState(ethConfig);
+        const ethState = await this.readEthereumState(config);
         const configResult = {
             orchestrator: this.makeOrchestratorConfig(nodeConfiguration),
             chains: await this.makeChainsConfig(nodeConfiguration, ethState),
