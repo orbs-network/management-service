@@ -7,8 +7,9 @@ import nock from 'nock';
 import { DockerConfig, ServiceConfiguration } from './data-types';
 import { EthereumConfig } from './ethereum-reader';
 import { nockDockerHub, nockBoyarConfig } from './test-kit';
-import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
+import { Driver, createVC, subscriptionChangedEvents } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { getAddresses } from './test-kit';
+import tier1 from './tier-1.json';
 
 test.serial.afterEach.always(() => {
     nock.cleanAll();
@@ -74,7 +75,7 @@ test.serial(
         };
 
         const processor = new Processor();
-        (processor as any).updateDockerConfig = async (dc: any) => ({ Image: dc.Image, Tag: '123' }); // skip docker endpoint
+        (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: 'fake' }); // skip docker endpoint
         (processor as any).readEthereumState = async () => ({ virtualChains: [] }); // skip ethereum endpoint
 
         const result = await processor.getBoyarConfiguration(config, {} as EthereumConfig);
@@ -93,7 +94,7 @@ test.serial(
                 'management-service': {
                     InternalPort: 8080,
                     ExternalPort: 7666,
-                    DockerConfig: { Image: 'orbsnetwork/management-service', Tag: '123' },
+                    DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'fake' },
                     Config: Object.assign(config, {
                         extraConfig: boyarConfigFakeEndpoint.extraConfig /* passthrough for legacy support */
                     })
@@ -104,7 +105,7 @@ test.serial(
     }
 );
 
-test.serial('getBoyarConfiguration returns 0 chains according to ethereum state', async t => {
+test.serial('getBoyarConfiguration returns chains according to ethereum state', async t => {
     t.timeout(60 * 1000);
 
     const ethUri = 'http://localhost:7545';
@@ -123,7 +124,7 @@ test.serial('getBoyarConfiguration returns 0 chains according to ethereum state'
     };
 
     const processor = new Processor();
-    (processor as any).updateDockerConfig = async (dc: any) => ({ Image: dc.Image, Tag: '123' }); // skip docker endpoint
+    (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: 'fake' }); // skip docker endpoint
     (processor as any).getLegacyBoyarBootstrap = async () => ({
         orchestrator: {},
         chains: [],
@@ -146,14 +147,32 @@ test.serial('getBoyarConfiguration returns 0 chains according to ethereum state'
                 'management-service': {
                     InternalPort: 8080,
                     ExternalPort: 7666,
-                    DockerConfig: { Image: 'orbsnetwork/management-service', Tag: '123' },
+                    DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'fake' },
                     Config: config
                 }
             }
         } as unknown,
         '0 chains'
     );
+    const vc1Id = (subscriptionChangedEvents(await createVC(d)).map(e => e.vcid)[0] as unknown) as string;
+    const vc2Id = (subscriptionChangedEvents(await createVC(d)).map(e => e.vcid)[0] as unknown) as string;
 
-    // const result2 = await processor.getBoyarConfiguration(config, ethConfig);
-    // t.deepEqual(result2.chains, [], '2 chains');
+    const expectedVirtualChainConfig = (vcid: string) => ({
+        Id: vcid,
+        InternalPort: 4400, // for gossip, identical for all vchains
+        ExternalPort: 4001, // for gossip, different for all vchains
+        InternalHttpPort: 8080, // identical for all vchains
+        DockerConfig: {
+            Image: 'orbsnetwork/node',
+            Tag: 'fake',
+            Resources: tier1
+        },
+        Config: {
+            ManagementConfigUrl: 'http://1.1.1.1/vchains/42/management',
+            SignerUrl: 'http://1.1.1.1/signer',
+            'ethereum-endpoint': 'http://localhost:8545' // eventually rename to EthereumEndpoint
+        }
+    });
+    const result2 = await processor.getBoyarConfiguration(config, ethConfig);
+    t.deepEqual(result2.chains, [expectedVirtualChainConfig(vc1Id), expectedVirtualChainConfig(vc2Id)], '2 chains');
 });
