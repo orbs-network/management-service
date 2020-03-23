@@ -2,6 +2,7 @@ import test from 'ava';
 import { Driver, createVC } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { EthereumReader } from './ethereum-reader';
 import { getAddresses } from './test-kit';
+import { range } from './utils';
 
 test.serial('reads VCs from SubscriptionChanged events', async t => {
     t.timeout(60 * 1000);
@@ -22,7 +23,7 @@ test.serial('reads VCs from SubscriptionChanged events', async t => {
     t.deepEqual(vcs.length, numnberOfVChains, 'number of VChains');
     t.deepEqual(
         vcs,
-        [...Array(numnberOfVChains).keys()].map(i => `${i + 1000000}`),
+        range(numnberOfVChains).map(i => `${i + 1000000}`),
         'exact match of virtual chains IDs. Requires update when contracts change' // fragile, coupled with contract
     );
 });

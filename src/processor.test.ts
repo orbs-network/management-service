@@ -10,6 +10,7 @@ import { nockDockerHub, nockBoyarConfig } from './test-kit';
 import { Driver, createVC, subscriptionChangedEvents } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { getAddresses } from './test-kit';
 import tier1 from './tier-1.json';
+import { getVirtualChainPort } from './ports';
 
 test.serial.afterEach.always(() => {
     nock.cleanAll();
@@ -160,7 +161,7 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
     const expectedVirtualChainConfig = (vcid: string) => ({
         Id: vcid,
         InternalPort: 4400, // for gossip, identical for all vchains
-        ExternalPort: 4001, // for gossip, different for all vchains
+        ExternalPort: getVirtualChainPort(vcid), // for gossip, different for all vchains
         InternalHttpPort: 8080, // identical for all vchains
         DockerConfig: {
             Image: 'orbsnetwork/node',

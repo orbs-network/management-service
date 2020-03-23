@@ -5,6 +5,7 @@ import { DockerConfig, ServiceConfiguration, LegacyBoyarBootstrapInput, BoyarCon
 import { EthereumReader, EthereumConfig } from './ethereum-reader';
 import { merge } from './merge';
 import tier1 from './tier-1.json';
+import { getVirtualChainPort } from './ports';
 
 export type LatestTagResult = Promise<string | undefined>;
 export type EthereumState = {
@@ -96,7 +97,7 @@ export class Processor {
             virtualChains.map(async id => ({
                 Id: id,
                 InternalPort: 4400, // for gossip, identical for all vchains
-                ExternalPort: 4001, // for gossip, different for all vchains
+                ExternalPort: getVirtualChainPort(id), // for gossip, different for all vchains
                 InternalHttpPort: 8080, // identical for all vchains
                 DockerConfig: await this.updateDockerConfig({
                     Image: 'orbsnetwork/node',
