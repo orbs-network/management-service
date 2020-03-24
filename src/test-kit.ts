@@ -3,7 +3,7 @@ import nock from 'nock';
 
 export function getAddresses(driver: Driver) {
     return {
-        Subscriptions: { address: driver.subscriptions.web3Contract.options.address, firstBlock: 0 }
+        Subscriptions: { address: driver.subscriptions.web3Contract.options.address, firstBlock: 0 },
     };
 }
 export function nockDockerHub(...repositories: { user: string; name: string; tags: string[] }[]) {
@@ -30,12 +30,10 @@ export function nockBoyarConfig() {
         extraConfig,
         services: {
             'management-service': {
-                Config: { extraConfig }
-            }
-        }
+                Config: { extraConfig },
+            },
+        },
     };
-    const scope = nock(congigUri)
-        .get(configPath)
-        .reply(200, body);
+    const scope = nock(congigUri).get(configPath).reply(200, body);
     return { scope, congigUri, configPath, extraConfig };
 }

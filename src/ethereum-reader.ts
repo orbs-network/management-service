@@ -49,17 +49,17 @@ export class EthereumConfigReader {
         const web3Contract = this.connect('ContractRegistry');
         const events = (await web3Contract.getPastEvents('ContractAddressUpdated', {
             fromBlock: 0,
-            toBlock: 'latest'
+            toBlock: 'latest',
         })) as ContractAddressUpdatedEvent[];
         const result: EthereumConfig = {
             contracts: {},
             firstBlock: events[0].blockNumber,
-            httpEndpoint: this.config.EthereumEndpoint
+            httpEndpoint: this.config.EthereumEndpoint,
         };
-        events.forEach(e => {
+        events.forEach((e) => {
             result.contracts[translateEventContractNameToContractName(e.returnValues.contractName)] = {
                 address: e.returnValues.addr,
-                firstBlock: 0 // e.blockNumber
+                firstBlock: 0, // e.blockNumber
             };
         });
         return result;
@@ -86,9 +86,9 @@ export class EthereumReader {
         const web3Contract = this.connect('Subscriptions');
         const events = await web3Contract.getPastEvents('SubscriptionChanged', {
             fromBlock: this.config.firstBlock,
-            toBlock: 'latest'
+            toBlock: 'latest',
         });
-        return events.map(event => event.returnValues.vcid);
+        return events.map((event) => event.returnValues.vcid);
     }
 }
 

@@ -7,14 +7,14 @@ export function parseOptions(argv: string[]): ServiceConfiguration {
             type: 'array',
             required: true,
             string: true,
-            description: 'list of config files'
+            description: 'list of config files',
         })
         .exitProcess(false)
         .parse();
 
     const config = Object.assign(
         { pollIntervalSeconds: 1, Port: 8080 },
-        ...options.config.map(configFile => JSON.parse(readFileSync(configFile).toString()))
+        ...options.config.map((configFile) => JSON.parse(readFileSync(configFile).toString()))
     );
 
     if (!isLegalServiceConfiguration(config)) {

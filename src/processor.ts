@@ -21,12 +21,12 @@ export class Processor {
     static async fetchLatestTagElement(repository: { name: string; user: string }): LatestTagResult {
         const token = await fetchDockerHubToken(repository as DockerHubRepo);
         const res = await fetch(`https://registry.hub.docker.com/v2/${repository.user}/${repository.name}/tags/list`, {
-            headers: { Authorization: 'Bearer ' + token }
+            headers: { Authorization: 'Bearer ' + token },
         });
         const textRes = await res.text();
         const body = JSON.parse(textRes);
         const tags = body?.tags;
-        if (tags && Array.isArray(tags) && tags.every(t => typeof t === 'string')) {
+        if (tags && Array.isArray(tags) && tags.every((t) => typeof t === 'string')) {
             const versions = tags.filter(isValid).sort(compare);
             if (versions.length) {
                 return versions[0];
@@ -69,7 +69,7 @@ export class Processor {
         const configResult = {
             orchestrator: this.makeOrchestratorConfig(nodeConfiguration),
             chains: await this.makeChainsConfig(nodeConfiguration, ethState),
-            services: await this.makeServicesConfig(config)
+            services: await this.makeServicesConfig(config),
         };
         return merge(nodeConfiguration, configResult); // aggressive passthrough for legacy support as per Tal's decision
     }
@@ -81,10 +81,10 @@ export class Processor {
                 InternalPort: 8080,
                 DockerConfig: await this.updateDockerConfig({
                     Image: 'orbsnetwork/management-service',
-                    Tag: 'G-0-N'
+                    Tag: 'G-0-N',
                 }),
-                Config: config
-            }
+                Config: config,
+            },
         };
     }
 
@@ -93,7 +93,7 @@ export class Processor {
         { virtualChains }: EthereumState
     ): Promise<BoyarConfigurationOutput['chains']> {
         return Promise.all(
-            virtualChains.map(async id => ({
+            virtualChains.map(async (id) => ({
                 Id: id,
                 InternalPort: 4400, // for gossip, identical for all vchains
                 ExternalPort: getVirtualChainPort(id), // for gossip, different for all vchains
@@ -101,13 +101,13 @@ export class Processor {
                 DockerConfig: await this.updateDockerConfig({
                     Image: 'orbsnetwork/node',
                     Tag: 'G-0-N',
-                    Resources: tier1
+                    Resources: tier1,
                 }),
                 Config: {
                     ManagementConfigUrl: 'http://1.1.1.1/vchains/42/management',
                     SignerUrl: 'http://1.1.1.1/signer',
-                    'ethereum-endpoint': 'http://localhost:8545' // eventually rename to EthereumEndpoint
-                }
+                    'ethereum-endpoint': 'http://localhost:8545', // eventually rename to EthereumEndpoint
+                },
             }))
         );
     }
@@ -119,8 +119,8 @@ export class Processor {
             DynamicManagementConfig: {
                 Url: 'http:/localhost:7666/node/management',
                 ReadInterval: '1m',
-                ResetTimeout: '30m'
-            }
+                ResetTimeout: '30m',
+            },
         });
     }
 
@@ -132,7 +132,7 @@ export class Processor {
             {
                 orchestrator: {},
                 chains: [],
-                services: {}
+                services: {},
             },
             legacyBoyarBootstrap
         );

@@ -8,11 +8,11 @@ export function serve(port: number, serviceConfig: ServiceConfiguration) {
         boyarBootstrap = Processor.getBoyarConfiguration(serviceConfig);
     }, serviceConfig.pollIntervalSeconds * 1000);
     const server = createServer((async (request, response) => {
-        request.on('error', err => {
+        request.on('error', (err) => {
             // If we don't have a listener for 'error' event, the error will be thrown
             console.error('request error', err.message, err.stack);
         });
-        response.on('error', err => {
+        response.on('error', (err) => {
             // If we don't have a listener for 'error' event, the error will be thrown
             console.error('response error', err.message, err.stack);
         });

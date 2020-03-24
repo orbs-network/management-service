@@ -14,7 +14,7 @@ test.serial.afterEach.always(() => {
     nock.cleanAll();
 });
 
-test.serial('fetchLatestTagElement gets latest tag from docker hub', async t => {
+test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) => {
     const repository = { user: 'orbsnetwork', name: 'node' };
     const tags = ['audit', 'G-2-N', 'G-0-N', 'G-1-N', 'foo G-6-N bar', 'v1.0.10', '0432a81f'];
     const scope = nockDockerHub({ ...repository, tags });
@@ -23,87 +23,90 @@ test.serial('fetchLatestTagElement gets latest tag from docker hub', async t => 
     scope.done();
 });
 
-test.serial('updateDockerConfig updates tags with minimal requests', async t => {
+test.serial('updateDockerConfig updates tags with minimal requests', async (t) => {
     const originalConfiguration = [
         {
             Image: 'foo/bar',
-            Tag: 'foo1'
+            Tag: 'foo1',
         },
         {
             Image: 'foo/bar',
-            Tag: 'G-1-N'
+            Tag: 'G-1-N',
         },
         {
             Image: 'fizz/baz',
-            Tag: 'foo3'
-        }
+            Tag: 'foo3',
+        },
     ] as DockerConfig[];
     const scope = nockDockerHub({ user: 'foo', name: 'bar', tags: ['G-3-N'] }, { user: 'fizz', name: 'baz', tags: [] });
     const processor = new Processor();
-    const newConfig = await Promise.all(originalConfiguration.map(dc => (processor as any).updateDockerConfig(dc)));
+    const newConfig = await Promise.all(originalConfiguration.map((dc) => (processor as any).updateDockerConfig(dc)));
 
     t.deepEqual(newConfig, [
         {
             Image: 'foo/bar',
             Tag: 'G-3-N',
-            Pull: true
+            Pull: true,
         },
         {
             Image: 'foo/bar',
             Tag: 'G-3-N',
-            Pull: true
+            Pull: true,
         },
         {
             Image: 'fizz/baz',
-            Tag: 'foo3'
-        }
+            Tag: 'foo3',
+        },
     ] as DockerConfig[]);
 
     scope.done();
 });
 
-test.serial('getBoyarConfiguration returns boyarLegacyBootstrap and propagates legacy config (no chains)', async t => {
-    const boyarConfigFakeEndpoint = nockBoyarConfig();
+test.serial(
+    'getBoyarConfiguration returns boyarLegacyBootstrap and propagates legacy config (no chains)',
+    async (t) => {
+        const boyarConfigFakeEndpoint = nockBoyarConfig();
 
-    const config: ServiceConfiguration = {
-        Port: -1,
-        EthereumGenesisContract: 'foo',
-        EthereumEndpoint: 'bar',
-        boyarLegacyBootstrap: boyarConfigFakeEndpoint.congigUri + boyarConfigFakeEndpoint.configPath,
-        pollIntervalSeconds: -1
-    };
+        const config: ServiceConfiguration = {
+            Port: -1,
+            EthereumGenesisContract: 'foo',
+            EthereumEndpoint: 'bar',
+            boyarLegacyBootstrap: boyarConfigFakeEndpoint.congigUri + boyarConfigFakeEndpoint.configPath,
+            pollIntervalSeconds: -1,
+        };
 
-    const processor = new Processor();
-    (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: 'fake' }); // skip docker endpoint
-    (processor as any).readEthereumState = async () => ({ virtualChains: [] }); // skip ethereum endpoint
+        const processor = new Processor();
+        (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: 'fake' }); // skip docker endpoint
+        (processor as any).readEthereumState = async () => ({ virtualChains: [] }); // skip ethereum endpoint
 
-    const result = await processor.getBoyarConfiguration(config);
+        const result = await processor.getBoyarConfiguration(config);
 
-    t.deepEqual(result, {
-        extraConfig: boyarConfigFakeEndpoint.extraConfig, // passthrough for legacy support
-        orchestrator: {
-            DynamicManagementConfig: {
-                Url: 'http:/localhost:7666/node/management',
-                ReadInterval: '1m',
-                ResetTimeout: '30m'
-            }
-        },
-        chains: [],
-        services: {
-            'management-service': {
-                InternalPort: 8080,
-                ExternalPort: 7666,
-                DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'fake' },
-                Config: Object.assign(config, {
-                    extraConfig: boyarConfigFakeEndpoint.extraConfig /* passthrough for legacy support */
-                })
-            }
-        }
-    } as unknown);
-    boyarConfigFakeEndpoint.scope.done();
-});
+        t.deepEqual(result, {
+            extraConfig: boyarConfigFakeEndpoint.extraConfig, // passthrough for legacy support
+            orchestrator: {
+                DynamicManagementConfig: {
+                    Url: 'http:/localhost:7666/node/management',
+                    ReadInterval: '1m',
+                    ResetTimeout: '30m',
+                },
+            },
+            chains: [],
+            services: {
+                'management-service': {
+                    InternalPort: 8080,
+                    ExternalPort: 7666,
+                    DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'fake' },
+                    Config: Object.assign(config, {
+                        extraConfig: boyarConfigFakeEndpoint.extraConfig /* passthrough for legacy support */,
+                    }),
+                },
+            },
+        } as unknown);
+        boyarConfigFakeEndpoint.scope.done();
+    }
+);
 
-test.serial('getBoyarConfiguration returns chains according to ethereum state', async t => {
+test.serial('getBoyarConfiguration returns chains according to ethereum state', async (t) => {
     t.timeout(60 * 1000);
 
     const d = await Driver.new();
@@ -113,7 +116,7 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
         EthereumGenesisContract: d.contractRegistry.address,
         EthereumEndpoint: 'http://localhost:7545',
         boyarLegacyBootstrap: 'foo',
-        pollIntervalSeconds: -1
+        pollIntervalSeconds: -1,
     };
 
     const processor = new Processor();
@@ -121,7 +124,7 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
     (processor as any).getLegacyBoyarBootstrap = async () => ({
         orchestrator: {},
         chains: [],
-        services: {}
+        services: {},
     }); // skip legacy config
 
     const result1 = await processor.getBoyarConfiguration(config);
@@ -132,8 +135,8 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
                 DynamicManagementConfig: {
                     Url: 'http:/localhost:7666/node/management',
                     ReadInterval: '1m',
-                    ResetTimeout: '30m'
-                }
+                    ResetTimeout: '30m',
+                },
             },
             chains: [],
             services: {
@@ -141,14 +144,14 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
                     InternalPort: 8080,
                     ExternalPort: 7666,
                     DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'fake' },
-                    Config: config
-                }
-            }
+                    Config: config,
+                },
+            },
         } as unknown,
         '0 chains'
     );
-    const vc1Id = (subscriptionChangedEvents(await createVC(d)).map(e => e.vcid)[0] as unknown) as string;
-    const vc2Id = (subscriptionChangedEvents(await createVC(d)).map(e => e.vcid)[0] as unknown) as string;
+    const vc1Id = (subscriptionChangedEvents(await createVC(d)).map((e) => e.vcid)[0] as unknown) as string;
+    const vc2Id = (subscriptionChangedEvents(await createVC(d)).map((e) => e.vcid)[0] as unknown) as string;
 
     const expectedVirtualChainConfig = (vcid: string) => ({
         Id: vcid,
@@ -158,13 +161,13 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
         DockerConfig: {
             Image: 'orbsnetwork/node',
             Tag: 'fake',
-            Resources: tier1
+            Resources: tier1,
         },
         Config: {
             ManagementConfigUrl: 'http://1.1.1.1/vchains/42/management',
             SignerUrl: 'http://1.1.1.1/signer',
-            'ethereum-endpoint': 'http://localhost:8545' // eventually rename to EthereumEndpoint
-        }
+            'ethereum-endpoint': 'http://localhost:8545', // eventually rename to EthereumEndpoint
+        },
     });
     const result2 = await processor.getBoyarConfiguration(config);
     t.deepEqual(result2.chains, [expectedVirtualChainConfig(vc1Id), expectedVirtualChainConfig(vc2Id)], '2 chains');

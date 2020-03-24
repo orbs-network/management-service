@@ -4,7 +4,7 @@ import { EthereumReader } from './ethereum-reader';
 import { getAddresses } from './test-kit';
 import { range } from './utils';
 
-test.serial('reads VCs from SubscriptionChanged events', async t => {
+test.serial('reads VCs from SubscriptionChanged events', async (t) => {
     t.timeout(60 * 1000);
     const d = await Driver.new();
     const numnberOfVChains = 5;
@@ -16,14 +16,14 @@ test.serial('reads VCs from SubscriptionChanged events', async t => {
     const reader = new EthereumReader({
         contracts: getAddresses(d),
         firstBlock: 0,
-        httpEndpoint: 'http://localhost:7545'
+        httpEndpoint: 'http://localhost:7545',
     });
 
     const vcs = await reader.getAllVirtualChains();
     t.deepEqual(vcs.length, numnberOfVChains, 'number of VChains');
     t.deepEqual(
         vcs,
-        range(numnberOfVChains).map(i => `${i + 1000000}`),
+        range(numnberOfVChains).map((i) => `${i + 1000000}`),
         'exact match of virtual chains IDs. Requires update when contracts change' // fragile, coupled with contract
     );
 });
