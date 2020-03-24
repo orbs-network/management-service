@@ -24,7 +24,7 @@ export class TestEnvironment {
             pollIntervalSeconds: 0.1
         };
     }
-    async init() {
+    init() {
         test.serial.before(async _t => {
             // clean up old config file
             const configFilePath = join(__dirname, 'app-config.json');
