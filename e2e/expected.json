@@ -1,50 +1,20 @@
 {
     "network": [],
     "orchestrator": {
-        "DynamicManagementConfig": {
-            "Url": "http:/localhost:7666/node/management",
-            "ReadInterval": "1m",
-            "ResetTimeout": "30m"
-        },
-        "max-reload-time-delay": "1m",
-        "storage-driver": "rexray/ebs"
-    },
-    "chains": [
-        {
-            "Id": 42,
-            "InternalPort": 4400,
-            "ExternalPort": 4001,
-            "InternalHttpPort": 8080,
-            "Disabled": false,
-            "DockerConfig": {
-                "Image": "orbsnetwork/node",
-                "Tag": "G-0-N",
-                "Resources": {
-                    "Limits": {
-                        "Memory": 1024,
-                        "CPUs": 1
-                    },
-                    "Reservations": {
-                        "Memory": 512,
-                        "CPUs": 0.5
-                    }
-                }
-            },
-            "Config": {
-                "ManagementConfigUrl": "http://1.1.1.1/vchains/42/management",
-                "SignerUrl": "http://1.1.1.1/signer",
-                "ethereum-endpoint": "http://localhost:8545",
-                "Port": 8080
-            }
+        "storage-driver": "nfs",
+        "storage-options": {
+            "maxRetries": "10"
         }
-    ],
+    },
+    "chains": [],
     "services": {
         "management-service": {
             "InternalPort": 8080,
             "ExternalPort": 7666,
             "DockerConfig": {
                 "Image": "orbsnetwork/management-service",
-                "Tag": "G-0-N"
+                "Tag": "G-0-N",
+                "Pull": true
             },
             "Config": "will be replaced by test driver with correct E2E fixture settings"
         }

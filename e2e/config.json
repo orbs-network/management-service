@@ -1,0 +1,1 @@
+{"Port":8080,"EthereumGenesisContract":"0xB9Fe91753A70960a4f1470156Ce06B68551f75fA","EthereumEndpoint":"http://host.docker.internal:7545","boyarLegacyBootstrap":"https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json","pollIntervalSeconds":0.1}

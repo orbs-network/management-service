@@ -3,7 +3,12 @@ import { ServiceConfiguration } from './data-types';
 import { Processor } from './processor';
 
 export function serve(port: number, serviceConfig: ServiceConfiguration) {
-    let boyarBootstrap = Processor.getBoyarConfiguration(serviceConfig);
+    let boyarBootstrap: Promise<object> = Promise.resolve({ status: 'loading' });
+    try {
+        boyarBootstrap = Processor.getBoyarConfiguration(serviceConfig);
+    } catch (e) {
+        boyarBootstrap = Promise.resolve({ status: 'error', error: e });
+    }
     const configPoller = setInterval(() => {
         boyarBootstrap = Processor.getBoyarConfiguration(serviceConfig);
     }, serviceConfig.pollIntervalSeconds * 1000);
@@ -27,11 +32,11 @@ export function serve(port: number, serviceConfig: ServiceConfiguration) {
             console.error(err);
             switch (stage) {
                 case 0:
-                    response.writeHead(500).end(err);
+                    response.writeHead(500).end({ status: 'error', error: '' + err, stack: err?.stack });
                     break;
                 case 1:
                 case 2:
-                    response.end(JSON.stringify(err));
+                    response.end({ status: 'error', error: '' + err, stack: err?.stack });
                     break;
             }
         }

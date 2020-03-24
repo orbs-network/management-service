@@ -16,7 +16,12 @@ export class Processor {
     static getBoyarConfiguration(
         config: ServiceConfiguration
     ): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
-        return new Processor().getBoyarConfiguration(config);
+        return (
+            new Processor()
+                .getBoyarConfiguration(config)
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                .catch((err) => ({ status: 'error', error: '' + err, stack: err?.stack } as any))
+        );
     }
     static async fetchLatestTagElement(repository: { name: string; user: string }): LatestTagResult {
         const token = await fetchDockerHubToken(repository as DockerHubRepo);

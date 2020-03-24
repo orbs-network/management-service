@@ -20,14 +20,14 @@ export class TestEnvironment {
             Port: 8080,
             EthereumGenesisContract: this.contractsDriver.contractRegistry.address,
             EthereumEndpoint: 'http://host.docker.internal:7545',
-            boyarLegacyBootstrap: 'https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json',
+            boyarLegacyBootstrap: 'http://static:80/legacy-boyar.json',
             pollIntervalSeconds: 0.1
         };
     }
     async init() {
         test.serial.before(async _t => {
             // clean up old config file
-            const configFilePath = join(__dirname, 'config.json');
+            const configFilePath = join(__dirname, 'app-config.json');
             try {
                 unlinkSync(configFilePath);
             } catch (err) {}

@@ -6,4 +6,9 @@ services:
             dockerfile: ./Dockerfile.test
         ports:
             - 8080
-        command: npm start -- --config /opt/orbs/config.json
+    static:
+        build:
+            context: .
+            dockerfile: ./Dockerfile-static.test
+        ports:
+            - 80
