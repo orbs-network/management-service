@@ -17,6 +17,7 @@ test.serial('[E2E] serves boyarLegacyBootstrap according to config', async t => 
     const res = await env.fetch('app');
 
     const expectedValue = JSON.parse(readFileSync(pathToExpected).toString());
+    expectedValue.services['management-service'].Config = env.getAppConfig(); // set correct E2E fixture settings
 
     t.deepEqual(res, expectedValue);
 });

@@ -15,6 +15,15 @@ export class TestEnvironment {
     public contractsDriver: Driver;
     constructor(private pathToCompose: string) {}
 
+    getAppConfig() {
+        return {
+            Port: 8080,
+            EthereumGenesisContract: this.contractsDriver.contractRegistry.address,
+            EthereumEndpoint: 'http://host.docker.internal:7545',
+            boyarLegacyBootstrap: 'https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json',
+            pollIntervalSeconds: 0.1
+        };
+    }
     async init() {
         test.serial.before(async _t => {
             // clean up old config file
@@ -25,17 +34,7 @@ export class TestEnvironment {
             // connect driver
             this.contractsDriver = await Driver.new();
             // prepare file
-            writeFileSync(
-                configFilePath,
-                JSON.stringify({
-                    Port: 8080,
-                    EthereumGenesisContract: this.contractsDriver.contractRegistry.address,
-                    EthereumEndpoint: 'http://host.docker.internal:7545',
-                    boyarLegacyBootstrap: 'https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json',
-                    pollIntervalSeconds: 0.1
-                }),
-                { flag: 'w' }
-            );
+            writeFileSync(configFilePath, JSON.stringify(this.getAppConfig()));
         });
         this.envName = dockerComposeTool(
             test.serial.before.bind(test.serial),
