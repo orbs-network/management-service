@@ -27,11 +27,11 @@ export function serve(port: number, serviceConfig: ServiceConfiguration) {
             console.error(err);
             switch (stage) {
                 case 0:
-                    response.writeHead(500).end();
+                    response.writeHead(500).end(err);
                     break;
                 case 1:
                 case 2:
-                    response.end();
+                    response.end(JSON.stringify(err));
                     break;
             }
         }

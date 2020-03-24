@@ -1,41 +1,60 @@
 import test from 'ava';
 import { exec as cb_exec } from 'child_process';
+import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { dockerComposeTool, getAddressForService } from 'docker-compose-mocha';
 import fetch from 'node-fetch';
 import { retry } from 'ts-retry-promise';
 import { promisify } from 'util';
+import { join } from 'path';
+import { writeFileSync, unlinkSync } from 'fs';
+
 const exec = promisify(cb_exec);
 
 export class TestEnvironment {
     private envName: string = '';
+    public contractsDriver: Driver;
     constructor(private pathToCompose: string) {}
 
-    init() {
+    async init() {
+        test.serial.before(async _t => {
+            // clean up old config file
+            const configFilePath = join(__dirname, 'config.json');
+            try {
+                unlinkSync(configFilePath);
+            } catch (err) {}
+            // connect driver
+            this.contractsDriver = await Driver.new();
+            // prepare file
+            writeFileSync(
+                configFilePath,
+                JSON.stringify({
+                    Port: 8080,
+                    EthereumGenesisContract: this.contractsDriver.contractRegistry.address,
+                    EthereumEndpoint: 'http://host.docker.internal:7545',
+                    boyarLegacyBootstrap: 'https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json',
+                    pollIntervalSeconds: 0.1
+                }),
+                { flag: 'w' }
+            );
+        });
         this.envName = dockerComposeTool(
             test.serial.before.bind(test.serial),
             test.serial.after.always.bind(test.serial.after),
             this.pathToCompose,
             {
-                shouldPullImages: false
+                shouldPullImages: false,
+                containerCleanUp: false
             }
         );
     }
 
     async fetch(serviceName: string, port: number = 8080, path: string = '/') {
-        // if (process.env['CIRCLECI']) {
-        // return await retry(
-        //     async () => {
-        //         const { stdout } = await exec(
-        //             `docker run --network container:${this.envName}_${serviceName}_1 appropriate/curl  -s --retry 10 --retry-delay 1 --retry-connrefused http://localhost:${port}${path}`
-        //         );
-        //         return JSON.parse(stdout);
-        //     },
-        //     { retries: 10, delay: 300 }
-        // );
-        // } else {
         const addr = await getAddressForService(this.envName, this.pathToCompose, serviceName, port);
         const res = await retry(() => fetch('http://' + addr + path), { retries: 10, delay: 300 });
-        return res.json();
-        // }
+        if (res.ok) {
+            return res.json();
+        } else {
+            throw new Error(`Error fetching from ${serviceName}: ${await res.text()}`);
+        }
     }
 }
