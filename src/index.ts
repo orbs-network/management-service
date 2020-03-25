@@ -1,5 +1,5 @@
 import { createServer, RequestListener } from 'http';
-import { ServiceConfiguration } from './data-types';
+import { ServiceConfiguration, isErrorResponse } from './data-types';
 import { Processor } from './processor';
 
 export function serve(port: number, serviceConfig: ServiceConfiguration) {
@@ -25,7 +25,7 @@ export function serve(port: number, serviceConfig: ServiceConfiguration) {
         try {
             const body = await boyarBootstrap;
             stage = 1;
-            response.writeHead(200, { 'Content-Type': 'application/json' });
+            response.writeHead(isErrorResponse(body) ? 500 : 200, { 'Content-Type': 'application/json' });
             stage = 2;
             response.end(JSON.stringify(body));
         } catch (err) {

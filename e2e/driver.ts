@@ -41,8 +41,8 @@ export class TestEnvironment {
             test.serial.after.always.bind(test.serial.after),
             this.pathToCompose,
             {
-                shouldPullImages: false,
-                containerCleanUp: false
+                shouldPullImages: false
+                // containerCleanUp: false
             } as any
         );
     }

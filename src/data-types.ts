@@ -90,3 +90,14 @@ export type BoyarConfigurationOutput = {
         'management-service': ManagementNodeService;
     };
 };
+
+export type ErrorResponse = {
+    error: string;
+    stack?: string | undefined;
+    status: 'error';
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isErrorResponse(res: any): res is ErrorResponse {
+    return res && res.status === 'error';
+}
