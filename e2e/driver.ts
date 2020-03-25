@@ -1,14 +1,14 @@
 import test from 'ava';
-import { exec as cb_exec } from 'child_process';
+import { execSync } from 'child_process';
 import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { dockerComposeTool, getAddressForService } from 'docker-compose-mocha';
 import fetch from 'node-fetch';
 import { retry } from 'ts-retry-promise';
-import { promisify } from 'util';
 import { join } from 'path';
 import { writeFileSync, unlinkSync } from 'fs';
 
-const exec = promisify(cb_exec);
+// get the host IP in all host systems (linux)
+const dockerHostIp = execSync(`echo $(docker run --rm bash bash -c 'H=$(getent ahostsv4 host.docker.internal | grep STREAM | cut -d" " -f1); [ -z "$H" ] && H=$(ip -4 route show default | cut -d" " -f3); echo $H')`).toString().trim();
 
 export class TestEnvironment {
     private envName: string = '';
@@ -19,7 +19,7 @@ export class TestEnvironment {
         return {
             Port: 8080,
             EthereumGenesisContract: this.contractsDriver.contractRegistry.address,
-            EthereumEndpoint: 'http://docker-host:7545',
+            EthereumEndpoint: `http://${dockerHostIp}:7545`,
             boyarLegacyBootstrap: 'http://static:80/legacy-boyar.json',
             pollIntervalSeconds: 1
         };
