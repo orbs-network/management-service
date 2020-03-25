@@ -27,7 +27,7 @@
         "prepack": "npm run build",
         "prettify": "npx prettier \"src/**/*.ts\" --write",
         "start": "node --async-stack-traces ./dist/main.js",
-        "start:eth": "ganache-cli -p 7545 -i 5777 -a 100 -m  \"vanish junk genuine web seminar cook absurd royal ability series taste method identify elevator liquid\""
+        "start:eth": "ganache-cli -p 7545 -i 5777 -a 10 -m  \"vanish junk genuine web seminar cook absurd royal ability series taste method identify elevator liquid\""
     },
     "husky": {
         "hooks": {
