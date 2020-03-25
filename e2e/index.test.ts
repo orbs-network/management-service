@@ -27,7 +27,9 @@ test.serial('[E2E] serves boyarLegacyBootstrap according to config', async t => 
     let res = await env.fetch('app');
 
     while (!res || isErrorResponse(res)) {
+        t.log('error response', res);
         await new Promise(res => setTimeout(res, 100));
+        t.log('polling again');
         res = await env.fetch('app');
     }
 

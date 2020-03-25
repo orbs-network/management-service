@@ -50,10 +50,6 @@ export class TestEnvironment {
     async fetch(serviceName: string, port: number = 8080, path: string = '/') {
         const addr = await getAddressForService(this.envName, this.pathToCompose, serviceName, port);
         const res = await retry(() => fetch('http://' + addr + path), { retries: 10, delay: 300 });
-        if (res.ok) {
-            return res.json();
-        } else {
-            throw new Error(`Error fetching from ${serviceName}: ${await res.text()}`);
-        }
+        return res.json();
     }
 }
