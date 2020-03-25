@@ -20,7 +20,7 @@ jobs:
             - run: npm install --no-save tap-xunit
       - run:
           name: spinning up ganache
-          command: npm run start:eth -- --verbose
+          command: npm run start:eth
           background: true
       - run: mkdir -p _out/unit _out/e2e
       - node/with-cache:
