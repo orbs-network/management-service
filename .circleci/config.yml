@@ -25,9 +25,9 @@ jobs:
       - run: mkdir -p _out
       - node/with-cache:
           steps:
-            - run: npm test | tap-xunit > _out/test.xml
+            - run: npm test | npx tap-xunit > _out/test.xml
             - run: npm run build
-            - run: npm run test:e2e | tap-xunit > _out/test-e2e.xml
+            - run: npm run test:e2e | npx tap-xunit > _out/test-e2e.xml
       - store_test_results:
           path: _out
       - store_artifacts:
