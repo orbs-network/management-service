@@ -22,16 +22,16 @@ jobs:
           name: spinning up ganache
           command: npm run start:eth
           background: true
-      - run: mkdir -p ~/_out
+      - run: mkdir -p _out
       - node/with-cache:
           steps:
-            - run: npm test | tap-xunit > ~/_out/test.xml
+            - run: npm test | tap-xunit > _out/test.xml
             - run: npm run build
-            - run: npm run test:e2e | tap-xunit > ~/_out/test-e2e.xml
+            - run: npm run test:e2e | tap-xunit > _out/test-e2e.xml
       - store_test_results:
-        path: ~/reports
+        path: _out
       - store_artifacts:
-        path: ~/reports    
+        path: _out    
 workflows:
     build-and-test:
       jobs:
