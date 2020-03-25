@@ -19,7 +19,7 @@ export class TestEnvironment {
         return {
             Port: 8080,
             EthereumGenesisContract: this.contractsDriver.contractRegistry.address,
-            EthereumEndpoint: 'http://host.docker.internal:7545',
+            EthereumEndpoint: 'http://gateway.docker.internal:7545',
             boyarLegacyBootstrap: 'http://static:80/legacy-boyar.json',
             pollIntervalSeconds: 1
         };
