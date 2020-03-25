@@ -1,5 +1,0 @@
-{
-    "ganache": {
-        "defaultEthereumEndpoint": "http://localhost:7545"
-    }
-}
