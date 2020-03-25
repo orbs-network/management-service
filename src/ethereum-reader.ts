@@ -98,10 +98,14 @@ async function retryGetPastEventsWithLatest(
         } catch (e2) {
             if (stage) {
                 console.error(`failed reading events from ethereum. `, errorString(e2));
-                throw new Error(`error reading '${event}' events: ${errorString(e2)}`);
+                throw new Error(
+                    `error reading '${event}' events: ${errorString(e2)}\n\n original error:\n${errorString(e)}`
+                );
             } else {
                 console.error(`failed reading block number from ethereum. `, errorString(e2));
-                throw new Error(`error reading block number: ${errorString(e2)}`);
+                throw new Error(
+                    `error reading block number: ${errorString(e2)}\n\n original error:\n${errorString(e)}`
+                );
             }
         }
     }
