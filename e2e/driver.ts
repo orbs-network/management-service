@@ -9,6 +9,7 @@ import { writeFileSync, unlinkSync } from 'fs';
 
 // get the host IP in all host systems (linux)
 const dockerHostIp = execSync(`echo $(docker run --rm bash bash -c 'H=$(getent ahostsv4 host.docker.internal | grep STREAM | cut -d" " -f1); [ -z "$H" ] && H=$(ip -4 route show default | cut -d" " -f3); echo $H')`).toString().trim();
+console.log('dockerHostIp', dockerHostIp);
 
 export class TestEnvironment {
     private envName: string = '';
