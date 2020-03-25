@@ -84,10 +84,26 @@ export class EthereumReader {
 
     async getAllVirtualChains(): Promise<Array<string>> {
         const web3Contract = this.connect('Subscriptions');
-        const events = await web3Contract.getPastEvents('SubscriptionChanged', {
-            fromBlock: this.config.firstBlock,
-            toBlock: 'latest',
-        });
+        let events = [] as EventData[];
+        try {
+            events = await web3Contract.getPastEvents('SubscriptionChanged', {
+                fromBlock: this.config.firstBlock,
+                toBlock: 'latest',
+            });
+        } catch (e) {
+            console.warn(`failed reading events from ethereum.`, (e && e.stack) || '' + e);
+            console.warn(`re-trying with not-latest block number`);
+            try {
+                const latest = await this.web3.eth.getBlockNumber();
+                console.warn(`re-trying with (latest - 1) block number (latest block is ${latest})`);
+                events = await web3Contract.getPastEvents('SubscriptionChanged', {
+                    fromBlock: this.config.firstBlock,
+                    toBlock: latest - 1,
+                });
+            } catch (e2) {
+                console.error(`failed reading events from ethereum. `, (e2 && e2.stack) || '' + e2);
+            }
+        }
         return events.map((event) => event.returnValues.vcid);
     }
 }
