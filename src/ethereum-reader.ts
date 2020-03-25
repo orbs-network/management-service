@@ -41,7 +41,7 @@ export class EthereumConfigReader {
     private web3: Web3;
 
     constructor(private config: ServiceEthereumConfiguration) {
-        this.web3 = new Web3(new Web3.providers.HttpProvider(config.EthereumEndpoint));
+        this.web3 = new Web3(new Web3.providers.WebsocketProvider(config.EthereumEndpoint));
     }
 
     private connect(contractName: keyof Contracts) {
