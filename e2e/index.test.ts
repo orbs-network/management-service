@@ -16,9 +16,9 @@ let vChainIds: string[] = [];
 test.serial.before('creating virtual chains', async t => {
     t.timeout(60 * 1000);
     for (let i = 0; i < numberOfVirtualChains; i++) {
-        vChainIds.push(
-            (subscriptionChangedEvents(await createVC(env.contractsDriver)).map(e => e.vcid)[0] as unknown) as string
-        );
+        const newVcEvents = await createVC(env.contractsDriver);
+        const vcId = subscriptionChangedEvents(newVcEvents).map(e => e.vcid)[0];
+        vChainIds.push((vcId as unknown) as string);
     }
 });
 
