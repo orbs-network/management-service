@@ -43,7 +43,7 @@ export class TestEnvironment {
             {
                 shouldPullImages: false,
                 containerCleanUp: false
-            }
+            } as any
         );
     }
 

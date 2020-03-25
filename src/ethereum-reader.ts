@@ -5,6 +5,7 @@ import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/rele
 import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { ServiceConfiguration } from './data-types';
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
+import { errorString } from './utils';
 
 type ContractMetadata = {
     address: string;
@@ -80,7 +81,7 @@ async function retryGetPastEventsWithLatest(
             toBlock: 'latest',
         });
     } catch (e) {
-        console.warn(`failed reading events from ethereum.`, (e && e.stack) || '' + e);
+        console.warn(`failed reading events from ethereum.`, errorString(e));
         console.warn(`re-trying with not-latest block number`);
         try {
             const latest = await web3.eth.getBlockNumber();
@@ -90,7 +91,8 @@ async function retryGetPastEventsWithLatest(
                 toBlock: latest - 1,
             });
         } catch (e2) {
-            console.error(`failed reading events from ethereum. `, (e2 && e2.stack) || '' + e2);
+            console.error(`failed reading events from ethereum. `, errorString(e2));
+            throw new Error(`error reading '${event}' events: ${errorString(e2)}`);
         }
     }
     return events;
