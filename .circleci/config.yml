@@ -5,6 +5,7 @@ orbs:
 jobs:
   test:
     machine: true
+    steps:
       - checkout
       - node/install:
           node-version: '12.13.0'
