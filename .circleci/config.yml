@@ -28,7 +28,7 @@ jobs:
             - run: npm test --  --timeout=1m --tap| npx tap-xunit > _out/unit/test.xml
             - run: npm run build
             - run: 
-                command: npm run test:e2e --  --timeout=2m --tap| npx tap-xunit > _out/e2e/test.xml
+                command: npm run test:e2e --  --timeout=1m --tap| npx tap-xunit > _out/e2e/test.xml
                 no_output_timeout: 2m
       - store_test_results:
           path: _out
