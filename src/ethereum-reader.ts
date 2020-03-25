@@ -86,16 +86,23 @@ async function retryGetPastEventsWithLatest(
     } catch (e) {
         console.warn(`failed reading events from ethereum.`, errorString(e));
         console.warn(`re-trying with not-latest block number`);
+        let stage = 0;
         try {
             const latest = await web3.eth.getBlockNumber();
+            stage = 1;
             console.warn(`re-trying with (latest - 1) block number (latest block is ${latest})`);
             events = await web3Contract.getPastEvents(event, {
                 fromBlock: firstBlock,
                 toBlock: latest - 1,
             });
         } catch (e2) {
-            console.error(`failed reading events from ethereum. `, errorString(e2));
-            throw new Error(`error reading '${event}' events: ${errorString(e2)}`);
+            if (stage) {
+                console.error(`failed reading events from ethereum. `, errorString(e2));
+                throw new Error(`error reading '${event}' events: ${errorString(e2)}`);
+            } else {
+                console.error(`failed reading block number from ethereum. `, errorString(e2));
+                throw new Error(`error reading block number: ${errorString(e2)}`);
+            }
         }
     }
     return events;
