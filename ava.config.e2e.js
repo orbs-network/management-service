@@ -1,4 +1,7 @@
 export default {
+    "nodeArguments": [
+        "--async-stack-traces"
+    ],
     "files": [
         "e2e/**/*.test.*"
     ],

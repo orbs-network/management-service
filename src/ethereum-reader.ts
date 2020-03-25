@@ -1,6 +1,6 @@
 import Web3 from 'web3';
 import { BlockNumber } from 'web3-core';
-import { EventData } from 'web3-eth-contract';
+import { EventData, Contract } from 'web3-eth-contract';
 import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/compiled-contracts';
 import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { ServiceConfiguration } from './data-types';
@@ -47,13 +47,15 @@ export class EthereumConfigReader {
 
     async readEthereumConfig(): Promise<EthereumConfig> {
         const web3Contract = this.connect('ContractRegistry');
-        const events = (await web3Contract.getPastEvents('ContractAddressUpdated', {
-            fromBlock: 0,
-            toBlock: 'latest',
-        })) as ContractAddressUpdatedEvent[];
+        const events = (await retryGetPastEventsWithLatest(
+            'ContractAddressUpdated',
+            this.web3,
+            web3Contract,
+            0
+        )) as ContractAddressUpdatedEvent[];
         const result: EthereumConfig = {
             contracts: {},
-            firstBlock: events[0].blockNumber,
+            firstBlock: 0, // events[0].blockNumber,
             httpEndpoint: this.config.EthereumEndpoint,
         };
         events.forEach((e) => {
@@ -65,7 +67,34 @@ export class EthereumConfigReader {
         return result;
     }
 }
-
+async function retryGetPastEventsWithLatest(
+    event: string,
+    web3: Web3,
+    web3Contract: Contract,
+    firstBlock: BlockNumber
+) {
+    let events = [] as EventData[];
+    try {
+        events = await web3Contract.getPastEvents(event, {
+            fromBlock: firstBlock,
+            toBlock: 'latest',
+        });
+    } catch (e) {
+        console.warn(`failed reading events from ethereum.`, (e && e.stack) || '' + e);
+        console.warn(`re-trying with not-latest block number`);
+        try {
+            const latest = await web3.eth.getBlockNumber();
+            console.warn(`re-trying with (latest - 1) block number (latest block is ${latest})`);
+            events = await web3Contract.getPastEvents('SubscriptionChanged', {
+                fromBlock: firstBlock,
+                toBlock: latest - 1,
+            });
+        } catch (e2) {
+            console.error(`failed reading events from ethereum. `, (e2 && e2.stack) || '' + e2);
+        }
+    }
+    return events;
+}
 export class EthereumReader {
     private web3: Web3;
 
@@ -84,26 +113,12 @@ export class EthereumReader {
 
     async getAllVirtualChains(): Promise<Array<string>> {
         const web3Contract = this.connect('Subscriptions');
-        let events = [] as EventData[];
-        try {
-            events = await web3Contract.getPastEvents('SubscriptionChanged', {
-                fromBlock: this.config.firstBlock,
-                toBlock: 'latest',
-            });
-        } catch (e) {
-            console.warn(`failed reading events from ethereum.`, (e && e.stack) || '' + e);
-            console.warn(`re-trying with not-latest block number`);
-            try {
-                const latest = await this.web3.eth.getBlockNumber();
-                console.warn(`re-trying with (latest - 1) block number (latest block is ${latest})`);
-                events = await web3Contract.getPastEvents('SubscriptionChanged', {
-                    fromBlock: this.config.firstBlock,
-                    toBlock: latest - 1,
-                });
-            } catch (e2) {
-                console.error(`failed reading events from ethereum. `, (e2 && e2.stack) || '' + e2);
-            }
-        }
+        const events = await retryGetPastEventsWithLatest(
+            'SubscriptionChanged',
+            this.web3,
+            web3Contract,
+            this.config.firstBlock
+        );
         return events.map((event) => event.returnValues.vcid);
     }
 }
