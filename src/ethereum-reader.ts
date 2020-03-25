@@ -3,7 +3,6 @@ import { BlockNumber } from 'web3-core';
 import { EventData, Contract } from 'web3-eth-contract';
 import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/compiled-contracts';
 import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
-import { ServiceConfiguration } from './data-types';
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
 import { errorString } from './utils';
 
@@ -34,10 +33,14 @@ function translateEventContractNameToContractName(eventContractName: string): ke
     throw new Error(`unknown contract name '${eventContractName}'`);
 }
 
+export type ServiceEthereumConfiguration = {
+    EthereumGenesisContract: string;
+    EthereumEndpoint: string;
+};
 export class EthereumConfigReader {
     private web3: Web3;
 
-    constructor(private config: ServiceConfiguration) {
+    constructor(private config: ServiceEthereumConfiguration) {
         this.web3 = new Web3(new Web3.providers.HttpProvider(config.EthereumEndpoint));
     }
 

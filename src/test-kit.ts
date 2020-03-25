@@ -1,11 +1,5 @@
-import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
 import nock from 'nock';
 
-export function getAddresses(driver: Driver) {
-    return {
-        Subscriptions: { address: driver.subscriptions.web3Contract.options.address, firstBlock: 0 },
-    };
-}
 export function nockDockerHub(...repositories: { user: string; name: string; tags: string[] }[]) {
     nock(/docker/); // prevent requests to docker domain from goinig to network
     nock('https://auth.docker.io') // allow asking for token from auth
