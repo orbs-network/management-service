@@ -7,9 +7,6 @@ import { retry } from 'ts-retry-promise';
 import { join } from 'path';
 import { writeFileSync, unlinkSync } from 'fs';
 
-// get the host IP in all host systems (linux)
-const dockerHostIp = execSync(`echo $(docker run --rm bash bash -c 'H=$(getent ahostsv4 host.docker.internal | grep STREAM | cut -d" " -f1); [ -z "$H" ] && H=$(ip -4 route show default | cut -d" " -f3); echo $H')`).toString().trim();
-
 export class TestEnvironment {
     private envName: string = '';
     public contractsDriver: Driver;
@@ -19,7 +16,7 @@ export class TestEnvironment {
         return {
             Port: 8080,
             EthereumGenesisContract: this.contractsDriver.contractRegistry.address,
-            EthereumEndpoint: `http://${dockerHostIp}:7545`,
+            EthereumEndpoint: `http://host.docker.internal:7545`,
             boyarLegacyBootstrap: 'http://static:80/legacy-boyar.json',
             pollIntervalSeconds: 1
         };

@@ -4,7 +4,8 @@ orbs:
   docker: circleci/docker@0.5.19
 jobs:
   build-and-test:
-    machine: true
+    macos:
+      xcode: 11.3.1
     steps:
       - checkout
       - node/install:
