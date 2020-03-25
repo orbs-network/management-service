@@ -19,6 +19,7 @@ test.serial.before('creating virtual chains', async t => {
         const newVcEvents = await createVC(env.contractsDriver);
         const vcId = subscriptionChangedEvents(newVcEvents).map(e => e.vcid)[0];
         vChainIds.push((vcId as unknown) as string);
+        await new Promise(res => setTimeout(res, 100));
     }
 });
 
@@ -28,7 +29,7 @@ test.serial('[E2E] serves boyarLegacyBootstrap according to config', async t => 
 
     while (!res || isErrorResponse(res)) {
         t.log('error response', res);
-        await new Promise(res => setTimeout(res, 100));
+        await new Promise(res => setTimeout(res, 1000));
         t.log('polling again');
         res = await env.fetch('app');
     }

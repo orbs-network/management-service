@@ -13,7 +13,7 @@ const exec = promisify(cb_exec);
 export class TestEnvironment {
     private envName: string = '';
     public contractsDriver: Driver;
-    constructor(private pathToCompose: string) {}
+    constructor(private pathToCompose: string) { }
 
     getAppConfig() {
         return {
@@ -21,7 +21,7 @@ export class TestEnvironment {
             EthereumGenesisContract: this.contractsDriver.contractRegistry.address,
             EthereumEndpoint: 'http://host.docker.internal:7545',
             boyarLegacyBootstrap: 'http://static:80/legacy-boyar.json',
-            pollIntervalSeconds: 0.1
+            pollIntervalSeconds: 1
         };
     }
     init() {
@@ -30,7 +30,7 @@ export class TestEnvironment {
             const configFilePath = join(__dirname, 'app-config.json');
             try {
                 unlinkSync(configFilePath);
-            } catch (err) {}
+            } catch (err) { }
             // connect driver
             this.contractsDriver = await Driver.new();
             // prepare file
