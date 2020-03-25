@@ -23,8 +23,10 @@ test.serial.before('creating virtual chains', async t => {
     }
 });
 
-test.serial('[E2E] serves boyarLegacyBootstrap according to config', async t => {
+test.serial('[E2E] serves boyar endpoint as expected', async t => {
     t.timeout(60 * 1000);
+    t.deepEqual(vChainIds.length, numberOfVirtualChains, 'all VCs created before test begins');
+
     let res = await env.fetch('app');
 
     while (!res || isErrorResponse(res)) {
