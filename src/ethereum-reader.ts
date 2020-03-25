@@ -86,7 +86,7 @@ async function retryGetPastEventsWithLatest(
         try {
             const latest = await web3.eth.getBlockNumber();
             console.warn(`re-trying with (latest - 1) block number (latest block is ${latest})`);
-            events = await web3Contract.getPastEvents('SubscriptionChanged', {
+            events = await web3Contract.getPastEvents(event, {
                 fromBlock: firstBlock,
                 toBlock: latest - 1,
             });
