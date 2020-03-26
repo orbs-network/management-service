@@ -11,7 +11,7 @@ const env = new TestEnvironment(pathToCompose);
 
 env.init();
 
-const numberOfVirtualChains = 5;
+const numberOfVirtualChains = 3;
 let vChainIds: string[] = [];
 test.serial.before('creating virtual chains', async t => {
     t.timeout(60 * 1000);
@@ -29,7 +29,7 @@ test.serial('[E2E] serves boyar endpoint as expected', async t => {
 
     let res = await env.fetch('app');
 
-    while (!res || isErrorResponse(res)) {
+    while (!res || isErrorResponse(res) || res.chains.length < numberOfVirtualChains) {
         t.log('error response', res);
         await new Promise(res => setTimeout(res, 1000));
         t.log('polling again');

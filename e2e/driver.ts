@@ -1,15 +1,12 @@
 import test from 'ava';
-import { execSync } from 'child_process';
 import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { dockerComposeTool, getAddressForService } from 'docker-compose-mocha';
 import fetch from 'node-fetch';
 import { retry } from 'ts-retry-promise';
 import { join } from 'path';
 import { writeFileSync, unlinkSync } from 'fs';
-
-// get the host IP in all host systems (linux)
-const dockerHostIp = execSync(`echo $(docker run --rm bash bash -c 'H=$(getent ahostsv4 host.docker.internal | grep STREAM | cut -d" " -f1); [ -z "$H" ] && H=$(ip -4 route show default | cut -d" " -f3); echo $H')`).toString().trim();
-console.log('dockerHostIp', dockerHostIp);
+import Web3 from 'web3';
+import HDWalletProvider from "truffle-hdwallet-provider";
 
 export class TestEnvironment {
     private envName: string = '';
@@ -20,29 +17,55 @@ export class TestEnvironment {
         return {
             Port: 8080,
             EthereumGenesisContract: this.contractsDriver.contractRegistry.address,
-            EthereumEndpoint: `http://${dockerHostIp}:7545`,
+            EthereumEndpoint: `http://ganache:7545`, // host.docker.internal :(
             boyarLegacyBootstrap: 'http://static:80/legacy-boyar.json',
             pollIntervalSeconds: 1
         };
     }
     init() {
-        test.serial.before(async _t => {
-            // clean up old config file
-            const configFilePath = join(__dirname, 'app-config.json');
-            try {
-                unlinkSync(configFilePath);
-            } catch (err) { }
-            // connect driver
-            this.contractsDriver = await Driver.new();
-            // prepare file
-            writeFileSync(configFilePath, JSON.stringify(this.getAppConfig()));
-        });
         this.envName = dockerComposeTool(
             test.serial.before.bind(test.serial),
             test.serial.after.always.bind(test.serial.after),
             this.pathToCompose,
             {
-                shouldPullImages: false
+                startOnlyTheseServices: ['ganache', 'static'],
+                containerCleanUp: false,
+            } as any
+        );
+        test.serial.before('wait 5 seconds for ganache to warm up', () => new Promise(res => setTimeout(res, 5 * 1000)));
+        test.serial.before('start contracts driver', async t => {
+            t.timeout(60 * 1000);
+            const ganacheAddress = await getAddressForService(this.envName, this.pathToCompose, 'ganache', 7545);
+            this.contractsDriver = await Driver.new({
+                web3Provider: () => {
+                    return new Web3(new (HDWalletProvider as any)(
+                        "vanish junk genuine web seminar cook absurd royal ability series taste method identify elevator liquid",
+                        `http://localhost:${ganacheAddress.split(':')[1]}`,
+                        0,
+                        100,
+                        false
+                    ))
+                }
+            });
+        });
+        test.serial.before('write management service config file', async t => {
+            const configFilePath = join(__dirname, 'app-config.json');
+            // clean up old config file
+            try {
+                unlinkSync(configFilePath);
+            } catch (err) { }
+            // prepare file
+            writeFileSync(configFilePath, JSON.stringify(this.getAppConfig()));
+        });
+        dockerComposeTool(
+            test.serial.before.bind(test.serial),
+            test.serial.after.always.bind(test.serial.after),
+            this.pathToCompose,
+            {
+                envName: this.envName,
+                startOnlyTheseServices: ['app'],
+                shouldPullImages: false,
+                cleanUp: false,
                 // containerCleanUp: false
             } as any
         );
