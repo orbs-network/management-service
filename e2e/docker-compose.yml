@@ -1,9 +1,19 @@
 version: '3'
 services:
+    ganache:
+        image: trufflesuite/ganache-cli
+        ports:
+            - 7545
+        command: -p 7545 -i 5777 -a 100 -m  "vanish junk genuine web seminar cook absurd royal ability series taste method identify elevator liquid"
     app:
         build:
             context: .
             dockerfile: ./Dockerfile.test
         ports:
             - 8080
-        command: npm start -- --config /opt/orbs/config.json
+    static:
+        build:
+            context: .
+            dockerfile: ./Dockerfile-static.test
+        ports:
+            - 80
