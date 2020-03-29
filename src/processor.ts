@@ -13,16 +13,6 @@ export type EthereumState = {
 };
 
 export class Processor {
-    static getBoyarConfiguration(
-        config: ServiceConfiguration
-    ): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
-        return (
-            new Processor(config)
-                .getBoyarConfiguration()
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .catch((err) => ({ status: 'error', error: '' + err, stack: err?.stack } as any))
-        );
-    }
     static async fetchLatestTagElement(repository: { name: string; user: string }): LatestTagResult {
         const token = await fetchDockerHubToken(repository as DockerHubRepo);
         const res = await fetch(`https://registry.hub.docker.com/v2/${repository.user}/${repository.name}/tags/list`, {
