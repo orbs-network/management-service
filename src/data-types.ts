@@ -73,6 +73,7 @@ export interface ManagementNodeService extends GenericNodeService {
     DockerConfig: DockerConfig<'orbsnetwork/management-service'>;
     Config: ServiceConfiguration;
 }
+export type VirtualChainConfigurationOutput = {};
 
 export type BoyarConfigurationOutput = {
     network: LegacyBoyarBootstrapInput['network'];

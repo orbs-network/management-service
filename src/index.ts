@@ -20,6 +20,15 @@ export function serve(serviceConfig: ServiceConfiguration) {
             response.status(200).json(body);
         })
     );
+
+    app.get(
+        '/vchains/:vchainId/management',
+        wrapAsync(async (request, response) => {
+            const { vchainId } = request.params;
+            const body = await processor.getVirtualChainConfiguration(vchainId);
+            response.status(200).json(body);
+        })
+    );
     app.use((error: Error, _req: Request, res: Response, next: NextFunction) => {
         if (error instanceof Error) {
             return res.status(500).json({

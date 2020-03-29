@@ -1,7 +1,13 @@
 import { fetchDockerHubToken, DockerHubRepo } from 'docker-hub-utils';
 import fetch from 'node-fetch';
 import { isValid, compare } from './versioning';
-import { DockerConfig, ServiceConfiguration, LegacyBoyarBootstrapInput, BoyarConfigurationOutput } from './data-types';
+import {
+    DockerConfig,
+    ServiceConfiguration,
+    LegacyBoyarBootstrapInput,
+    BoyarConfigurationOutput,
+    VirtualChainConfigurationOutput,
+} from './data-types';
 import { EthereumReader, EthereumConfigReader } from './ethereum-reader';
 import { merge } from './merge';
 import tier1 from './tier-1.json';
@@ -37,7 +43,7 @@ export class Processor {
     }
 
     private cache = new Map<string, LatestTagResult>();
-    constructor(private config: ServiceConfiguration) { }
+    constructor(private config: ServiceConfiguration) {}
 
     private async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
         if (!this.cache.has(dc.Image)) {
@@ -56,6 +62,10 @@ export class Processor {
         const reader = new EthereumReader(ethConfig);
         const virtualChains = await reader.getAllVirtualChains();
         return { virtualChains };
+    }
+
+    async getVirtualChainConfiguration(vchainId: string): Promise<VirtualChainConfigurationOutput> {
+        return await Promise.resolve({});
     }
 
     async getNodeManagementConfiguration(): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
