@@ -23,7 +23,7 @@
         "build": "tsc --skipLibCheck -p ./tsconfig.prod.json && docker build -t local/management-service .",
         "test": "ava --verbose --serial",
         "test:quick": "echo '-- TEST --' && ava --verbose",
-        "test:e2e": "ava --verbose --serial --config ./ava.config.e2e.js",
+        "test:e2e": "ava --verbose --timeout=1m --serial --config ./ava.config.e2e.js",
         "prepack": "npm run build",
         "prettify": "npx prettier \"src/**/*.ts\" --write",
         "start": "node --async-stack-traces ./dist/main.js",
