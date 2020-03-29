@@ -37,7 +37,7 @@ export class Processor {
     }
 
     private cache = new Map<string, LatestTagResult>();
-    constructor(private config: ServiceConfiguration) {}
+    constructor(private config: ServiceConfiguration) { }
 
     private async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
         if (!this.cache.has(dc.Image)) {
@@ -58,7 +58,7 @@ export class Processor {
         return { virtualChains };
     }
 
-    async getBoyarConfiguration(): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
+    async getNodeManagementConfiguration(): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
         const nodeConfiguration = await this.getLegacyBoyarBootstrap();
         const ethState = await this.readEthereumState();
         const configResult = {

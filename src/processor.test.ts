@@ -79,7 +79,7 @@ test.serial(
         (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: 'fake' }); // skip docker endpoint
         (processor as any).readEthereumState = async () => ({ virtualChains: [] }); // skip ethereum endpoint
 
-        const result = await processor.getBoyarConfiguration();
+        const result = await processor.getNodeManagementConfiguration();
 
         t.deepEqual(result, {
             extraConfig: boyarConfigFakeEndpoint.extraConfig, // passthrough for legacy support
@@ -127,7 +127,7 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
         services: {},
     }); // skip legacy config
 
-    const result1 = await processor.getBoyarConfiguration();
+    const result1 = await processor.getNodeManagementConfiguration();
     t.deepEqual(
         result1,
         {
@@ -169,6 +169,6 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
             'ethereum-endpoint': 'http://localhost:8545', // eventually rename to EthereumEndpoint
         },
     });
-    const result2 = await processor.getBoyarConfiguration();
+    const result2 = await processor.getNodeManagementConfiguration();
     t.deepEqual(result2.chains, [expectedVirtualChainConfig(vc1Id), expectedVirtualChainConfig(vc2Id)], '2 chains');
 });

@@ -16,7 +16,7 @@ export function serve(serviceConfig: ServiceConfiguration) {
     app.get(
         '/node/management',
         wrapAsync(async (_request, response) => {
-            const body = await processor.getBoyarConfiguration();
+            const body = await processor.getNodeManagementConfiguration();
             response.status(200).json(body);
         })
     );
