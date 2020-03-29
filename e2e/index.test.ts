@@ -27,13 +27,13 @@ test.serial('[E2E] serves boyar endpoint as expected', async t => {
     t.timeout(60 * 1000);
     t.deepEqual(vChainIds.length, numberOfVirtualChains, 'all VCs created before test begins');
 
-    let res = await env.fetch('app');
+    let res = await env.fetch('app', 8080, 'node/management');
 
     while (!res || isErrorResponse(res) || res.chains.length < numberOfVirtualChains) {
         t.log('error response', res);
         await new Promise(res => setTimeout(res, 1000));
         t.log('polling again');
-        res = await env.fetch('app');
+        res = await env.fetch('app', 8080, 'node/management');
     }
 
     const expectedValue = getExpected(env.getAppConfig(), vChainIds);

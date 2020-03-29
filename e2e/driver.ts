@@ -71,9 +71,16 @@ export class TestEnvironment {
         );
     }
 
-    async fetch(serviceName: string, port: number = 8080, path: string = '/') {
+    async fetch(serviceName: string, port: number, path: string) {
         const addr = await getAddressForService(this.envName, this.pathToCompose, serviceName, port);
-        const res = await retry(() => fetch('http://' + addr + path), { retries: 10, delay: 300 });
-        return res.json();
+        return await retry(async () => {
+            const response = await fetch(`http://${addr}/${path}`);
+            const body = await response.text();
+            try {
+                return JSON.parse(body);
+            } catch (e) {
+                throw new Error(`invalid response: \n${body}`);
+            }
+        }, { retries: 10, delay: 300 });
     }
 }

@@ -9,3 +9,10 @@ export function range(length: number) {
 export function errorString(e: any) {
     return (e && e.stack) || '' + e;
 }
+
+export function timeout<T>(ms: number, promise: Promise<T>): Promise<T> {
+    return Promise.race<T>([
+        promise,
+        new Promise<T>((_, reject) => setTimeout(() => reject('Timed out in ' + ms + 'ms.'), ms)),
+    ]);
+}

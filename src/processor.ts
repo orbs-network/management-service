@@ -17,8 +17,8 @@ export class Processor {
         config: ServiceConfiguration
     ): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
         return (
-            new Processor()
-                .getBoyarConfiguration(config)
+            new Processor(config)
+                .getBoyarConfiguration()
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .catch((err) => ({ status: 'error', error: '' + err, stack: err?.stack } as any))
         );
@@ -47,6 +47,8 @@ export class Processor {
     }
 
     private cache = new Map<string, LatestTagResult>();
+    constructor(private config: ServiceConfiguration) {}
+
     private async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
         if (!this.cache.has(dc.Image)) {
             const [user, name] = dc.Image.split('/');
@@ -59,27 +61,25 @@ export class Processor {
         return dc;
     }
 
-    private async readEthereumState(config: ServiceConfiguration): Promise<EthereumState> {
-        const ethConfig = await new EthereumConfigReader(config).readEthereumConfig();
+    private async readEthereumState(): Promise<EthereumState> {
+        const ethConfig = await new EthereumConfigReader(this.config).readEthereumConfig();
         const reader = new EthereumReader(ethConfig);
         const virtualChains = await reader.getAllVirtualChains();
         return { virtualChains };
     }
 
-    async getBoyarConfiguration(
-        config: ServiceConfiguration
-    ): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
-        const nodeConfiguration = await this.getLegacyBoyarBootstrap(config);
-        const ethState = await this.readEthereumState(config);
+    async getBoyarConfiguration(): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
+        const nodeConfiguration = await this.getLegacyBoyarBootstrap();
+        const ethState = await this.readEthereumState();
         const configResult = {
             orchestrator: this.makeOrchestratorConfig(nodeConfiguration),
             chains: await this.makeChainsConfig(nodeConfiguration, ethState),
-            services: await this.makeServicesConfig(config),
+            services: await this.makeServicesConfig(),
         };
         return merge(nodeConfiguration, configResult); // aggressive passthrough for legacy support as per Tal's decision
     }
 
-    private async makeServicesConfig(config: ServiceConfiguration): Promise<BoyarConfigurationOutput['services']> {
+    private async makeServicesConfig(): Promise<BoyarConfigurationOutput['services']> {
         return {
             'management-service': {
                 ExternalPort: 7666,
@@ -88,7 +88,7 @@ export class Processor {
                     Image: 'orbsnetwork/management-service',
                     Tag: 'G-0-N',
                 }),
-                Config: config,
+                Config: this.config,
             },
         };
     }
@@ -129,9 +129,9 @@ export class Processor {
         });
     }
 
-    private async getLegacyBoyarBootstrap(config: ServiceConfiguration): Promise<LegacyBoyarBootstrapInput> {
+    private async getLegacyBoyarBootstrap(): Promise<LegacyBoyarBootstrapInput> {
         const legacyBoyarBootstrap: Partial<LegacyBoyarBootstrapInput> = await Processor.fetchJson(
-            config.boyarLegacyBootstrap
+            this.config.boyarLegacyBootstrap
         );
         return Object.assign(
             {
