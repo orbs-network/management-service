@@ -75,7 +75,7 @@ export interface ManagementNodeService extends GenericNodeService {
 }
 export type VirtualChainConfigurationOutput = {};
 
-export type BoyarConfigurationOutput = {
+export type NodeManagementConfigurationOutput = {
     network: LegacyBoyarBootstrapInput['network'];
     orchestrator: {
         [name: string]: string | object;

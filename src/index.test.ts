@@ -3,7 +3,7 @@ import test from 'ava';
 import fetch from 'node-fetch';
 import { retry } from 'ts-retry-promise';
 import { serve } from '.';
-import { BoyarConfigurationOutput, ServiceConfiguration } from './data-types';
+import { NodeManagementConfigurationOutput, ServiceConfiguration } from './data-types';
 import { nockBoyarConfig } from './test-kit';
 
 test.serial('[small e2e] index serves /node/management with virtual chains', async (t) => {
@@ -26,7 +26,7 @@ test.serial('[small e2e] index serves /node/management with virtual chains', asy
     };
     const server = serve(config);
     try {
-        const response: BoyarConfigurationOutput = await retry(
+        const response: NodeManagementConfigurationOutput = await retry(
             async () => {
                 const response = await fetch(`http://localhost:${config.Port}/node/management`);
                 const body = await response.text();

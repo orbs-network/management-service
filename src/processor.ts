@@ -5,7 +5,7 @@ import {
     DockerConfig,
     ServiceConfiguration,
     LegacyBoyarBootstrapInput,
-    BoyarConfigurationOutput,
+    NodeManagementConfigurationOutput,
     VirtualChainConfigurationOutput,
 } from './data-types';
 import { EthereumReader, EthereumConfigReader } from './ethereum-reader';
@@ -68,7 +68,7 @@ export class Processor {
         return await Promise.resolve({});
     }
 
-    async getNodeManagementConfiguration(): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
+    async getNodeManagementConfiguration(): Promise<NodeManagementConfigurationOutput & LegacyBoyarBootstrapInput> {
         const nodeConfiguration = await this.getLegacyBoyarBootstrap();
         const ethState = await this.readEthereumState();
         const configResult = {
@@ -79,7 +79,7 @@ export class Processor {
         return merge(nodeConfiguration, configResult); // aggressive passthrough for legacy support as per Tal's decision
     }
 
-    private async makeServicesConfig(): Promise<BoyarConfigurationOutput['services']> {
+    private async makeServicesConfig(): Promise<NodeManagementConfigurationOutput['services']> {
         return {
             'management-service': {
                 ExternalPort: 7666,
@@ -96,7 +96,7 @@ export class Processor {
     private makeChainsConfig(
         _nodeConfiguration: LegacyBoyarBootstrapInput,
         { virtualChains }: EthereumState
-    ): Promise<BoyarConfigurationOutput['chains']> {
+    ): Promise<NodeManagementConfigurationOutput['chains']> {
         return Promise.all(
             virtualChains.map(async (id) => ({
                 Id: id,
@@ -119,7 +119,7 @@ export class Processor {
 
     private makeOrchestratorConfig(
         nodeConfiguration: LegacyBoyarBootstrapInput
-    ): BoyarConfigurationOutput['orchestrator'] {
+    ): NodeManagementConfigurationOutput['orchestrator'] {
         return Object.assign({}, nodeConfiguration.orchestrator, {
             DynamicManagementConfig: {
                 Url: 'http:/localhost:7666/node/management',
