@@ -39,7 +39,7 @@ test.serial('updateDockerConfig updates tags with minimal requests', async (t) =
         },
     ] as DockerConfig[];
     const scope = nockDockerHub({ user: 'foo', name: 'bar', tags: ['G-3-N'] }, { user: 'fizz', name: 'baz', tags: [] });
-    const processor = new Processor();
+    const processor = new Processor({} as ServiceConfiguration);
     const newConfig = await Promise.all(originalConfiguration.map((dc) => (processor as any).updateDockerConfig(dc)));
 
     t.deepEqual(newConfig, [
@@ -75,11 +75,11 @@ test.serial(
             pollIntervalSeconds: -1,
         };
 
-        const processor = new Processor();
+        const processor = new Processor(config);
         (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: 'fake' }); // skip docker endpoint
         (processor as any).readEthereumState = async () => ({ virtualChains: [] }); // skip ethereum endpoint
 
-        const result = await processor.getBoyarConfiguration(config);
+        const result = await processor.getBoyarConfiguration();
 
         t.deepEqual(result, {
             extraConfig: boyarConfigFakeEndpoint.extraConfig, // passthrough for legacy support
@@ -119,7 +119,7 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
         pollIntervalSeconds: -1,
     };
 
-    const processor = new Processor();
+    const processor = new Processor(config);
     (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: 'fake' }); // skip docker endpoint
     (processor as any).getLegacyBoyarBootstrap = async () => ({
         orchestrator: {},
@@ -127,7 +127,7 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
         services: {},
     }); // skip legacy config
 
-    const result1 = await processor.getBoyarConfiguration(config);
+    const result1 = await processor.getBoyarConfiguration();
     t.deepEqual(
         result1,
         {
@@ -169,6 +169,6 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
             'ethereum-endpoint': 'http://localhost:8545', // eventually rename to EthereumEndpoint
         },
     });
-    const result2 = await processor.getBoyarConfiguration(config);
+    const result2 = await processor.getBoyarConfiguration();
     t.deepEqual(result2.chains, [expectedVirtualChainConfig(vc1Id), expectedVirtualChainConfig(vc2Id)], '2 chains');
 });

@@ -8,7 +8,7 @@ process.on('uncaughtException', function (e) {
 
 try {
     const config = parseOptions(process.argv);
-    const server = serve(8080, config);
+    const server = serve(config);
 
     process.on('SIGINT', function () {
         // graceful shutdown
