@@ -6,15 +6,6 @@ import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typi
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
 import { errorString } from './utils';
 
-type ContractMetadata = {
-    address: string;
-    firstBlock: BlockNumber;
-};
-export type EthereumConfig = {
-    contracts: { [t in keyof Contracts]?: ContractMetadata };
-    firstBlock: BlockNumber;
-    httpEndpoint: string;
-};
 type ContractAddressUpdatedEvent = EventData & { returnValues: ContractAddressUpdatedEventValues };
 
 function translateEventContractNameToContractName(eventContractName: string): keyof Contracts {
@@ -66,7 +57,7 @@ export class EthereumConfigReader {
         events.forEach((e) => {
             result.contracts[translateEventContractNameToContractName(e.returnValues.contractName)] = {
                 address: e.returnValues.addr,
-                firstBlock: 0, // e.blockNumber
+                firstBlock: this.config.FirstBlock, // TODO: max with contract genesis once it exists
             };
         });
         return result;
@@ -112,6 +103,15 @@ async function retryGetPastEventsWithLatest(
     }
     return events;
 }
+type ContractMetadata = {
+    address: string;
+    firstBlock: BlockNumber;
+};
+export type EthereumConfig = {
+    contracts: { [t in keyof Contracts]?: ContractMetadata };
+    firstBlock: BlockNumber;
+    httpEndpoint: string;
+};
 export class EthereumReader {
     private web3: Web3;
 
