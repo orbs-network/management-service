@@ -77,7 +77,11 @@ test.serial(
 
         const processor = new Processor(config);
         (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: 'fake' }); // skip docker endpoint
-        (processor as any).readEthereumState = async () => ({ virtualChains: [] }); // skip ethereum endpoint
+        (processor as any).getNewReader = async () => ({
+            getAllVirtualChains() {
+                return [];
+            },
+        }); // skip ethereum endpoint
 
         const result = await processor.getNodeManagementConfiguration();
 

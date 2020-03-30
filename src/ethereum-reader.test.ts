@@ -3,6 +3,22 @@ import { Driver, createVC } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { EthereumReader, EthereumConfigReader } from './ethereum-reader';
 import { range } from './utils';
 
+test.serial('EthereumReader reads getCurrentRefTime', async (t) => {
+    t.timeout(60 * 1000);
+    await createVC(await Driver.new()); // create a block
+
+    const reader = new EthereumReader({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        contracts: null as any,
+        firstBlock: 0,
+        httpEndpoint: 'http://localhost:7545',
+    });
+
+    const refTime = await reader.getCurrentRefTime();
+    t.assert(Date.now() / 1000 - refTime > 0, `time is before now(): ${refTime}`);
+    t.assert(Date.now() / 1000 - refTime < 60, `time is not too much before now(): ${Date.now() / 1000 - refTime}`);
+});
+
 test.serial('EthereumReader reads VCs from SubscriptionChanged events', async (t) => {
     t.timeout(60 * 1000);
     const d = await Driver.new();

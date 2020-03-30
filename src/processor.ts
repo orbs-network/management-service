@@ -12,11 +12,9 @@ import { EthereumReader, EthereumConfigReader } from './ethereum-reader';
 import { merge } from './merge';
 import tier1 from './tier-1.json';
 import { getVirtualChainPort } from './ports';
+import { utcDay } from './utils';
 
 export type LatestTagResult = Promise<string | undefined>;
-export type EthereumState = {
-    virtualChains: Array<string>;
-};
 
 export class Processor {
     static async fetchLatestTagElement(repository: { name: string; user: string }): LatestTagResult {
@@ -57,23 +55,38 @@ export class Processor {
         return dc;
     }
 
-    private async readEthereumState(): Promise<EthereumState> {
+    private async getNewReader() {
         const ethConfig = await new EthereumConfigReader(this.config).readEthereumConfig();
-        const reader = new EthereumReader(ethConfig);
-        const virtualChains = await reader.getAllVirtualChains();
-        return { virtualChains };
+        return new EthereumReader(ethConfig);
     }
 
     async getVirtualChainConfiguration(vchainId: string): Promise<VirtualChainConfigurationOutput> {
-        return await Promise.resolve({});
+        const reader = await this.getNewReader();
+        const refTime = await reader.getCurrentRefTime();
+        // TODO: test and complete stub
+        return {
+            CurrentRefTime: refTime,
+            PageStartRefTime: refTime - utcDay,
+            PageEndRefTime: refTime,
+            VirtualChains: {
+                [vchainId]: {
+                    VirtualChainId: vchainId,
+                    CurrentTopology: [],
+                    CommitteeEvents: [],
+                    SubscriptionEvents: [],
+                    ProtocolVersionEvents: [],
+                },
+            },
+        };
     }
 
     async getNodeManagementConfiguration(): Promise<NodeManagementConfigurationOutput & LegacyBoyarBootstrapInput> {
         const nodeConfiguration = await this.getLegacyBoyarBootstrap();
-        const ethState = await this.readEthereumState();
+        const reader = await this.getNewReader();
+        const virtualChains = await reader.getAllVirtualChains();
         const configResult = {
             orchestrator: this.makeOrchestratorConfig(nodeConfiguration),
-            chains: await this.makeChainsConfig(nodeConfiguration, ethState),
+            chains: await this.makeChainsConfig(nodeConfiguration, virtualChains),
             services: await this.makeServicesConfig(),
         };
         return merge(nodeConfiguration, configResult); // aggressive passthrough for legacy support as per Tal's decision
@@ -95,7 +108,7 @@ export class Processor {
 
     private makeChainsConfig(
         _nodeConfiguration: LegacyBoyarBootstrapInput,
-        { virtualChains }: EthereumState
+        virtualChains: Array<string>
     ): Promise<NodeManagementConfigurationOutput['chains']> {
         return Promise.all(
             virtualChains.map(async (id) => ({

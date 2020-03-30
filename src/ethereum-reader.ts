@@ -137,6 +137,15 @@ export class EthereumReader {
         );
         return events.map((event) => event.returnValues.vcid);
     }
+
+    async getCurrentRefTime(): Promise<number> {
+        const currBlock = await this.web3.eth.getBlock('latest');
+        const result = currBlock.timestamp;
+        if (typeof result == 'string') {
+            return parseInt(result);
+        }
+        return result;
+    }
 }
 
 // async function getEventsPaged(
