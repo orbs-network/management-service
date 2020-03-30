@@ -36,6 +36,7 @@ function translateEventContractNameToContractName(eventContractName: string): ke
 export type ServiceEthereumConfiguration = {
     EthereumGenesisContract: string;
     EthereumEndpoint: string;
+    FirstBlock: BlockNumber;
 };
 export class EthereumConfigReader {
     private web3: Web3;
@@ -59,7 +60,7 @@ export class EthereumConfigReader {
         )) as ContractAddressUpdatedEvent[];
         const result: EthereumConfig = {
             contracts: {},
-            firstBlock: 0, // events[0].blockNumber,
+            firstBlock: this.config.FirstBlock, // events[0].blockNumber,
             httpEndpoint: this.config.EthereumEndpoint,
         };
         events.forEach((e) => {

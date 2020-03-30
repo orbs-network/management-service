@@ -13,7 +13,7 @@ export function parseOptions(argv: string[]): ServiceConfiguration {
         .parse();
 
     const config = Object.assign(
-        { pollIntervalSeconds: 1, Port: 8080 },
+        { pollIntervalSeconds: 1, Port: 8080, FirstBlock: 0 },
         ...options.config.map((configFile) => JSON.parse(readFileSync(configFile).toString()))
     );
 

@@ -19,6 +19,7 @@ test.serial('[small e2e] index serves /node/management with virtual chains', asy
 
     const config: ServiceConfiguration = {
         Port: 1234,
+        FirstBlock: 0,
         EthereumGenesisContract: d.contractRegistry.web3Contract.options.address,
         EthereumEndpoint: 'http://localhost:7545',
         boyarLegacyBootstrap: boyarConfigFakeEndpoint.congigUri + boyarConfigFakeEndpoint.configPath,

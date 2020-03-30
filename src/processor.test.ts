@@ -69,6 +69,7 @@ test.serial(
 
         const config: ServiceConfiguration = {
             Port: -1,
+            FirstBlock: 0,
             EthereumGenesisContract: 'foo',
             EthereumEndpoint: 'bar',
             boyarLegacyBootstrap: boyarConfigFakeEndpoint.congigUri + boyarConfigFakeEndpoint.configPath,
@@ -117,6 +118,7 @@ test.serial('getBoyarConfiguration returns chains according to ethereum state', 
 
     const config: ServiceConfiguration = {
         Port: -1,
+        FirstBlock: 0,
         EthereumGenesisContract: d.contractRegistry.address,
         EthereumEndpoint: 'http://localhost:7545',
         boyarLegacyBootstrap: 'foo',
