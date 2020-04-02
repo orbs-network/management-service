@@ -25,3 +25,9 @@ export const utcDay = 24 * 60 * 60;
 //         to: time - (time % windowSize) + windowSize,
 //     };
 // }
+
+export function toNumber(val: number | string) {
+    if (typeof val == 'string') {
+        return parseInt(val);
+    } else return val;
+}

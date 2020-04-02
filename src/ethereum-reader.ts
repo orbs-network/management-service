@@ -4,7 +4,7 @@ import { EventData, Contract } from 'web3-eth-contract';
 import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/compiled-contracts';
 import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
-import { errorString } from './utils';
+import { errorString, toNumber } from './utils';
 
 type ContractAddressUpdatedEvent = EventData & { returnValues: ContractAddressUpdatedEventValues };
 
@@ -141,11 +141,7 @@ export class EthereumReader {
 
     async getCurrentRefTime(): Promise<number> {
         const currBlock = await this.web3.eth.getBlock('latest');
-        const result = currBlock.timestamp;
-        if (typeof result == 'string') {
-            return parseInt(result);
-        }
-        return result;
+        return toNumber(currBlock.timestamp);
     }
 }
 
