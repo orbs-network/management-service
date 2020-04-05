@@ -3,7 +3,7 @@ import { Driver, createVC } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { EthereumReader, EthereumConfigReader } from './ethereum-reader';
 import { range } from './utils';
 
-test.serial('EthereumReader reads getCurrentRefTime', async (t) => {
+test.serial('EthereumReader reads getRefTime', async (t) => {
     t.timeout(60 * 1000);
     await createVC(await Driver.new()); // create a block
 
@@ -14,7 +14,7 @@ test.serial('EthereumReader reads getCurrentRefTime', async (t) => {
         httpEndpoint: 'http://localhost:7545',
     });
 
-    const refTime = await reader.getCurrentRefTime();
+    const refTime = (await reader.getRefTime('latest')) || -1;
     t.assert(Date.now() / 1000 - refTime > 0, `time is before now(): ${refTime}`);
     t.assert(Date.now() / 1000 - refTime < 60, `time is not too much before now(): ${Date.now() / 1000 - refTime}`);
 });
@@ -29,9 +29,9 @@ test.serial('EthereumReader reads VCs from SubscriptionChanged events', async (t
     }
 
     const reader = new EthereumReader({
-        contracts: {
+        contracts: Promise.resolve({
             Subscriptions: { address: d.subscriptions.web3Contract.options.address, firstBlock: 0 },
-        },
+        }),
         firstBlock: 0,
         httpEndpoint: 'http://localhost:7545',
     });
@@ -60,7 +60,7 @@ test.serial('EthereumConfigReader reads registry for contracts address', async (
         FirstBlock: 0,
     });
 
-    const config = await reader.readEthereumConfig();
+    const config = reader.readEthereumConfig();
     t.deepEqual(config.httpEndpoint, 'http://localhost:7545');
-    t.deepEqual(config.contracts.Subscriptions?.address, d.subscriptions.web3Contract.options.address);
+    t.deepEqual((await config.contracts).Subscriptions?.address, d.subscriptions.web3Contract.options.address);
 });

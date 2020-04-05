@@ -3,6 +3,7 @@ import { ABI } from '../data-types';
 import { errorString, toNumber } from '../utils';
 import { EventModel } from './event-model';
 import { BlocksTimeModel } from './block-time-model';
+import { ServiceEthereumConfiguration, EthereumReader, getNewEthereumReader } from '../ethereum-reader';
 
 /*
 goal:
@@ -23,11 +24,8 @@ export type EventPollParams = {
 export class EthereumModel {
     private events = new Map<string, { params: EventPollParams; model: EventModel }>();
     private blockTime: BlocksTimeModel;
-    constructor(private web3: Web3) {
-        this.blockTime = new BlocksTimeModel(
-            (blockNumber: number) => this.web3.eth.getBlock(blockNumber).then((b) => b && toNumber(b.timestamp)),
-            100
-        );
+    constructor(private reader: EthereumReader) {
+        this.blockTime = new BlocksTimeModel((blockNumber: number) => this.reader.getRefTime(blockNumber), 100);
     }
 
     pollSync() {
@@ -43,10 +41,12 @@ export class EthereumModel {
             // todo move into cache?
             const fromBlock = model.getNextBlock();
             const toBlock = fromBlock + pollSize;
+
             const web3Contract = new this.web3.eth.Contract(params.abi, params.address);
+
             // TODO pagination
             (async () => {
-                const events = await web3Contract.getPastEvents(params.eventName, { fromBlock, toBlock });
+                const events = await this.reader.getPastEvents(params.eventName, { fromBlock, toBlock });
                 for (const event of events) {
                     model.rememberEvent(event, await this.blockTime.getApproximateBlockTime(event.blockNumber));
                 }

@@ -8,11 +8,12 @@ import {
     NodeManagementConfigurationOutput,
     VirtualChainConfigurationOutput,
 } from './data-types';
-import { EthereumReader, EthereumConfigReader } from './ethereum-reader';
+import { getNewEthereumReader, EthereumReader } from './ethereum-reader';
 import { merge } from './merge';
 import tier1 from './tier-1.json';
 import { getVirtualChainPort } from './ports';
 import { utcDay } from './utils';
+import { EthereumModel } from './eth-model';
 
 export type LatestTagResult = Promise<string | undefined>;
 
@@ -40,29 +41,28 @@ export class Processor {
         return JSON.parse(body);
     }
 
-    private cache = new Map<string, LatestTagResult>();
-    constructor(private config: ServiceConfiguration) {}
+    private dockerTagCache = new Map<string, LatestTagResult>();
+    private ethModel: EthereumModel;
+    private reader: EthereumReader;
+    constructor(private config: ServiceConfiguration) {
+        this.reader = getNewEthereumReader(this.config);
+        this.ethModel = new EthereumModel(this.reader);
+    }
 
     private async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
-        if (!this.cache.has(dc.Image)) {
+        if (!this.dockerTagCache.has(dc.Image)) {
             const [user, name] = dc.Image.split('/');
-            this.cache.set(dc.Image, Processor.fetchLatestTagElement({ user, name }));
+            this.dockerTagCache.set(dc.Image, Processor.fetchLatestTagElement({ user, name }));
         }
-        const tag = await this.cache.get(dc.Image);
+        const tag = await this.dockerTagCache.get(dc.Image);
         if (typeof tag === 'string') {
             return { ...dc, Tag: tag, Pull: true };
         }
         return dc;
     }
 
-    private async getNewReader() {
-        const ethConfig = await new EthereumConfigReader(this.config).readEthereumConfig();
-        return new EthereumReader(ethConfig);
-    }
-
     async getVirtualChainConfiguration(vchainId: string): Promise<VirtualChainConfigurationOutput> {
-        const reader = await this.getNewReader();
-        const refTime = await reader.getCurrentRefTime();
+        const refTime = (await this.reader.getRefTime('latest')) || -1;
         // TODO: test and complete stub
         return {
             CurrentRefTime: refTime,
@@ -82,8 +82,7 @@ export class Processor {
 
     async getNodeManagementConfiguration(): Promise<NodeManagementConfigurationOutput & LegacyBoyarBootstrapInput> {
         const nodeConfiguration = await this.getLegacyBoyarBootstrap();
-        const reader = await this.getNewReader();
-        const virtualChains = await reader.getAllVirtualChains();
+        const virtualChains = await this.reader.getAllVirtualChains();
         const configResult = {
             orchestrator: this.makeOrchestratorConfig(nodeConfiguration),
             chains: await this.makeChainsConfig(nodeConfiguration, virtualChains),

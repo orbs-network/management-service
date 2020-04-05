@@ -1,11 +1,15 @@
 import Web3 from 'web3';
 import { BlockNumber } from 'web3-core';
-import { EventData, Contract } from 'web3-eth-contract';
+import { EventData, Contract, PastEventOptions } from 'web3-eth-contract';
 import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/compiled-contracts';
 import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
 import { errorString, toNumber } from './utils';
 
+export function getNewEthereumReader(config: ServiceEthereumConfiguration) {
+    const ethConfig = new EthereumConfigReader(config).readEthereumConfig();
+    return new EthereumReader(ethConfig);
+}
 type ContractAddressUpdatedEvent = EventData & { returnValues: ContractAddressUpdatedEventValues };
 
 function translateEventContractNameToContractName(eventContractName: string): keyof Contracts {
@@ -41,7 +45,7 @@ export class EthereumConfigReader {
         return new this.web3.eth.Contract(abi, this.config.EthereumGenesisContract);
     }
 
-    async readEthereumConfig(): Promise<EthereumConfig> {
+    async readContractsConfig(): EthereumConfig['contracts'] {
         const web3Contract = this.connect('ContractRegistry');
         const events = (await retryGetPastEventsWithLatest(
             'ContractAddressUpdated',
@@ -49,18 +53,21 @@ export class EthereumConfigReader {
             web3Contract,
             0
         )) as ContractAddressUpdatedEvent[];
-        const result: EthereumConfig = {
-            contracts: {},
-            firstBlock: this.config.FirstBlock, // events[0].blockNumber,
-            httpEndpoint: this.config.EthereumEndpoint,
-        };
+        const contracts: { [t in keyof Contracts]?: ContractMetadata } = {};
         events.forEach((e) => {
-            result.contracts[translateEventContractNameToContractName(e.returnValues.contractName)] = {
+            contracts[translateEventContractNameToContractName(e.returnValues.contractName)] = {
                 address: e.returnValues.addr,
                 firstBlock: this.config.FirstBlock, // TODO: max with contract genesis once it exists
             };
         });
-        return result;
+        return contracts;
+    }
+    readEthereumConfig() {
+        return {
+            contracts: this.readContractsConfig(),
+            firstBlock: this.config.FirstBlock, // events[0].blockNumber,
+            httpEndpoint: this.config.EthereumEndpoint,
+        };
     }
 }
 async function retryGetPastEventsWithLatest(
@@ -108,10 +115,26 @@ type ContractMetadata = {
     firstBlock: BlockNumber;
 };
 export type EthereumConfig = {
-    contracts: { [t in keyof Contracts]?: ContractMetadata };
+    contracts: Promise<{ [t in keyof Contracts]?: ContractMetadata }>;
     firstBlock: BlockNumber;
     httpEndpoint: string;
 };
+
+export type EventName = 'CommitteeChanged' | 'TopologyChanged' | 'SubscriptionChanged' | 'ProtocolVersionChanged';
+export function contractByEventName(eventName: EventName): keyof Contracts {
+    switch (eventName) {
+        case 'CommitteeChanged':
+            return 'Elections';
+        case 'TopologyChanged':
+            return 'Elections';
+        case 'SubscriptionChanged':
+            return 'Subscriptions';
+        case 'ProtocolVersionChanged':
+            return 'Protocol';
+        default:
+            throw new Error(`unknown event name '${eventName}'`);
+    }
+}
 export class EthereumReader {
     private web3: Web3;
 
@@ -119,8 +142,8 @@ export class EthereumReader {
         this.web3 = new Web3(new Web3.providers.HttpProvider(config.httpEndpoint));
     }
 
-    private connect(contractName: keyof Contracts) {
-        const contractMetadata = this.config.contracts[contractName];
+    private async connect(contractName: keyof Contracts) {
+        const contractMetadata = (await this.config.contracts)[contractName];
         if (!contractMetadata) {
             throw new Error(`contract "${contractName}" not in registry`);
         }
@@ -129,7 +152,7 @@ export class EthereumReader {
     }
 
     async getAllVirtualChains(): Promise<Array<string>> {
-        const web3Contract = this.connect('Subscriptions');
+        const web3Contract = await this.connect('Subscriptions');
         const events = await retryGetPastEventsWithLatest(
             'SubscriptionChanged',
             this.web3,
@@ -139,9 +162,14 @@ export class EthereumReader {
         return events.map((event) => event.returnValues.vcid);
     }
 
-    async getCurrentRefTime(): Promise<number> {
-        const currBlock = await this.web3.eth.getBlock('latest');
-        return toNumber(currBlock.timestamp);
+    async getRefTime(blockNumber: number | 'latest'): Promise<number | null> {
+        const block = await this.web3.eth.getBlock(blockNumber);
+        return block && toNumber(block.timestamp);
+    }
+
+    async getPastEvents(eventName: EventName, { fromBlock, toBlock }: PastEventOptions) {
+        const web3Contract = await this.connect(contractByEventName(eventName));
+        return await web3Contract.getPastEvents(eventName, { fromBlock, toBlock });
     }
 }
 
