@@ -2,16 +2,19 @@ import { ServiceConfiguration } from './data-types';
 import { Processor } from './processor';
 import express, { RequestHandler, Request, Response, NextFunction } from 'express';
 import { errorString } from './utils';
+import { getNewEthereumReader } from './ethereum-reader';
+import { EthereumModel } from './eth-model';
+import { TaskLoop } from './task-loop';
 
 function wrapAsync(fn: RequestHandler): RequestHandler {
     return (req, res, next) => fn(req, res, next).catch(next);
 }
 
 export function serve(serviceConfig: ServiceConfiguration) {
-    const processor = new Processor(serviceConfig);
-    // const configPoller = setInterval(() => {
-    //     boyarBootstrap = Processor.getBoyarConfiguration(serviceConfig);
-    // }, serviceConfig.pollIntervalSeconds * 1000);
+    const ethReader = getNewEthereumReader(serviceConfig);
+    const ethModel = new EthereumModel(ethReader);
+    const processor = new Processor(serviceConfig, ethReader, ethModel);
+
     const app = express();
     app.get(
         '/node/management',
@@ -38,10 +41,12 @@ export function serve(serviceConfig: ServiceConfiguration) {
         }
         return next(error);
     });
+    const pollEvents = new TaskLoop(() => ethModel.pollEvents(), serviceConfig.pollIntervalSeconds * 1000);
+    pollEvents.start();
     const server = app.listen(serviceConfig.Port, '0.0.0.0', () =>
         console.log(`Management service listening on port ${serviceConfig.Port}!`)
     );
-    // server.on('close', () => clearInterval(configPoller));
+    server.on('close', pollEvents.stop);
     console.log('Management service starting..');
     return server;
 }

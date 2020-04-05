@@ -47,12 +47,9 @@ export class EthereumConfigReader {
 
     async readContractsConfig(): EthereumConfig['contracts'] {
         const web3Contract = this.connect('ContractRegistry');
-        const events = (await retryGetPastEventsWithLatest(
-            'ContractAddressUpdated',
-            this.web3,
-            web3Contract,
-            0
-        )) as ContractAddressUpdatedEvent[];
+        const events =
+            (await retryGetPastEventsWithLatest('ContractAddressUpdated', this.web3, web3Contract, 0)) as
+            ContractAddressUpdatedEvent[];
         const contracts: { [t in keyof Contracts]?: ContractMetadata } = {};
         events.forEach((e) => {
             contracts[translateEventContractNameToContractName(e.returnValues.contractName)] = {
@@ -62,6 +59,7 @@ export class EthereumConfigReader {
         });
         return contracts;
     }
+
     readEthereumConfig() {
         return {
             contracts: this.readContractsConfig(),
@@ -76,40 +74,49 @@ async function retryGetPastEventsWithLatest(
     web3Contract: Contract,
     firstBlock: BlockNumber
 ) {
-    let events = [] as EventData[];
     try {
-        events = await web3Contract.getPastEvents(event, {
+        return await web3Contract.getPastEvents(event, {
             fromBlock: firstBlock,
             toBlock: 'latest',
         });
     } catch (e) {
-        console.warn(`failed reading events from ethereum.`, errorString(e));
-        console.warn(`re-trying with not-latest block number`);
-        let stage = 0;
-        try {
-            const latest = await web3.eth.getBlockNumber();
-            stage = 1;
-            console.warn(`re-trying with (latest - 1) block number (latest block is ${latest})`);
-            events = await web3Contract.getPastEvents(event, {
-                fromBlock: firstBlock,
-                toBlock: latest - 1,
-            });
-        } catch (e2) {
-            if (stage) {
-                console.error(`failed reading events from ethereum. `, errorString(e2));
-                throw new Error(
-                    `error reading '${event}' events: ${errorString(e2)}\n\n original error:\n${errorString(e)}`
-                );
-            } else {
-                console.error(`failed reading block number from ethereum. `, errorString(e2));
-                throw new Error(
-                    `error reading block number: ${errorString(e2)}\n\n original error:\n${errorString(e)}`
-                );
-            }
+        return await handleEventReadError(event, web3, web3Contract, firstBlock, e);
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function handleEventReadError(
+    event: string,
+    web3: Web3,
+    web3Contract: Contract,
+    firstBlock: BlockNumber,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    e: any
+) {
+    console.warn(`failed reading events from ethereum.`, errorString(e));
+    console.warn(`re-trying with not-latest block number`);
+    let stage = 0;
+    try {
+        const latest = await web3.eth.getBlockNumber();
+        stage = 1;
+        console.warn(`re-trying with (latest - 1) block number (latest block is ${latest})`);
+        return await web3Contract.getPastEvents(event, {
+            fromBlock: firstBlock,
+            toBlock: latest - 1,
+        });
+    } catch (e2) {
+        if (stage) {
+            console.error(`failed reading events from ethereum. `, errorString(e2));
+            throw new Error(
+                `error reading '${event}' events: ${errorString(e2)}\n\n original error:\n${errorString(e)}`
+            );
+        } else {
+            console.error(`failed reading block number from ethereum. `, errorString(e2));
+            throw new Error(`error reading block number: ${errorString(e2)}\n\n original error:\n${errorString(e)}`);
         }
     }
-    return events;
 }
+
 type ContractMetadata = {
     address: string;
     firstBlock: BlockNumber;
@@ -120,7 +127,10 @@ export type EthereumConfig = {
     httpEndpoint: string;
 };
 
-export type EventName = 'CommitteeChanged' | 'TopologyChanged' | 'SubscriptionChanged' | 'ProtocolVersionChanged';
+export const eventNames =
+    ['CommitteeChanged', 'TopologyChanged', 'SubscriptionChanged', 'ProtocolVersionChanged'] as
+    Readonly<['CommitteeChanged', 'TopologyChanged', 'SubscriptionChanged', 'ProtocolVersionChanged']>;
+export type EventName = typeof eventNames[-1];
 export function contractByEventName(eventName: EventName): keyof Contracts {
     switch (eventName) {
         case 'CommitteeChanged':
@@ -162,6 +172,10 @@ export class EthereumReader {
         return events.map((event) => event.returnValues.vcid);
     }
 
+    getBlockNumber(): Promise<number> {
+        return this.web3.eth.getBlockNumber();
+    }
+
     async getRefTime(blockNumber: number | 'latest'): Promise<number | null> {
         const block = await this.web3.eth.getBlock(blockNumber);
         return block && toNumber(block.timestamp);
@@ -169,42 +183,39 @@ export class EthereumReader {
 
     async getPastEvents(eventName: EventName, { fromBlock, toBlock }: PastEventOptions) {
         const web3Contract = await this.connect(contractByEventName(eventName));
-        return await web3Contract.getPastEvents(eventName, { fromBlock, toBlock });
+        return await getEventsPaged(web3Contract, eventName, fromBlock, toBlock, fromBlock - toBlock);
     }
 }
 
-// async function getEventsPaged(
-//   contract: Contract,
-//   eventType: string,
-//   fromBlock: number,
-//   toBlock: number,
-//   pageSize: number
-// ): Promise<Array<EventData>> {
-//   const result: Array<EventData> = [];
-//   for (let currBlock = fromBlock; currBlock < toBlock; currBlock += pageSize) {
-//     const options = {
-//       fromBlock: currBlock,
-//       toBlock: Math.min(currBlock + pageSize, toBlock)
-//     };
-//     try {
-//       const events = await contract.getPastEvents(
-//         "SubscriptionChanged",
-//         options
-//       );
-//       result.push(...events);
-//     } catch (err) {
-//       if (pageSize > 5) {
-//         // assume there are too many events
-//         const events = await getEventsPaged(
-//           contract,
-//           eventType,
-//           options.fromBlock,
-//           options.toBlock,
-//           Math.floor(pageSize / 5)
-//         );
-//         result.push(...events);
-//       } else throw err;
-//     }
-//   }
-//   return result;
-// }
+async function getEventsPaged(
+    web3Contract: Contract,
+    eventName: string,
+    fromBlock: number,
+    toBlock: number,
+    pageSize: number
+): Promise<Array<EventData>> {
+    const result: Array<EventData> = [];
+    for (let currBlock = fromBlock; currBlock < toBlock; currBlock += pageSize) {
+        const options = {
+            fromBlock: currBlock,
+            toBlock: Math.min(currBlock + pageSize, toBlock),
+        };
+        try {
+            const events = await web3Contract.getPastEvents(eventName, options);
+            result.push(...events);
+        } catch (err) {
+            if (pageSize > 5) {
+                // assume there are too many events
+                const events = await getEventsPaged(
+                    web3Contract,
+                    eventName,
+                    options.fromBlock,
+                    options.toBlock,
+                    Math.floor(pageSize / 5)
+                );
+                result.push(...events);
+            } else throw err;
+        }
+    }
+    return result;
+}

@@ -7,8 +7,12 @@ import {
     LegacyBoyarBootstrapInput,
     NodeManagementConfigurationOutput,
     VirtualChainConfigurationOutput,
+    TopologyElement,
+    CommitteeEvent,
+    SubscriptionEvent,
+    ProtocolVersionEvent,
 } from './data-types';
-import { getNewEthereumReader, EthereumReader } from './ethereum-reader';
+import { EthereumReader } from './ethereum-reader';
 import { merge } from './merge';
 import tier1 from './tier-1.json';
 import { getVirtualChainPort } from './ports';
@@ -42,12 +46,11 @@ export class Processor {
     }
 
     private dockerTagCache = new Map<string, LatestTagResult>();
-    private ethModel: EthereumModel;
-    private reader: EthereumReader;
-    constructor(private config: ServiceConfiguration) {
-        this.reader = getNewEthereumReader(this.config);
-        this.ethModel = new EthereumModel(this.reader);
-    }
+    constructor(
+        private config: ServiceConfiguration,
+        private reader: EthereumReader,
+        private ethModel: EthereumModel
+    ) {}
 
     private async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
         if (!this.dockerTagCache.has(dc.Image)) {
@@ -71,10 +74,18 @@ export class Processor {
             VirtualChains: {
                 [vchainId]: {
                     VirtualChainId: vchainId,
-                    CurrentTopology: [],
-                    CommitteeEvents: [],
-                    SubscriptionEvents: [],
-                    ProtocolVersionEvents: [],
+                    CurrentTopology: this.ethModel
+                        .getLast24HoursEvents('TopologyChanged', refTime - utcDay)
+                        .map((d) => d.returnValues as TopologyElement),
+                    CommitteeEvents: this.ethModel
+                        .getLast24HoursEvents('CommitteeChanged', refTime - utcDay)
+                        .map((d) => d.returnValues as CommitteeEvent),
+                    SubscriptionEvents: this.ethModel
+                        .getLast24HoursEvents('SubscriptionChanged', refTime - utcDay)
+                        .map((d) => d.returnValues as SubscriptionEvent),
+                    ProtocolVersionEvents: this.ethModel
+                        .getLast24HoursEvents('ProtocolVersionChanged', refTime - utcDay)
+                        .map((d) => d.returnValues as ProtocolVersionEvent),
                 },
             },
         };
