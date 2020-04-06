@@ -25,21 +25,20 @@ test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) =
 });
 
 test.serial('updateDockerConfig updates tags with minimal requests', async (t) => {
-    const originalConfiguration =
-        [
-            {
-                Image: 'foo/bar',
-                Tag: 'foo1',
-            },
-            {
-                Image: 'foo/bar',
-                Tag: 'G-1-N',
-            },
-            {
-                Image: 'fizz/baz',
-                Tag: 'foo3',
-            },
-        ] as DockerConfig[];
+    const originalConfiguration = [
+        {
+            Image: 'foo/bar',
+            Tag: 'foo1',
+        },
+        {
+            Image: 'foo/bar',
+            Tag: 'G-1-N',
+        },
+        {
+            Image: 'fizz/baz',
+            Tag: 'foo3',
+        },
+    ] as DockerConfig[];
     const scope = nockDockerHub({ user: 'foo', name: 'bar', tags: ['G-3-N'] }, { user: 'fizz', name: 'baz', tags: [] });
     const processor = new Processor({} as ServiceConfiguration, null as any, null as any);
     const newConfig = await Promise.all(originalConfiguration.map((dc) => (processor as any).updateDockerConfig(dc)));
@@ -78,15 +77,12 @@ test.serial(
             pollIntervalSeconds: -1,
         };
 
-        const fakeReader =
-            ({
-                // skip ethereum endpoint
-                getAllVirtualChains() {
-                    return [];
-                },
-            } as
-                unknown) as
-            EthereumReader;
+        const fakeReader = ({
+            // skip ethereum endpoint
+            getAllVirtualChains() {
+                return [];
+            },
+        } as unknown) as EthereumReader;
         const processor = new Processor(config, fakeReader, null as any);
         (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: 'fake' }); // skip docker endpoint
 

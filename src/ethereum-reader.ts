@@ -47,9 +47,12 @@ export class EthereumConfigReader {
 
     async readContractsConfig(): EthereumConfig['contracts'] {
         const web3Contract = this.connect('ContractRegistry');
-        const events =
-            (await retryGetPastEventsWithLatest('ContractAddressUpdated', this.web3, web3Contract, 0)) as
-            ContractAddressUpdatedEvent[];
+        const events = (await retryGetPastEventsWithLatest(
+            'ContractAddressUpdated',
+            this.web3,
+            web3Contract,
+            0
+        )) as ContractAddressUpdatedEvent[];
         const contracts: { [t in keyof Contracts]?: ContractMetadata } = {};
         events.forEach((e) => {
             contracts[translateEventContractNameToContractName(e.returnValues.contractName)] = {
@@ -127,9 +130,12 @@ export type EthereumConfig = {
     httpEndpoint: string;
 };
 
-export const eventNames =
-    ['CommitteeChanged', 'TopologyChanged', 'SubscriptionChanged', 'ProtocolVersionChanged'] as
-    Readonly<['CommitteeChanged', 'TopologyChanged', 'SubscriptionChanged', 'ProtocolVersionChanged']>;
+export const eventNames = [
+    'CommitteeChanged',
+    'TopologyChanged',
+    'SubscriptionChanged',
+    'ProtocolVersionChanged',
+] as Readonly<['CommitteeChanged', 'TopologyChanged', 'SubscriptionChanged', 'ProtocolVersionChanged']>;
 export type EventName = typeof eventNames[-1];
 export function contractByEventName(eventName: EventName): keyof Contracts {
     switch (eventName) {
