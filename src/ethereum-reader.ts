@@ -189,7 +189,7 @@ export class EthereumReader {
 
     async getPastEvents(eventName: EventName, { fromBlock, toBlock }: PastEventOptions) {
         const web3Contract = await this.connect(contractByEventName(eventName));
-        return await getEventsPaged(web3Contract, eventName, fromBlock, toBlock, fromBlock - toBlock);
+        return await getEventsPaged(web3Contract, eventName, fromBlock, toBlock, toBlock - fromBlock);
     }
 }
 
@@ -210,6 +210,7 @@ async function getEventsPaged(
             const events = await web3Contract.getPastEvents(eventName, options);
             result.push(...events);
         } catch (err) {
+            console.info(`soft failure reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(err)}`);
             if (pageSize > 5) {
                 // assume there are too many events
                 const events = await getEventsPaged(
