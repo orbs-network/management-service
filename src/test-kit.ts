@@ -40,19 +40,21 @@ export function deepDataMatcher(data: any, pattern: any, path = 'ROOT'): string[
     if (typeof pattern == 'object' && pattern && data) {
         // either object or array
         for (const key in pattern) {
-            const current = data[key];
-            const should = pattern[key];
-            const propertyPath = isArray(pattern) ? `${path}[${key}]` : `${path}.${key}`;
-            if (isRegExp(should)) {
-                (isString(current) && should.test(current)) ||
-                    errors.push(`${propertyPath} : ${JSON.stringify(data)} does not satisfy ${should} `);
-            } else if (isFunction(should)) {
-                should(current) ||
-                    errors.push(`${propertyPath} : ${JSON.stringify(data)} does not satisfy matcher ${should} `);
-            } else if (isArray(should) && !isArray(current)) {
-                errors.push(`${propertyPath} : ${JSON.stringify(data)} is not an array`);
-            } else {
-                errors.push(...deepDataMatcher(current, should, propertyPath));
+            if (!`${key}`.startsWith('_')) { // ignore private properties
+                const current = data[key];
+                const should = pattern[key];
+                const propertyPath = isArray(pattern) ? `${path}[${key}]` : `${path}.${key}`;
+                if (isRegExp(should)) {
+                    (isString(current) && should.test(current)) ||
+                        errors.push(`${propertyPath} : ${JSON.stringify(current)} does not satisfy ${should} `);
+                } else if (isFunction(should)) {
+                    should(current) ||
+                        errors.push(`${propertyPath} : ${JSON.stringify(current)} does not satisfy matcher ${should} `);
+                } else if (isArray(should) && !isArray(current)) {
+                    errors.push(`${propertyPath} : ${JSON.stringify(current)} is not an array`);
+                } else {
+                    errors.push(...deepDataMatcher(current, should, propertyPath));
+                }
             }
         }
     } else {
