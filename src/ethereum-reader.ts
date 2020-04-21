@@ -5,6 +5,7 @@ import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/rele
 import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
 import { errorString, toNumber } from './utils';
+import { EventName, EventTypes } from './eth-model/events-types';
 
 export function getNewEthereumReader(config: ServiceEthereumConfiguration) {
     const ethConfig = new EthereumConfigReader(config).readEthereumConfig();
@@ -130,13 +131,6 @@ export type EthereumConfig = {
     httpEndpoint: string;
 };
 
-export const eventNames = [
-    'CommitteeChanged',
-    'TopologyChanged',
-    'SubscriptionChanged',
-    'ProtocolVersionChanged',
-] as Readonly<['CommitteeChanged', 'TopologyChanged', 'SubscriptionChanged', 'ProtocolVersionChanged']>;
-export type EventName = typeof eventNames[-1];
 export function contractByEventName(eventName: EventName): keyof Contracts {
     switch (eventName) {
         case 'CommitteeChanged':
@@ -187,33 +181,36 @@ export class EthereumReader {
         return block && toNumber(block.timestamp);
     }
 
-    async getPastEvents(eventName: EventName, { fromBlock, toBlock }: PastEventOptions) {
+    async getPastEvents<T extends EventName>(
+        eventName: T,
+        { fromBlock, toBlock }: PastEventOptions
+    ): Promise<Array<EventTypes[T]>> {
         const web3Contract = await this.connect(contractByEventName(eventName));
         return await getEventsPaged(web3Contract, eventName, fromBlock, toBlock, toBlock - fromBlock);
     }
 }
 
-async function getEventsPaged(
+async function getEventsPaged<T extends EventName>(
     web3Contract: Contract,
     eventName: string,
     fromBlock: number,
     toBlock: number,
     pageSize: number
-): Promise<Array<EventData>> {
-    const result: Array<EventData> = [];
+): Promise<Array<EventTypes[T]>> {
+    const result: Array<EventTypes[T]> = [];
     for (let currBlock = fromBlock; currBlock < toBlock; currBlock += pageSize) {
         const options = {
             fromBlock: currBlock,
             toBlock: Math.min(currBlock + pageSize, toBlock),
         };
         try {
-            const events = await web3Contract.getPastEvents(eventName, options);
+            const events = (await web3Contract.getPastEvents(eventName, options)) as Array<EventTypes[T]>;
             result.push(...events);
         } catch (err) {
             console.info(`soft failure reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(err)}`);
             if (pageSize > 5) {
                 // assume there are too many events
-                const events = await getEventsPaged(
+                const events = await getEventsPaged<T>(
                     web3Contract,
                     eventName,
                     options.fromBlock,

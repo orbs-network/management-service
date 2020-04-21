@@ -40,7 +40,8 @@ export function deepDataMatcher(data: any, pattern: any, path = 'ROOT'): string[
     if (typeof pattern == 'object' && pattern && data) {
         // either object or array
         for (const key in pattern) {
-            if (!`${key}`.startsWith('_')) { // ignore private properties
+            if (!`${key}`.startsWith('_')) {
+                // ignore private properties
                 const current = data[key];
                 const should = pattern[key];
                 const propertyPath = isArray(pattern) ? `${path}[${key}]` : `${path}.${key}`;

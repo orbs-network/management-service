@@ -18,6 +18,9 @@ import tier1 from './tier-1.json';
 import { getVirtualChainPort } from './ports';
 import { utcDay } from './utils';
 import { EthereumModel } from './eth-model';
+import { BlocksTimeModel } from './eth-model/block-time-model';
+import { EventTypes } from './eth-model/events-types';
+import { Timed } from './eth-model/event-model';
 
 export type LatestTagResult = Promise<string | undefined>;
 
@@ -46,6 +49,7 @@ export class Processor {
     }
 
     private dockerTagCache = new Map<string, LatestTagResult>();
+
     constructor(
         private config: ServiceConfiguration,
         private reader: EthereumReader,
@@ -64,9 +68,32 @@ export class Processor {
         return dc;
     }
 
-    async getVirtualChainConfiguration(vchainId: string): Promise<VirtualChainConfigurationOutput> {
-        const refTime = (await this.reader.getRefTime('latest')) || -1;
+    // private translateTopologyChangedEvent(value: Timed & EventTypes['TopologyChanged']): TopologyElement {
+    //     console.log('TopologyChanged', value.returnValues);
+    //     return {
+    //         OrbsAddress: value.returnValues,
+    //         Ip: '192.168.199.3',
+    //         Port: 4400,
+    //     };
+    // }
+    private translateSubscriptionChangedEvent(value: Timed & EventTypes['SubscriptionChanged']): SubscriptionEvent {
+        return {
+            RefTime: value.time,
+            Data: {
+                Status: 'active',
+                Tier: value.returnValues.tier,
+                RolloutGroup: value.returnValues.deploymentSubset,
+                IdentityType: 0,
+                Params: {},
+            },
+        };
+    }
+
+    async getVirtualChainConfiguration(vchainId: string) {
+        // : Promise<VirtualChainConfigurationOutput> {
+        const refTime = Date.now() / 1000; //(await this.reader.getRefTime('latest')) || -1;
         // TODO: test and complete stub
+        console.log('SubscriptionChanged', this.ethModel.getLast24HoursEvents('SubscriptionChanged', refTime - utcDay));
         return {
             CurrentRefTime: refTime,
             PageStartRefTime: refTime - utcDay,
@@ -77,15 +104,16 @@ export class Processor {
                     CurrentTopology: this.ethModel
                         .getLast24HoursEvents('TopologyChanged', refTime - utcDay)
                         .map((d) => d.returnValues as TopologyElement),
-                    CommitteeEvents: this.ethModel
-                        .getLast24HoursEvents('CommitteeChanged', refTime - utcDay)
-                        .map((d) => d.returnValues as CommitteeEvent),
+                    // CommitteeEvents: this.ethModel
+                    //     .getLast24HoursEvents('CommitteeChanged', refTime - utcDay)
+                    //     .map((d) => d.returnValues as CommitteeEvent),
                     SubscriptionEvents: this.ethModel
                         .getLast24HoursEvents('SubscriptionChanged', refTime - utcDay)
-                        .map((d) => d.returnValues as SubscriptionEvent),
-                    ProtocolVersionEvents: this.ethModel
-                        .getLast24HoursEvents('ProtocolVersionChanged', refTime - utcDay)
-                        .map((d) => d.returnValues as ProtocolVersionEvent),
+                        .filter((v) => v.returnValues.vcid === vchainId)
+                        .map((d) => this.translateSubscriptionChangedEvent(d)),
+                    // ProtocolVersionEvents: this.ethModel
+                    //     .getLast24HoursEvents('ProtocolVersionChanged', refTime - utcDay)
+                    //     .map((d) => d.returnValues as ProtocolVersionEvent), // TODO this needs more logic for "undo"
                 },
             },
         };

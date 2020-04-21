@@ -1,9 +1,11 @@
 import { EventData } from 'web3-eth-contract';
 
-export type EventBlockData = {
+export type Timed = { time: number };
+
+export type EventBlockData<T extends EventData> = {
     time: number;
     blockNumber: number;
-    events: Array<EventData>;
+    events: Array<Timed & T>;
 };
 
 /**
@@ -20,8 +22,8 @@ function getEventMatcher(event: EventData) {
 }
 
 // TODO what happens in a re-org? should we confirm blockHash of events match block ?
-export class EventModel {
-    private eventsPerBlock = new Array<EventBlockData>();
+export class EventModel<T extends EventData> {
+    private eventsPerBlock = new Array<EventBlockData<T>>();
     private nextBlock = 0;
     constructor() {
         this.eventsPerBlock.push({ time: -1, blockNumber: -1, events: [] });
@@ -34,14 +36,14 @@ export class EventModel {
     setNextBlock(nextBlock: number) {
         this.nextBlock = nextBlock;
     }
-
-    rememberEvent(event: EventData, blockTime: number) {
+    rememberEvent(event: T, blockTime: number) {
         for (let i = this.eventsPerBlock.length - 1; i >= 0; --i) {
             const block = this.eventsPerBlock[i];
+            const timedEvent = { time: blockTime, ...event };
             if (block.blockNumber == event.blockNumber) {
                 // no duplicate events
                 if (!block.events.find(getEventMatcher(event))) {
-                    block.events.push(event);
+                    block.events.push(timedEvent);
                 }
                 return;
             } else if (block.blockNumber < event.blockNumber) {
@@ -49,7 +51,7 @@ export class EventModel {
                 this.eventsPerBlock.splice(i + 1, 0, {
                     time: blockTime,
                     blockNumber: event.blockNumber,
-                    events: [event],
+                    events: [timedEvent],
                 });
                 return;
             }
@@ -75,7 +77,7 @@ export class EventModel {
         return min;
     }
 
-    getEvents(fromTime: number): EventData[] {
+    getEvents(fromTime: number): (Timed & T)[] {
         const fromIdx = this.getIndexOfBlockAfterTime(fromTime);
         return this.eventsPerBlock.slice(fromIdx).flatMap((b) => b.events);
     }

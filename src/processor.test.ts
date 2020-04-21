@@ -5,11 +5,15 @@ import test from 'ava';
 import { Processor } from './processor';
 import nock from 'nock';
 import { DockerConfig, ServiceConfiguration } from './data-types';
-import { nockDockerHub, nockBoyarConfig } from './test-kit';
+import { nockDockerHub, nockBoyarConfig, deepDataMatcher } from './test-kit';
 import { Driver, createVC, subscriptionChangedEvents } from '@orbs-network/orbs-ethereum-contracts-v2';
 import tier1 from './tier-1.json';
 import { getVirtualChainPort } from './ports';
 import { EthereumReader, getNewEthereumReader } from './ethereum-reader';
+import { EthereumModel } from './eth-model';
+import { isNumber } from 'util';
+import { EventTypes, SubscriptionChangedPayload, DEPLOYMENT_SUBSET_MAIN } from './eth-model/events-types';
+// import { DEPLOYMENT_SUBSET_MAIN } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/driver';
 
 test.serial.afterEach.always(() => {
     nock.cleanAll();
@@ -179,3 +183,68 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
     const result2 = await processor.getNodeManagementConfiguration();
     t.deepEqual(result2.chains, [expectedVirtualChainConfig(vc1Id), expectedVirtualChainConfig(vc2Id)], '2 chains');
 });
+
+test.serial.only(
+    '[integration with reader] getVirtualChainConfiguration returns according to ethereum state',
+    async (t) => {
+        t.timeout(60 * 1000);
+
+        const d = await Driver.new();
+
+        const config: ServiceConfiguration = {
+            Port: -1,
+            FirstBlock: 0,
+            EthereumGenesisContract: d.contractRegistry.address,
+            EthereumEndpoint: 'http://localhost:7545',
+            boyarLegacyBootstrap: 'foo',
+            pollIntervalSeconds: -1,
+        };
+
+        const ethReader = getNewEthereumReader(config);
+        const ethModel = new EthereumModel(ethReader);
+        const processor = new Processor(config, ethReader, ethModel);
+
+        // const vc1Id = (subscriptionChangedEvents(await createVC(d)).map((e) => e.vcid)[0] as unknown) as string;
+        const vc1Subscription = (subscriptionChangedEvents(
+            await createVC(d)
+        )[0] as unknown) as SubscriptionChangedPayload;
+        const vc1Id = vc1Subscription.vcid;
+        await createVC(d); // add a second vc to demonstrate filtering events per vc
+
+        // poll all events
+        while (ethModel.pollEvents() < ethReader.getBlockNumber()) {
+            await new Promise((res) => setTimeout(res, 50));
+        }
+
+        const result1 = await processor.getVirtualChainConfiguration(vc1Id);
+
+        t.deepEqual(
+            deepDataMatcher(result1, {
+                CurrentRefTime: isNumber,
+                PageStartRefTime: isNumber,
+                PageEndRefTime: isNumber,
+                VirtualChains: {
+                    [vc1Id]: {
+                        VirtualChainId: vc1Id,
+                        CurrentTopology: [],
+                        // CommitteeEvents: [],
+                        SubscriptionEvents: [
+                            {
+                                RefTime: isNumber,
+                                Data: {
+                                    Status: 'active',
+                                    Tier: 'defaultTier',
+                                    RolloutGroup: DEPLOYMENT_SUBSET_MAIN,
+                                    IdentityType: 0,
+                                    Params: {},
+                                },
+                            },
+                        ],
+                        // ProtocolVersionEvents: [],
+                    },
+                },
+            }),
+            []
+        );
+    }
+);
