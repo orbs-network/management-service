@@ -19,12 +19,10 @@ export type SubscriptionChangedPayload = {
     tier: 'defaultTier';
     deploymentSubset: typeof DEPLOYMENT_SUBSET_MAIN | typeof DEPLOYMENT_SUBSET_CANARY;
 };
+
 export type TopologyChangedayload = {
-    vcid: string;
-    genRef: string;
-    expiresAt: string;
-    tier: 'defaultTier';
-    deploymentSubset: typeof DEPLOYMENT_SUBSET_MAIN | typeof DEPLOYMENT_SUBSET_CANARY;
+    orbsAddrs: string[];
+    ips: string[];
 };
 
 export type EventTypes = {

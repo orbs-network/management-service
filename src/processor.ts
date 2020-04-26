@@ -54,7 +54,7 @@ export class Processor {
         private config: ServiceConfiguration,
         private reader: EthereumReader,
         private ethModel: EthereumModel
-    ) {}
+    ) { }
 
     private async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
         if (!this.dockerTagCache.has(dc.Image)) {
@@ -68,14 +68,14 @@ export class Processor {
         return dc;
     }
 
-    // private translateTopologyChangedEvent(value: Timed & EventTypes['TopologyChanged']): TopologyElement {
-    //     console.log('TopologyChanged', value.returnValues);
-    //     return {
-    //         OrbsAddress: value.returnValues,
-    //         Ip: '192.168.199.3',
-    //         Port: 4400,
-    //     };
-    // }
+    private translateTopologyChangedEvent(value: Timed & EventTypes['TopologyChanged']): TopologyElement {
+        console.log('value.returnValues', value.returnValues);
+        return {
+            OrbsAddress: value.returnValues,
+            Ip: '192.168.199.3',
+            Port: 4400,
+        };
+    }
     private translateSubscriptionChangedEvent(value: Timed & EventTypes['SubscriptionChanged']): SubscriptionEvent {
         return {
             RefTime: value.time,
@@ -89,11 +89,10 @@ export class Processor {
         };
     }
 
-    async getVirtualChainConfiguration(vchainId: string) {
+    getVirtualChainConfiguration(vchainId: string) {
         // : Promise<VirtualChainConfigurationOutput> {
-        const refTime = Date.now() / 1000; //(await this.reader.getRefTime('latest')) || -1;
+        const refTime = Math.floor(Date.now() / 1000); //(await this.reader.getRefTime('latest')) || -1;
         // TODO: test and complete stub
-        console.log('SubscriptionChanged', this.ethModel.getLast24HoursEvents('SubscriptionChanged', refTime - utcDay));
         return {
             CurrentRefTime: refTime,
             PageStartRefTime: refTime - utcDay,
@@ -103,7 +102,7 @@ export class Processor {
                     VirtualChainId: vchainId,
                     CurrentTopology: this.ethModel
                         .getLast24HoursEvents('TopologyChanged', refTime - utcDay)
-                        .map((d) => d.returnValues as TopologyElement),
+                        .map((d) => this.translateTopologyChangedEvent(d)),
                     // CommitteeEvents: this.ethModel
                     //     .getLast24HoursEvents('CommitteeChanged', refTime - utcDay)
                     //     .map((d) => d.returnValues as CommitteeEvent),

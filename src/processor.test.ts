@@ -6,13 +6,14 @@ import { Processor } from './processor';
 import nock from 'nock';
 import { DockerConfig, ServiceConfiguration } from './data-types';
 import { nockDockerHub, nockBoyarConfig, deepDataMatcher } from './test-kit';
-import { Driver, createVC, subscriptionChangedEvents } from '@orbs-network/orbs-ethereum-contracts-v2';
+import { Driver, createVC, subscriptionChangedEvents, topologyChangedEvents } from '@orbs-network/orbs-ethereum-contracts-v2';
 import tier1 from './tier-1.json';
 import { getVirtualChainPort } from './ports';
 import { EthereumReader, getNewEthereumReader } from './ethereum-reader';
 import { EthereumModel } from './eth-model';
 import { isNumber } from 'util';
-import { EventTypes, SubscriptionChangedPayload, DEPLOYMENT_SUBSET_MAIN } from './eth-model/events-types';
+import { EventTypes, SubscriptionChangedPayload, DEPLOYMENT_SUBSET_MAIN, TopologyChangedayload } from './eth-model/events-types';
+import { addParticipant } from './pos-v2-simulations';
 // import { DEPLOYMENT_SUBSET_MAIN } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/driver';
 
 test.serial.afterEach.always(() => {
@@ -204,6 +205,10 @@ test.serial.only(
         const ethModel = new EthereumModel(ethReader);
         const processor = new Processor(config, ethReader, ethModel);
 
+        await addParticipant(d, true);
+        const participantResult = await addParticipant(d, false);
+
+        const topologyEvent = topologyChangedEvents(participantResult.validatorTxResult)[0] as TopologyChangedayload;
         // const vc1Id = (subscriptionChangedEvents(await createVC(d)).map((e) => e.vcid)[0] as unknown) as string;
         const vc1Subscription = (subscriptionChangedEvents(
             await createVC(d)
@@ -212,11 +217,11 @@ test.serial.only(
         await createVC(d); // add a second vc to demonstrate filtering events per vc
 
         // poll all events
-        while (ethModel.pollEvents() < ethReader.getBlockNumber()) {
+        while (await ethModel.pollEvents() < await ethReader.getBlockNumber()) {
             await new Promise((res) => setTimeout(res, 50));
         }
 
-        const result1 = await processor.getVirtualChainConfiguration(vc1Id);
+        const result1 = processor.getVirtualChainConfiguration(vc1Id);
 
         t.deepEqual(
             deepDataMatcher(result1, {
@@ -226,7 +231,10 @@ test.serial.only(
                 VirtualChains: {
                     [vc1Id]: {
                         VirtualChainId: vc1Id,
-                        CurrentTopology: [],
+                        CurrentTopology: [
+                            { "OrbsAddress": topologyEvent.orbsAddrs[0], "Ip": topologyEvent.ips[0], "Port": 4400 },
+                            { "OrbsAddress": "d27e2e7398e2582f63d0800330010b3e58952ff6", "Ip": "192.168.199.3", "Port": 4400 }
+                        ],
                         // CommitteeEvents: [],
                         SubscriptionEvents: [
                             {
