@@ -242,8 +242,16 @@ test.serial.only(
                     [vcid]: {
                         VirtualChainId: vcid,
                         CurrentTopology: [
-                            { OrbsAddress: topologyEvent.orbsAddrs[0], Ip: topologyEvent.ips[0], Port: getVirtualChainPort(vcid) },
-                            { OrbsAddress: topologyEvent.orbsAddrs[1], Ip: topologyEvent.ips[1], Port: getVirtualChainPort(vcid) },
+                            {
+                                OrbsAddress: topologyEvent.orbsAddrs[0],
+                                Ip: topologyEvent.ips[0],
+                                Port: getVirtualChainPort(vcid),
+                            },
+                            {
+                                OrbsAddress: topologyEvent.orbsAddrs[1],
+                                Ip: topologyEvent.ips[1],
+                                Port: getVirtualChainPort(vcid),
+                            },
                         ],
                         // CommitteeEvents: [],
                         SubscriptionEvents: [

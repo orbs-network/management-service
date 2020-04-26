@@ -26,7 +26,7 @@ export class EventModel<T extends EventData> {
     private eventsPerBlock = new Array<EventBlockData<T>>();
     private nextBlock = 0;
     constructor() {
-        this.eventsPerBlock.push({ time: -1, blockNumber: -1, events: [] });  // invariant: this.eventsPerBlock has to be at least 1
+        this.eventsPerBlock.push({ time: -1, blockNumber: -1, events: [] }); // invariant: this.eventsPerBlock has to be at least 1
     }
 
     getNextBlock() {
@@ -59,7 +59,7 @@ export class EventModel<T extends EventData> {
         throw new Error(`can't find place for event : ${JSON.stringify(event)}`);
     }
 
-    getIndexOfBlocksNearTime(time: number): { before: number, after: number } {
+    getIndexOfBlocksNearTime(time: number): { before: number; after: number } {
         if (this.eventsPerBlock.length < 1) {
             throw new Error('invariant broken: this.eventsPerBlock has to be at least 1');
         }
@@ -74,7 +74,7 @@ export class EventModel<T extends EventData> {
                 // too late
                 max = k - 1;
             } else {
-                return { before: k, after: k } // the idx of the events exactly at time
+                return { before: k, after: k }; // the idx of the events exactly at time
             }
         }
         return { before: max, after: min };
@@ -86,7 +86,7 @@ export class EventModel<T extends EventData> {
         return this.eventsPerBlock.slice(fromIdx, toIdx).flatMap((b) => b.events);
     }
 
-    getLastEvent(maxTime: number): (Timed & T) {
+    getLastEvent(maxTime: number): Timed & T {
         const blockIdx = this.getIndexOfBlocksNearTime(maxTime).before;
         const blockEvents = this.eventsPerBlock[blockIdx].events;
         return blockEvents[blockEvents.length - 1];

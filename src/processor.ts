@@ -54,7 +54,7 @@ export class Processor {
         private config: ServiceConfiguration,
         private reader: EthereumReader,
         private ethModel: EthereumModel
-    ) { }
+    ) {}
 
     private async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
         if (!this.dockerTagCache.has(dc.Image)) {
@@ -68,7 +68,10 @@ export class Processor {
         return dc;
     }
 
-    private translateTopologyChangedEvent(vchainId: string, value: Timed & EventTypes['TopologyChanged']): TopologyElement[] {
+    private translateTopologyChangedEvent(
+        vchainId: string,
+        value: Timed & EventTypes['TopologyChanged']
+    ): TopologyElement[] {
         return value.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
             OrbsAddress,
             Ip: value.returnValues.ips[idx],
@@ -99,9 +102,10 @@ export class Processor {
             VirtualChains: {
                 [vchainId]: {
                     VirtualChainId: vchainId,
-                    CurrentTopology:
-                        this.translateTopologyChangedEvent(vchainId,
-                            this.ethModel.getLastEvent('TopologyChanged', refTime)),
+                    CurrentTopology: this.translateTopologyChangedEvent(
+                        vchainId,
+                        this.ethModel.getLastEvent('TopologyChanged', refTime)
+                    ),
                     // CommitteeEvents: this.ethModel
                     //     .getLast24HoursEvents('CommitteeChanged', refTime - utcDay)
                     //     .map((d) => d.returnValues as CommitteeEvent),
