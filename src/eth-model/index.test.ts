@@ -23,7 +23,7 @@ test.serial(
         const vc2Event = subscriptionChangedEvents(await createVC(d))[0];
         const evpectedEvents = [{ returnValues: vc1Event }, { returnValues: vc2Event }];
         const ethModel = await pollEvents(d);
-        const eventsFromModel = ethModel.getLast24HoursEvents('SubscriptionChanged', 0);
+        const eventsFromModel = ethModel.getEventsFromTime('SubscriptionChanged', 0);
         t.deepEqual(
             deepDataMatcher(eventsFromModel, evpectedEvents),
             [],
@@ -43,7 +43,7 @@ test.serial('[integration] getLast24HoursEvents(TopologyChanged) returns accordi
     const vc2Event = topologyChangedEvents(v2Results.validatorTxResult)[0];
     const evpectedEvents = [{ returnValues: vc1Event }, { returnValues: vc2Event }];
     const ethModel = await pollEvents(d);
-    const eventsFromModel = ethModel.getLast24HoursEvents('TopologyChanged', 0);
+    const eventsFromModel = ethModel.getEventsFromTime('TopologyChanged', 0);
 
     t.deepEqual(
         deepDataMatcher(eventsFromModel, evpectedEvents),
@@ -63,7 +63,7 @@ test.serial('[integration] getLast24HoursEvents(CommitteeChanged) returns accord
     const vc2Event = committeeChangedEvents(v2Results.commiteeTxResult)[0];
     const evpectedEvents = [{ returnValues: vc1Event }, { returnValues: vc2Event }];
     const ethModel = await pollEvents(d);
-    const eventsFromModel = ethModel.getLast24HoursEvents('CommitteeChanged', 0);
+    const eventsFromModel = ethModel.getEventsFromTime('CommitteeChanged', 0);
 
     t.deepEqual(
         deepDataMatcher(eventsFromModel, evpectedEvents),
@@ -91,7 +91,7 @@ test.serial(
             { returnValues: vc2Event },
         ];
         const ethModel = await pollEvents(d);
-        const eventsFromModel = ethModel.getLast24HoursEvents('ProtocolVersionChanged', 0);
+        const eventsFromModel = ethModel.getEventsFromTime('ProtocolVersionChanged', 0);
 
         t.deepEqual(
             deepDataMatcher(eventsFromModel, evpectedEvents),

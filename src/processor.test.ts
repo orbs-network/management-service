@@ -6,13 +6,23 @@ import { Processor } from './processor';
 import nock from 'nock';
 import { DockerConfig, ServiceConfiguration } from './data-types';
 import { nockDockerHub, nockBoyarConfig, deepDataMatcher } from './test-kit';
-import { Driver, createVC, subscriptionChangedEvents, topologyChangedEvents } from '@orbs-network/orbs-ethereum-contracts-v2';
+import {
+    Driver,
+    createVC,
+    subscriptionChangedEvents,
+    topologyChangedEvents,
+} from '@orbs-network/orbs-ethereum-contracts-v2';
 import tier1 from './tier-1.json';
 import { getVirtualChainPort } from './ports';
 import { EthereumReader, getNewEthereumReader } from './ethereum-reader';
 import { EthereumModel } from './eth-model';
 import { isNumber } from 'util';
-import { EventTypes, SubscriptionChangedPayload, DEPLOYMENT_SUBSET_MAIN, TopologyChangedayload } from './eth-model/events-types';
+import {
+    EventTypes,
+    SubscriptionChangedPayload,
+    DEPLOYMENT_SUBSET_MAIN,
+    TopologyChangedayload,
+} from './eth-model/events-types';
 import { addParticipant } from './pos-v2-simulations';
 // import { DEPLOYMENT_SUBSET_MAIN } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/driver';
 
@@ -213,15 +223,15 @@ test.serial.only(
         const vc1Subscription = (subscriptionChangedEvents(
             await createVC(d)
         )[0] as unknown) as SubscriptionChangedPayload;
-        const vc1Id = vc1Subscription.vcid;
+        const vcid = vc1Subscription.vcid;
         await createVC(d); // add a second vc to demonstrate filtering events per vc
 
         // poll all events
-        while (await ethModel.pollEvents() < await ethReader.getBlockNumber()) {
+        while ((await ethModel.pollEvents()) < (await ethReader.getBlockNumber())) {
             await new Promise((res) => setTimeout(res, 50));
         }
 
-        const result1 = processor.getVirtualChainConfiguration(vc1Id);
+        const result1 = processor.getVirtualChainConfiguration(vcid);
 
         t.deepEqual(
             deepDataMatcher(result1, {
@@ -229,11 +239,11 @@ test.serial.only(
                 PageStartRefTime: isNumber,
                 PageEndRefTime: isNumber,
                 VirtualChains: {
-                    [vc1Id]: {
-                        VirtualChainId: vc1Id,
+                    [vcid]: {
+                        VirtualChainId: vcid,
                         CurrentTopology: [
-                            { "OrbsAddress": topologyEvent.orbsAddrs[0], "Ip": topologyEvent.ips[0], "Port": 4400 },
-                            { "OrbsAddress": "d27e2e7398e2582f63d0800330010b3e58952ff6", "Ip": "192.168.199.3", "Port": 4400 }
+                            { OrbsAddress: topologyEvent.orbsAddrs[0], Ip: topologyEvent.ips[0], Port: getVirtualChainPort(vcid) },
+                            { OrbsAddress: topologyEvent.orbsAddrs[1], Ip: topologyEvent.ips[1], Port: getVirtualChainPort(vcid) },
                         ],
                         // CommitteeEvents: [],
                         SubscriptionEvents: [

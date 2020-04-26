@@ -26,7 +26,7 @@ export class EventModel<T extends EventData> {
     private eventsPerBlock = new Array<EventBlockData<T>>();
     private nextBlock = 0;
     constructor() {
-        this.eventsPerBlock.push({ time: -1, blockNumber: -1, events: [] });
+        this.eventsPerBlock.push({ time: -1, blockNumber: -1, events: [] });  // invariant: this.eventsPerBlock has to be at least 1
     }
 
     getNextBlock() {
@@ -59,26 +59,36 @@ export class EventModel<T extends EventData> {
         throw new Error(`can't find place for event : ${JSON.stringify(event)}`);
     }
 
-    getIndexOfBlockAfterTime(fromTime: number) {
+    getIndexOfBlocksNearTime(time: number): { before: number, after: number } {
+        if (this.eventsPerBlock.length < 1) {
+            throw new Error('invariant broken: this.eventsPerBlock has to be at least 1');
+        }
         let min = 0;
         let max = this.eventsPerBlock.length - 1;
         while (min < max) {
             const k = Math.floor((max + min) / 2);
-            if (this.eventsPerBlock[k].time < fromTime) {
+            if (this.eventsPerBlock[k].time < time) {
                 // too early
                 min = k + 1;
-            } else if (this.eventsPerBlock[k].time > fromTime) {
+            } else if (this.eventsPerBlock[k].time > time) {
                 // too late
                 max = k - 1;
             } else {
-                return k;
+                return { before: k, after: k } // the idx of the events exactly at time
             }
         }
-        return min;
+        return { before: max, after: min };
     }
 
-    getEvents(fromTime: number): (Timed & T)[] {
-        const fromIdx = this.getIndexOfBlockAfterTime(fromTime);
-        return this.eventsPerBlock.slice(fromIdx).flatMap((b) => b.events);
+    getEvents(fromTime: number, toTime?: number): (Timed & T)[] {
+        const fromIdx = this.getIndexOfBlocksNearTime(fromTime).after;
+        const toIdx = toTime && this.getIndexOfBlocksNearTime(toTime).before;
+        return this.eventsPerBlock.slice(fromIdx, toIdx).flatMap((b) => b.events);
+    }
+
+    getLastEvent(maxTime: number): (Timed & T) {
+        const blockIdx = this.getIndexOfBlocksNearTime(maxTime).before;
+        const blockEvents = this.eventsPerBlock[blockIdx].events;
+        return blockEvents[blockEvents.length - 1];
     }
 }

@@ -68,13 +68,12 @@ export class Processor {
         return dc;
     }
 
-    private translateTopologyChangedEvent(value: Timed & EventTypes['TopologyChanged']): TopologyElement {
-        console.log('value.returnValues', value.returnValues);
-        return {
-            OrbsAddress: value.returnValues,
-            Ip: '192.168.199.3',
-            Port: 4400,
-        };
+    private translateTopologyChangedEvent(vchainId: string, value: Timed & EventTypes['TopologyChanged']): TopologyElement[] {
+        return value.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
+            OrbsAddress,
+            Ip: value.returnValues.ips[idx],
+            Port: getVirtualChainPort(vchainId),
+        }));
     }
     private translateSubscriptionChangedEvent(value: Timed & EventTypes['SubscriptionChanged']): SubscriptionEvent {
         return {
@@ -100,14 +99,14 @@ export class Processor {
             VirtualChains: {
                 [vchainId]: {
                     VirtualChainId: vchainId,
-                    CurrentTopology: this.ethModel
-                        .getLast24HoursEvents('TopologyChanged', refTime - utcDay)
-                        .map((d) => this.translateTopologyChangedEvent(d)),
+                    CurrentTopology:
+                        this.translateTopologyChangedEvent(vchainId,
+                            this.ethModel.getLastEvent('TopologyChanged', refTime)),
                     // CommitteeEvents: this.ethModel
                     //     .getLast24HoursEvents('CommitteeChanged', refTime - utcDay)
                     //     .map((d) => d.returnValues as CommitteeEvent),
                     SubscriptionEvents: this.ethModel
-                        .getLast24HoursEvents('SubscriptionChanged', refTime - utcDay)
+                        .getEvents('SubscriptionChanged', refTime - utcDay, refTime)
                         .filter((v) => v.returnValues.vcid === vchainId)
                         .map((d) => this.translateSubscriptionChangedEvent(d)),
                     // ProtocolVersionEvents: this.ethModel

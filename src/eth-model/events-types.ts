@@ -27,7 +27,7 @@ export type TopologyChangedayload = {
 
 export type EventTypes = {
     CommitteeChanged: EventData;
-    TopologyChanged: EventData;
+    TopologyChanged: EventData & { returnValues: TopologyChangedayload };
     SubscriptionChanged: EventData & { returnValues: SubscriptionChangedPayload };
     ProtocolVersionChanged: EventData;
 };
