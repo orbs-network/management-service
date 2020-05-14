@@ -65,7 +65,11 @@ export class EthereumModel {
         return latestBlock;
     }
 
-    getEvents<T extends EventName>(eventName: T, fromTime: number, toTime?: number): Array<Timed & EventTypes[T]> {
+    getEventsFromTime<T extends EventName>(
+        eventName: T,
+        fromTime: number,
+        toTime: number
+    ): Array<Timed & EventTypes[T]> {
         return this.getEventModel(eventName).getEvents(fromTime, toTime);
     }
 

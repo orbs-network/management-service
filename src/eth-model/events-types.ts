@@ -20,14 +20,20 @@ export type SubscriptionChangedPayload = {
     deploymentSubset: typeof DEPLOYMENT_SUBSET_MAIN | typeof DEPLOYMENT_SUBSET_CANARY;
 };
 
-export type TopologyChangedayload = {
+export type TopologyChangedPayload = {
     orbsAddrs: string[];
     ips: string[];
 };
 
+export type CommitteeChangedPayload = {
+    addrs: string[];
+    orbsAddrs: string[];
+    stakes: string[];
+};
+
 export type EventTypes = {
-    CommitteeChanged: EventData;
-    TopologyChanged: EventData & { returnValues: TopologyChangedayload };
+    CommitteeChanged: EventData & { returnValues: TopologyChangedPayload };
+    TopologyChanged: EventData & { returnValues: TopologyChangedPayload };
     SubscriptionChanged: EventData & { returnValues: SubscriptionChangedPayload };
     ProtocolVersionChanged: EventData;
 };

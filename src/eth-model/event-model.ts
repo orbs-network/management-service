@@ -59,13 +59,13 @@ export class EventModel<T extends EventData> {
         throw new Error(`can't find place for event : ${JSON.stringify(event)}`);
     }
 
-    getIndexOfBlocksNearTime(time: number): { before: number; after: number } {
+    getIndexOfBlocksNearTime(time: number): { prev: number; next: number } {
         if (this.eventsPerBlock.length < 1) {
             throw new Error('invariant broken: this.eventsPerBlock has to be at least 1');
         }
         let min = 0;
         let max = this.eventsPerBlock.length - 1;
-        while (min < max) {
+        while (min <= max) {
             const k = Math.floor((max + min) / 2);
             if (this.eventsPerBlock[k].time < time) {
                 // too early
@@ -74,21 +74,36 @@ export class EventModel<T extends EventData> {
                 // too late
                 max = k - 1;
             } else {
-                return { before: k, after: k }; // the idx of the events exactly at time
+                return { prev: k, next: k }; // the idx of the events exactly at time
             }
         }
-        return { before: max, after: min };
+        return { prev: max, next: min };
     }
 
-    getEvents(fromTime: number, toTime?: number): (Timed & T)[] {
-        const fromIdx = this.getIndexOfBlocksNearTime(fromTime).after;
-        const toIdx = toTime && this.getIndexOfBlocksNearTime(toTime).before;
-        return this.eventsPerBlock.slice(fromIdx, toIdx).flatMap((b) => b.events);
+    getEvents(fromTime: number, toTime: number): (Timed & T)[] {
+        const blocksNearFrom = this.getIndexOfBlocksNearTime(fromTime);
+        const blocksNearTo = this.getIndexOfBlocksNearTime(toTime);
+        if (blocksNearFrom.next === blocksNearTo.next) {
+            if (blocksNearFrom.prev) {
+                // edge case : no events in range, return last event
+                return [this.lastBlockEvent(blocksNearFrom.prev)];
+            } else {
+                // double edgeed case : before first event
+                return [];
+            }
+        } else {
+            // slice and dice events from blocks range
+            return this.eventsPerBlock.slice(blocksNearFrom.next, blocksNearTo.prev + 1).flatMap((b) => b.events);
+        }
+    }
+
+    private lastBlockEvent(blockIdx: number) {
+        const blockEvents = this.eventsPerBlock[blockIdx].events;
+        return blockEvents[blockEvents.length - 1];
     }
 
     getLastEvent(maxTime: number): Timed & T {
-        const blockIdx = this.getIndexOfBlocksNearTime(maxTime).before;
-        const blockEvents = this.eventsPerBlock[blockIdx].events;
-        return blockEvents[blockEvents.length - 1];
+        const blockIdx = this.getIndexOfBlocksNearTime(maxTime).prev;
+        return this.lastBlockEvent(blockIdx);
     }
 }

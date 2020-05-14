@@ -1,7 +1,7 @@
 import test from 'ava';
 import { Driver, createVC } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { EthereumReader, EthereumConfigReader } from './ethereum-reader';
-import { range } from './utils';
+import { range, nowUTC } from './utils';
 
 test.serial('EthereumReader reads getRefTime', async (t) => {
     t.timeout(60 * 1000);
@@ -15,8 +15,8 @@ test.serial('EthereumReader reads getRefTime', async (t) => {
     });
 
     const refTime = (await reader.getRefTime('latest')) || -1;
-    t.assert(Date.now() / 1000 - refTime > 0, `time is before now(): ${refTime}`);
-    t.assert(Date.now() / 1000 - refTime < 60, `time is not too much before now(): ${Date.now() / 1000 - refTime}`);
+    t.assert(1 + nowUTC() - refTime > 0, `time is before now(): ${refTime}`);
+    t.assert(nowUTC() - refTime < 60, `time is not too much before now(): ${nowUTC() - refTime}`);
 });
 
 test.serial('EthereumReader reads VCs from SubscriptionChanged events', async (t) => {

@@ -82,7 +82,7 @@ export interface ManagementNodeService extends GenericNodeService {
 export type CommitteeElement = {
     EthAddress: string;
     OrbsAddress: string;
-    EffectiveStake: 16578435;
+    EffectiveStake: number;
     IdentityType: IdentityType;
 };
 export type CommitteeEvent = {

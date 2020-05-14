@@ -12,6 +12,7 @@ import { getNewEthereumReader } from '../ethereum-reader';
 import { deepDataMatcher } from '../test-kit';
 import Web3 from 'web3';
 import { addParticipant, setProtocolVersion } from '../pos-v2-simulations';
+import { nowUTC } from '../utils';
 
 test.serial(
     '[integration] getLast24HoursEvents(SubscriptionChanged) returns according to ethereum state',
@@ -23,7 +24,7 @@ test.serial(
         const vc2Event = subscriptionChangedEvents(await createVC(d))[0];
         const evpectedEvents = [{ returnValues: vc1Event }, { returnValues: vc2Event }];
         const ethModel = await pollEvents(d);
-        const eventsFromModel = ethModel.getEventsFromTime('SubscriptionChanged', 0);
+        const eventsFromModel = ethModel.getEventsFromTime('SubscriptionChanged', 0, nowUTC());
         t.deepEqual(
             deepDataMatcher(eventsFromModel, evpectedEvents),
             [],
@@ -43,7 +44,7 @@ test.serial('[integration] getLast24HoursEvents(TopologyChanged) returns accordi
     const vc2Event = topologyChangedEvents(v2Results.validatorTxResult)[0];
     const evpectedEvents = [{ returnValues: vc1Event }, { returnValues: vc2Event }];
     const ethModel = await pollEvents(d);
-    const eventsFromModel = ethModel.getEventsFromTime('TopologyChanged', 0);
+    const eventsFromModel = ethModel.getEventsFromTime('TopologyChanged', 0, nowUTC());
 
     t.deepEqual(
         deepDataMatcher(eventsFromModel, evpectedEvents),
@@ -63,7 +64,7 @@ test.serial('[integration] getLast24HoursEvents(CommitteeChanged) returns accord
     const vc2Event = committeeChangedEvents(v2Results.commiteeTxResult)[0];
     const evpectedEvents = [{ returnValues: vc1Event }, { returnValues: vc2Event }];
     const ethModel = await pollEvents(d);
-    const eventsFromModel = ethModel.getEventsFromTime('CommitteeChanged', 0);
+    const eventsFromModel = ethModel.getEventsFromTime('CommitteeChanged', 0, nowUTC());
 
     t.deepEqual(
         deepDataMatcher(eventsFromModel, evpectedEvents),
@@ -91,7 +92,7 @@ test.serial(
             { returnValues: vc2Event },
         ];
         const ethModel = await pollEvents(d);
-        const eventsFromModel = ethModel.getEventsFromTime('ProtocolVersionChanged', 0);
+        const eventsFromModel = ethModel.getEventsFromTime('ProtocolVersionChanged', 0, nowUTC());
 
         t.deepEqual(
             deepDataMatcher(eventsFromModel, evpectedEvents),

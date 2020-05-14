@@ -1,29 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/unbound-method */
-import test from 'ava';
-import { Processor } from './processor';
-import nock from 'nock';
-import { DockerConfig, ServiceConfiguration } from './data-types';
-import { nockDockerHub, nockBoyarConfig, deepDataMatcher } from './test-kit';
 import {
-    Driver,
     createVC,
+    Driver,
     subscriptionChangedEvents,
     topologyChangedEvents,
+    committeeChangedEvents,
 } from '@orbs-network/orbs-ethereum-contracts-v2';
-import tier1 from './tier-1.json';
-import { getVirtualChainPort } from './ports';
-import { EthereumReader, getNewEthereumReader } from './ethereum-reader';
-import { EthereumModel } from './eth-model';
+import test from 'ava';
+import nock from 'nock';
 import { isNumber } from 'util';
+import { DockerConfig, ServiceConfiguration } from './data-types';
+import { EthereumModel } from './eth-model';
 import {
-    EventTypes,
-    SubscriptionChangedPayload,
     DEPLOYMENT_SUBSET_MAIN,
-    TopologyChangedayload,
+    SubscriptionChangedPayload,
+    TopologyChangedPayload,
+    CommitteeChangedPayload,
 } from './eth-model/events-types';
+import { EthereumReader, getNewEthereumReader } from './ethereum-reader';
+import { getVirtualChainPort } from './ports';
 import { addParticipant } from './pos-v2-simulations';
+import { Processor } from './processor';
+import { deepDataMatcher, nockBoyarConfig, nockDockerHub } from './test-kit';
+import tier1 from './tier-1.json';
 // import { DEPLOYMENT_SUBSET_MAIN } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/driver';
 
 test.serial.afterEach.always(() => {
@@ -195,82 +196,90 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
     t.deepEqual(result2.chains, [expectedVirtualChainConfig(vc1Id), expectedVirtualChainConfig(vc2Id)], '2 chains');
 });
 
-test.serial.only(
-    '[integration with reader] getVirtualChainConfiguration returns according to ethereum state',
-    async (t) => {
-        t.timeout(60 * 1000);
+test.serial('[integration with reader] getVirtualChainConfiguration returns according to ethereum state', async (t) => {
+    t.timeout(60 * 1000);
 
-        const d = await Driver.new();
+    const d = await Driver.new();
 
-        const config: ServiceConfiguration = {
-            Port: -1,
-            FirstBlock: 0,
-            EthereumGenesisContract: d.contractRegistry.address,
-            EthereumEndpoint: 'http://localhost:7545',
-            boyarLegacyBootstrap: 'foo',
-            pollIntervalSeconds: -1,
-        };
+    const config: ServiceConfiguration = {
+        Port: -1,
+        FirstBlock: 0,
+        EthereumGenesisContract: d.contractRegistry.address,
+        EthereumEndpoint: 'http://localhost:7545',
+        boyarLegacyBootstrap: 'foo',
+        pollIntervalSeconds: -1,
+    };
 
-        const ethReader = getNewEthereumReader(config);
-        const ethModel = new EthereumModel(ethReader);
-        const processor = new Processor(config, ethReader, ethModel);
+    const ethReader = getNewEthereumReader(config);
+    const ethModel = new EthereumModel(ethReader);
+    const processor = new Processor(config, ethReader, ethModel);
 
-        await addParticipant(d, true);
-        const participantResult = await addParticipant(d, false);
+    const comittyResult = await addParticipant(d, true);
+    const participantResult = await addParticipant(d, false);
 
-        const topologyEvent = topologyChangedEvents(participantResult.validatorTxResult)[0] as TopologyChangedayload;
-        // const vc1Id = (subscriptionChangedEvents(await createVC(d)).map((e) => e.vcid)[0] as unknown) as string;
-        const vc1Subscription = (subscriptionChangedEvents(
-            await createVC(d)
-        )[0] as unknown) as SubscriptionChangedPayload;
-        const vcid = vc1Subscription.vcid;
-        await createVC(d); // add a second vc to demonstrate filtering events per vc
+    // the last event contains data on entire topology
+    const topologyEvent = topologyChangedEvents(participantResult.validatorTxResult)[0] as TopologyChangedPayload;
+    const comittyEvent = committeeChangedEvents(comittyResult.commiteeTxResult)[0] as CommitteeChangedPayload;
+    // const vc1Id = (subscriptionChangedEvents(await createVC(d)).map((e) => e.vcid)[0] as unknown) as string;
+    const vc1Subscription = (subscriptionChangedEvents(await createVC(d))[0] as unknown) as SubscriptionChangedPayload;
+    const vcid = vc1Subscription.vcid;
+    await createVC(d); // add a second vc to demonstrate filtering events per vc
 
-        // poll all events
-        while ((await ethModel.pollEvents()) < (await ethReader.getBlockNumber())) {
-            await new Promise((res) => setTimeout(res, 50));
-        }
-
-        const result1 = processor.getVirtualChainConfiguration(vcid);
-
-        t.deepEqual(
-            deepDataMatcher(result1, {
-                CurrentRefTime: isNumber,
-                PageStartRefTime: isNumber,
-                PageEndRefTime: isNumber,
-                VirtualChains: {
-                    [vcid]: {
-                        VirtualChainId: vcid,
-                        CurrentTopology: [
-                            {
-                                OrbsAddress: topologyEvent.orbsAddrs[0],
-                                Ip: topologyEvent.ips[0],
-                                Port: getVirtualChainPort(vcid),
-                            },
-                            {
-                                OrbsAddress: topologyEvent.orbsAddrs[1],
-                                Ip: topologyEvent.ips[1],
-                                Port: getVirtualChainPort(vcid),
-                            },
-                        ],
-                        // CommitteeEvents: [],
-                        SubscriptionEvents: [
-                            {
-                                RefTime: isNumber,
-                                Data: {
-                                    Status: 'active',
-                                    Tier: 'defaultTier',
-                                    RolloutGroup: DEPLOYMENT_SUBSET_MAIN,
-                                    IdentityType: 0,
-                                    Params: {},
-                                },
-                            },
-                        ],
-                        // ProtocolVersionEvents: [],
-                    },
-                },
-            }),
-            []
-        );
+    // poll all events
+    while ((await ethModel.pollEvents()) < (await ethReader.getBlockNumber())) {
+        await new Promise((res) => setTimeout(res, 50));
     }
-);
+
+    const result1 = await processor.getVirtualChainConfiguration(vcid);
+
+    t.deepEqual(
+        deepDataMatcher(result1, {
+            CurrentRefTime: isNumber,
+            PageStartRefTime: isNumber,
+            PageEndRefTime: isNumber,
+            VirtualChains: {
+                [vcid]: {
+                    VirtualChainId: vcid,
+                    CurrentTopology: [
+                        {
+                            OrbsAddress: topologyEvent.orbsAddrs[0],
+                            Ip: topologyEvent.ips[0],
+                            Port: getVirtualChainPort(vcid),
+                        },
+                        {
+                            OrbsAddress: topologyEvent.orbsAddrs[1],
+                            Ip: topologyEvent.ips[1],
+                            Port: getVirtualChainPort(vcid),
+                        },
+                    ],
+                    CommitteeEvents: [
+                        {
+                            Committee: [
+                                {
+                                    EthAddress: comittyEvent.addrs[0],
+                                    OrbsAddress: comittyEvent.orbsAddrs[0],
+                                    EffectiveStake: parseInt(comittyEvent.stakes[0]),
+                                    IdentityType: 0,
+                                },
+                            ],
+                        },
+                    ],
+                    SubscriptionEvents: [
+                        {
+                            RefTime: isNumber,
+                            Data: {
+                                Status: 'active',
+                                Tier: 'defaultTier',
+                                RolloutGroup: DEPLOYMENT_SUBSET_MAIN,
+                                IdentityType: 0,
+                                Params: {},
+                            },
+                        },
+                    ],
+                    // ProtocolVersionEvents: [],
+                },
+            },
+        }),
+        []
+    );
+});

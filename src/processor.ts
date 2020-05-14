@@ -1,26 +1,23 @@
-import { fetchDockerHubToken, DockerHubRepo } from 'docker-hub-utils';
+import { DockerHubRepo, fetchDockerHubToken } from 'docker-hub-utils';
 import fetch from 'node-fetch';
-import { isValid, compare } from './versioning';
 import {
+    CommitteeEvent,
     DockerConfig,
-    ServiceConfiguration,
     LegacyBoyarBootstrapInput,
     NodeManagementConfigurationOutput,
-    VirtualChainConfigurationOutput,
-    TopologyElement,
-    CommitteeEvent,
+    ServiceConfiguration,
     SubscriptionEvent,
-    ProtocolVersionEvent,
+    TopologyElement,
 } from './data-types';
+import { EthereumModel } from './eth-model';
+import { Timed } from './eth-model/event-model';
+import { EventTypes } from './eth-model/events-types';
 import { EthereumReader } from './ethereum-reader';
 import { merge } from './merge';
-import tier1 from './tier-1.json';
 import { getVirtualChainPort } from './ports';
-import { utcDay } from './utils';
-import { EthereumModel } from './eth-model';
-import { BlocksTimeModel } from './eth-model/block-time-model';
-import { EventTypes } from './eth-model/events-types';
-import { Timed } from './eth-model/event-model';
+import tier1 from './tier-1.json';
+import { utcDay, nowUTC } from './utils';
+import { compare, isValid } from './versioning';
 
 export type LatestTagResult = Promise<string | undefined>;
 
@@ -68,16 +65,6 @@ export class Processor {
         return dc;
     }
 
-    private translateTopologyChangedEvent(
-        vchainId: string,
-        value: Timed & EventTypes['TopologyChanged']
-    ): TopologyElement[] {
-        return value.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
-            OrbsAddress,
-            Ip: value.returnValues.ips[idx],
-            Port: getVirtualChainPort(vchainId),
-        }));
-    }
     private translateSubscriptionChangedEvent(value: Timed & EventTypes['SubscriptionChanged']): SubscriptionEvent {
         return {
             RefTime: value.time,
@@ -90,12 +77,34 @@ export class Processor {
             },
         };
     }
-
+    private translateTopologyChangedEvent(
+        vchainId: string,
+        value: Timed & EventTypes['TopologyChanged']
+    ): TopologyElement[] {
+        return value.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
+            OrbsAddress,
+            Ip: value.returnValues.ips[idx],
+            Port: getVirtualChainPort(vchainId),
+        }));
+    }
+    private translateCommitteeChangedEvent(value: Timed & EventTypes['CommitteeChanged']): CommitteeEvent {
+        return {
+            RefTime: value.time,
+            Committee: value.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
+                OrbsAddress,
+                EthAddress: value.returnValues.addrs[idx],
+                EffectiveStake: parseInt(value.returnValues.stakes[idx]),
+                IdentityType: 0,
+            })),
+        };
+    }
     getVirtualChainConfiguration(vchainId: string) {
         // : Promise<VirtualChainConfigurationOutput> {
-        const refTime = Math.floor(Date.now() / 1000); //(await this.reader.getRefTime('latest')) || -1;
+        // TODO: cap by last updated block time
+        const refTime = nowUTC(); //(await this.reader.getRefTime('latest')) || -1;
         // TODO: test and complete stub
-        return {
+        return Promise.resolve({
+            // for now keep it async-ish
             CurrentRefTime: refTime,
             PageStartRefTime: refTime - utcDay,
             PageEndRefTime: refTime,
@@ -106,11 +115,11 @@ export class Processor {
                         vchainId,
                         this.ethModel.getLastEvent('TopologyChanged', refTime)
                     ),
-                    // CommitteeEvents: this.ethModel
-                    //     .getLast24HoursEvents('CommitteeChanged', refTime - utcDay)
-                    //     .map((d) => d.returnValues as CommitteeEvent),
+                    CommitteeEvents: this.ethModel
+                        .getEventsFromTime('CommitteeChanged', refTime - utcDay, refTime)
+                        .map((d) => this.translateCommitteeChangedEvent(d)),
                     SubscriptionEvents: this.ethModel
-                        .getEvents('SubscriptionChanged', refTime - utcDay, refTime)
+                        .getEventsFromTime('SubscriptionChanged', refTime - utcDay, refTime)
                         .filter((v) => v.returnValues.vcid === vchainId)
                         .map((d) => this.translateSubscriptionChangedEvent(d)),
                     // ProtocolVersionEvents: this.ethModel
@@ -118,7 +127,7 @@ export class Processor {
                     //     .map((d) => d.returnValues as ProtocolVersionEvent), // TODO this needs more logic for "undo"
                 },
             },
-        };
+        });
     }
 
     async getNodeManagementConfiguration(): Promise<NodeManagementConfigurationOutput & LegacyBoyarBootstrapInput> {
