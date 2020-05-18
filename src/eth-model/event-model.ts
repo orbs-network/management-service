@@ -83,7 +83,11 @@ export class EventModel<T extends EventData> {
     getEvents(fromTime: number, toTime: number): (Timed & T)[] {
         const blocksNearFrom = this.getIndexOfBlocksNearTime(fromTime);
         const blocksNearTo = this.getIndexOfBlocksNearTime(toTime);
-        if (blocksNearFrom.next === blocksNearTo.next) {
+        const eventsInRange = blocksNearFrom.prev < blocksNearTo.prev;
+        if (eventsInRange) {
+            // slice and dice events from blocks range
+            return this.eventsPerBlock.slice(blocksNearFrom.next, blocksNearTo.prev + 1).flatMap((b) => b.events);
+        } else {
             if (blocksNearFrom.prev) {
                 // edge case : no events in range, return last event
                 return [this.lastBlockEvent(blocksNearFrom.prev)];
@@ -91,9 +95,6 @@ export class EventModel<T extends EventData> {
                 // double edgeed case : before first event
                 return [];
             }
-        } else {
-            // slice and dice events from blocks range
-            return this.eventsPerBlock.slice(blocksNearFrom.next, blocksNearTo.prev + 1).flatMap((b) => b.events);
         }
     }
 

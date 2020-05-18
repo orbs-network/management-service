@@ -1,7 +1,6 @@
 import { errorString } from '../utils';
 import { EventModel, Timed } from './event-model';
 import { BlocksTimeModel } from './block-time-model';
-import { EthereumReader } from '../ethereum-reader';
 import { EventTypes, EventName, eventNames } from './events-types';
 
 /*
@@ -13,6 +12,19 @@ IPs need diferent model, just keeps latest per orbs address
 
 const pollSize = 1000;
 
+export type ModelConfig = {
+    finalityBufferTime: number;
+    finalityBufferBlocks: number;
+};
+export interface Reader {
+    getBlockNumber(): Promise<number>;
+    getRefTime(blockNumber: number | 'latest'): Promise<number | null>;
+    getPastEvents<T extends EventName>(
+        eventName: T,
+        range: { fromBlock: number; toBlock: number }
+    ): Promise<Array<EventTypes[T]>>;
+}
+
 export class EthereumModel {
     private events = {
         CommitteeChanged: new EventModel<EventTypes['CommitteeChanged']>(),
@@ -22,12 +34,29 @@ export class EthereumModel {
     };
     // private events = new Map<EventName, EventModel>();
     blockTime: BlocksTimeModel;
-    constructor(private reader: EthereumReader) {
-        this.blockTime = new BlocksTimeModel((blockNumber: number) => this.reader.getRefTime(blockNumber), 100);
+    constructor(private reader: Reader, private config: ModelConfig) {
+        this.blockTime = new BlocksTimeModel((blockNumber: number) => this.reader.getRefTime(blockNumber));
+    }
+
+    async getUTCRefTime(): Promise<number> {
+        const earliestNextBlock = Math.min(...eventNames.map((n) => this.events[n].getNextBlock()));
+        const result = await this.blockTime.getExactBlockTime(Math.max(earliestNextBlock - 1, 0));
+        if (typeof result !== 'number') {
+            console.error(`error getting time for block ${earliestNextBlock}`);
+            return -1;
+        }
+        return result;
     }
 
     async pollEvents(): Promise<number> {
-        const latestBlockNumber = await this.reader.getBlockNumber(); // TODO will throw on errors
+        // determine latest block after finality concerns
+        const latestBlockNumber = await this.reader.getBlockNumber();
+        const latestFinalBlockNumber = latestBlockNumber - this.config.finalityBufferBlocks;
+        const finalityTime = Math.min(
+            ((await this.reader.getRefTime(latestBlockNumber)) || 0) - this.config.finalityBufferTime,
+            (await this.reader.getRefTime(latestFinalBlockNumber)) || 0
+        );
+
         /*
         todo: generate requests and batch them ?
         var batch = new web3.BatchRequest();
@@ -35,30 +64,45 @@ export class EthereumModel {
         batch.add(contract.methods.balance(address).call.request({from: '0x0000000000000000000000000000000000000000'}, callback2));
         batch.execute();
         */
-        const latestBlocks = await Promise.all(eventNames.map((n) => this.pollEvent(n, latestBlockNumber)));
+        const latestBlocks = await Promise.all(
+            eventNames.map((n) => this.pollEvent(n, latestFinalBlockNumber, finalityTime))
+        );
         // console.log('pollEvents() latest blocks: ' + latestBlocks.join());
         return Math.min(...latestBlocks);
     }
 
-    private async pollEvent<T extends EventName>(eventName: T, latestBlockNumber: number): Promise<number> {
+    private async pollEvent<T extends EventName>(
+        eventName: T,
+        latestBlockNumber: number,
+        finalityTime: number
+    ): Promise<number> {
         const model = this.getEventModel(eventName);
         // todo move into cache?
         const fromBlock = model.getNextBlock();
         const toBlock = Math.min(latestBlockNumber, fromBlock + pollSize);
         let latestBlock = fromBlock;
+        let aborted = false;
         // TODO pagination
         try {
             const events = await this.reader.getPastEvents(eventName, { fromBlock, toBlock });
             for (const event of events) {
-                const blockTime = await this.blockTime.getExactBlockTime(event.blockNumber);
+                const blockTime = await this.blockTime.getExactBlockTime(event.blockNumber, finalityTime);
                 if (blockTime == null) {
-                    throw new Error(`got null reading block ${blockTime}`);
+                    throw new Error(`got null reading block ${event.blockNumber}`);
+                } else if (blockTime > 0) {
+                    model.rememberEvent(event, blockTime);
+                    latestBlock = Math.max(latestBlock, event.blockNumber);
+                } else {
+                    aborted = true;
+                    break;
                 }
-                model.rememberEvent(event, blockTime);
-                latestBlock = Math.max(latestBlock, event.blockNumber);
             }
-            model.setNextBlock(toBlock + 1); // assuming toBlock is inclusive
-            latestBlock = toBlock;
+            if (aborted) {
+                model.setNextBlock(latestBlock + 1);
+            } else {
+                model.setNextBlock(toBlock + 1);
+                latestBlock = toBlock;
+            }
         } catch (e) {
             console.error(`failed reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(e)}`);
         }

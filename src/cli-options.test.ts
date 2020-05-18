@@ -19,6 +19,8 @@ const configValue: ServiceConfiguration = {
     Port: -1,
     FirstBlock: 0,
     pollIntervalSeconds: 0.5,
+    finalityBufferTime: 0,
+    finalityBufferBlocks: 0,
 };
 
 test.serial('parseOptions with file', (t) => {
@@ -39,6 +41,8 @@ test.serial('parseOptions with partial file (complete default values)', (t) => {
         FirstBlock: 0,
         pollIntervalSeconds: 1,
         Port: 8080,
+        finalityBufferTime: 20 * 60,
+        finalityBufferBlocks: 80,
     });
 });
 

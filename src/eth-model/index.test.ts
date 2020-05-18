@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     createVC,
     Driver,
@@ -6,34 +7,32 @@ import {
     committeeChangedEvents,
     protocolChangedEvents,
 } from '@orbs-network/orbs-ethereum-contracts-v2';
-import test from 'ava';
+import test, { ExecutionContext } from 'ava';
 import { EthereumModel } from '../eth-model';
 import { getNewEthereumReader } from '../ethereum-reader';
 import { deepDataMatcher } from '../test-kit';
 import Web3 from 'web3';
 import { addParticipant, setProtocolVersion } from '../pos-v2-simulations';
 import { nowUTC } from '../utils';
+import { EventName, EventTypes } from './events-types';
 
-test.serial(
-    '[integration] getLast24HoursEvents(SubscriptionChanged) returns according to ethereum state',
-    async (t) => {
-        t.timeout(60 * 1000);
-        const d = await Driver.new();
+test.serial('[integration] getEventsFromTime(SubscriptionChanged) returns according to ethereum state', async (t) => {
+    t.timeout(60 * 1000);
+    const d = await Driver.new();
 
-        const vc1Event = subscriptionChangedEvents(await createVC(d))[0];
-        const vc2Event = subscriptionChangedEvents(await createVC(d))[0];
-        const evpectedEvents = [{ returnValues: vc1Event }, { returnValues: vc2Event }];
-        const ethModel = await pollEvents(d);
-        const eventsFromModel = ethModel.getEventsFromTime('SubscriptionChanged', 0, nowUTC());
-        t.deepEqual(
-            deepDataMatcher(eventsFromModel, evpectedEvents),
-            [],
-            'SubscriptionChanged events stored matches events produced'
-        );
-    }
-);
+    const vc1Event = subscriptionChangedEvents(await createVC(d))[0];
+    const vc2Event = subscriptionChangedEvents(await createVC(d))[0];
+    const evpectedEvents = [{ returnValues: vc1Event }, { returnValues: vc2Event }];
+    const ethModel = await pollEvents(d);
+    const eventsFromModel = ethModel.getEventsFromTime('SubscriptionChanged', 0, nowUTC());
+    t.deepEqual(
+        deepDataMatcher(eventsFromModel, evpectedEvents),
+        [],
+        'SubscriptionChanged events stored matches events produced'
+    );
+});
 
-test.serial('[integration] getLast24HoursEvents(TopologyChanged) returns according to ethereum state', async (t) => {
+test.serial('[integration] getEventsFromTime(TopologyChanged) returns according to ethereum state', async (t) => {
     t.timeout(60 * 1000);
     const d = await Driver.new();
 
@@ -53,7 +52,7 @@ test.serial('[integration] getLast24HoursEvents(TopologyChanged) returns accordi
     );
 });
 
-test.serial('[integration] getLast24HoursEvents(CommitteeChanged) returns according to ethereum state', async (t) => {
+test.serial('[integration] getEventsFromTime(CommitteeChanged) returns according to ethereum state', async (t) => {
     t.timeout(60 * 1000);
     const d = await Driver.new();
 
@@ -74,7 +73,7 @@ test.serial('[integration] getLast24HoursEvents(CommitteeChanged) returns accord
 });
 
 test.serial(
-    '[integration] getLast24HoursEvents(ProtocolVersionChanged) returns according to ethereum state',
+    '[integration] getEventsFromTime(ProtocolVersionChanged) returns according to ethereum state',
     async (t) => {
         t.timeout(60 * 1000);
         const d = await Driver.new();
@@ -110,9 +109,137 @@ async function pollEvents(d: Driver) {
         EthereumEndpoint: 'http://localhost:7545',
     };
     const ethReader = getNewEthereumReader(config);
-    const ethModel = new EthereumModel(ethReader);
+    const ethModel = new EthereumModel(ethReader, {
+        finalityBufferTime: 0,
+        finalityBufferBlocks: 0,
+    });
     while ((await ethModel.pollEvents()) < (await ethReader.getBlockNumber())) {
         await new Promise((res) => setTimeout(res, 50));
     }
     return ethModel;
+}
+
+function makeFakeReader() {
+    return {
+        blocks: [
+            {
+                time: 10,
+                events: { ProtocolVersionChanged: [{ returnValues: { protocolVersion: 'A', asOfBlock: '99' } }] },
+            },
+            {
+                time: 20,
+                events: { ProtocolVersionChanged: [{ returnValues: { protocolVersion: 'B', asOfBlock: '99' } }] },
+            },
+            {
+                time: 30,
+                events: { ProtocolVersionChanged: [{ returnValues: { protocolVersion: 'C', asOfBlock: '99' } }] },
+            },
+            {
+                time: 40,
+                events: { ProtocolVersionChanged: [{ returnValues: { protocolVersion: 'D', asOfBlock: '99' } }] },
+            },
+        ],
+        getBlockNumber(): Promise<number> {
+            return Promise.resolve(this.blocks.length - 1);
+        },
+
+        getRefTime(blockNumber: number | 'latest'): Promise<number | null> {
+            if (blockNumber === 'latest') {
+                blockNumber = this.blocks.length - 1;
+            }
+            if (blockNumber >= this.blocks.length) {
+                return Promise.resolve(null);
+            }
+            return Promise.resolve(this.blocks[blockNumber].time);
+        },
+
+        getPastEvents<T extends EventName>(
+            eventName: T,
+            { fromBlock, toBlock }: { fromBlock: number; toBlock: number }
+        ): Promise<Array<EventTypes[T]>> {
+            if (eventName === 'ProtocolVersionChanged') {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                return Promise.resolve(
+                    this.blocks
+                        .slice(fromBlock, toBlock - fromBlock + 1)
+                        .flatMap((b, i) =>
+                            b.events.ProtocolVersionChanged.map((e) => ({ blockNumber: i, ...(e as any) }))
+                        )
+                );
+            } else {
+                return Promise.resolve([]);
+            }
+        },
+    };
+}
+
+test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow', async (t) => {
+    const fakeReader = makeFakeReader();
+    const ethModel = new EthereumModel(fakeReader, {
+        finalityBufferTime: 0,
+        finalityBufferBlocks: 0,
+    });
+    await assertExpectedEvents(t, ethModel, fakeReader, 3);
+});
+
+test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and finality by blocks', async (t) => {
+    const fakeReader = makeFakeReader();
+    const ethModel = new EthereumModel(fakeReader, {
+        finalityBufferTime: 0,
+        finalityBufferBlocks: 2,
+    });
+    await assertExpectedEvents(t, ethModel, fakeReader, 1);
+});
+
+test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and finality by time', async (t) => {
+    const fakeReader = makeFakeReader();
+    const ethModel = new EthereumModel(fakeReader, {
+        finalityBufferTime: 1,
+        finalityBufferBlocks: 0,
+    });
+    await assertExpectedEvents(t, ethModel, fakeReader, 2);
+});
+
+test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and finality by time (2)', async (t) => {
+    const fakeReader = makeFakeReader();
+    const ethModel = new EthereumModel(fakeReader, {
+        finalityBufferTime: 19,
+        finalityBufferBlocks: 1,
+    });
+    await assertExpectedEvents(t, ethModel, fakeReader, 0);
+});
+
+test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and finality by time and blocks', async (t) => {
+    const fakeReader = makeFakeReader();
+    const ethModel = new EthereumModel(fakeReader, {
+        finalityBufferTime: 19,
+        finalityBufferBlocks: 1,
+    });
+    await assertExpectedEvents(t, ethModel, fakeReader, 1);
+});
+
+test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and finality by time and blocks (2)', async (t) => {
+    const fakeReader = makeFakeReader();
+    const ethModel = new EthereumModel(fakeReader, {
+        finalityBufferTime: 5,
+        finalityBufferBlocks: 2,
+    });
+    await assertExpectedEvents(t, ethModel, fakeReader, 1);
+});
+async function assertExpectedEvents(
+    t: ExecutionContext,
+    ethModel: EthereumModel,
+    fakeReader: ReturnType<typeof makeFakeReader>,
+    lastExpectedBlockNumber: number
+) {
+    while ((await ethModel.pollEvents()) < lastExpectedBlockNumber);
+    const evpectedEvents = (
+        await fakeReader.getPastEvents('ProtocolVersionChanged', { fromBlock: 0, toBlock: lastExpectedBlockNumber })
+    ).map((e) => ({ ...e, time: fakeReader.blocks[e.blockNumber].time }));
+    const eventsFromModel = ethModel.getEventsFromTime('ProtocolVersionChanged', 0, 10000);
+    t.deepEqual(
+        deepDataMatcher(eventsFromModel, evpectedEvents),
+        [],
+        'ProtocolVersionChanged events stored matches events produced'
+    );
 }

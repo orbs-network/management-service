@@ -9,6 +9,9 @@ export interface ServiceConfiguration {
     // EthereumNetwork: EthereumNetwork;
     boyarLegacyBootstrap: string;
     pollIntervalSeconds: number;
+
+    finalityBufferTime: number;
+    finalityBufferBlocks: number;
 }
 
 // export type EthereumNetwork = 'ganache' | 'mainnet' | 'ropsten';
@@ -22,7 +25,11 @@ export function isLegalServiceConfiguration(c: Partial<ServiceConfiguration>): c
         typeof c.Port == 'number' &&
         !Number.isNaN(c.Port) &&
         typeof c.EthereumEndpoint == 'string' &&
-        typeof c.EthereumGenesisContract == 'string'
+        typeof c.EthereumGenesisContract == 'string' &&
+        typeof c.finalityBufferTime == 'number' &&
+        !Number.isNaN(c.finalityBufferTime) &&
+        typeof c.finalityBufferBlocks == 'number' &&
+        !Number.isNaN(c.finalityBufferBlocks)
         // typeof c.EthereumNetwork == 'string' &&
         // ['ganache', 'mainnet', 'ropsten'].includes(c.EthereumNetwork)
     );

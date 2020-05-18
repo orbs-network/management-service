@@ -11,14 +11,20 @@ import {
 } from './data-types';
 import { EthereumModel } from './eth-model';
 import { Timed } from './eth-model/event-model';
-import { EventTypes } from './eth-model/events-types';
+import { EventTypes, DEPLOYMENT_SUBSET_MAIN } from './eth-model/events-types';
 import { EthereumReader } from './ethereum-reader';
 import { merge } from './merge';
 import { getVirtualChainPort } from './ports';
 import tier1 from './tier-1.json';
-import { utcDay, nowUTC } from './utils';
+import { utcDay } from './utils';
 import { compare, isValid } from './versioning';
 
+export const ROLLOUT_GROUP_MAIN = 'ga';
+export const ROLLOUT_GROUP_CANARY = 'canary';
+
+export function translateDeploymentSubsetToRouuloutGroup(ds: string): string {
+    return ds === DEPLOYMENT_SUBSET_MAIN ? ROLLOUT_GROUP_MAIN : ROLLOUT_GROUP_CANARY;
+}
 export type LatestTagResult = Promise<string | undefined>;
 
 export class Processor {
@@ -71,7 +77,7 @@ export class Processor {
             Data: {
                 Status: 'active',
                 Tier: value.returnValues.tier,
-                RolloutGroup: value.returnValues.deploymentSubset,
+                RolloutGroup: translateDeploymentSubsetToRouuloutGroup(value.returnValues.deploymentSubset),
                 IdentityType: 0,
                 Params: {},
             },
@@ -98,12 +104,25 @@ export class Processor {
             })),
         };
     }
-    getVirtualChainConfiguration(vchainId: string) {
+    // private translateProtocolVersionEvent(value: Timed & EventTypes['ProtocolVersionChanged']): ProtocolVersionEvent {
+    //     return {
+    //         RefTime: value.time,
+
+    //     };
+    // }
+    async getVirtualChainConfiguration(vchainId: string) {
         // : Promise<VirtualChainConfigurationOutput> {
         // TODO: cap by last updated block time
-        const refTime = nowUTC(); //(await this.reader.getRefTime('latest')) || -1;
+        const refTime = await this.ethModel.getUTCRefTime(); // nowUTC(); //(await this.reader.getRefTime('latest')) || -1;
+        const topologyChangedEvent = this.ethModel.getLastEvent('TopologyChanged', refTime);
+        const committeeChangedEvents = this.ethModel.getEventsFromTime('CommitteeChanged', refTime - utcDay, refTime);
+        const subscriptionChangedEvents = this.ethModel.getEventsFromTime(
+            'SubscriptionChanged',
+            refTime - utcDay,
+            refTime
+        );
         // TODO: test and complete stub
-        return Promise.resolve({
+        return {
             // for now keep it async-ish
             CurrentRefTime: refTime,
             PageStartRefTime: refTime - utcDay,
@@ -111,23 +130,21 @@ export class Processor {
             VirtualChains: {
                 [vchainId]: {
                     VirtualChainId: vchainId,
-                    CurrentTopology: this.translateTopologyChangedEvent(
-                        vchainId,
-                        this.ethModel.getLastEvent('TopologyChanged', refTime)
-                    ),
-                    CommitteeEvents: this.ethModel
-                        .getEventsFromTime('CommitteeChanged', refTime - utcDay, refTime)
-                        .map((d) => this.translateCommitteeChangedEvent(d)),
-                    SubscriptionEvents: this.ethModel
-                        .getEventsFromTime('SubscriptionChanged', refTime - utcDay, refTime)
+                    CurrentTopology: this.translateTopologyChangedEvent(vchainId, topologyChangedEvent),
+                    CommitteeEvents: committeeChangedEvents.map((d) => this.translateCommitteeChangedEvent(d)),
+                    SubscriptionEvents: subscriptionChangedEvents
                         .filter((v) => v.returnValues.vcid === vchainId)
                         .map((d) => this.translateSubscriptionChangedEvent(d)),
                     // ProtocolVersionEvents: this.ethModel
-                    //     .getLast24HoursEvents('ProtocolVersionChanged', refTime - utcDay)
-                    //     .map((d) => d.returnValues as ProtocolVersionEvent), // TODO this needs more logic for "undo"
+                    //     .getLastEvent('ProtocolVersionChanged', refTime)
+                    //     .map((d) => this.translateProtocolVersionEvent(d)), // TODO this needs more logic for "undo"
+                    ProtocolVersionEvents: [
+                        { RefTime: refTime, Data: { RolloutGroup: ROLLOUT_GROUP_MAIN, Version: 1 } },
+                        { RefTime: refTime, Data: { RolloutGroup: ROLLOUT_GROUP_CANARY, Version: 1 } },
+                    ],
                 },
             },
-        });
+        };
     }
 
     async getNodeManagementConfiguration(): Promise<NodeManagementConfigurationOutput & LegacyBoyarBootstrapInput> {
