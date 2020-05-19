@@ -4,6 +4,7 @@ import { TestEnvironment } from './driver';
 import { getExpected } from './expected';
 import { subscriptionChangedEvents, createVC } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { isErrorResponse } from '../src/data-types';
+import { deepDataMatcher } from '../src/test-kit';
 
 const pathToCompose = join(__dirname, 'docker-compose.yml');
 
@@ -38,5 +39,6 @@ test.serial('[E2E] serves boyar endpoint as expected', async t => {
 
     const expectedValue = getExpected(env.getAppConfig(), vChainIds);
 
-    t.deepEqual(res, expectedValue);
+    const matchErrors = deepDataMatcher(res, expectedValue);
+    t.deepEqual(matchErrors, []);
 });
