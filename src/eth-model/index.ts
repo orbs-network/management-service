@@ -47,25 +47,28 @@ export class EthereumModel {
         }
         return result;
     }
-
-    async pollEvents(): Promise<number> {
-        // determine latest block after finality concerns
+    async getFinalityBar() {
         const latestBlockNumber = await this.reader.getBlockNumber();
         const latestFinalBlockNumber = latestBlockNumber - this.config.finalityBufferBlocks;
         const finalityTime = Math.min(
             ((await this.reader.getRefTime(latestBlockNumber)) || 0) - this.config.finalityBufferTime,
             (await this.reader.getRefTime(latestFinalBlockNumber)) || 0
         );
+        return [latestFinalBlockNumber, finalityTime];
+    }
 
-        /*
-        todo: generate requests and batch them ?
-        var batch = new web3.BatchRequest();
-        batch.add(web3.eth.getBalance.request('0x0000000000000000000000000000000000000000', 'latest', callback));
-        batch.add(contract.methods.balance(address).call.request({from: '0x0000000000000000000000000000000000000000'}, callback2));
-        batch.execute();
-        */
+    /*
+    todo: generate requests and batch them ?
+    var batch = new web3.BatchRequest();
+    batch.add(web3.eth.getBalance.request('0x0000000000000000000000000000000000000000', 'latest', callback));
+    batch.add(contract.methods.balance(address).call.request({from: '0x0000000000000000000000000000000000000000'}, callback2));
+    batch.execute();
+    */
+    async pollEvents(): Promise<number> {
+        // determine latest block after finality concerns
+        const [latestFinalBlockNumber, finalityTime] = await this.getFinalityBar();
         const latestBlocks = await Promise.all(
-            eventNames.map((n) => this.pollEvent(n, latestFinalBlockNumber, finalityTime))
+            eventNames.map((n) => this.pollEvent(n, latestFinalBlockNumber, finalityTime + 1))
         );
         // console.log('pollEvents() latest blocks: ' + latestBlocks.join());
         return Math.min(...latestBlocks);
@@ -81,7 +84,7 @@ export class EthereumModel {
         const fromBlock = model.getNextBlock();
         const toBlock = Math.min(latestBlockNumber, fromBlock + pollSize);
         let latestBlock = fromBlock;
-        let aborted = false;
+        let skipped = false;
         // TODO pagination
         try {
             const events = await this.reader.getPastEvents(eventName, { fromBlock, toBlock });
@@ -93,13 +96,13 @@ export class EthereumModel {
                     model.rememberEvent(event, blockTime);
                     latestBlock = Math.max(latestBlock, event.blockNumber);
                 } else {
-                    aborted = true;
-                    break;
+                    skipped = true;
                 }
             }
-            if (aborted) {
+            if (skipped) {
                 model.setNextBlock(latestBlock + 1);
             } else {
+                // assume all blocks till toBlock are read
                 model.setNextBlock(toBlock + 1);
                 latestBlock = toBlock;
             }

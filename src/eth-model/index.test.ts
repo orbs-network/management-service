@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     createVC,
@@ -24,7 +25,9 @@ test.serial('[integration] getEventsFromTime(SubscriptionChanged) returns accord
     const vc2Event = subscriptionChangedEvents(await createVC(d))[0];
     const evpectedEvents = [{ returnValues: vc1Event }, { returnValues: vc2Event }];
     const ethModel = await pollEvents(d);
-    const eventsFromModel = ethModel.getEventsFromTime('SubscriptionChanged', 0, nowUTC());
+    // @ts-ignore
+    // const eventsFromModel = ethModel.getEventsFromTime('SubscriptionChanged', 0, ethModel.events.SubscriptionChanged.getLastEvent(nowUTC() * 2).time);
+    const eventsFromModel = ethModel.getEventsFromTime('SubscriptionChanged', 0, nowUTC() * 2);
     t.deepEqual(
         deepDataMatcher(eventsFromModel, evpectedEvents),
         [],
@@ -43,7 +46,9 @@ test.serial('[integration] getEventsFromTime(TopologyChanged) returns according 
     const vc2Event = topologyChangedEvents(v2Results.validatorTxResult)[0];
     const evpectedEvents = [{ returnValues: vc1Event }, { returnValues: vc2Event }];
     const ethModel = await pollEvents(d);
-    const eventsFromModel = ethModel.getEventsFromTime('TopologyChanged', 0, nowUTC());
+    // @ts-ignore
+    // const eventsFromModel = ethModel.getEventsFromTime('TopologyChanged', 0, ethModel.events.TopologyChanged.getLastEvent(nowUTC() * 2).time);
+    const eventsFromModel = ethModel.getEventsFromTime('TopologyChanged', 0, nowUTC() * 2);
 
     t.deepEqual(
         deepDataMatcher(eventsFromModel, evpectedEvents),
@@ -63,7 +68,9 @@ test.serial('[integration] getEventsFromTime(CommitteeChanged) returns according
     const vc2Event = committeeChangedEvents(v2Results.commiteeTxResult)[0];
     const evpectedEvents = [{ returnValues: vc1Event }, { returnValues: vc2Event }];
     const ethModel = await pollEvents(d);
-    const eventsFromModel = ethModel.getEventsFromTime('CommitteeChanged', 0, nowUTC());
+    // @ts-ignore
+    // const eventsFromModel = ethModel.getEventsFromTime('CommitteeChanged', 0, ethModel.events.CommitteeChanged.getLastEvent(nowUTC() * 2).time);
+    const eventsFromModel = ethModel.getEventsFromTime('CommitteeChanged', 0, nowUTC() * 2);
 
     t.deepEqual(
         deepDataMatcher(eventsFromModel, evpectedEvents),
@@ -91,7 +98,9 @@ test.serial(
             { returnValues: vc2Event },
         ];
         const ethModel = await pollEvents(d);
-        const eventsFromModel = ethModel.getEventsFromTime('ProtocolVersionChanged', 0, nowUTC());
+        // @ts-ignore
+        // const eventsFromModel = ethModel.getEventsFromTime('ProtocolVersionChanged', 0, ethModel.events.ProtocolVersionChanged.getLastEvent(nowUTC() * 2).time);
+        const eventsFromModel = ethModel.getEventsFromTime('ProtocolVersionChanged', 0, nowUTC() * 2);
 
         t.deepEqual(
             deepDataMatcher(eventsFromModel, evpectedEvents),
