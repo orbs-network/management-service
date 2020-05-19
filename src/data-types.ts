@@ -1,3 +1,5 @@
+import validate from 'validate.js';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ABI = any;
 
@@ -16,23 +18,45 @@ export interface ServiceConfiguration {
 
 // export type EthereumNetwork = 'ganache' | 'mainnet' | 'ropsten';
 
-export function isLegalServiceConfiguration(c: Partial<ServiceConfiguration>): c is ServiceConfiguration {
-    return (
-        !!c &&
-        typeof c.boyarLegacyBootstrap === 'string' &&
-        typeof c.pollIntervalSeconds == 'number' &&
-        !Number.isNaN(c.pollIntervalSeconds) &&
-        typeof c.Port == 'number' &&
-        !Number.isNaN(c.Port) &&
-        typeof c.EthereumEndpoint == 'string' &&
-        typeof c.EthereumGenesisContract == 'string' &&
-        typeof c.finalityBufferTime == 'number' &&
-        !Number.isNaN(c.finalityBufferTime) &&
-        typeof c.finalityBufferBlocks == 'number' &&
-        !Number.isNaN(c.finalityBufferBlocks)
-        // typeof c.EthereumNetwork == 'string' &&
-        // ['ganache', 'mainnet', 'ropsten'].includes(c.EthereumNetwork)
-    );
+export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): string[] | undefined {
+    const serviceConfigConstraints = {
+        boyarLegacyBootstrap: {
+            presence: { allowEmpty: false },
+            type: 'string',
+        },
+        pollIntervalSeconds: {
+            presence: { allowEmpty: false },
+            type: 'number',
+            numericality: { noStrings: true },
+        },
+        Port: {
+            presence: { allowEmpty: false },
+            type: 'integer',
+            numericality: { noStrings: true },
+        },
+        EthereumEndpoint: {
+            presence: { allowEmpty: false },
+            type: 'string',
+            url: {
+                allowLocal: true,
+            },
+        },
+        EthereumGenesisContract: {
+            presence: { allowEmpty: false },
+            type: 'string',
+        },
+        finalityBufferTime: {
+            presence: { allowEmpty: false },
+            type: 'integer',
+            numericality: { noStrings: true },
+        },
+        finalityBufferBlocks: {
+            presence: { allowEmpty: false },
+            type: 'integer',
+            numericality: { noStrings: true },
+        },
+    };
+    return validate(c, serviceConfigConstraints, { format: 'flat' });
 }
 
 export type DockerConfig<I extends string = string> = {

@@ -1,4 +1,4 @@
-import { ServiceConfiguration, isLegalServiceConfiguration } from './data-types';
+import { ServiceConfiguration, validateServiceConfiguration } from './data-types';
 import { readFileSync } from 'fs';
 import yargs from 'yargs';
 export function parseOptions(argv: string[]): ServiceConfiguration {
@@ -23,8 +23,9 @@ export function parseOptions(argv: string[]): ServiceConfiguration {
         ...options.config.map((configFile) => JSON.parse(readFileSync(configFile).toString()))
     );
 
-    if (!isLegalServiceConfiguration(config)) {
-        throw new Error(`illegal configuration value ${JSON.stringify(config)}`);
+    const validationErrors = validateServiceConfiguration(config);
+    if (validationErrors) {
+        throw new Error(`illegal configuration value ${JSON.stringify(config)}\n ${validationErrors.join('\n')}`);
     }
     return config;
 }
