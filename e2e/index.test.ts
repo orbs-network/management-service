@@ -54,15 +54,17 @@ test.serial('[E2E] serves ONG endpoint as expected', async t => {
     const d = env.contractsDriver;
 
     const comittyResult = await addParticipant(d, true);
-    await new Promise(res => setTimeout(res, 5 * 1000)); // wait 5 seconds to give the last block a distinctive timestamp
     const participantResult = await addParticipant(d, false);
+    await new Promise(res => setTimeout(res, 5 * 1000)); // wait 5 seconds to give the last block a distinctive timestamp
+    await createVC(env.contractsDriver); // extra VC to force a new block
     const topologyEvent = topologyChangedEvents(participantResult.validatorTxResult)[0];
     const comittyEvent = committeeChangedEvents(comittyResult.commiteeTxResult)[0];
     const lastBlockTime = +(await d.web3.eth.getBlock(participantResult.validatorTxResult.blockNumber)).timestamp;
+
     const vcid = vChainIds[0];
     let res = await env.fetch('app', 8080, `vchains/${vcid}/management`);
 
-    while (!res || isErrorResponse(res) || res.CurrentRefTime < lastBlockTime) {
+    while (!res || isErrorResponse(res) || res.CurrentRefTime <= lastBlockTime) {
         t.log('soft error response', res);
         await new Promise(res => setTimeout(res, 1000));
         t.log('polling again');
