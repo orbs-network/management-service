@@ -57,7 +57,7 @@ export class Processor {
         private config: ServiceConfiguration,
         private reader: EthereumReader,
         private ethModel: EthereumModel
-    ) {}
+    ) { }
 
     private async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
         if (!this.dockerTagCache.has(dc.Image)) {
@@ -87,6 +87,9 @@ export class Processor {
         vchainId: string,
         value: Timed & EventTypes['TopologyChanged']
     ): TopologyElement[] {
+        if (!value) {
+            return []; // not yet polled a single event
+        }
         return value.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
             OrbsAddress,
             Ip: value.returnValues.ips[idx],
