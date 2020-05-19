@@ -9,6 +9,8 @@ test('accepts legal config', (t) => {
             EthereumEndpoint: 'http://localhost:7545',
             boyarLegacyBootstrap: 'https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json',
             pollIntervalSeconds: 0.1,
+            finalityBufferTime: 0,
+            finalityBufferBlocks: 0,
         })
     );
 });

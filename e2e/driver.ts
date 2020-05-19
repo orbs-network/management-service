@@ -1,6 +1,6 @@
-import test from 'ava';
+import test, { ExecutionContext } from 'ava';
 import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
-import { dockerComposeTool, getAddressForService } from 'docker-compose-mocha';
+import { dockerComposeTool, getAddressForService, getLogsForService } from 'docker-compose-mocha';
 import fetch from 'node-fetch';
 import { retry } from 'ts-retry-promise';
 import { join } from 'path';
@@ -17,9 +17,12 @@ export class TestEnvironment {
         return {
             Port: 8080,
             EthereumGenesisContract: this.contractsDriver.contractRegistry.address,
+            FirstBlock: 0,
             EthereumEndpoint: `http://ganache:7545`, // host.docker.internal :(
             boyarLegacyBootstrap: 'http://static:80/legacy-boyar.json',
-            pollIntervalSeconds: 1
+            pollIntervalSeconds: 1,
+            finalityBufferTime: 0,
+            finalityBufferBlocks: 0,
         };
     }
     init() {
@@ -57,6 +60,13 @@ export class TestEnvironment {
             // prepare file
             writeFileSync(configFilePath, JSON.stringify(this.getAppConfig()));
         });
+        test.serial.afterEach.always('print logs on failures', async (t: ExecutionContext & { passed: boolean }) => {
+            if (!t.passed){
+                const logs = await getLogsForService(this.envName, this.pathToCompose, 'app');
+                console.log(logs);
+            }
+        });
+
         dockerComposeTool(
             test.serial.before.bind(test.serial),
             test.serial.after.always.bind(test.serial.after),

@@ -1,7 +1,23 @@
 import test from 'ava';
 import { Driver, createVC } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { EthereumReader, EthereumConfigReader } from './ethereum-reader';
-import { range } from './utils';
+import { range, nowUTC } from './utils';
+
+test.serial('EthereumReader reads getRefTime', async (t) => {
+    t.timeout(60 * 1000);
+    await createVC(await Driver.new()); // create a block
+
+    const reader = new EthereumReader({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        contracts: null as any,
+        firstBlock: 0,
+        httpEndpoint: 'http://localhost:7545',
+    });
+
+    const refTime = (await reader.getRefTime('latest')) || -1;
+    t.assert(1 + nowUTC() - refTime > 0, `time is before now(): ${refTime}`);
+    t.assert(nowUTC() - refTime < 60, `time is not too much before now(): ${nowUTC() - refTime}`);
+});
 
 test.serial('EthereumReader reads VCs from SubscriptionChanged events', async (t) => {
     t.timeout(60 * 1000);
@@ -13,9 +29,9 @@ test.serial('EthereumReader reads VCs from SubscriptionChanged events', async (t
     }
 
     const reader = new EthereumReader({
-        contracts: {
+        contracts: Promise.resolve({
             Subscriptions: { address: d.subscriptions.web3Contract.options.address, firstBlock: 0 },
-        },
+        }),
         firstBlock: 0,
         httpEndpoint: 'http://localhost:7545',
     });
@@ -41,9 +57,10 @@ test.serial('EthereumConfigReader reads registry for contracts address', async (
     const reader = new EthereumConfigReader({
         EthereumGenesisContract: d.contractRegistry.web3Contract.options.address,
         EthereumEndpoint: 'http://localhost:7545',
+        FirstBlock: 0,
     });
 
-    const config = await reader.readEthereumConfig();
+    const config = reader.readEthereumConfig();
     t.deepEqual(config.httpEndpoint, 'http://localhost:7545');
-    t.deepEqual(config.contracts.Subscriptions?.address, d.subscriptions.web3Contract.options.address);
+    t.deepEqual((await config.contracts).Subscriptions?.address, d.subscriptions.web3Contract.options.address);
 });

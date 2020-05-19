@@ -1,10 +1,17 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ABI = any;
+
 export interface ServiceConfiguration {
     Port: number;
     EthereumGenesisContract: string;
     EthereumEndpoint: string;
+    FirstBlock: string | number;
     // EthereumNetwork: EthereumNetwork;
     boyarLegacyBootstrap: string;
     pollIntervalSeconds: number;
+
+    finalityBufferTime: number;
+    finalityBufferBlocks: number;
 }
 
 // export type EthereumNetwork = 'ganache' | 'mainnet' | 'ropsten';
@@ -18,7 +25,11 @@ export function isLegalServiceConfiguration(c: Partial<ServiceConfiguration>): c
         typeof c.Port == 'number' &&
         !Number.isNaN(c.Port) &&
         typeof c.EthereumEndpoint == 'string' &&
-        typeof c.EthereumGenesisContract == 'string'
+        typeof c.EthereumGenesisContract == 'string' &&
+        typeof c.finalityBufferTime == 'number' &&
+        !Number.isNaN(c.finalityBufferTime) &&
+        typeof c.finalityBufferBlocks == 'number' &&
+        !Number.isNaN(c.finalityBufferBlocks)
         // typeof c.EthereumNetwork == 'string' &&
         // ['ganache', 'mainnet', 'ropsten'].includes(c.EthereumNetwork)
     );
@@ -69,12 +80,61 @@ export interface GenericNodeService {
     DockerConfig: DockerConfig;
     Config: object;
 }
+
+export type IdentityType = 0;
 export interface ManagementNodeService extends GenericNodeService {
     DockerConfig: DockerConfig<'orbsnetwork/management-service'>;
     Config: ServiceConfiguration;
 }
+export type CommitteeElement = {
+    EthAddress: string;
+    OrbsAddress: string;
+    EffectiveStake: number;
+    IdentityType: IdentityType;
+};
+export type CommitteeEvent = {
+    RefTime: number;
+    Committee: Array<CommitteeElement>;
+};
+export type SubscriptionEvent = {
+    RefTime: number;
+    Data: {
+        Status: string;
+        Tier: string;
+        RolloutGroup: string;
+        IdentityType: IdentityType;
+        Params: object;
+    };
+};
+export type ProtocolVersionEvent = {
+    RefTime: number;
+    Data: {
+        RolloutGroup: string;
+        Version: number;
+    };
+};
+export type TopologyElement = {
+    OrbsAddress: string;
+    Ip: string;
+    Port: number;
+};
 
-export type BoyarConfigurationOutput = {
+export type VirtualChainConfigurationOutput = {
+    CurrentRefTime: number;
+    PageStartRefTime: number;
+    PageEndRefTime: number;
+    VirtualChains: {
+        [VirtualChainId: string]: {
+            VirtualChainId: string;
+            CurrentTopology: Array<TopologyElement>;
+            CommitteeEvents: Array<CommitteeEvent>;
+            SubscriptionEvents: Array<SubscriptionEvent>;
+            ProtocolVersionEvents: Array<ProtocolVersionEvent>;
+        };
+    };
+};
+
+export type NodeManagementConfigurationOutput = {
     network: LegacyBoyarBootstrapInput['network'];
     orchestrator: {
         [name: string]: string | object;

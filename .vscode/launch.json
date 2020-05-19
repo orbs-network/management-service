@@ -27,7 +27,7 @@
             "runtimeArgs": ["debug", "--break", "${file}"],
             "port": 9229,
             "outputCapture": "std",
-            "skipFiles": ["<node_internals>/**/*.js"]
+            "skipFiles": ["<node_internals>/**/*"]
         },
         {
             "type": "node",

@@ -1,16 +1,31 @@
-import { fetchDockerHubToken, DockerHubRepo } from 'docker-hub-utils';
+import { DockerHubRepo, fetchDockerHubToken } from 'docker-hub-utils';
 import fetch from 'node-fetch';
-import { isValid, compare } from './versioning';
-import { DockerConfig, ServiceConfiguration, LegacyBoyarBootstrapInput, BoyarConfigurationOutput } from './data-types';
-import { EthereumReader, EthereumConfigReader } from './ethereum-reader';
+import {
+    CommitteeEvent,
+    DockerConfig,
+    LegacyBoyarBootstrapInput,
+    NodeManagementConfigurationOutput,
+    ServiceConfiguration,
+    SubscriptionEvent,
+    TopologyElement,
+} from './data-types';
+import { EthereumModel } from './eth-model';
+import { Timed } from './eth-model/event-model';
+import { EventTypes, DEPLOYMENT_SUBSET_MAIN } from './eth-model/events-types';
+import { EthereumReader } from './ethereum-reader';
 import { merge } from './merge';
-import tier1 from './tier-1.json';
 import { getVirtualChainPort } from './ports';
+import tier1 from './tier-1.json';
+import { utcDay } from './utils';
+import { compare, isValid } from './versioning';
 
+export const ROLLOUT_GROUP_MAIN = 'ga';
+export const ROLLOUT_GROUP_CANARY = 'canary';
+
+export function translateDeploymentSubsetToRouuloutGroup(ds: string): string {
+    return ds === DEPLOYMENT_SUBSET_MAIN ? ROLLOUT_GROUP_MAIN : ROLLOUT_GROUP_CANARY;
+}
 export type LatestTagResult = Promise<string | undefined>;
-export type EthereumState = {
-    virtualChains: Array<string>;
-};
 
 export class Processor {
     static async fetchLatestTagElement(repository: { name: string; user: string }): LatestTagResult {
@@ -36,40 +51,117 @@ export class Processor {
         return JSON.parse(body);
     }
 
-    private cache = new Map<string, LatestTagResult>();
-    constructor(private config: ServiceConfiguration) {}
+    private dockerTagCache = new Map<string, LatestTagResult>();
+
+    constructor(
+        private config: ServiceConfiguration,
+        private reader: EthereumReader,
+        private ethModel: EthereumModel
+    ) {}
 
     private async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
-        if (!this.cache.has(dc.Image)) {
+        if (!this.dockerTagCache.has(dc.Image)) {
             const [user, name] = dc.Image.split('/');
-            this.cache.set(dc.Image, Processor.fetchLatestTagElement({ user, name }));
+            this.dockerTagCache.set(dc.Image, Processor.fetchLatestTagElement({ user, name }));
         }
-        const tag = await this.cache.get(dc.Image);
+        const tag = await this.dockerTagCache.get(dc.Image);
         if (typeof tag === 'string') {
             return { ...dc, Tag: tag, Pull: true };
         }
         return dc;
     }
 
-    private async readEthereumState(): Promise<EthereumState> {
-        const ethConfig = await new EthereumConfigReader(this.config).readEthereumConfig();
-        const reader = new EthereumReader(ethConfig);
-        const virtualChains = await reader.getAllVirtualChains();
-        return { virtualChains };
+    private translateSubscriptionChangedEvent(value: Timed & EventTypes['SubscriptionChanged']): SubscriptionEvent {
+        return {
+            RefTime: value.time,
+            Data: {
+                Status: 'active',
+                Tier: value.returnValues.tier,
+                RolloutGroup: translateDeploymentSubsetToRouuloutGroup(value.returnValues.deploymentSubset),
+                IdentityType: 0,
+                Params: {},
+            },
+        };
+    }
+    private translateTopologyChangedEvent(
+        vchainId: string,
+        value: Timed & EventTypes['TopologyChanged']
+    ): TopologyElement[] {
+        if (!value) {
+            return []; // not yet polled a single event
+        }
+        return value.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
+            OrbsAddress,
+            Ip: value.returnValues.ips[idx],
+            Port: getVirtualChainPort(vchainId),
+        }));
+    }
+    private translateCommitteeChangedEvent(value: Timed & EventTypes['CommitteeChanged']): CommitteeEvent {
+        return {
+            RefTime: value.time,
+            Committee: value.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
+                OrbsAddress,
+                EthAddress: value.returnValues.addrs[idx],
+                EffectiveStake: parseInt(value.returnValues.stakes[idx]),
+                IdentityType: 0,
+            })),
+        };
+    }
+    // private translateProtocolVersionEvent(value: Timed & EventTypes['ProtocolVersionChanged']): ProtocolVersionEvent {
+    //     return {
+    //         RefTime: value.time,
+
+    //     };
+    // }
+    async getVirtualChainConfiguration(vchainId: string) {
+        // : Promise<VirtualChainConfigurationOutput> {
+        // TODO: cap by last updated block time
+        const refTime = await this.ethModel.getUTCRefTime(); // nowUTC(); //(await this.reader.getRefTime('latest')) || -1;
+        const topologyChangedEvent = this.ethModel.getLastEvent('TopologyChanged', refTime);
+        const committeeChangedEvents = this.ethModel.getEventsFromTime('CommitteeChanged', refTime - utcDay, refTime);
+        const subscriptionChangedEvents = this.ethModel.getEventsFromTime(
+            'SubscriptionChanged',
+            refTime - utcDay,
+            refTime
+        );
+        // TODO: test and complete stub
+        return {
+            // for now keep it async-ish
+            CurrentRefTime: refTime,
+            PageStartRefTime: refTime - utcDay,
+            PageEndRefTime: refTime,
+            VirtualChains: {
+                [vchainId]: {
+                    VirtualChainId: vchainId,
+                    CurrentTopology: this.translateTopologyChangedEvent(vchainId, topologyChangedEvent),
+                    CommitteeEvents: committeeChangedEvents.map((d) => this.translateCommitteeChangedEvent(d)),
+                    SubscriptionEvents: subscriptionChangedEvents
+                        .filter((v) => v.returnValues.vcid === vchainId)
+                        .map((d) => this.translateSubscriptionChangedEvent(d)),
+                    // ProtocolVersionEvents: this.ethModel
+                    //     .getLastEvent('ProtocolVersionChanged', refTime)
+                    //     .map((d) => this.translateProtocolVersionEvent(d)), // TODO this needs more logic for "undo"
+                    ProtocolVersionEvents: [
+                        { RefTime: refTime, Data: { RolloutGroup: ROLLOUT_GROUP_MAIN, Version: 1 } },
+                        { RefTime: refTime, Data: { RolloutGroup: ROLLOUT_GROUP_CANARY, Version: 1 } },
+                    ],
+                },
+            },
+        };
     }
 
-    async getBoyarConfiguration(): Promise<BoyarConfigurationOutput & LegacyBoyarBootstrapInput> {
+    async getNodeManagementConfiguration(): Promise<NodeManagementConfigurationOutput & LegacyBoyarBootstrapInput> {
         const nodeConfiguration = await this.getLegacyBoyarBootstrap();
-        const ethState = await this.readEthereumState();
+        const virtualChains = await this.reader.getAllVirtualChains();
         const configResult = {
             orchestrator: this.makeOrchestratorConfig(nodeConfiguration),
-            chains: await this.makeChainsConfig(nodeConfiguration, ethState),
+            chains: await this.makeChainsConfig(nodeConfiguration, virtualChains),
             services: await this.makeServicesConfig(),
         };
         return merge(nodeConfiguration, configResult); // aggressive passthrough for legacy support as per Tal's decision
     }
 
-    private async makeServicesConfig(): Promise<BoyarConfigurationOutput['services']> {
+    private async makeServicesConfig(): Promise<NodeManagementConfigurationOutput['services']> {
         return {
             'management-service': {
                 ExternalPort: 7666,
@@ -85,8 +177,8 @@ export class Processor {
 
     private makeChainsConfig(
         _nodeConfiguration: LegacyBoyarBootstrapInput,
-        { virtualChains }: EthereumState
-    ): Promise<BoyarConfigurationOutput['chains']> {
+        virtualChains: Array<string>
+    ): Promise<NodeManagementConfigurationOutput['chains']> {
         return Promise.all(
             virtualChains.map(async (id) => ({
                 Id: id,
@@ -109,7 +201,7 @@ export class Processor {
 
     private makeOrchestratorConfig(
         nodeConfiguration: LegacyBoyarBootstrapInput
-    ): BoyarConfigurationOutput['orchestrator'] {
+    ): NodeManagementConfigurationOutput['orchestrator'] {
         return Object.assign({}, nodeConfiguration.orchestrator, {
             DynamicManagementConfig: {
                 Url: 'http:/localhost:7666/node/management',

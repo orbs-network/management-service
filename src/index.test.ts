@@ -3,7 +3,7 @@ import test from 'ava';
 import fetch from 'node-fetch';
 import { retry } from 'ts-retry-promise';
 import { serve } from '.';
-import { BoyarConfigurationOutput, ServiceConfiguration } from './data-types';
+import { NodeManagementConfigurationOutput, ServiceConfiguration } from './data-types';
 import { nockBoyarConfig } from './test-kit';
 
 test.serial('[small e2e] index serves /node/management with virtual chains', async (t) => {
@@ -19,14 +19,17 @@ test.serial('[small e2e] index serves /node/management with virtual chains', asy
 
     const config: ServiceConfiguration = {
         Port: 1234,
+        FirstBlock: 0,
         EthereumGenesisContract: d.contractRegistry.web3Contract.options.address,
         EthereumEndpoint: 'http://localhost:7545',
         boyarLegacyBootstrap: boyarConfigFakeEndpoint.congigUri + boyarConfigFakeEndpoint.configPath,
         pollIntervalSeconds: 0.1,
+        finalityBufferTime: 0,
+        finalityBufferBlocks: 0,
     };
     const server = serve(config);
     try {
-        const response: BoyarConfigurationOutput = await retry(
+        const response: NodeManagementConfigurationOutput = await retry(
             async () => {
                 const response = await fetch(`http://localhost:${config.Port}/node/management`);
                 const body = await response.text();

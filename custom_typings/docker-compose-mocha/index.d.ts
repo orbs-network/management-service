@@ -22,4 +22,10 @@ declare module 'docker-compose-mocha' {
         serviceName: string,
         originalPort: number
     ): Promise<string>;
+
+    export function getLogsForService(
+        envName: string,
+        pathToCompose: string,
+        serviceName: string
+    ): Promise<string>;
 }

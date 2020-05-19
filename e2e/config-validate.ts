@@ -1,4 +1,7 @@
 import { getVirtualChainPort } from '../src/ports';
+import { isNumber } from 'util';
+import { deepDataMatcher } from '../src/test-kit';
+
 /*
 Below is the expected behaviour of the management service in the E2E test.
 The goal is to keep the expectations as static as reasonably possible, to help readability.
@@ -13,8 +16,8 @@ https://raw.githubusercontent.com/orbs-network/orbs-spec/master/config-examples/
 /**
  * @param appConfig actual E2E fixture settings
  */
-export function getExpected(appConfig: object, vChainIds: string[]) {
-    return {
+export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) {
+    const expected = {
         network: [],
         orchestrator: {
             DynamicManagementConfig: {
@@ -41,6 +44,7 @@ export function getExpected(appConfig: object, vChainIds: string[]) {
             }
         }
     };
+    return (res: any) => deepDataMatcher(res, expected);
 }
 
 function getExpectedVirtualChainConfiguration(vcid: string) {
@@ -69,4 +73,45 @@ function getExpectedVirtualChainConfiguration(vcid: string) {
         InternalHttpPort: 8080,
         InternalPort: 4400
     };
+}
+
+export function getOngConfigValidator(vcid: string, topologyEvent: any, comittyEvent: any) {
+    const expected = {
+        CurrentRefTime: isNumber,
+        PageStartRefTime: isNumber,
+        PageEndRefTime: isNumber,
+        VirtualChains: {
+            [vcid]: {
+                VirtualChainId: vcid,
+                CurrentTopology: topologyEvent.orbsAddrs.map((_: never, i: number) => ({
+                    OrbsAddress: topologyEvent.orbsAddrs[i],
+                    Ip: topologyEvent.ips[i],
+                    Port: getVirtualChainPort(vcid),
+                })),
+                CommitteeEvents: [
+                    {
+                        Committee: comittyEvent.orbsAddrs.map((_: never, i: number) => ({
+                            EthAddress: comittyEvent.addrs[i],
+                            OrbsAddress: comittyEvent.orbsAddrs[i],
+                            EffectiveStake: parseInt(comittyEvent.stakes[i]),
+                            IdentityType: 0,
+                        }))
+                    }
+                ],
+                SubscriptionEvents: [
+                    {
+                        RefTime: isNumber,
+                        Data: {
+                            Status: 'active',
+                            Tier: 'defaultTier',
+                            RolloutGroup: 'ga',
+                            IdentityType: 0,
+                            Params: {},
+                        },
+                    },
+                ]
+            },
+        },
+    };
+    return (res: any) => deepDataMatcher(res, expected);
 }

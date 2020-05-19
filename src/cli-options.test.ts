@@ -17,7 +17,10 @@ const minimalConfigValue = {
 const configValue: ServiceConfiguration = {
     ...minimalConfigValue,
     Port: -1,
+    FirstBlock: 0,
     pollIntervalSeconds: 0.5,
+    finalityBufferTime: 0,
+    finalityBufferBlocks: 0,
 };
 
 test.serial('parseOptions with file', (t) => {
@@ -33,7 +36,14 @@ test.serial('parseOptions with partial file (complete default values)', (t) => {
         [configPath]: JSON.stringify(minimalConfigValue),
     });
 
-    t.deepEqual(parseOptions(['--config', configPath]), { ...minimalConfigValue, pollIntervalSeconds: 1, Port: 8080 });
+    t.deepEqual(parseOptions(['--config', configPath]), {
+        ...minimalConfigValue,
+        FirstBlock: 0,
+        pollIntervalSeconds: 1,
+        Port: 8080,
+        finalityBufferTime: 20 * 60,
+        finalityBufferBlocks: 80,
+    });
 });
 
 test.serial('parseOptions with no file', (t) => {
