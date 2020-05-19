@@ -223,6 +223,9 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
     const topologyEvent = topologyChangedEvents(participantResult.validatorTxResult)[0] as TopologyChangedPayload;
     const comittyEvent = committeeChangedEvents(comittyResult.commiteeTxResult)[0] as CommitteeChangedPayload;
     // const vc1Id = (subscriptionChangedEvents(await createVC(d)).map((e) => e.vcid)[0] as unknown) as string;
+
+    await new Promise((res) => setTimeout(res, 2 * 1000)); // wait 2 seconds to give the last block a distinctive timestamp
+
     const vc1Subscription = (subscriptionChangedEvents(await createVC(d))[0] as unknown) as SubscriptionChangedPayload;
     const vcid = vc1Subscription.vcid;
     await createVC(d); // add a second vc to demonstrate filtering events per vc

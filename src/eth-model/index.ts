@@ -80,36 +80,32 @@ export class EthereumModel {
         finalityTime: number
     ): Promise<number> {
         const model = this.getEventModel(eventName);
-        // todo move into cache?
         const fromBlock = model.getNextBlock();
         const toBlock = Math.min(latestBlockNumber, fromBlock + pollSize);
-        let latestBlock = fromBlock;
         let skipped = false;
-        // TODO pagination
         try {
-            const events = await this.reader.getPastEvents(eventName, { fromBlock, toBlock });
+            const events = (await this.reader.getPastEvents(eventName, { fromBlock, toBlock })).sort(
+                (e1, e2) => e1.blockNumber - e2.blockNumber
+            );
             for (const event of events) {
                 const blockTime = await this.blockTime.getExactBlockTime(event.blockNumber, finalityTime);
                 if (blockTime == null) {
                     throw new Error(`got null reading block ${event.blockNumber}`);
                 } else if (blockTime > 0) {
                     model.rememberEvent(event, blockTime);
-                    latestBlock = Math.max(latestBlock, event.blockNumber);
                 } else {
                     skipped = true;
+                    break;
                 }
             }
-            if (skipped) {
-                model.setNextBlock(latestBlock + 1);
-            } else {
+            if (!skipped) {
                 // assume all blocks till toBlock are read
                 model.setNextBlock(toBlock + 1);
-                latestBlock = toBlock;
             }
         } catch (e) {
             console.error(`failed reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(e)}`);
         }
-        return latestBlock;
+        return model.getNextBlock() - 1;
     }
 
     getEventsFromTime<T extends EventName>(
