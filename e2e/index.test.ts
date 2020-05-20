@@ -19,17 +19,17 @@ env.init();
 
 const numberOfVirtualChains = 3;
 let vChainIds: string[] = [];
-test.serial.before('creating virtual chains', async t => {
+test.serial.before('creating virtual chains', async (t) => {
     t.timeout(60 * 1000);
     for (let i = 0; i < numberOfVirtualChains; i++) {
         const newVcEvents = await createVC(env.contractsDriver);
-        const vcId = subscriptionChangedEvents(newVcEvents).map(e => e.vcid)[0];
+        const vcId = subscriptionChangedEvents(newVcEvents).map((e) => e.vcid)[0];
         vChainIds.push((vcId as unknown) as string);
-        await new Promise(res => setTimeout(res, 100));
+        await new Promise((res) => setTimeout(res, 100));
     }
 });
 
-test.serial('[E2E] serves boyar endpoint as expected', async t => {
+test.serial('[E2E] serves boyar endpoint as expected', async (t) => {
     t.timeout(60 * 1000);
     t.deepEqual(vChainIds.length, numberOfVirtualChains, 'all VCs created before test begins');
 
@@ -37,7 +37,7 @@ test.serial('[E2E] serves boyar endpoint as expected', async t => {
 
     while (!res || isErrorResponse(res) || res.chains.length < numberOfVirtualChains) {
         t.log('error response', res);
-        await new Promise(res => setTimeout(res, 1000));
+        await new Promise((res) => setTimeout(res, 1000));
         t.log('polling again');
         res = await env.fetch('app', 8080, 'node/management');
     }
@@ -47,7 +47,7 @@ test.serial('[E2E] serves boyar endpoint as expected', async t => {
     t.deepEqual(validate(res), []);
 });
 
-test.serial('[E2E] serves ONG endpoint as expected', async t => {
+test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
     t.timeout(60 * 1000);
     t.deepEqual(vChainIds.length, numberOfVirtualChains, 'all VCs created before test begins');
 
@@ -55,18 +55,18 @@ test.serial('[E2E] serves ONG endpoint as expected', async t => {
 
     const comittyResult = await addParticipant(d, true);
     const participantResult = await addParticipant(d, false);
-    await new Promise(res => setTimeout(res, 5 * 1000)); // wait 5 seconds to give the last block a distinctive timestamp
-    await createVC(env.contractsDriver); // extra VC to force a new block
+    await new Promise((res) => setTimeout(res, 5 * 1000)); // wait 5 seconds to give the last block a distinctive timestamp
+    const newVcEvents = await createVC(env.contractsDriver); // extra VC to force a new block
     const topologyEvent = topologyChangedEvents(participantResult.validatorTxResult)[0];
     const comittyEvent = committeeChangedEvents(comittyResult.commiteeTxResult)[0];
-    const lastBlockTime = +(await d.web3.eth.getBlock(participantResult.validatorTxResult.blockNumber)).timestamp;
+    const lastBlockTime = +(await d.web3.eth.getBlock(newVcEvents.blockNumber)).timestamp;
 
     const vcid = vChainIds[0];
     let res = await env.fetch('app', 8080, `vchains/${vcid}/management`);
 
-    while (!res || isErrorResponse(res) || res.CurrentRefTime <= lastBlockTime) {
+    while (!res || isErrorResponse(res) || res.CurrentRefTime < lastBlockTime) {
         t.log('soft error response', res);
-        await new Promise(res => setTimeout(res, 1000));
+        await new Promise((res) => setTimeout(res, 1000));
         t.log('polling again');
         t.log('lastBlockTime', lastBlockTime);
         res = await env.fetch('app', 8080, `vchains/${vcid}/management`);

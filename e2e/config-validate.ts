@@ -23,12 +23,12 @@ export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) 
             DynamicManagementConfig: {
                 ReadInterval: '1m',
                 ResetTimeout: '30m',
-                Url: 'http:/localhost:7666/node/management'
+                Url: 'http:/localhost:7666/node/management',
             },
             'storage-driver': 'nfs',
             'storage-options': {
-                maxRetries: '10'
-            }
+                maxRetries: '10',
+            },
         },
         chains: vChainIds.map(getExpectedVirtualChainConfiguration),
         services: {
@@ -37,12 +37,23 @@ export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) 
                 ExternalPort: 7666,
                 DockerConfig: {
                     Image: 'orbsnetwork/management-service',
-                    Tag: 'G-0-N',
-                    Pull: true
+                    Tag: 'G-0-N', // v0.0.1
+                    Pull: undefined, // true
                 },
-                Config: appConfig
-            }
-        }
+                Config: appConfig,
+            },
+            signer: {
+                InternalPort: 7777,
+                DockerConfig: {
+                    Image: 'orbsnetwork/signer',
+                    Tag: 'v1.3.9',
+                    Pull: true,
+                },
+                Config: {
+                    api: 'v1',
+                },
+            },
+        },
     };
     return (res: any) => deepDataMatcher(res, expected);
 }
@@ -50,28 +61,28 @@ export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) 
 function getExpectedVirtualChainConfiguration(vcid: string) {
     return {
         Config: {
-            ManagementConfigUrl: 'http://1.1.1.1/vchains/42/management',
-            SignerUrl: 'http://1.1.1.1/signer',
-            'ethereum-endpoint': 'http://localhost:8545'
+            ManagementConfigUrl: `http://management-service/vchains/${vcid}/management`,
+            SignerUrl: 'http://signer:7777',
+            'ethereum-endpoint': 'http://eth.orbs.com',
         },
         DockerConfig: {
             Image: 'orbsnetwork/node',
             Resources: {
                 Limits: {
                     CPUs: 1,
-                    Memory: 1024
+                    Memory: 1024,
                 },
                 Reservations: {
                     CPUs: 0.5,
-                    Memory: 512
-                }
+                    Memory: 512,
+                },
             },
-            Tag: 'G-0-N'
+            Tag: 'v1.3.9',
         },
         ExternalPort: getVirtualChainPort(vcid),
         Id: vcid,
         InternalHttpPort: 8080,
-        InternalPort: 4400
+        InternalPort: 4400,
     };
 }
 
@@ -95,8 +106,8 @@ export function getOngConfigValidator(vcid: string, topologyEvent: any, comittyE
                             OrbsAddress: comittyEvent.orbsAddrs[i],
                             EffectiveStake: parseInt(comittyEvent.stakes[i]),
                             IdentityType: 0,
-                        }))
-                    }
+                        })),
+                    },
                 ],
                 SubscriptionEvents: [
                     {
@@ -109,7 +120,7 @@ export function getOngConfigValidator(vcid: string, topologyEvent: any, comittyE
                             Params: {},
                         },
                     },
-                ]
+                ],
             },
         },
     };

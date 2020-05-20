@@ -39,7 +39,7 @@ export class Processor {
         if (tags && Array.isArray(tags) && tags.every((t) => typeof t === 'string')) {
             const versions = tags.filter(isValid).sort(compare);
             if (versions.length) {
-                return versions[0];
+                return versions[versions.length - 1];
             }
         }
         return; // undefined
@@ -172,6 +172,17 @@ export class Processor {
                 }),
                 Config: this.config,
             },
+            signer: {
+                InternalPort: 7777,
+                DockerConfig: await this.updateDockerConfig({
+                    Image: 'orbsnetwork/signer',
+                    Tag: 'v2.0.3',
+                    Pull: false,
+                }),
+                Config: {
+                    api: 'v1',
+                },
+            },
         };
     }
 
@@ -180,10 +191,10 @@ export class Processor {
         virtualChains: Array<string>
     ): Promise<NodeManagementConfigurationOutput['chains']> {
         return Promise.all(
-            virtualChains.map(async (id) => ({
-                Id: id,
+            virtualChains.map(async (vcid) => ({
+                Id: vcid,
                 InternalPort: 4400, // for gossip, identical for all vchains
-                ExternalPort: getVirtualChainPort(id), // for gossip, different for all vchains
+                ExternalPort: getVirtualChainPort(vcid), // for gossip, different for all vchains
                 InternalHttpPort: 8080, // identical for all vchains
                 DockerConfig: await this.updateDockerConfig({
                     Image: 'orbsnetwork/node',
@@ -191,9 +202,9 @@ export class Processor {
                     Resources: tier1,
                 }),
                 Config: {
-                    ManagementConfigUrl: 'http://1.1.1.1/vchains/42/management',
-                    SignerUrl: 'http://1.1.1.1/signer',
-                    'ethereum-endpoint': 'http://localhost:8545', // eventually rename to EthereumEndpoint
+                    ManagementConfigUrl: `http://management-service/vchains/${vcid}/management`,
+                    SignerUrl: 'http://signer:7777',
+                    'ethereum-endpoint': 'http://eth.orbs.com', // eventually rename to EthereumEndpoint
                 },
             }))
         );
