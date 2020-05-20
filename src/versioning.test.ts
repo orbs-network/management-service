@@ -3,17 +3,12 @@ import { isValid, compare } from './versioning';
 
 test('isValid returns true on valid versions', (t) => {
     const validTags = [
-        'G-0-H',
-        'G-0-N',
-        'C-0-H',
-        'C-0-N',
-        'G-101-N',
-        'foo G-101-N',
-        'G-101-N bar',
-        'foo G-101-N bar',
-        'foo C-100-N bar G-101-N ',
-        'foo C-100-N bar G-101-Nbar ',
-        'foo C-100-N bar G-101-n ',
+        'v0.0.0',
+        'v1.22.333',
+        'v0.0.0-canary',
+        'v0.0.0+hotfix',
+        'v1.22.333+hotfix',
+        'v0.0.0-canary+hotfix',
     ];
     for (const tag of validTags) {
         t.true(isValid(tag), tag);
@@ -22,16 +17,18 @@ test('isValid returns true on valid versions', (t) => {
 
 test('isValid returns false on invalid versions', (t) => {
     const invalidTags = [
-        '1',
-        'G-101',
-        '101-N',
-        'G- 101-N',
-        'G -101-N',
-        'G-101 -N',
-        'G-101- N',
-        'aG-101-N',
-        'G-101-Na',
-        'fooG-101-Nbar',
+        'G-0-H',
+        'C-0-N',
+        '0.0.0',
+        'v0.0.0 foo',
+        'foo v0.0.0',
+        'v0.0',
+        'v0.0.',
+        'v0.0.0 -canary',
+        'v0.0.0-canar y',
+        'v01.22.333',
+        'v0.0.0-ferrary',
+        'v0.0.0-ferrary+slow',
     ];
     for (const tag of invalidTags) {
         t.false(isValid(tag), tag);
@@ -39,8 +36,38 @@ test('isValid returns false on invalid versions', (t) => {
 });
 
 test('copmpare sorts the latest version at the smallest index', (t) => {
-    const validTags = ['', 'G-2-N', 'G-0-N', '', 'G-1-N', 'G-4-N', 'G-7-N', 'G-3-N', '', 'G-6-N', ''];
+    const validTags = [
+        'v1.1.4-canary',
+        'v1.0.6-canary+hotfix',
+        'v0.0.8',
+        'v0.0.1+hotfix',
+        'v0.0.0',
+        '',
+        'v0.2.5',
+        'v1.0.0',
+        'v1.1.3',
+        'v0.20.0+hotfix',
+        '',
+        'v0.2.0-canary',
+        'v1.11.0',
+        'v1.1.0',
+    ];
     const sorted = validTags.sort(compare);
-
-    t.deepEqual(sorted, ['G-7-N', 'G-6-N', 'G-4-N', 'G-3-N', 'G-2-N', 'G-1-N', 'G-0-N', '', '', '', '']);
+    // console.log(sorted);
+    t.deepEqual(sorted, [
+        '',
+        '',
+        'v0.0.0',
+        'v0.0.1+hotfix',
+        'v0.0.8',
+        'v0.2.0-canary',
+        'v0.2.5',
+        'v0.20.0+hotfix',
+        'v1.0.0',
+        'v1.0.6-canary+hotfix',
+        'v1.1.0',
+        'v1.1.3',
+        'v1.1.4-canary',
+        'v1.11.0',
+    ]);
 });

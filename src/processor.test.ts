@@ -29,10 +29,10 @@ test.serial.afterEach.always(() => {
 
 test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) => {
     const repository = { user: 'orbsnetwork', name: 'node' };
-    const tags = ['audit', 'G-2-N', 'G-0-N', 'G-1-N', 'foo G-6-N bar', 'v1.0.10', '0432a81f'];
+    const tags = ['audit', 'v1.1.1', 'v0.0.0', 'v9.9.9 ', 'foo v4.0.4 bar', 'v1.0.10', '0432a81f', 'G-0-N'];
     const scope = nockDockerHub({ ...repository, tags });
     const tag = await Processor.fetchLatestTagElement(repository);
-    t.deepEqual(tag, 'foo G-6-N bar');
+    t.deepEqual(tag, 'v1.1.1');
     scope.done();
 });
 
@@ -44,26 +44,29 @@ test.serial('updateDockerConfig updates tags with minimal requests', async (t) =
         },
         {
             Image: 'foo/bar',
-            Tag: 'G-1-N',
+            Tag: 'v0.0.1',
         },
         {
             Image: 'fizz/baz',
             Tag: 'foo3',
         },
     ] as DockerConfig[];
-    const scope = nockDockerHub({ user: 'foo', name: 'bar', tags: ['G-3-N'] }, { user: 'fizz', name: 'baz', tags: [] });
+    const scope = nockDockerHub(
+        { user: 'foo', name: 'bar', tags: ['v0.0.3'] },
+        { user: 'fizz', name: 'baz', tags: [] }
+    );
     const processor = new Processor({} as ServiceConfiguration, null as any, null as any);
     const newConfig = await Promise.all(originalConfiguration.map((dc) => (processor as any).updateDockerConfig(dc)));
 
     t.deepEqual(newConfig, [
         {
             Image: 'foo/bar',
-            Tag: 'G-3-N',
+            Tag: 'v0.0.3',
             Pull: true,
         },
         {
             Image: 'foo/bar',
-            Tag: 'G-3-N',
+            Tag: 'v0.0.3',
             Pull: true,
         },
         {
@@ -121,6 +124,17 @@ test.serial(
                         extraConfig: boyarConfigFakeEndpoint.extraConfig /* passthrough for legacy support */,
                     }),
                 },
+                signer: {
+                    InternalPort: 7777,
+                    DockerConfig: {
+                        Image: 'orbsnetwork/signer',
+                        Pull: false,
+                        Tag: 'fake',
+                    },
+                    Config: {
+                        api: 'v1',
+                    },
+                },
             },
         } as unknown);
         boyarConfigFakeEndpoint.scope.done();
@@ -169,6 +183,17 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
                     DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'fake' },
                     Config: config,
                 },
+                signer: {
+                    InternalPort: 7777,
+                    DockerConfig: {
+                        Image: 'orbsnetwork/signer',
+                        Pull: false,
+                        Tag: 'fake',
+                    },
+                    Config: {
+                        api: 'v1',
+                    },
+                },
             },
         } as unknown,
         '0 chains'
@@ -187,9 +212,9 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
             Resources: tier1,
         },
         Config: {
-            ManagementConfigUrl: 'http://1.1.1.1/vchains/42/management',
-            SignerUrl: 'http://1.1.1.1/signer',
-            'ethereum-endpoint': 'http://localhost:8545', // eventually rename to EthereumEndpoint
+            ManagementConfigUrl: `http://management-service/vchains/${vcid}/management`,
+            SignerUrl: 'http://signer:7777',
+            'ethereum-endpoint': 'http://eth.orbs.com', // eventually rename to EthereumEndpoint
         },
     });
     const result2 = await processor.getNodeManagementConfiguration();

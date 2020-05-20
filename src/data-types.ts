@@ -92,15 +92,15 @@ export type ChainConfiguration = {
     InternalHttpPort: number; // identical for all vchains
     DockerConfig: DockerConfig;
     Config: {
-        ManagementConfigUrl: string; //'http://1.1.1.1/vchains/42/management';
-        SignerUrl: string; //'http://1.1.1.1/signer';
-        'ethereum-endpoint': string; //'http://localhost:8545'; // eventually rename to EthereumEndpoint
+        ManagementConfigUrl: string; //`http://management-service/vchains/${vcid}/management`;
+        SignerUrl: string; //'http://signer:7777';
+        'ethereum-endpoint': string; //'http://eth.orbs.com'; // eventually rename to EthereumEndpoint
     };
 };
 
 export interface GenericNodeService {
     InternalPort: number;
-    ExternalPort: number;
+    ExternalPort?: number;
     DockerConfig: DockerConfig;
     Config: object;
 }
