@@ -12,6 +12,7 @@ test('accepts legal config', (t) => {
             pollIntervalSeconds: 0.1,
             finalityBufferTime: 0,
             finalityBufferBlocks: 0,
+            DockerNamespace: 'foo',
         })
     );
 });
@@ -26,6 +27,7 @@ test('declines illegal config (1)', (t) => {
             boyarLegacyBootstrap: 'https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json',
             pollIntervalSeconds: 0.1,
             finalityBufferBlocks: 0,
+            DockerNamespace: 'foo',
         })
     );
 });
@@ -40,6 +42,7 @@ test('declines illegal config (2)', (t) => {
             pollIntervalSeconds: 0.1,
             finalityBufferTime: 0,
             finalityBufferBlocks: 0,
+            DockerNamespace: 'foo',
         })
     );
 });

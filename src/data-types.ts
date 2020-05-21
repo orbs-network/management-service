@@ -11,7 +11,7 @@ export interface ServiceConfiguration {
     // EthereumNetwork: EthereumNetwork;
     boyarLegacyBootstrap: string;
     pollIntervalSeconds: number;
-
+    DockerNamespace: string;
     finalityBufferTime: number;
     finalityBufferBlocks: number;
 }
@@ -55,13 +55,17 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
             type: 'integer',
             numericality: { noStrings: true },
         },
+        DockerNamespace: {
+            presence: { allowEmpty: false },
+            type: 'string',
+        },
     };
     return validate(c, serviceConfigConstraints, { format: 'flat' });
 }
 
-export type DockerConfig<I extends string = string> = {
+export type DockerConfig = {
     ContainerNamePrefix?: string;
-    Image: I;
+    Image: string;
     Tag: string;
     Pull?: boolean;
     Resources?: {
@@ -107,7 +111,7 @@ export interface GenericNodeService {
 
 export type IdentityType = 0;
 export interface ManagementNodeService extends GenericNodeService {
-    DockerConfig: DockerConfig<'orbsnetwork/management-service'>;
+    DockerConfig: DockerConfig;
     Config: ServiceConfiguration;
 }
 export type CommitteeElement = {

@@ -59,7 +59,7 @@ export class Processor {
         private ethModel: EthereumModel
     ) {}
 
-    private async updateDockerConfig<I extends string>(dc: DockerConfig<I>): Promise<DockerConfig<I>> {
+    private async updateDockerConfig(dc: DockerConfig): Promise<DockerConfig> {
         if (!this.dockerTagCache.has(dc.Image)) {
             const [user, name] = dc.Image.split('/');
             this.dockerTagCache.set(dc.Image, Processor.fetchLatestTagElement({ user, name }));
@@ -167,7 +167,7 @@ export class Processor {
                 ExternalPort: 7666,
                 InternalPort: 8080,
                 DockerConfig: await this.updateDockerConfig({
-                    Image: 'orbsnetwork/management-service',
+                    Image: this.config.DockerNamespace + '/management-service',
                     Tag: 'G-0-N',
                 }),
                 Config: this.config,
@@ -175,9 +175,8 @@ export class Processor {
             signer: {
                 InternalPort: 7777,
                 DockerConfig: await this.updateDockerConfig({
-                    Image: 'orbsnetwork/signer',
+                    Image: this.config.DockerNamespace + '/signer',
                     Tag: 'v2.0.3',
-                    Pull: false,
                 }),
                 Config: {
                     api: 'v1',
