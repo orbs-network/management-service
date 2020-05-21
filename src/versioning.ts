@@ -34,7 +34,6 @@ export function isValid(src: string): boolean {
 }
 
 export function compare(a: string, b: string): number {
-
     const aResult = REGULAR_EXPRESSION.exec(a);
     if (!aResult) {
         return -1;
@@ -46,11 +45,9 @@ export function compare(a: string, b: string): number {
     for (let i = 1; i <= 3; ++i) {
         if (aResult[i] === bResult[i]) {
             continue;
-        }
-        else if (Number(aResult[i]) > Number(bResult[i])) {
+        } else if (Number(aResult[i]) > Number(bResult[i])) {
             return 1;
-        }
-        else {
+        } else {
             return -1;
         }
     }

@@ -73,3 +73,9 @@ test('copmpare sorts the latest version at the smallest index', (t) => {
         'v1.11.0',
     ]);
 });
+test('regression sort', (t) => {
+    const validTags = ['v1.3.11', 'v1.3.9', 'v1.3.13'];
+    const sorted = validTags.sort(compare);
+    console.log(sorted);
+    t.deepEqual(sorted, ['v1.3.9', 'v1.3.11', 'v1.3.13']);
+});
