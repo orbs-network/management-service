@@ -34,7 +34,23 @@ jobs:
           path: _out
       - store_artifacts:
           path: _out    
+  
+  build-and-release:
+    machine: true
+    steps:
+      - checkout
+      - node/install:
+        node-version: '12.13.0'
+      - docker/install-docker
+      - run: ./create-version-file.sh
+      - node/with-cache:
+          steps:
+            - run: npm install
+      - run: ./docker-build.sh
+      - run: ./.circleci/release-to-staging.sh
+
 workflows:
     build-and-test:
       jobs:
         - build-and-test
+        - build-and-release
