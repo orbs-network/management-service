@@ -21,6 +21,7 @@ const configValue: ServiceConfiguration = {
     pollIntervalSeconds: 0.5,
     finalityBufferTime: 0,
     finalityBufferBlocks: 0,
+    DockerNamespace: 'foo',
 };
 
 test.serial('parseOptions with file', (t) => {
@@ -43,6 +44,7 @@ test.serial('parseOptions with partial file (complete default values)', (t) => {
         Port: 8080,
         finalityBufferTime: 20 * 60,
         finalityBufferBlocks: 80,
+        DockerNamespace: 'orbsnetwork',
     });
 });
 

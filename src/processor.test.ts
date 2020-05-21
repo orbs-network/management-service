@@ -78,7 +78,7 @@ test.serial('updateDockerConfig updates tags with minimal requests', async (t) =
     scope.done();
 });
 
-test.serial(
+test.serial.only(
     'getBoyarConfiguration returns boyarLegacyBootstrap and propagates legacy config (no chains)',
     async (t) => {
         const boyarConfigFakeEndpoint = nockBoyarConfig();
@@ -92,16 +92,22 @@ test.serial(
             pollIntervalSeconds: -1,
             finalityBufferTime: 0,
             finalityBufferBlocks: 0,
+            DockerNamespace: 'myDockerNamespace',
         };
-
+        const fakeTag = 'v9.9.9';
         const fakeReader = ({
             // skip ethereum endpoint
             getAllVirtualChains() {
                 return [];
             },
         } as unknown) as EthereumReader;
+
+        const scope = nockDockerHub(
+            { user: 'myDockerNamespace', name: 'management-service', tags: [fakeTag] },
+            { user: 'myDockerNamespace', name: 'signer', tags: [fakeTag] }
+        );
+
         const processor = new Processor(config, fakeReader, null as any);
-        (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: 'fake' }); // skip docker endpoint
 
         const result = await processor.getNodeManagementConfiguration();
 
@@ -119,7 +125,11 @@ test.serial(
                 'management-service': {
                     InternalPort: 8080,
                     ExternalPort: 7666,
-                    DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'fake' },
+                    DockerConfig: {
+                        Image: 'myDockerNamespace/management-service',
+                        Pull: true,
+                        Tag: fakeTag,
+                    },
                     Config: Object.assign(config, {
                         extraConfig: boyarConfigFakeEndpoint.extraConfig /* passthrough for legacy support */,
                     }),
@@ -127,9 +137,9 @@ test.serial(
                 signer: {
                     InternalPort: 7777,
                     DockerConfig: {
-                        Image: 'orbsnetwork/signer',
-                        Pull: false,
-                        Tag: 'fake',
+                        Image: 'myDockerNamespace/signer',
+                        Pull: true,
+                        Tag: fakeTag,
                     },
                     Config: {
                         api: 'v1',
@@ -138,6 +148,7 @@ test.serial(
             },
         } as unknown);
         boyarConfigFakeEndpoint.scope.done();
+        scope.done();
     }
 );
 
@@ -155,9 +166,11 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
         pollIntervalSeconds: -1,
         finalityBufferTime: 0,
         finalityBufferBlocks: 0,
+        DockerNamespace: 'myDockerNamespace',
     };
+    const fakeTag = 'v9.9.9';
     const processor = new Processor(config, getNewEthereumReader(config), null as any);
-    (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: 'fake' }); // skip docker endpoint
+    (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: fakeTag }); // skip docker endpoint
     (processor as any).getLegacyBoyarBootstrap = async () => ({
         orchestrator: {},
         chains: [],
@@ -180,15 +193,14 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
                 'management-service': {
                     InternalPort: 8080,
                     ExternalPort: 7666,
-                    DockerConfig: { Image: 'orbsnetwork/management-service', Tag: 'fake' },
+                    DockerConfig: { Image: 'myDockerNamespace/management-service', Tag: fakeTag },
                     Config: config,
                 },
                 signer: {
                     InternalPort: 7777,
                     DockerConfig: {
-                        Image: 'orbsnetwork/signer',
-                        Pull: false,
-                        Tag: 'fake',
+                        Image: 'myDockerNamespace/signer',
+                        Tag: fakeTag,
                     },
                     Config: {
                         api: 'v1',
@@ -207,7 +219,7 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
         ExternalPort: getVirtualChainPort(vcid), // for gossip, different for all vchains
         InternalHttpPort: 8080, // identical for all vchains
         DockerConfig: {
-            Image: 'orbsnetwork/node',
+            Image: 'myDockerNamespace/node',
             Tag: 'fake',
             Resources: tier1,
         },
@@ -235,6 +247,7 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
         pollIntervalSeconds: -1,
         finalityBufferTime: 0,
         finalityBufferBlocks: 0,
+        DockerNamespace: 'foo',
     };
 
     const ethReader = getNewEthereumReader(config);
