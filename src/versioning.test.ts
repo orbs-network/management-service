@@ -40,6 +40,7 @@ test('copmpare sorts the latest version at the smallest index', (t) => {
         'v1.1.4-canary',
         'v1.0.6-canary+hotfix',
         'v0.0.8',
+        'v0.0.11',
         'v0.0.1+hotfix',
         'v0.0.0',
         '',
@@ -53,13 +54,14 @@ test('copmpare sorts the latest version at the smallest index', (t) => {
         'v1.1.0',
     ];
     const sorted = validTags.sort(compare);
-    // console.log(sorted);
+    console.log(sorted);
     t.deepEqual(sorted, [
         '',
         '',
         'v0.0.0',
         'v0.0.1+hotfix',
         'v0.0.8',
+        'v0.0.11',
         'v0.2.0-canary',
         'v0.2.5',
         'v0.20.0+hotfix',
@@ -70,4 +72,10 @@ test('copmpare sorts the latest version at the smallest index', (t) => {
         'v1.1.4-canary',
         'v1.11.0',
     ]);
+});
+test('regression sort', (t) => {
+    const validTags = ['v1.3.11', 'v1.3.9', 'v1.3.13'];
+    const sorted = validTags.sort(compare);
+    console.log(sorted);
+    t.deepEqual(sorted, ['v1.3.9', 'v1.3.11', 'v1.3.13']);
 });

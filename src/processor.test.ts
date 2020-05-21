@@ -27,6 +27,12 @@ test.serial.afterEach.always(() => {
     nock.cleanAll();
 });
 
+test.serial('fetchLatestTagElement gets latest tag from REAL docker hub', async (t) => {
+    const repository = { user: 'orbsnetwork', name: 'node' };
+    const tag = await Processor.fetchLatestTagElement(repository);
+    t.deepEqual(tag, 'v1.3.13');
+});
+
 test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) => {
     const repository = { user: 'orbsnetwork', name: 'node' };
     const tags = ['audit', 'v1.1.1', 'v0.0.0', 'v9.9.9 ', 'foo v4.0.4 bar', 'v1.0.10', '0432a81f', 'G-0-N'];
@@ -78,7 +84,7 @@ test.serial('updateDockerConfig updates tags with minimal requests', async (t) =
     scope.done();
 });
 
-test.serial.only(
+test.serial(
     'getBoyarConfiguration returns boyarLegacyBootstrap and propagates legacy config (no chains)',
     async (t) => {
         const boyarConfigFakeEndpoint = nockBoyarConfig();
@@ -220,7 +226,7 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
         InternalHttpPort: 8080, // identical for all vchains
         DockerConfig: {
             Image: 'myDockerNamespace/node',
-            Tag: 'fake',
+            Tag: fakeTag,
             Resources: tier1,
         },
         Config: {

@@ -34,12 +34,22 @@ export function isValid(src: string): boolean {
 }
 
 export function compare(a: string, b: string): number {
-    if (!isValid(a)) {
+    const aResult = REGULAR_EXPRESSION.exec(a);
+    if (!aResult) {
         return -1;
     }
-    if (!isValid(b)) {
+    const bResult = REGULAR_EXPRESSION.exec(b);
+    if (!bResult) {
         return 1;
     }
-    // lex sort is enough
-    return a.localeCompare(b);
+    for (let i = 1; i <= 3; ++i) {
+        if (aResult[i] === bResult[i]) {
+            continue;
+        } else if (Number(aResult[i]) > Number(bResult[i])) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+    return 0;
 }

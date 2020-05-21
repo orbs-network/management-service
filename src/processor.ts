@@ -196,7 +196,7 @@ export class Processor {
                 ExternalPort: getVirtualChainPort(vcid), // for gossip, different for all vchains
                 InternalHttpPort: 8080, // identical for all vchains
                 DockerConfig: await this.updateDockerConfig({
-                    Image: 'orbsnetwork/node',
+                    Image: this.config.DockerNamespace + '/node',
                     Tag: 'G-0-N',
                     Resources: tier1,
                 }),

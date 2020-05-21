@@ -46,7 +46,7 @@ export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) 
                 InternalPort: 7777,
                 DockerConfig: {
                     Image: 'orbsnetwork/signer',
-                    Tag: 'v1.3.9',
+                    Tag: 'v1.3.13',
                     Pull: true,
                 },
                 Config: {
@@ -77,7 +77,7 @@ function getExpectedVirtualChainConfiguration(vcid: string) {
                     Memory: 512,
                 },
             },
-            Tag: 'v1.3.9',
+            Tag: 'v1.3.13',
         },
         ExternalPort: getVirtualChainPort(vcid),
         Id: vcid,
