@@ -31,6 +31,7 @@ export class EthereumModel {
         StandbysChanged: new EventModel<EventTypes['StandbysChanged']>(),
         SubscriptionChanged: new EventModel<EventTypes['SubscriptionChanged']>(),
         ProtocolVersionChanged: new EventModel<EventTypes['ProtocolVersionChanged']>(),
+        ValidatorRegistered: new EventModel<EventTypes['ValidatorRegistered']>(),
     };
     // private events = new Map<EventName, EventModel>();
     blockTime: BlocksTimeModel;
@@ -118,6 +119,10 @@ export class EthereumModel {
 
     getLastEvent<T extends EventName>(eventName: T, maxTime: number): Timed & EventTypes[T] {
         return this.getEventModel(eventName).getLastEvent(maxTime);
+    }
+
+    getIteratorFrom<T extends EventName>(eventName: T, maxTime: number): IterableIterator<Timed & EventTypes[T]> {
+        return this.getEventModel(eventName).getIteratorFrom(maxTime);
     }
 
     getEventModel<T extends EventName>(eventName: T): EventModel<EventTypes[T]> {

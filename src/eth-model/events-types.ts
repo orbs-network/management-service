@@ -8,6 +8,7 @@ export const eventNames: Readonly<Array<EventName>> = [
     'CommitteeChanged',
     'StandbysChanged',
     'ProtocolVersionChanged',
+    'ValidatorRegistered',
 ];
 
 export type EventName = keyof EventTypes;
@@ -38,9 +39,15 @@ export type ProtocolChangedPayload = {
     fromTimestamp: string;
 };
 
+export type ValidatorRegisteredPayload = {
+    ip: string;
+    orbsAddr: string;
+};
+
 export type EventTypes = {
     CommitteeChanged: EventData & { returnValues: CommitteeChangedPayload };
     StandbysChanged: EventData & { returnValues: StandbysChangedPayload };
     SubscriptionChanged: EventData & { returnValues: SubscriptionChangedPayload };
     ProtocolVersionChanged: EventData & { returnValues: ProtocolChangedPayload };
+    ValidatorRegistered: EventData & { returnValues: ValidatorRegisteredPayload };
 };

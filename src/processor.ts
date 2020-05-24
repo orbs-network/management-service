@@ -83,19 +83,7 @@ export class Processor {
             },
         };
     }
-    private translateStandbysChangedEvent(
-        vchainId: string,
-        value: Timed & EventTypes['StandbysChanged']
-    ): TopologyElement[] {
-        if (!value) {
-            return []; // not yet polled a single event
-        }
-        return value.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
-            OrbsAddress,
-            Ip: value.returnValues.ips[idx],
-            Port: getVirtualChainPort(vchainId),
-        }));
-    }
+
     private translateCommitteeChangedEvent(value: Timed & EventTypes['CommitteeChanged']): CommitteeEvent {
         return {
             RefTime: value.time,
@@ -107,16 +95,56 @@ export class Processor {
             })),
         };
     }
-    // private translateProtocolVersionEvent(value: Timed & EventTypes['ProtocolVersionChanged']): ProtocolVersionEvent {
-    //     return {
-    //         RefTime: value.time,
 
-    //     };
-    // }
+    private calcTopology(
+        vchainId: string,
+        standbysChangedEvent: Timed & EventTypes['StandbysChanged'],
+        committeeChangedEvents: Array<Timed & EventTypes['CommitteeChanged']>,
+        validatorRegisteredEvents: Iterable<Timed & EventTypes['ValidatorRegistered']>
+    ): TopologyElement[] {
+        if (!standbysChangedEvent) {
+            return []; // not yet polled a single event
+        }
+        const Port = getVirtualChainPort(vchainId);
+        const validatorsLeft = new Set<string>(standbysChangedEvent.returnValues.orbsAddrs);
+        for (const committeeChangedEvent of committeeChangedEvents) {
+            for (const orbsAddress of committeeChangedEvent.returnValues.orbsAddrs) {
+                validatorsLeft.add(orbsAddress);
+            }
+        }
+        const topologyOrbsAddrs = Array.from(validatorsLeft);
+
+        // look for the IP addresses of all validators in topology
+        const ips = new Map<string, string>();
+        for (const validator of validatorRegisteredEvents) {
+            const orbsAddress = validator.returnValues.orbsAddr;
+            if (validatorsLeft.delete(orbsAddress)) {
+                ips.set(orbsAddress, validator.returnValues.ip);
+                if (validatorsLeft.size === 0) {
+                    break;
+                }
+            }
+        }
+
+        return topologyOrbsAddrs.flatMap((OrbsAddress) => {
+            const Ip = ips.get(OrbsAddress);
+            if (Ip) {
+                return [
+                    {
+                        OrbsAddress,
+                        Ip,
+                        Port,
+                    },
+                ];
+            } else {
+                console.error(`invalid: validator ${OrbsAddress} has no associated ValidatorRegisteredEvent`);
+                return [];
+            }
+        });
+    }
+
     async getVirtualChainConfiguration(vchainId: string) {
-        // : Promise<VirtualChainConfigurationOutput> {
-        // TODO: cap by last updated block time
-        const refTime = await this.ethModel.getUTCRefTime(); // nowUTC(); //(await this.reader.getRefTime('latest')) || -1;
+        const refTime = await this.ethModel.getUTCRefTime();
         const standbysChangedEvent = this.ethModel.getLastEvent('StandbysChanged', refTime);
         const committeeChangedEvents = this.ethModel.getEventsFromTime('CommitteeChanged', refTime - utcDay, refTime);
         const subscriptionChangedEvents = this.ethModel.getEventsFromTime(
@@ -124,23 +152,25 @@ export class Processor {
             refTime - utcDay,
             refTime
         );
-        // TODO: test and complete stub
+        const validatorRegisteredEvents = this.ethModel.getIteratorFrom('ValidatorRegistered', refTime);
+        const CurrentTopology = this.calcTopology(
+            vchainId,
+            standbysChangedEvent,
+            committeeChangedEvents,
+            validatorRegisteredEvents
+        );
         return {
-            // for now keep it async-ish
             CurrentRefTime: refTime,
             PageStartRefTime: refTime - utcDay,
             PageEndRefTime: refTime,
             VirtualChains: {
                 [vchainId]: {
                     VirtualChainId: vchainId,
-                    CurrentTopology: this.translateStandbysChangedEvent(vchainId, standbysChangedEvent),
+                    CurrentTopology,
                     CommitteeEvents: committeeChangedEvents.map((d) => this.translateCommitteeChangedEvent(d)),
                     SubscriptionEvents: subscriptionChangedEvents
                         .filter((v) => v.returnValues.vcid === vchainId)
                         .map((d) => this.translateSubscriptionChangedEvent(d)),
-                    // ProtocolVersionEvents: this.ethModel
-                    //     .getLastEvent('ProtocolVersionChanged', refTime)
-                    //     .map((d) => this.translateProtocolVersionEvent(d)), // TODO this needs more logic for "undo"
                     ProtocolVersionEvents: [
                         { RefTime: refTime, Data: { RolloutGroup: ROLLOUT_GROUP_MAIN, Version: 1 } },
                         { RefTime: refTime, Data: { RolloutGroup: ROLLOUT_GROUP_CANARY, Version: 1 } },

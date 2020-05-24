@@ -59,7 +59,7 @@ test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
     const newVcEvents = await createVC(env.contractsDriver); // extra VC to force a new block
 
     const committeeContractAddress = d.committeeGeneral.address;
-    const standbyEvent = standbysChangedEvents(participantResult.validatorTxResult, committeeContractAddress)[0];
+    const standbyEvent = standbysChangedEvents(participantResult.syncTxResult, committeeContractAddress)[0];
     const comittyEvent = committeeChangedEvents(comittyResult.commiteeTxResult, committeeContractAddress)[0];
     const lastBlockTime = +(await d.web3.eth.getBlock(newVcEvents.blockNumber)).timestamp;
 

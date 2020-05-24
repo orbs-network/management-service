@@ -165,6 +165,8 @@ export function contractByEventName(eventName: EventName): ContractName {
             return 'subscriptions';
         case 'ProtocolVersionChanged':
             return 'protocol';
+        case 'ValidatorRegistered':
+            return 'validatorsRegistration';
         default:
             throw new Error(`unknown event name '${eventName}'`);
     }
