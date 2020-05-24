@@ -12,10 +12,11 @@ export async function addParticipant(d: Driver, committee: boolean) {
         const commiteeTxResult = await v1.notifyReadyForCommittee(); // this moves from pending to commitee
         return { validatorTxResult, commiteeTxResult };
     } else {
-        return { validatorTxResult };
+        const syncTxResult = await v1.notifyReadyToSync();
+        return { validatorTxResult, syncTxResult };
     }
 }
 // protocol version has to be greater than current, and in future block.
-export async function setProtocolVersion(d: Driver, newVersion: number, blockNumber: number) {
-    return await d.protocol.setProtocolVersion(DEPLOYMENT_SUBSET_MAIN, newVersion, blockNumber);
+export async function setProtocolVersion(d: Driver, newVersion: number, fromTimestamp: number) {
+    return await d.protocol.setProtocolVersion(DEPLOYMENT_SUBSET_MAIN, newVersion, fromTimestamp);
 }

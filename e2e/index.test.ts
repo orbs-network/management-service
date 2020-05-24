@@ -5,7 +5,7 @@ import { getBoyarConfigValidator, getOngConfigValidator } from './config-validat
 import {
     createVC,
     subscriptionChangedEvents,
-    topologyChangedEvents,
+    standbysChangedEvents,
     committeeChangedEvents,
 } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { isErrorResponse } from '../src/data-types';
@@ -57,8 +57,10 @@ test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
     const participantResult = await addParticipant(d, false);
     await new Promise((res) => setTimeout(res, 5 * 1000)); // wait 5 seconds to give the last block a distinctive timestamp
     const newVcEvents = await createVC(env.contractsDriver); // extra VC to force a new block
-    const topologyEvent = topologyChangedEvents(participantResult.validatorTxResult)[0];
-    const comittyEvent = committeeChangedEvents(comittyResult.commiteeTxResult)[0];
+
+    const committeeContractAddress = d.committeeGeneral.address;
+    const standbyEvent = standbysChangedEvents(participantResult.validatorTxResult, committeeContractAddress)[0];
+    const comittyEvent = committeeChangedEvents(comittyResult.commiteeTxResult, committeeContractAddress)[0];
     const lastBlockTime = +(await d.web3.eth.getBlock(newVcEvents.blockNumber)).timestamp;
 
     const vcid = vChainIds[0];
@@ -72,7 +74,7 @@ test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
         res = await env.fetch('app', 8080, `vchains/${vcid}/management`);
     }
 
-    const validate = getOngConfigValidator(vcid, topologyEvent, comittyEvent);
+    const validate = getOngConfigValidator(vcid, standbyEvent, comittyEvent);
     const errors = validate(res);
 
     t.deepEqual(errors, []);

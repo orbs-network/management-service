@@ -4,9 +4,9 @@ export const DEPLOYMENT_SUBSET_MAIN = 'main';
 export const DEPLOYMENT_SUBSET_CANARY = 'canary';
 
 export const eventNames: Readonly<Array<EventName>> = [
-    'CommitteeChanged',
-    'TopologyChanged',
     'SubscriptionChanged',
+    'CommitteeChanged',
+    'StandbysChanged',
     'ProtocolVersionChanged',
 ];
 
@@ -20,20 +20,27 @@ export type SubscriptionChangedPayload = {
     deploymentSubset: typeof DEPLOYMENT_SUBSET_MAIN | typeof DEPLOYMENT_SUBSET_CANARY;
 };
 
-export type TopologyChangedPayload = {
+export type StandbysChangedPayload = {
+    addrs: string[];
     orbsAddrs: string[];
-    ips: string[];
 };
 
 export type CommitteeChangedPayload = {
     addrs: string[];
     orbsAddrs: string[];
-    stakes: string[];
+    weights: string[];
+};
+
+export type ProtocolChangedPayload = {
+    deploymentSubset: string;
+    currentVersion: string;
+    nextVersion: string;
+    fromTimestamp: string;
 };
 
 export type EventTypes = {
-    CommitteeChanged: EventData & { returnValues: TopologyChangedPayload };
-    TopologyChanged: EventData & { returnValues: TopologyChangedPayload };
+    CommitteeChanged: EventData & { returnValues: CommitteeChangedPayload };
+    StandbysChanged: EventData & { returnValues: StandbysChangedPayload };
     SubscriptionChanged: EventData & { returnValues: SubscriptionChangedPayload };
-    ProtocolVersionChanged: EventData;
+    ProtocolVersionChanged: EventData & { returnValues: ProtocolChangedPayload };
 };

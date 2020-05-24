@@ -86,7 +86,7 @@ function getExpectedVirtualChainConfiguration(vcid: string) {
     };
 }
 
-export function getOngConfigValidator(vcid: string, topologyEvent: any, comittyEvent: any) {
+export function getOngConfigValidator(vcid: string, standbyEvent: any, comittyEvent: any) {
     const expected = {
         CurrentRefTime: isNumber,
         PageStartRefTime: isNumber,
@@ -94,9 +94,9 @@ export function getOngConfigValidator(vcid: string, topologyEvent: any, comittyE
         VirtualChains: {
             [vcid]: {
                 VirtualChainId: vcid,
-                CurrentTopology: topologyEvent.orbsAddrs.map((_: never, i: number) => ({
-                    OrbsAddress: topologyEvent.orbsAddrs[i],
-                    Ip: topologyEvent.ips[i],
+                CurrentTopology: standbyEvent.orbsAddrs.map((_: never, i: number) => ({
+                    OrbsAddress: standbyEvent.orbsAddrs[i],
+                    Ip: standbyEvent.ips[i],
                     Port: getVirtualChainPort(vcid),
                 })),
                 CommitteeEvents: [

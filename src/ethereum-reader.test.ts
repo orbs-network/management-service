@@ -30,7 +30,7 @@ test.serial('EthereumReader reads VCs from SubscriptionChanged events', async (t
 
     const reader = new EthereumReader({
         contracts: Promise.resolve({
-            Subscriptions: { address: d.subscriptions.web3Contract.options.address, firstBlock: 0 },
+            subscriptions: { address: d.subscriptions.web3Contract.options.address, firstBlock: 0 },
         }),
         firstBlock: 0,
         httpEndpoint: 'http://localhost:7545',
@@ -62,5 +62,5 @@ test.serial('EthereumConfigReader reads registry for contracts address', async (
 
     const config = reader.readEthereumConfig();
     t.deepEqual(config.httpEndpoint, 'http://localhost:7545');
-    t.deepEqual((await config.contracts).Subscriptions?.address, d.subscriptions.web3Contract.options.address);
+    t.deepEqual((await config.contracts).subscriptions?.address, d.subscriptions.web3Contract.options.address);
 });

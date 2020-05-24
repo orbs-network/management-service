@@ -83,9 +83,9 @@ export class Processor {
             },
         };
     }
-    private translateTopologyChangedEvent(
+    private translateStandbysChangedEvent(
         vchainId: string,
-        value: Timed & EventTypes['TopologyChanged']
+        value: Timed & EventTypes['StandbysChanged']
     ): TopologyElement[] {
         if (!value) {
             return []; // not yet polled a single event
@@ -102,7 +102,7 @@ export class Processor {
             Committee: value.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
                 OrbsAddress,
                 EthAddress: value.returnValues.addrs[idx],
-                EffectiveStake: parseInt(value.returnValues.stakes[idx]),
+                EffectiveStake: parseInt(value.returnValues.weights[idx]),
                 IdentityType: 0,
             })),
         };
@@ -117,7 +117,7 @@ export class Processor {
         // : Promise<VirtualChainConfigurationOutput> {
         // TODO: cap by last updated block time
         const refTime = await this.ethModel.getUTCRefTime(); // nowUTC(); //(await this.reader.getRefTime('latest')) || -1;
-        const topologyChangedEvent = this.ethModel.getLastEvent('TopologyChanged', refTime);
+        const standbysChangedEvent = this.ethModel.getLastEvent('StandbysChanged', refTime);
         const committeeChangedEvents = this.ethModel.getEventsFromTime('CommitteeChanged', refTime - utcDay, refTime);
         const subscriptionChangedEvents = this.ethModel.getEventsFromTime(
             'SubscriptionChanged',
@@ -133,7 +133,7 @@ export class Processor {
             VirtualChains: {
                 [vchainId]: {
                     VirtualChainId: vchainId,
-                    CurrentTopology: this.translateTopologyChangedEvent(vchainId, topologyChangedEvent),
+                    CurrentTopology: this.translateStandbysChangedEvent(vchainId, standbysChangedEvent),
                     CommitteeEvents: committeeChangedEvents.map((d) => this.translateCommitteeChangedEvent(d)),
                     SubscriptionEvents: subscriptionChangedEvents
                         .filter((v) => v.returnValues.vcid === vchainId)

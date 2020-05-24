@@ -6,7 +6,7 @@ import {
     createVC,
     Driver,
     subscriptionChangedEvents,
-    topologyChangedEvents,
+    standbysChangedEvents,
     committeeChangedEvents,
 } from '@orbs-network/orbs-ethereum-contracts-v2';
 import test from 'ava';
@@ -14,7 +14,7 @@ import nock from 'nock';
 import { isNumber } from 'util';
 import { DockerConfig, ServiceConfiguration } from './data-types';
 import { EthereumModel } from './eth-model';
-import { SubscriptionChangedPayload, TopologyChangedPayload, CommitteeChangedPayload } from './eth-model/events-types';
+import { SubscriptionChangedPayload, StandbysChangedPayload, CommitteeChangedPayload } from './eth-model/events-types';
 import { EthereumReader, getNewEthereumReader } from './ethereum-reader';
 import { getVirtualChainPort } from './ports';
 import { addParticipant } from './pos-v2-simulations';
@@ -264,8 +264,15 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
     const participantResult = await addParticipant(d, false);
 
     // the last event contains data on entire topology
-    const topologyEvent = topologyChangedEvents(participantResult.validatorTxResult)[0] as TopologyChangedPayload;
-    const comittyEvent = committeeChangedEvents(comittyResult.commiteeTxResult)[0] as CommitteeChangedPayload;
+    const committeeContractAddress = d.committeeGeneral.address;
+    const standbyEvent = standbysChangedEvents(
+        participantResult.syncTxResult,
+        committeeContractAddress
+    )[0] as StandbysChangedPayload;
+    const comittyEvent = committeeChangedEvents(
+        comittyResult.commiteeTxResult,
+        committeeContractAddress
+    )[0] as CommitteeChangedPayload;
     // const vc1Id = (subscriptionChangedEvents(await createVC(d)).map((e) => e.vcid)[0] as unknown) as string;
 
     await new Promise((res) => setTimeout(res, 2 * 1000)); // wait 2 seconds to give the last block a distinctive timestamp
@@ -293,13 +300,13 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
                     VirtualChainId: vcid,
                     CurrentTopology: [
                         {
-                            OrbsAddress: topologyEvent.orbsAddrs[0],
-                            Ip: topologyEvent.ips[0],
+                            OrbsAddress: standbyEvent.orbsAddrs[0],
+                            Ip: standbyEvent.ips[0],
                             Port: getVirtualChainPort(vcid),
                         },
                         {
-                            OrbsAddress: topologyEvent.orbsAddrs[1],
-                            Ip: topologyEvent.ips[1],
+                            OrbsAddress: standbyEvent.orbsAddrs[1],
+                            Ip: standbyEvent.ips[1],
                             Port: getVirtualChainPort(vcid),
                         },
                     ],

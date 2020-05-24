@@ -28,7 +28,7 @@ export interface Reader {
 export class EthereumModel {
     private events = {
         CommitteeChanged: new EventModel<EventTypes['CommitteeChanged']>(),
-        TopologyChanged: new EventModel<EventTypes['TopologyChanged']>(),
+        StandbysChanged: new EventModel<EventTypes['StandbysChanged']>(),
         SubscriptionChanged: new EventModel<EventTypes['SubscriptionChanged']>(),
         ProtocolVersionChanged: new EventModel<EventTypes['ProtocolVersionChanged']>(),
     };
