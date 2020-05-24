@@ -29,6 +29,7 @@ test('isValid returns false on invalid versions', (t) => {
         'v01.22.333',
         'v0.0.0-ferrary',
         'v0.0.0-ferrary+slow',
+        'v1.3.13-cc1cc788',
     ];
     for (const tag of invalidTags) {
         t.false(isValid(tag), tag);
@@ -54,7 +55,6 @@ test('copmpare sorts the latest version at the smallest index', (t) => {
         'v1.1.0',
     ];
     const sorted = validTags.sort(compare);
-    console.log(sorted);
     t.deepEqual(sorted, [
         '',
         '',
@@ -76,6 +76,5 @@ test('copmpare sorts the latest version at the smallest index', (t) => {
 test('regression sort', (t) => {
     const validTags = ['v1.3.11', 'v1.3.9', 'v1.3.13'];
     const sorted = validTags.sort(compare);
-    console.log(sorted);
     t.deepEqual(sorted, ['v1.3.9', 'v1.3.11', 'v1.3.13']);
 });
