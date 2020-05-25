@@ -4,6 +4,7 @@ import { TestEnvironment } from './driver';
 import { getBoyarConfigValidator, getOngConfigValidator } from './config-validate';
 import {
     createVC,
+    Driver,
     subscriptionChangedEvents,
     standbysChangedEvents,
     committeeChangedEvents,
@@ -47,6 +48,13 @@ test.serial('[E2E] serves boyar endpoint as expected', async (t) => {
     t.deepEqual(validate(res), []);
 });
 
+async function ganmacheGraceBuffer(d: Driver) {
+    await new Promise((res) => setTimeout(res, 5 * 1000)); // wait 5 seconds to give the last block a distinctive timestamp
+    const txResult = await createVC(env.contractsDriver); // force a new block to ignore finality edge cases
+    const block = await d.web3.eth.getBlock(txResult.blockNumber);
+    return Number(block.timestamp);
+}
+
 test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
     t.timeout(60 * 1000);
     t.deepEqual(vChainIds.length, numberOfVirtualChains, 'all VCs created before test begins');
@@ -55,23 +63,33 @@ test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
 
     const comittyResult = await addParticipant(d, true);
     const participantResult = await addParticipant(d, false);
-    await new Promise((res) => setTimeout(res, 5 * 1000)); // wait 5 seconds to give the last block a distinctive timestamp
-    const newVcEvents = await createVC(env.contractsDriver); // extra VC to force a new block
+
+    const lastBlockTime = ganmacheGraceBuffer(d);
 
     const committeeContractAddress = d.committeeGeneral.address;
     const standbyEvent = standbysChangedEvents(participantResult.syncTxResult, committeeContractAddress)[0];
     const comittyEvent = committeeChangedEvents(comittyResult.commiteeTxResult, committeeContractAddress)[0];
-    const lastBlockTime = +(await d.web3.eth.getBlock(newVcEvents.blockNumber)).timestamp;
 
     const vcid = vChainIds[0];
     let res = await env.fetch('app', 8080, `vchains/${vcid}/management`);
 
-    while (!res || isErrorResponse(res) || res.CurrentRefTime < lastBlockTime) {
+    // busy wait for service to initialize
+    while (!res || isErrorResponse(res)) {
         t.log('soft error response', res);
         await new Promise((res) => setTimeout(res, 1000));
         t.log('polling again');
-        t.log('lastBlockTime', lastBlockTime);
         res = await env.fetch('app', 8080, `vchains/${vcid}/management`);
+    }
+
+    // poll until service is caught up with state
+    while (res.CurrentRefTime < lastBlockTime) {
+        t.log('not caught up with state', res.CurrentRefTime, lastBlockTime);
+        await new Promise((res) => setTimeout(res, 100));
+        t.log('polling again');
+        res = await env.fetch('app', 8080, `vchains/${vcid}/management`);
+        if (!res || isErrorResponse(res)) {
+            throw new Error('error response after init: ' + JSON.stringify(res));
+        }
     }
 
     const validate = getOngConfigValidator(vcid, standbyEvent, comittyEvent);
