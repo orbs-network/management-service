@@ -1,10 +1,9 @@
 import { errorString } from './utils';
 
 export class TaskLoop {
-    private handle: NodeJS.Timeout;
+    private handle: NodeJS.Timeout | undefined;
     private started = false;
     constructor(private task: () => Promise<unknown>, private pause: number) {
-        this.handle = setTimeout(this.runTask, this.pause);
     }
 
     runTask = () => {
@@ -16,6 +15,9 @@ export class TaskLoop {
             },
             (e) => {
                 console.error(`Error polling for events: ${errorString(e)}`);
+                if (this.started) {
+                    this.handle = setTimeout(this.runTask, this.pause);
+                }
             }
         );
     };
@@ -29,6 +31,8 @@ export class TaskLoop {
 
     stop = () => {
         this.started = false;
-        clearTimeout(this.handle);
+        if (this.handle !== undefined) {
+            clearTimeout(this.handle);
+        }
     };
 }
