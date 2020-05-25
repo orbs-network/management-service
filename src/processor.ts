@@ -57,7 +57,7 @@ export class Processor {
         private config: ServiceConfiguration,
         private reader: EthereumReader,
         private ethModel: EthereumModel
-    ) {}
+    ) { }
 
     private async updateDockerConfig(dc: DockerConfig): Promise<DockerConfig> {
         if (!this.dockerTagCache.has(dc.Image)) {
@@ -151,6 +151,9 @@ export class Processor {
     async getVirtualChainConfiguration(vchainId: string) {
         const refTime = await this.ethModel.getUTCRefTime();
         const standbysChangedEvent = this.ethModel.getLastEvent('StandbysChanged', refTime);
+        if (!standbysChangedEvent) {
+            throw new Error(`can't find StandbysChanged event prior to ${refTime}`);
+        }
         const committeeChangedEvents = this.ethModel.getEventsFromTime('CommitteeChanged', refTime - utcDay, refTime);
         const subscriptionChangedEvents = this.ethModel.getEventsFromTime(
             'SubscriptionChanged',
