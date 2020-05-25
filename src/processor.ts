@@ -16,7 +16,7 @@ import { EthereumReader } from './ethereum-reader';
 import { merge } from './merge';
 import { getVirtualChainPort } from './ports';
 import tier1 from './tier-1.json';
-import { utcDay } from './utils';
+import { utcDay, nowUTC } from './utils';
 import { compare, isValid } from './versioning';
 
 export const ROLLOUT_GROUP_MAIN = 'ga';
@@ -57,7 +57,7 @@ export class Processor {
         private config: ServiceConfiguration,
         private reader: EthereumReader,
         private ethModel: EthereumModel
-    ) { }
+    ) {}
 
     private async updateDockerConfig(dc: DockerConfig): Promise<DockerConfig> {
         if (!this.dockerTagCache.has(dc.Image)) {
@@ -152,6 +152,15 @@ export class Processor {
         const refTime = await this.ethModel.getUTCRefTime();
         const standbysChangedEvent = this.ethModel.getLastEvent('StandbysChanged', refTime);
         if (!standbysChangedEvent) {
+            if (this.config.verbose) {
+                console.log(`error in getVirtualChainConfiguration(${vchainId})`);
+                console.log(`can't find StandbysChanged event prior to ${refTime}`);
+                console.log(
+                    `all StandbysChanged events : ${JSON.stringify(
+                        this.ethModel.getEventsFromTime('StandbysChanged', 0, nowUTC() * 2)
+                    )}`
+                );
+            }
             throw new Error(`can't find StandbysChanged event prior to ${refTime}`);
         }
         const committeeChangedEvents = this.ethModel.getEventsFromTime('CommitteeChanged', refTime - utcDay, refTime);
