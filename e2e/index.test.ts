@@ -53,7 +53,7 @@ async function ganacheGraceBuffer(d: Driver) {
 }
 
 test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
-    t.timeout(5 * 60 * 1000);
+    t.timeout(2.5 * 60 * 1000);
     t.deepEqual(vChainIds.length, numberOfVirtualChains, 'all VCs created before test begins');
 
     const d = env.contractsDriver;
