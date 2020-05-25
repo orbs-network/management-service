@@ -11,7 +11,7 @@ import HDWalletProvider from 'truffle-hdwallet-provider';
 export class TestEnvironment {
     private envName: string = '';
     public contractsDriver: Driver;
-    constructor(private pathToCompose: string) {}
+    constructor(private pathToCompose: string) { }
 
     getAppConfig() {
         return {
@@ -61,15 +61,13 @@ export class TestEnvironment {
             // clean up old config file
             try {
                 unlinkSync(configFilePath);
-            } catch (err) {}
+            } catch (err) { }
             // prepare file
             writeFileSync(configFilePath, JSON.stringify(this.getAppConfig()));
         });
-        test.serial.afterEach.always('print logs on failures', async (t: ExecutionContext & { passed: boolean }) => {
-            if (!t.passed) {
-                const logs = await getLogsForService(this.envName, this.pathToCompose, 'app');
-                console.log(logs);
-            }
+        test.serial.afterEach.always('print app logs', async (t: ExecutionContext) => {
+            const logs = await getLogsForService(this.envName, this.pathToCompose, 'app');
+            t.log(logs);
         });
 
         dockerComposeTool(
