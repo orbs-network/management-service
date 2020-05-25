@@ -48,12 +48,12 @@ test.serial('[E2E] serves boyar endpoint as expected', async (t) => {
 
 async function ganacheGraceBuffer(d: Driver) {
     await new Promise((res) => setTimeout(res, 5 * 1000)); // wait 5 seconds to give the last block a distinctive timestamp
-    const txResult = await createVC(env.contractsDriver); // force a new block to ignore finality edge cases
+    const txResult = await createVC(env.contractsDriver); // force a new block
     return d.web3.eth.getBlock(txResult.blockNumber);
 }
 
 test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
-    t.timeout(60 * 1000);
+    t.timeout(5 * 60 * 1000);
     t.deepEqual(vChainIds.length, numberOfVirtualChains, 'all VCs created before test begins');
 
     const d = env.contractsDriver;

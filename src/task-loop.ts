@@ -3,8 +3,7 @@ import { errorString } from './utils';
 export class TaskLoop {
     private handle: NodeJS.Timeout | undefined;
     private started = false;
-    constructor(private task: () => Promise<unknown>, private pause: number) {
-    }
+    constructor(private task: () => Promise<unknown>, private pause: number) {}
 
     runTask = () => {
         this.task().then(
