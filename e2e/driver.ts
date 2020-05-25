@@ -23,6 +23,7 @@ export class TestEnvironment {
             pollIntervalSeconds: 1,
             finalityBufferTime: 0,
             finalityBufferBlocks: 0,
+            verbose: true,
         };
     }
     init() {

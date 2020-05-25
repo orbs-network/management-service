@@ -22,6 +22,7 @@ const configValue: ServiceConfiguration = {
     finalityBufferTime: 0,
     finalityBufferBlocks: 0,
     DockerNamespace: 'foo',
+    verbose: true,
 };
 
 test.serial('parseOptions with file', (t) => {
@@ -45,6 +46,7 @@ test.serial('parseOptions with partial file (complete default values)', (t) => {
         finalityBufferTime: 20 * 60,
         finalityBufferBlocks: 80,
         DockerNamespace: 'orbsnetwork',
+        verbose: false,
     });
 });
 

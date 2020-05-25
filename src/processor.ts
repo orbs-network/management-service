@@ -125,7 +125,12 @@ export class Processor {
                 }
             }
         }
-
+        if (this.config.verbose) {
+            console.log(`calcTopology(${vchainId})`);
+            console.log(`Port = ${Port}`);
+            console.log(`topologyOrbsAddrs = ${JSON.stringify(topologyOrbsAddrs)}`);
+            console.log(`ips = ${JSON.stringify([...ips.entries()].map((e) => e[0] + '->' + e[1]))}`);
+        }
         return topologyOrbsAddrs.flatMap((OrbsAddress) => {
             const Ip = ips.get(OrbsAddress);
             if (Ip) {
@@ -153,6 +158,17 @@ export class Processor {
             refTime
         );
         const validatorRegisteredEvents = this.ethModel.getIteratorFrom('ValidatorRegistered', refTime);
+        if (this.config.verbose) {
+            console.log(`getVirtualChainConfiguration(${vchainId})`);
+            console.log(`refTime = ${refTime}`);
+            console.log(`standbysChangedEvent = ${JSON.stringify(standbysChangedEvent.returnValues)}`);
+            console.log(
+                `committeeChangedEvents = ${JSON.stringify(committeeChangedEvents.map((e) => e.returnValues))}`
+            );
+            console.log(
+                `subscriptionChangedEvents = ${JSON.stringify(subscriptionChangedEvents.map((e) => e.returnValues))}`
+            );
+        }
         const CurrentTopology = this.calcTopology(
             vchainId,
             standbysChangedEvent,

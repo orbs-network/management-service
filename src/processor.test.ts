@@ -106,6 +106,7 @@ test.serial(
             finalityBufferTime: 0,
             finalityBufferBlocks: 0,
             DockerNamespace: 'myDockerNamespace',
+            verbose: true,
         };
         const fakeTag = 'v9.9.9';
         const fakeReader = ({
@@ -180,6 +181,7 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
         finalityBufferTime: 0,
         finalityBufferBlocks: 0,
         DockerNamespace: 'myDockerNamespace',
+        verbose: true,
     };
     const fakeTag = 'v9.9.9';
     const processor = new Processor(config, getNewEthereumReader(config), null as any);
@@ -261,6 +263,7 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
         finalityBufferTime: 0,
         finalityBufferBlocks: 0,
         DockerNamespace: 'foo',
+        verbose: true,
     };
 
     const ethReader = getNewEthereumReader(config);

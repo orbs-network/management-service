@@ -6,8 +6,6 @@ import {
     createVC,
     Driver,
     subscriptionChangedEvents,
-    standbysChangedEvents,
-    committeeChangedEvents,
 } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { isErrorResponse } from '../src/data-types';
 import { addParticipant } from '../src/pos-v2-simulations';
