@@ -15,6 +15,7 @@ const pollSize = 1000;
 export type ModelConfig = {
     finalityBufferTime: number;
     finalityBufferBlocks: number;
+    verbose: boolean;
 };
 export interface Reader {
     getBlockNumber(): Promise<number>;
@@ -68,6 +69,13 @@ export class EthereumModel {
     async pollEvents(): Promise<number> {
         // determine latest block after finality concerns
         const [latestFinalBlockNumber, finalityTime] = await this.getFinalityBar();
+
+        if (this.config.verbose) {
+            console.log(`pollEvents()`);
+            console.log(`getUTCRefTime() = ${this.getUTCRefTime()}`);
+            console.log(`latestFinalBlockNumber = ${latestFinalBlockNumber}`);
+            console.log(`finalityTime = ${finalityTime + 1}`);
+        }
         const latestBlocks = await Promise.all(
             eventNames.map((n) => this.pollEvent(n, latestFinalBlockNumber, finalityTime + 1))
         );
@@ -83,6 +91,11 @@ export class EthereumModel {
         const model = this.getEventModel(eventName);
         const fromBlock = model.getNextBlock();
         const toBlock = Math.min(latestBlockNumber, fromBlock + pollSize);
+        if (this.config.verbose) {
+            console.log(`pollEvent(${eventName})`);
+            console.log(`fromBlock = ${fromBlock}`);
+            console.log(`toBlock = ${toBlock}`);
+        }
         let skipped = false;
         try {
             const events = (await this.reader.getPastEvents(eventName, { fromBlock, toBlock })).sort(
@@ -95,6 +108,10 @@ export class EthereumModel {
                 } else if (blockTime > 0) {
                     model.rememberEvent(event, blockTime);
                 } else {
+                    if (this.config.verbose) {
+                        console.log(`skipping block ${event.blockNumber}, because it did not pass finality`);
+                        console.log(`skipped event: ${JSON.stringify(event.returnValues)}`);
+                    }
                     skipped = true;
                     break;
                 }

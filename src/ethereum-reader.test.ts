@@ -12,6 +12,7 @@ test.serial('EthereumReader reads getRefTime', async (t) => {
         contracts: null as any,
         firstBlock: 0,
         httpEndpoint: 'http://localhost:7545',
+        verbose:true,
     });
 
     const refTime = (await reader.getRefTime('latest')) || -1;
@@ -34,6 +35,7 @@ test.serial('EthereumReader reads VCs from SubscriptionChanged events', async (t
         }),
         firstBlock: 0,
         httpEndpoint: 'http://localhost:7545',
+        verbose:true,
     });
 
     const vcs = await reader.getAllVirtualChains();
@@ -58,6 +60,7 @@ test.serial('EthereumConfigReader reads registry for contracts address', async (
         EthereumGenesisContract: d.contractRegistry.web3Contract.options.address,
         EthereumEndpoint: 'http://localhost:7545',
         FirstBlock: 0,
+        verbose:true,
     });
 
     const config = reader.readEthereumConfig();

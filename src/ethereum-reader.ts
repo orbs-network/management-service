@@ -57,6 +57,7 @@ export type ServiceEthereumConfiguration = {
     EthereumGenesisContract: string;
     EthereumEndpoint: string;
     FirstBlock: BlockNumber;
+    verbose: boolean;
 };
 export class EthereumConfigReader {
     private web3: Web3;
@@ -93,6 +94,7 @@ export class EthereumConfigReader {
             contracts: this.readContractsConfig(),
             firstBlock: this.config.FirstBlock, // events[0].blockNumber,
             httpEndpoint: this.config.EthereumEndpoint,
+            verbose: this.config.verbose,
         };
     }
 }
@@ -153,6 +155,7 @@ export type EthereumConfig = {
     contracts: Promise<{ [t in ContractName]?: ContractMetadata }>;
     firstBlock: BlockNumber;
     httpEndpoint: string;
+    verbose: boolean;
 };
 
 export function contractByEventName(eventName: EventName): ContractName {
@@ -187,6 +190,7 @@ export class EthereumReader {
         return new this.web3.eth.Contract(abi, contractMetadata.address);
     }
 
+    // TODO: retire this function in favor of eth model
     async getAllVirtualChains(): Promise<Array<string>> {
         const web3Contract = await this.connect('subscriptions');
         const events = await retryGetPastEventsWithLatest(

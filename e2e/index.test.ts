@@ -64,6 +64,8 @@ test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
 
     const lastBlockTime = ganmacheGraceBuffer(d);
 
+    t.log('lastBlockTime : ' + lastBlockTime);
+
     const vcid = vChainIds[0];
     let res = await env.fetch('app', 8080, `vchains/${vcid}/management`);
 

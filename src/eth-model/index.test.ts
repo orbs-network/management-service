@@ -109,11 +109,13 @@ async function pollEvents(d: Driver) {
         FirstBlock: zeroBlock,
         EthereumGenesisContract: d.contractRegistry.address,
         EthereumEndpoint: 'http://localhost:7545',
+        verbose: true,
     };
     const ethReader = getNewEthereumReader(config);
     const ethModel = new EthereumModel(ethReader, {
         finalityBufferTime: 0,
         finalityBufferBlocks: 0,
+        verbose: true,
     });
     while ((await ethModel.pollEvents()) < (await ethReader.getBlockNumber())) {
         await new Promise((res) => setTimeout(res, 50));
@@ -180,6 +182,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow', as
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferTime: 0,
         finalityBufferBlocks: 0,
+        verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 3);
 });
@@ -189,6 +192,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferTime: 0,
         finalityBufferBlocks: 2,
+        verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 1);
 });
@@ -198,6 +202,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferTime: 1,
         finalityBufferBlocks: 0,
+        verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 2);
 });
@@ -207,6 +212,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferTime: 19,
         finalityBufferBlocks: 1,
+        verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 0);
 });
@@ -216,6 +222,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferTime: 19,
         finalityBufferBlocks: 1,
+        verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 1);
 });
@@ -225,6 +232,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferTime: 5,
         finalityBufferBlocks: 2,
+        verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 1);
 });
