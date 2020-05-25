@@ -66,10 +66,6 @@ test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
 
     const lastBlockTime = ganmacheGraceBuffer(d);
 
-    const committeeContractAddress = d.committeeGeneral.address;
-    const standbyEvent = standbysChangedEvents(participantResult.syncTxResult, committeeContractAddress)[0];
-    const comittyEvent = committeeChangedEvents(comittyResult.commiteeTxResult, committeeContractAddress)[0];
-
     const vcid = vChainIds[0];
     let res = await env.fetch('app', 8080, `vchains/${vcid}/management`);
 
@@ -92,7 +88,7 @@ test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
         }
     }
 
-    const validate = getOngConfigValidator(vcid, standbyEvent, comittyEvent);
+    const validate = getOngConfigValidator(vcid, comittyResult, participantResult, d.committeeGeneral.address);
     const errors = validate(res);
 
     t.deepEqual(errors, []);

@@ -1,11 +1,18 @@
 import { getVirtualChainPort } from '../src/ports';
 import { isNumber } from 'util';
 import { deepDataMatcher } from '../src/test-kit';
-
+import { addParticipant } from '../src/pos-v2-simulations';
+import { Dictionary } from 'lodash';
+import { validatorRegisteredEvents, standbysChangedEvents, committeeChangedEvents } from '@orbs-network/orbs-ethereum-contracts-v2';
+import {
+    StandbysChangedPayload,
+    CommitteeChangedPayload,
+    ValidatorRegisteredPayload,
+} from '../src/eth-model/events-types';
 /*
 Below is the expected behaviour of the management service in the E2E test.
 The goal is to keep the expectations as static as reasonably possible, to help readability.
-The dynamic parts are:
+The dynamic parts in the boyar endpoint are:
  - the number of virtual chains to match
  - the `Id` and `ExternalPort` properties of virtual chain configurations
  - the configuration of the management service itself (determined by test fixture)
@@ -85,8 +92,33 @@ function getExpectedVirtualChainConfiguration(vcid: string) {
         InternalPort: 4400,
     };
 }
+/**
+ * extract the value type from a promise type
+ */
+type Await<T> = T extends PromiseLike<infer U> ? U : T
 
-export function getOngConfigValidator(vcid: string, standbyEvent: any, comittyEvent: any) {
+type ParticipantResult = Await<ReturnType<typeof addParticipant>>;
+export function getOngConfigValidator(vcid: string, comittyResult: ParticipantResult, participantResult: ParticipantResult, committeeContractAddress: string) {
+    const ips: Dictionary<string> = {};
+    const participant1Registraion = validatorRegisteredEvents(
+        comittyResult.validatorTxResult
+    )[0] as ValidatorRegisteredPayload;
+    const participant2Registraion = validatorRegisteredEvents(
+        participantResult.validatorTxResult
+    )[0] as ValidatorRegisteredPayload;
+
+    ips[participant1Registraion.orbsAddr] = participant1Registraion.ip;
+    ips[participant2Registraion.orbsAddr] = participant2Registraion.ip;
+    // the last event contains data on entire topology
+    const standbyEvent = standbysChangedEvents(
+        participantResult.syncTxResult,
+        committeeContractAddress
+    )[0] as StandbysChangedPayload;
+    const comittyEvent = committeeChangedEvents(
+        comittyResult.commiteeTxResult,
+        committeeContractAddress
+    )[0] as CommitteeChangedPayload;
+
     const expected = {
         CurrentRefTime: isNumber,
         PageStartRefTime: isNumber,
@@ -94,19 +126,28 @@ export function getOngConfigValidator(vcid: string, standbyEvent: any, comittyEv
         VirtualChains: {
             [vcid]: {
                 VirtualChainId: vcid,
-                CurrentTopology: standbyEvent.orbsAddrs.map((_: never, i: number) => ({
-                    OrbsAddress: standbyEvent.orbsAddrs[i],
-                    Ip: standbyEvent.ips[i],
-                    Port: getVirtualChainPort(vcid),
-                })),
+                CurrentTopology: [
+                    {
+                        OrbsAddress: standbyEvent.orbsAddrs[0],
+                        Ip: ips[standbyEvent.orbsAddrs[0]],
+                        Port: getVirtualChainPort(vcid),
+                    },
+                    {
+                        OrbsAddress: comittyEvent.orbsAddrs[0],
+                        Ip: ips[comittyEvent.orbsAddrs[0]],
+                        Port: getVirtualChainPort(vcid),
+                    },
+                ],
                 CommitteeEvents: [
                     {
-                        Committee: comittyEvent.orbsAddrs.map((_: never, i: number) => ({
-                            EthAddress: comittyEvent.addrs[i],
-                            OrbsAddress: comittyEvent.orbsAddrs[i],
-                            EffectiveStake: parseInt(comittyEvent.stakes[i]),
-                            IdentityType: 0,
-                        })),
+                        Committee: [
+                            {
+                                EthAddress: comittyEvent.addrs[0],
+                                OrbsAddress: comittyEvent.orbsAddrs[0],
+                                EffectiveStake: parseInt(comittyEvent.weights[0]),
+                                IdentityType: 0,
+                            },
+                        ],
                     },
                 ],
                 SubscriptionEvents: [
