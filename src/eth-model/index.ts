@@ -102,11 +102,20 @@ export class EthereumModel {
                 const events = (await this.reader.getPastEvents(eventName, { fromBlock, toBlock })).sort(
                     (e1, e2) => e1.blockNumber - e2.blockNumber
                 );
+                if (this.config.verbose) {
+                    console.log(`events size ${events.length}`);
+                }
                 for (const event of events) {
                     const blockTime = await this.blockTime.getExactBlockTime(event.blockNumber, finalityTime);
                     if (blockTime == null) {
-                        throw new Error(`got null reading block ${event.blockNumber}`);
+                        if (this.config.verbose) {
+                            console.log(`got null time reading block ${event.blockNumber}`);
+                        }
+                        throw new Error(`got null time reading block ${event.blockNumber}`);
                     } else if (blockTime > 0) {
+                        if (this.config.verbose) {
+                            console.log(`saving event from time ${blockTime} : ${JSON.stringify(event.returnValues)}`);
+                        }
                         model.rememberEvent(event, blockTime);
                     } else {
                         if (this.config.verbose) {
