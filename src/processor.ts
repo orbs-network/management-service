@@ -16,7 +16,7 @@ import { EthereumReader } from './ethereum-reader';
 import { merge } from './merge';
 import { getVirtualChainPort } from './ports';
 import tier1 from './tier-1.json';
-import { utcDay, nowUTC } from './utils';
+import { utcDay, nowUTC, getIpFromHex } from './utils';
 import { compare, isValid } from './versioning';
 
 export const ROLLOUT_GROUP_MAIN = 'ga';
@@ -119,7 +119,7 @@ export class Processor {
         for (const validator of validatorRegisteredEvents) {
             const orbsAddress = validator.returnValues.orbsAddr;
             if (validatorsLeft.delete(orbsAddress)) {
-                ips.set(orbsAddress, validator.returnValues.ip);
+                ips.set(orbsAddress, getIpFromHex(validator.returnValues.ip));
                 if (validatorsLeft.size === 0) {
                     break;
                 }

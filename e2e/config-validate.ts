@@ -1,6 +1,7 @@
 import { getVirtualChainPort } from '../src/ports';
 import { isNumber } from 'util';
 import { deepDataMatcher } from '../src/test-kit';
+import { getIpFromHex } from '../src/utils';
 import { addParticipant } from '../src/pos-v2-simulations';
 import { Dictionary } from 'lodash';
 import { validatorRegisteredEvents, standbysChangedEvents, committeeChangedEvents } from '@orbs-network/orbs-ethereum-contracts-v2';
@@ -107,8 +108,8 @@ export function getOngConfigValidator(vcid: string, comittyResult: ParticipantRe
         participantResult.validatorTxResult
     )[0] as ValidatorRegisteredPayload;
 
-    ips[participant1Registraion.orbsAddr] = participant1Registraion.ip;
-    ips[participant2Registraion.orbsAddr] = participant2Registraion.ip;
+    ips[participant1Registraion.orbsAddr] = getIpFromHex(participant1Registraion.ip);
+    ips[participant2Registraion.orbsAddr] = getIpFromHex(participant2Registraion.ip);
     // the last event contains data on entire topology
     const standbyEvent = standbysChangedEvents(
         participantResult.syncTxResult,

@@ -28,6 +28,7 @@ import { Processor, ROLLOUT_GROUP_MAIN } from './processor';
 import { deepDataMatcher, nockBoyarConfig, nockDockerHub } from './test-kit';
 import tier1 from './tier-1.json';
 import { Dictionary } from 'lodash';
+import { getIpFromHex } from './utils';
 // import { DEPLOYMENT_SUBSET_MAIN } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/driver';
 
 test.serial.afterEach.always(() => {
@@ -281,8 +282,8 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
         participantResult.validatorTxResult
     )[0] as ValidatorRegisteredPayload;
 
-    ips[participant1Registraion.orbsAddr] = participant1Registraion.ip;
-    ips[participant2Registraion.orbsAddr] = participant2Registraion.ip;
+    ips[participant1Registraion.orbsAddr] = getIpFromHex(participant1Registraion.ip);
+    ips[participant2Registraion.orbsAddr] = getIpFromHex(participant2Registraion.ip);
     // the last event contains data on entire topology
     const committeeContractAddress = d.committeeGeneral.address;
     const standbyEvent = standbysChangedEvents(

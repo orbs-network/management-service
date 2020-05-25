@@ -35,3 +35,12 @@ export function toNumber(val: number | string) {
         return parseInt(val);
     } else return val;
 }
+
+function byte(value: number, byteIdx: number) {
+    const shift = byteIdx * 8;
+    return (value & (0xff << shift)) >> shift;
+}
+export function getIpFromHex(ipStr: string): string {
+    const ipBytes = Number(ipStr);
+    return byte(ipBytes, 3) + '.' + byte(ipBytes, 2) + '.' + byte(ipBytes, 1) + '.' + byte(ipBytes, 0);
+}
