@@ -46,11 +46,10 @@ test.serial('[E2E] serves boyar endpoint as expected', async (t) => {
     t.deepEqual(validate(res), []);
 });
 
-async function ganmacheGraceBuffer(d: Driver) {
+async function ganacheGraceBuffer(d: Driver) {
     await new Promise((res) => setTimeout(res, 5 * 1000)); // wait 5 seconds to give the last block a distinctive timestamp
     const txResult = await createVC(env.contractsDriver); // force a new block to ignore finality edge cases
-    const block = await d.web3.eth.getBlock(txResult.blockNumber);
-    return Number(block.timestamp);
+    return d.web3.eth.getBlock(txResult.blockNumber);
 }
 
 test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
@@ -62,9 +61,15 @@ test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
     const comittyResult = await addParticipant(d, true);
     const participantResult = await addParticipant(d, false);
 
-    const lastBlockTime = await ganmacheGraceBuffer(d);
+    t.log('lastFixtureBlock : ' + participantResult.syncTxResult.blockNumber);
+    const lastFixtureBlockTime = Number((await d.web3.eth.getBlock(participantResult.syncTxResult.blockNumber)).timestamp);
+    t.log('lastFixtureBlockTime : ' + lastFixtureBlockTime);
 
-    t.log('lastBlockTime : ' + lastBlockTime);
+    const lastBlock = await ganacheGraceBuffer(d);
+    const lastBlockTime = Number(lastBlock.timestamp);
+
+    t.log('lastBlock (with finality grace): ' + lastBlock.number);
+    t.log('lastBlockTime (with finality grace): ' + lastBlockTime);
 
     const vcid = vChainIds[0];
     let res = await env.fetch('app', 8080, `vchains/${vcid}/management`);
