@@ -62,7 +62,7 @@ test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
     const comittyResult = await addParticipant(d, true);
     const participantResult = await addParticipant(d, false);
 
-    const lastBlockTime = ganmacheGraceBuffer(d);
+    const lastBlockTime = await ganmacheGraceBuffer(d);
 
     t.log('lastBlockTime : ' + lastBlockTime);
 
