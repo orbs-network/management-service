@@ -41,6 +41,8 @@ export class TestEnvironment {
             () => new Promise((res) => setTimeout(res, 5 * 1000))
         );
         test.serial.before('start contracts driver', async (t) => {
+            console.log('starting contracts driver');
+            t.log('starting contracts driver');
             t.timeout(60 * 1000);
             const ganacheAddress = await getAddressForService(this.envName, this.pathToCompose, 'ganache', 7545);
             this.contractsDriver = await Driver.new({
@@ -56,6 +58,9 @@ export class TestEnvironment {
                     );
                 },
             });
+
+            console.log('contracts driver initialized');
+            t.log('contracts driver initialized');
         });
         test.serial.before('write management service config file', async (t) => {
             const configFilePath = join(__dirname, 'app-config.json');
@@ -83,6 +88,10 @@ export class TestEnvironment {
                 // containerCleanUp: false
             } as any
         );
+        test.serial.before('(log step)', async (t) => {
+            console.log('e2e driver done');
+            t.log('e2e driver done');
+        });
     }
 
     async fetch(serviceName: string, port: number, path: string) {
