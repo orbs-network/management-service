@@ -38,7 +38,7 @@ test.serial('parseOptions with partial file (complete default values)', (t) => {
     });
 
     const options = parseOptions(['--config', configPath]);
-    t.deepEqual(validateServiceConfiguration(options), []);
+    t.deepEqual(validateServiceConfiguration(options), undefined);
 });
 
 test.serial('parseOptions with no file', (t) => {
