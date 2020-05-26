@@ -78,7 +78,6 @@ export class EthereumModel {
         const fromBlock = model.getNextBlock();
         if (fromBlock <= latestBlockNumber) {
             const toBlock = Math.min(latestBlockNumber, fromBlock + pollSize);
-            let skipped = false;
             try {
                 const events = (await this.reader.getPastEvents(eventName, { fromBlock, toBlock })).sort(
                     (e1, e2) => e1.blockNumber - e2.blockNumber
@@ -95,7 +94,7 @@ export class EthereumModel {
                             console.log(`got null time reading ${eventName} from block ${event.blockNumber}`);
                         }
                         throw new Error(`got null time reading ${eventName} from block ${event.blockNumber}`);
-                    } else if (blockTime > 0) {
+                    } else {
                         if (this.config.verbose) {
                             console.log(
                                 `saving event ${eventName} from time ${blockTime} : ${JSON.stringify(
@@ -104,21 +103,10 @@ export class EthereumModel {
                             );
                         }
                         model.rememberEvent(event, blockTime);
-                    } else {
-                        if (this.config.verbose) {
-                            console.log(
-                                `skipping ${eventName} from block ${event.blockNumber}, because it did not pass finality`
-                            );
-                            console.log(`skipped event: ${JSON.stringify(event.returnValues)}`);
-                        }
-                        skipped = true;
-                        break;
                     }
                 }
-                if (!skipped) {
-                    // assume all blocks till toBlock are read
-                    model.setNextBlock(toBlock + 1);
-                }
+                // assume all blocks till toBlock are read
+                model.setNextBlock(toBlock + 1);
             } catch (e) {
                 console.error(`failed reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(e)}`);
             }
