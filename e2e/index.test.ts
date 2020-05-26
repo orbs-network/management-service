@@ -34,10 +34,16 @@ test.serial('[E2E] serves boyar endpoint as expected', async (t) => {
     t.timeout(60 * 1000);
     t.deepEqual(vChainIds.length, numberOfVirtualChains, 'all VCs created before test begins');
 
+    const lastBlock = await ganacheGraceBuffer(env.contractsDriver);
+    const lastBlockTime = Number(lastBlock.timestamp);
+
+    t.log('lastBlock (with finality grace): ' + lastBlock.number);
+    t.log('lastBlockTime (with finality grace): ' + lastBlockTime);
+
     let res = await env.fetch('app', 8080, 'node/management');
 
     while (!res || isErrorResponse(res) || res.chains.length < numberOfVirtualChains) {
-        t.log('error response', res);
+        t.log('soft error response', res);
         await new Promise((res) => setTimeout(res, 1000));
         t.log('polling again');
         res = await env.fetch('app', 8080, 'node/management');
@@ -50,8 +56,8 @@ test.serial('[E2E] serves boyar endpoint as expected', async (t) => {
 
 async function ganacheGraceBuffer(d: Driver) {
     await new Promise((res) => setTimeout(res, 5 * 1000)); // wait 5 seconds to give the last block a distinctive timestamp
-    const txResult = await createVC(env.contractsDriver); // force a new block
-    return d.web3.eth.getBlock(txResult.blockNumber);
+    const txResult = await d.newSubscriber('defaultTier', 0); // add a block for finality
+    return d.web3.eth.getBlock('latest');
 }
 
 test.serial('[E2E] serves ONG endpoint as expected', async (t) => {

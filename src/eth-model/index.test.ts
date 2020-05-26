@@ -114,6 +114,7 @@ async function pollEvents(d: Driver) {
     const ethReader = getNewEthereumReader(config);
     const ethModel = new EthereumModel(ethReader, {
         finalityBufferBlocks: 0,
+        FirstBlock: 0,
         verbose: true,
     });
     while ((await ethModel.pollEvents()) < (await ethReader.getBlockNumber())) {
@@ -180,6 +181,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow', as
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferBlocks: 0,
+        FirstBlock: 0,
         verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 3);
@@ -189,6 +191,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferBlocks: 2,
+        FirstBlock: 0,
         verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 1);
@@ -198,6 +201,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferBlocks: 0,
+        FirstBlock: 0,
         verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 2);
@@ -207,6 +211,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferBlocks: 1,
+        FirstBlock: 0,
         verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 0);
@@ -216,6 +221,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferBlocks: 1,
+        FirstBlock: 0,
         verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 1);
@@ -225,6 +231,7 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
         finalityBufferBlocks: 2,
+        FirstBlock: 0,
         verbose: true,
     });
     await assertExpectedEvents(t, ethModel, fakeReader, 1);
