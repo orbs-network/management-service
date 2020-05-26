@@ -6,21 +6,29 @@ import {
     createVC,
     Driver,
     subscriptionChangedEvents,
-    topologyChangedEvents,
+    standbysChangedEvents,
     committeeChangedEvents,
+    validatorRegisteredEvents,
 } from '@orbs-network/orbs-ethereum-contracts-v2';
 import test from 'ava';
 import nock from 'nock';
 import { isNumber } from 'util';
 import { DockerConfig, ServiceConfiguration } from './data-types';
 import { EthereumModel } from './eth-model';
-import { SubscriptionChangedPayload, TopologyChangedPayload, CommitteeChangedPayload } from './eth-model/events-types';
+import {
+    SubscriptionChangedPayload,
+    StandbysChangedPayload,
+    CommitteeChangedPayload,
+    ValidatorRegisteredPayload,
+} from './eth-model/events-types';
 import { EthereumReader, getNewEthereumReader } from './ethereum-reader';
 import { getVirtualChainPort } from './ports';
 import { addParticipant } from './pos-v2-simulations';
 import { Processor, ROLLOUT_GROUP_MAIN } from './processor';
 import { deepDataMatcher, nockBoyarConfig, nockDockerHub } from './test-kit';
 import tier1 from './tier-1.json';
+import { Dictionary } from 'lodash';
+import { getIpFromHex } from './utils';
 // import { DEPLOYMENT_SUBSET_MAIN } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/driver';
 
 test.serial.afterEach.always(() => {
@@ -99,6 +107,7 @@ test.serial(
             finalityBufferTime: 0,
             finalityBufferBlocks: 0,
             DockerNamespace: 'myDockerNamespace',
+            verbose: true,
         };
         const fakeTag = 'v9.9.9';
         const fakeReader = ({
@@ -173,6 +182,7 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
         finalityBufferTime: 0,
         finalityBufferBlocks: 0,
         DockerNamespace: 'myDockerNamespace',
+        verbose: true,
     };
     const fakeTag = 'v9.9.9';
     const processor = new Processor(config, getNewEthereumReader(config), null as any);
@@ -254,6 +264,7 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
         finalityBufferTime: 0,
         finalityBufferBlocks: 0,
         DockerNamespace: 'foo',
+        verbose: true,
     };
 
     const ethReader = getNewEthereumReader(config);
@@ -263,9 +274,26 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
     const comittyResult = await addParticipant(d, true);
     const participantResult = await addParticipant(d, false);
 
+    const ips: Dictionary<string> = {};
+    const participant1Registraion = validatorRegisteredEvents(
+        comittyResult.validatorTxResult
+    )[0] as ValidatorRegisteredPayload;
+    const participant2Registraion = validatorRegisteredEvents(
+        participantResult.validatorTxResult
+    )[0] as ValidatorRegisteredPayload;
+
+    ips[participant1Registraion.orbsAddr] = getIpFromHex(participant1Registraion.ip);
+    ips[participant2Registraion.orbsAddr] = getIpFromHex(participant2Registraion.ip);
     // the last event contains data on entire topology
-    const topologyEvent = topologyChangedEvents(participantResult.validatorTxResult)[0] as TopologyChangedPayload;
-    const comittyEvent = committeeChangedEvents(comittyResult.commiteeTxResult)[0] as CommitteeChangedPayload;
+    const committeeContractAddress = d.committeeGeneral.address;
+    const standbyEvent = standbysChangedEvents(
+        participantResult.syncTxResult,
+        committeeContractAddress
+    )[0] as StandbysChangedPayload;
+    const comittyEvent = committeeChangedEvents(
+        comittyResult.commiteeTxResult,
+        committeeContractAddress
+    )[0] as CommitteeChangedPayload;
     // const vc1Id = (subscriptionChangedEvents(await createVC(d)).map((e) => e.vcid)[0] as unknown) as string;
 
     await new Promise((res) => setTimeout(res, 2 * 1000)); // wait 2 seconds to give the last block a distinctive timestamp
@@ -293,13 +321,13 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
                     VirtualChainId: vcid,
                     CurrentTopology: [
                         {
-                            OrbsAddress: topologyEvent.orbsAddrs[0],
-                            Ip: topologyEvent.ips[0],
+                            OrbsAddress: standbyEvent.orbsAddrs[0],
+                            Ip: ips[standbyEvent.orbsAddrs[0]],
                             Port: getVirtualChainPort(vcid),
                         },
                         {
-                            OrbsAddress: topologyEvent.orbsAddrs[1],
-                            Ip: topologyEvent.ips[1],
+                            OrbsAddress: comittyEvent.orbsAddrs[0],
+                            Ip: ips[comittyEvent.orbsAddrs[0]],
                             Port: getVirtualChainPort(vcid),
                         },
                     ],
@@ -309,7 +337,7 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
                                 {
                                     EthAddress: comittyEvent.addrs[0],
                                     OrbsAddress: comittyEvent.orbsAddrs[0],
-                                    EffectiveStake: parseInt(comittyEvent.stakes[0]),
+                                    EffectiveStake: parseInt(comittyEvent.weights[0]),
                                     IdentityType: 0,
                                 },
                             ],

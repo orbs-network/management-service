@@ -27,6 +27,7 @@ test.serial('[small e2e] index serves /node/management with virtual chains', asy
         finalityBufferTime: 0,
         finalityBufferBlocks: 0,
         DockerNamespace: 'orbsnetwork',
+        verbose: true,
     };
     const server = serve(config);
     try {

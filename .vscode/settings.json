@@ -11,5 +11,6 @@
         "editor.formatOnSave": true,
     },
     "typescript.tsdk": "node_modules/typescript/lib",
-    "eslint.format.enable": true
+    "eslint.format.enable": true,
+    "terminal.integrated.scrollback": 10000
 }

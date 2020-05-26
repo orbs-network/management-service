@@ -35,7 +35,7 @@
             "cwd": "${workspaceRoot}",
             "name": "Debug E2E AVA test file",
             "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/ava",
-            "runtimeArgs": ["--config", "./ava.config.e2e.js", "debug", "--break", "${file}"],
+            "runtimeArgs": ["--config", "./ava.config.e2e.js", "debug", "--break", "e2e/index.test.ts"],
             "port": 9229,
             "outputCapture": "std",
             "skipFiles": ["<node_internals>/**/*.js"]

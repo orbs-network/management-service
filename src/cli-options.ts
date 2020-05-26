@@ -20,6 +20,7 @@ export function parseOptions(argv: string[]): ServiceConfiguration {
             finalityBufferTime: 20 * 60,
             finalityBufferBlocks: 80,
             DockerNamespace: 'orbsnetwork',
+            verbose: false,
         },
         ...options.config.map((configFile) => JSON.parse(readFileSync(configFile).toString()))
     );

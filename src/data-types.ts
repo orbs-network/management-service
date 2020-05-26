@@ -14,6 +14,7 @@ export interface ServiceConfiguration {
     DockerNamespace: string;
     finalityBufferTime: number;
     finalityBufferBlocks: number;
+    verbose: boolean;
 }
 
 // export type EthereumNetwork = 'ganache' | 'mainnet' | 'ropsten';
@@ -58,6 +59,10 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
         DockerNamespace: {
             presence: { allowEmpty: false },
             type: 'string',
+        },
+        verbose: {
+            presence: { allowEmpty: false },
+            type: 'boolean',
         },
     };
     return validate(c, serviceConfigConstraints, { format: 'flat' });

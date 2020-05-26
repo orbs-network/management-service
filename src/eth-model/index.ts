@@ -15,6 +15,7 @@ const pollSize = 1000;
 export type ModelConfig = {
     finalityBufferTime: number;
     finalityBufferBlocks: number;
+    verbose: boolean;
 };
 export interface Reader {
     getBlockNumber(): Promise<number>;
@@ -28,9 +29,10 @@ export interface Reader {
 export class EthereumModel {
     private events = {
         CommitteeChanged: new EventModel<EventTypes['CommitteeChanged']>(),
-        TopologyChanged: new EventModel<EventTypes['TopologyChanged']>(),
+        StandbysChanged: new EventModel<EventTypes['StandbysChanged']>(),
         SubscriptionChanged: new EventModel<EventTypes['SubscriptionChanged']>(),
         ProtocolVersionChanged: new EventModel<EventTypes['ProtocolVersionChanged']>(),
+        ValidatorRegistered: new EventModel<EventTypes['ValidatorRegistered']>(),
     };
     // private events = new Map<EventName, EventModel>();
     blockTime: BlocksTimeModel;
@@ -67,6 +69,14 @@ export class EthereumModel {
     async pollEvents(): Promise<number> {
         // determine latest block after finality concerns
         const [latestFinalBlockNumber, finalityTime] = await this.getFinalityBar();
+
+        if (this.config.verbose) {
+            console.log(
+                `pollEvents() getUTCRefTime() = ${await this.getUTCRefTime()} latestFinalBlockNumber = ${latestFinalBlockNumber} finalityTime = ${
+                    finalityTime + 1
+                }`
+            );
+        }
         const latestBlocks = await Promise.all(
             eventNames.map((n) => this.pollEvent(n, latestFinalBlockNumber, finalityTime + 1))
         );
@@ -81,29 +91,54 @@ export class EthereumModel {
     ): Promise<number> {
         const model = this.getEventModel(eventName);
         const fromBlock = model.getNextBlock();
-        const toBlock = Math.min(latestBlockNumber, fromBlock + pollSize);
-        let skipped = false;
-        try {
-            const events = (await this.reader.getPastEvents(eventName, { fromBlock, toBlock })).sort(
-                (e1, e2) => e1.blockNumber - e2.blockNumber
-            );
-            for (const event of events) {
-                const blockTime = await this.blockTime.getExactBlockTime(event.blockNumber, finalityTime);
-                if (blockTime == null) {
-                    throw new Error(`got null reading block ${event.blockNumber}`);
-                } else if (blockTime > 0) {
-                    model.rememberEvent(event, blockTime);
-                } else {
-                    skipped = true;
-                    break;
+        if (fromBlock <= latestBlockNumber) {
+            const toBlock = Math.min(latestBlockNumber, fromBlock + pollSize);
+            let skipped = false;
+            try {
+                const events = (await this.reader.getPastEvents(eventName, { fromBlock, toBlock })).sort(
+                    (e1, e2) => e1.blockNumber - e2.blockNumber
+                );
+                if (this.config.verbose) {
+                    console.log(
+                        `pollEvent(${eventName}) fromBlock = ${fromBlock} toBlock = ${toBlock} events size ${events.length}`
+                    );
                 }
+                for (const event of events) {
+                    const blockTime = await this.blockTime.getExactBlockTime(event.blockNumber, finalityTime);
+                    if (blockTime == null) {
+                        if (this.config.verbose) {
+                            console.log(`got null time reading ${eventName} from block ${event.blockNumber}`);
+                        }
+                        throw new Error(`got null time reading ${eventName} from block ${event.blockNumber}`);
+                    } else if (blockTime > 0) {
+                        if (this.config.verbose) {
+                            console.log(
+                                `saving event ${eventName} from time ${blockTime} : ${JSON.stringify(
+                                    event.returnValues
+                                )}`
+                            );
+                        }
+                        model.rememberEvent(event, blockTime);
+                    } else {
+                        if (this.config.verbose) {
+                            console.log(
+                                `skipping ${eventName} from block ${event.blockNumber}, because it did not pass finality`
+                            );
+                            console.log(`skipped event: ${JSON.stringify(event.returnValues)}`);
+                        }
+                        skipped = true;
+                        break;
+                    }
+                }
+                if (!skipped) {
+                    // assume all blocks till toBlock are read
+                    model.setNextBlock(toBlock + 1);
+                }
+            } catch (e) {
+                console.error(`failed reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(e)}`);
             }
-            if (!skipped) {
-                // assume all blocks till toBlock are read
-                model.setNextBlock(toBlock + 1);
-            }
-        } catch (e) {
-            console.error(`failed reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(e)}`);
+        } else if (this.config.verbose) {
+            console.log(`skipping pollEvent(${eventName}), no new final blocks`);
         }
         return model.getNextBlock() - 1;
     }
@@ -118,6 +153,10 @@ export class EthereumModel {
 
     getLastEvent<T extends EventName>(eventName: T, maxTime: number): Timed & EventTypes[T] {
         return this.getEventModel(eventName).getLastEvent(maxTime);
+    }
+
+    getIteratorFrom<T extends EventName>(eventName: T, maxTime: number): IterableIterator<Timed & EventTypes[T]> {
+        return this.getEventModel(eventName).getIteratorFrom(maxTime);
     }
 
     getEventModel<T extends EventName>(eventName: T): EventModel<EventTypes[T]> {

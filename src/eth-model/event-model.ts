@@ -108,4 +108,37 @@ export class EventModel<T extends EventData> {
         const blockIdx = this.getIndexOfBlocksNearTime(maxTime).prev;
         return this.lastBlockEvent(blockIdx);
     }
+
+    getIteratorFrom(maxTime: number): IterableIterator<Timed & T> {
+        return this.getIterator(this.getIndexOfBlocksNearTime(maxTime).prev);
+    }
+
+    /**
+     * iterate over all events from specific block backwards in time
+     * @param blockIdx start of iteration (inclusive, unless is 0 which marks events epoch)
+     */
+    private getIterator(blockIdx: number): IterableIterator<Timed & T> {
+        const eventsPerBlock = this.eventsPerBlock;
+        let eventIdx = eventsPerBlock[blockIdx].events.length - 1;
+        return {
+            [Symbol.iterator]() {
+                return this;
+            },
+            next() {
+                if (blockIdx === 0) {
+                    // before first event
+                    return { value: undefined, done: true };
+                } else {
+                    const value = eventsPerBlock[blockIdx].events[eventIdx];
+                    if (eventIdx > 0) {
+                        eventIdx--;
+                    } else {
+                        blockIdx--;
+                        eventIdx = eventsPerBlock[blockIdx].events.length - 1;
+                    }
+                    return { value, done: false };
+                }
+            },
+        };
+    }
 }

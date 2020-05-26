@@ -13,26 +13,51 @@ export function getNewEthereumReader(config: ServiceEthereumConfiguration) {
 }
 type ContractAddressUpdatedEvent = EventData & { returnValues: ContractAddressUpdatedEventValues };
 
-function translateEventContractNameToContractName(eventContractName: string): keyof Contracts {
-    switch (eventContractName) {
-        case 'staking':
-            return 'StakingContract';
-        case 'rewards':
-            return 'Rewards';
-        case 'elections':
-            return 'Elections';
-        case 'subscriptions':
-            return 'Subscriptions';
+export type ContractName =
+    | 'protocol'
+    | 'fees'
+    | 'committee-general'
+    | 'committee-compliance'
+    | 'elections'
+    | 'delegations'
+    | 'validatorsRegistration'
+    | 'compliance'
+    | 'staking'
+    | 'subscriptions';
+
+type ContractTypeName = keyof Contracts;
+
+export function getContractTypeName(key: ContractName): ContractTypeName {
+    switch (key) {
         case 'protocol':
             return 'Protocol';
+        case 'fees':
+            return 'Fees';
+        case 'committee-general':
+        case 'committee-compliance':
+            return 'Committee';
+        case 'elections':
+            return 'Delegations';
+        case 'delegations':
+            return 'Delegations';
+        case 'validatorsRegistration':
+            return 'ValidatorsRegistration';
+        case 'compliance':
+            return 'Compliance';
+        case 'staking':
+            return 'StakingContract';
+        case 'subscriptions':
+            return 'Subscriptions';
+        default:
+            throw new Error(`unknown event name '${key}'`);
     }
-    throw new Error(`unknown contract name '${eventContractName}'`);
 }
 
 export type ServiceEthereumConfiguration = {
     EthereumGenesisContract: string;
     EthereumEndpoint: string;
     FirstBlock: BlockNumber;
+    verbose: boolean;
 };
 export class EthereumConfigReader {
     private web3: Web3;
@@ -41,8 +66,8 @@ export class EthereumConfigReader {
         this.web3 = new Web3(new Web3.providers.HttpProvider(config.EthereumEndpoint));
     }
 
-    private connect(contractName: keyof Contracts) {
-        const abi = compiledContracts[contractName].abi;
+    private connect(contractType: ContractTypeName) {
+        const abi = compiledContracts[contractType].abi;
         return new this.web3.eth.Contract(abi, this.config.EthereumGenesisContract);
     }
 
@@ -54,9 +79,9 @@ export class EthereumConfigReader {
             web3Contract,
             0
         )) as ContractAddressUpdatedEvent[];
-        const contracts: { [t in keyof Contracts]?: ContractMetadata } = {};
+        const contracts: { [t in ContractName]?: ContractMetadata } = {};
         events.forEach((e) => {
-            contracts[translateEventContractNameToContractName(e.returnValues.contractName)] = {
+            contracts[e.returnValues.contractName as ContractName] = {
                 address: e.returnValues.addr,
                 firstBlock: this.config.FirstBlock, // TODO: max with contract genesis once it exists
             };
@@ -69,6 +94,7 @@ export class EthereumConfigReader {
             contracts: this.readContractsConfig(),
             firstBlock: this.config.FirstBlock, // events[0].blockNumber,
             httpEndpoint: this.config.EthereumEndpoint,
+            verbose: this.config.verbose,
         };
     }
 }
@@ -126,21 +152,24 @@ type ContractMetadata = {
     firstBlock: BlockNumber;
 };
 export type EthereumConfig = {
-    contracts: Promise<{ [t in keyof Contracts]?: ContractMetadata }>;
+    contracts: Promise<{ [t in ContractName]?: ContractMetadata }>;
     firstBlock: BlockNumber;
     httpEndpoint: string;
+    verbose: boolean;
 };
 
-export function contractByEventName(eventName: EventName): keyof Contracts {
+export function contractByEventName(eventName: EventName): ContractName {
     switch (eventName) {
         case 'CommitteeChanged':
-            return 'Elections';
-        case 'TopologyChanged':
-            return 'Elections';
+            return 'committee-general';
+        case 'StandbysChanged':
+            return 'committee-general';
         case 'SubscriptionChanged':
-            return 'Subscriptions';
+            return 'subscriptions';
         case 'ProtocolVersionChanged':
-            return 'Protocol';
+            return 'protocol';
+        case 'ValidatorRegistered':
+            return 'validatorsRegistration';
         default:
             throw new Error(`unknown event name '${eventName}'`);
     }
@@ -152,17 +181,18 @@ export class EthereumReader {
         this.web3 = new Web3(new Web3.providers.HttpProvider(config.httpEndpoint));
     }
 
-    private async connect(contractName: keyof Contracts) {
+    private async connect(contractName: ContractName) {
         const contractMetadata = (await this.config.contracts)[contractName];
         if (!contractMetadata) {
             throw new Error(`contract "${contractName}" not in registry`);
         }
-        const abi = compiledContracts[contractName].abi;
+        const abi = compiledContracts[getContractTypeName(contractName)].abi;
         return new this.web3.eth.Contract(abi, contractMetadata.address);
     }
 
+    // TODO: retire this function in favor of eth model
     async getAllVirtualChains(): Promise<Array<string>> {
-        const web3Contract = await this.connect('Subscriptions');
+        const web3Contract = await this.connect('subscriptions');
         const events = await retryGetPastEventsWithLatest(
             'SubscriptionChanged',
             this.web3,

@@ -13,6 +13,7 @@ test('accepts legal config', (t) => {
             finalityBufferTime: 0,
             finalityBufferBlocks: 0,
             DockerNamespace: 'foo',
+            verbose: true,
         })
     );
 });
@@ -28,6 +29,7 @@ test('declines illegal config (1)', (t) => {
             pollIntervalSeconds: 0.1,
             finalityBufferBlocks: 0,
             DockerNamespace: 'foo',
+            verbose: true,
         })
     );
 });
@@ -43,6 +45,7 @@ test('declines illegal config (2)', (t) => {
             finalityBufferTime: 0,
             finalityBufferBlocks: 0,
             DockerNamespace: 'foo',
+            verbose: true,
         })
     );
 });

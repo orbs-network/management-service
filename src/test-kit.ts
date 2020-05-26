@@ -54,6 +54,9 @@ export function deepDataMatcher(data: any, pattern: any, path = 'ROOT'): string[
                 } else if (isArray(should) && !isArray(current)) {
                     errors.push(`${propertyPath} : ${JSON.stringify(current)} is not an array`);
                 } else {
+                    if (isArray(should) && isArray(current) && should.length !== current.length) {
+                        errors.push(`${propertyPath} : ${JSON.stringify(current)} expected length ${should.length}`);
+                    }
                     errors.push(...deepDataMatcher(current, should, propertyPath));
                 }
             }

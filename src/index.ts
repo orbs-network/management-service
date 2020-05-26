@@ -32,8 +32,11 @@ export function serve(serviceConfig: ServiceConfiguration) {
             response.status(200).json(body);
         })
     );
-    app.use((error: Error, _req: Request, res: Response, next: NextFunction) => {
+    app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
         if (error instanceof Error) {
+            if (serviceConfig.verbose) {
+                console.log(`Error response to ${req.url} : ${errorString(error)}`);
+            }
             return res.status(500).json({
                 status: 'error',
                 error: errorString(error),

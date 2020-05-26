@@ -25,11 +25,10 @@ jobs:
       - run: mkdir -p _out/unit _out/e2e
       - node/with-cache:
           steps:
-            - run: npm test --  --timeout=1m --tap| npx tap-xunit > _out/unit/test.xml
+            - run: npm test --  --timeout=5m --tap --no-color| npx tap-xunit > _out/unit/test.xml
             - run: npm run build
             - run: 
-                command: npm run test:e2e --  --timeout=1m --tap| npx tap-xunit > _out/e2e/test.xml
-                no_output_timeout: 2m
+                command: npm run test:e2e --  --timeout=10m --tap --no-color| npx tap-xunit > _out/e2e/test.xml
       - store_test_results:
           path: _out
       - store_artifacts:
