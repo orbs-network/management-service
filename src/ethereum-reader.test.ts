@@ -16,8 +16,8 @@ test.serial('EthereumReader reads getRefTime', async (t) => {
     });
 
     const refTime = (await reader.getRefTime('latest')) || -1;
-    t.assert(1 + nowUTC() - refTime > 0, `time is before now(): ${refTime}`);
-    t.assert(nowUTC() - refTime < 60, `time is not too much before now(): ${nowUTC() - refTime}`);
+    t.assert(1 + nowUTC() - refTime > 0, `time is before now(): ${refTime} - make sure your ganache clock is not in future`);
+    t.assert(nowUTC() - refTime < 60, `time is not too much before now(): ${nowUTC() - refTime} - make sure your ganache clock is not in future`);
 });
 
 test.serial('EthereumReader reads VCs from SubscriptionChanged events', async (t) => {
