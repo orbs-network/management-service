@@ -12,7 +12,6 @@ import {
 import { EthereumModel } from './eth-model';
 import { Timed } from './eth-model/event-model';
 import { EventTypes, DEPLOYMENT_SUBSET_MAIN } from './eth-model/events-types';
-import { EthereumReader } from './ethereum-reader';
 import { merge } from './merge';
 import { getVirtualChainPort } from './ports';
 import tier1 from './tier-1.json';
@@ -53,11 +52,7 @@ export class Processor {
 
     private dockerTagCache = new Map<string, LatestTagResult>();
 
-    constructor(
-        private config: ServiceConfiguration,
-        private reader: EthereumReader,
-        private ethModel: EthereumModel
-    ) {}
+    constructor(private config: ServiceConfiguration, private ethModel: EthereumModel) {}
 
     private async updateDockerConfig(dc: DockerConfig): Promise<DockerConfig> {
         if (!this.dockerTagCache.has(dc.Image)) {
@@ -211,12 +206,16 @@ export class Processor {
 
     async getNodeManagementConfiguration(): Promise<NodeManagementConfigurationOutput & LegacyBoyarBootstrapInput> {
         const nodeConfiguration = await this.getLegacyBoyarBootstrap();
-        const virtualChains = await this.reader.getAllVirtualChains();
+        const refTime = await this.ethModel.getUTCRefTime();
+        const virtualChains = [...this.ethModel.getIteratorFrom('SubscriptionChanged', refTime)].map(
+            (event) => event.returnValues.vcid
+        );
         const configResult = {
             orchestrator: this.makeOrchestratorConfig(nodeConfiguration),
             chains: await this.makeChainsConfig(nodeConfiguration, virtualChains),
             services: await this.makeServicesConfig(),
         };
+        this.dockerTagCache.clear();
         return merge(nodeConfiguration, configResult); // aggressive passthrough for legacy support
     }
 

@@ -190,18 +190,6 @@ export class EthereumReader {
         return new this.web3.eth.Contract(abi, contractMetadata.address);
     }
 
-    // TODO: retire this function in favor of eth model
-    async getAllVirtualChains(): Promise<Array<string>> {
-        const web3Contract = await this.connect('subscriptions');
-        const events = await retryGetPastEventsWithLatest(
-            'SubscriptionChanged',
-            this.web3,
-            web3Contract,
-            this.config.firstBlock
-        );
-        return events.map((event) => event.returnValues.vcid);
-    }
-
     getBlockNumber(): Promise<number> {
         return this.web3.eth.getBlockNumber();
     }

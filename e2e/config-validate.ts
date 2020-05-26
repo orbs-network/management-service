@@ -31,7 +31,7 @@ export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) 
             DynamicManagementConfig: {
                 ReadInterval: '1m',
                 ResetTimeout: '30m',
-                Url: 'http:/localhost:7666/node/management',
+                Url: 'http://localhost:7666/node/management',
             },
             'storage-driver': 'nfs',
             'storage-options': {

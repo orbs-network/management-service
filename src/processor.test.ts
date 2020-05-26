@@ -21,7 +21,7 @@ import {
     CommitteeChangedPayload,
     ValidatorRegisteredPayload,
 } from './eth-model/events-types';
-import { EthereumReader, getNewEthereumReader } from './ethereum-reader';
+import { getNewEthereumReader } from './ethereum-reader';
 import { getVirtualChainPort } from './ports';
 import { addParticipant } from './pos-v2-simulations';
 import { Processor, ROLLOUT_GROUP_MAIN } from './processor';
@@ -69,7 +69,7 @@ test.serial('updateDockerConfig updates tags with minimal requests', async (t) =
         { user: 'foo', name: 'bar', tags: ['v0.0.3'] },
         { user: 'fizz', name: 'baz', tags: [] }
     );
-    const processor = new Processor({} as ServiceConfiguration, null as any, null as any);
+    const processor = new Processor({} as ServiceConfiguration, null as any);
     const newConfig = await Promise.all(originalConfiguration.map((dc) => (processor as any).updateDockerConfig(dc)));
 
     t.deepEqual(newConfig, [
@@ -109,19 +109,22 @@ test.serial(
             verbose: true,
         };
         const fakeTag = 'v9.9.9';
-        const fakeReader = ({
-            // skip ethereum endpoint
-            getAllVirtualChains() {
-                return [];
-            },
-        } as unknown) as EthereumReader;
+        // @ts-ignore
+        const emptyModel = new EthereumModel(
+            {
+                getRefTime(_: any) {
+                    return Promise.resolve(-1);
+                },
+            } as any,
+            config
+        );
 
         const scope = nockDockerHub(
             { user: 'myDockerNamespace', name: 'management-service', tags: [fakeTag] },
             { user: 'myDockerNamespace', name: 'signer', tags: [fakeTag] }
         );
 
-        const processor = new Processor(config, fakeReader, null as any);
+        const processor = new Processor(config, emptyModel);
 
         const result = await processor.getNodeManagementConfiguration();
 
@@ -129,7 +132,7 @@ test.serial(
             extraConfig: boyarConfigFakeEndpoint.extraConfig, // passthrough for legacy support
             orchestrator: {
                 DynamicManagementConfig: {
-                    Url: 'http:/localhost:7666/node/management',
+                    Url: 'http://localhost:7666/node/management',
                     ReadInterval: '1m',
                     ResetTimeout: '30m',
                 },
@@ -183,7 +186,8 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
         verbose: true,
     };
     const fakeTag = 'v9.9.9';
-    const processor = new Processor(config, getNewEthereumReader(config), null as any);
+    const model = new EthereumModel(getNewEthereumReader(config), config);
+    const processor = new Processor(config, model);
     (processor as any).updateDockerConfig = async (dc: any) => ({ ...dc, Tag: fakeTag }); // skip docker endpoint
     (processor as any).getLegacyBoyarBootstrap = async () => ({
         orchestrator: {},
@@ -197,7 +201,7 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
         {
             orchestrator: {
                 DynamicManagementConfig: {
-                    Url: 'http:/localhost:7666/node/management',
+                    Url: 'http://localhost:7666/node/management',
                     ReadInterval: '1m',
                     ResetTimeout: '30m',
                 },
@@ -225,7 +229,8 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
         '0 chains'
     );
     const vc1Id = (subscriptionChangedEvents(await createVC(d)).map((e) => e.vcid)[0] as unknown) as string;
-    const vc2Id = (subscriptionChangedEvents(await createVC(d)).map((e) => e.vcid)[0] as unknown) as string;
+    const vc2Tx = await createVC(d);
+    const vc2Id = (subscriptionChangedEvents(vc2Tx).map((e) => e.vcid)[0] as unknown) as string;
 
     const expectedVirtualChainConfig = (vcid: string) => ({
         Id: vcid,
@@ -243,8 +248,15 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
             'ethereum-endpoint': 'http://eth.orbs.com', // eventually rename to EthereumEndpoint
         },
     });
+    const fixtureTime = await model.blockTime.getExactBlockTime(await d.web3.eth.getBlockNumber());
+    if (!fixtureTime) {
+        throw new Error('cant read ethereum time for unknown reason');
+    }
+    while ((await model.getUTCRefTime()) < fixtureTime) {
+        await model.pollEvents();
+    }
     const result2 = await processor.getNodeManagementConfiguration();
-    t.deepEqual(result2.chains, [expectedVirtualChainConfig(vc1Id), expectedVirtualChainConfig(vc2Id)], '2 chains');
+    t.deepEqual(result2.chains, [expectedVirtualChainConfig(vc2Id), expectedVirtualChainConfig(vc1Id)], '2 chains');
 });
 
 test.serial('[integration with reader] getVirtualChainConfiguration returns according to ethereum state', async (t) => {
@@ -266,7 +278,7 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
 
     const ethReader = getNewEthereumReader(config);
     const ethModel = new EthereumModel(ethReader, config);
-    const processor = new Processor(config, ethReader, ethModel);
+    const processor = new Processor(config, ethModel);
 
     const comittyResult = await addParticipant(d, true);
     const participantResult = await addParticipant(d, false);
