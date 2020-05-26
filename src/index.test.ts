@@ -32,7 +32,7 @@ test.serial('[small e2e] index serves /node/management with virtual chains', asy
     const server = serve(config);
 
     await new Promise((res) => setTimeout(res, 5 * 1000));
-    await d.newSubscriber('defaultTier', 0); // ad a block for finality
+    await d.newSubscriber('defaultTier', 0); // add a block for finality
 
     try {
         let response: NodeManagementConfigurationOutput = await retry(
