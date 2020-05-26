@@ -273,7 +273,7 @@ export class Processor {
     ): NodeManagementConfigurationOutput['orchestrator'] {
         return Object.assign({}, nodeConfiguration.orchestrator, {
             DynamicManagementConfig: {
-                Url: 'http:/localhost:7666/node/management',
+                Url: 'http://localhost:7666/node/management',
                 ReadInterval: '1m',
                 ResetTimeout: '30m',
             },
