@@ -27,6 +27,11 @@ export class TestEnvironment {
         };
     }
     init() {
+
+        test.serial.before('(log step)', async (t) => {
+            console.log('e2e driver init() start');
+            t.log('e2e driver init() start');
+        });
         this.envName = dockerComposeTool(
             test.serial.before.bind(test.serial),
             test.serial.after.always.bind(test.serial.after),
@@ -89,8 +94,8 @@ export class TestEnvironment {
             } as any
         );
         test.serial.before('(log step)', async (t) => {
-            console.log('e2e driver done');
-            t.log('e2e driver done');
+            console.log('e2e driver init() done');
+            t.log('e2e driver init() done');
         });
     }
 
