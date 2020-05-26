@@ -7,10 +7,12 @@ import { join } from 'path';
 import { writeFileSync, unlinkSync } from 'fs';
 import Web3 from 'web3';
 import HDWalletProvider from 'truffle-hdwallet-provider';
+import { exec, ChildProcess } from 'child_process';
 
 export class TestEnvironment {
     private envName: string = '';
     public contractsDriver: Driver;
+    public logger: (lines: string) => void;
     constructor(private pathToCompose: string) { }
 
     getAppConfig() {
@@ -76,10 +78,15 @@ export class TestEnvironment {
             // prepare file
             writeFileSync(configFilePath, JSON.stringify(this.getAppConfig()));
         });
-        test.serial.afterEach.always('print app logs', async (t: ExecutionContext) => {
-            const logs = await getLogsForService(this.envName, this.pathToCompose, 'app');
-            t.log(logs);
-        });
+
+        // old code to dump entire log of app at the end of test
+        // let emittedLogLines = 0;
+        // test.serial.afterEach.always('print app logs', async (t: ExecutionContext) => {
+        //     const logs: string = await getLogsForService(this.envName, this.pathToCompose, 'app');
+        //     const logLines = logs.split('\n').slice(emittedLogLines);
+        //     emittedLogLines += logLines.length - 1;
+        //     t.log(logLines.join('\n'));
+        // });
 
         dockerComposeTool(
             test.serial.before.bind(test.serial),
@@ -94,6 +101,18 @@ export class TestEnvironment {
             } as any
         );
         test.serial.before('(log step)', async (t) => {
+            const logP = exec(`docker-compose -p ${this.envName} -f "${this.pathToCompose}" logs -f app`);
+            this.logger = t.log;
+            logP.stdout.on('data', (data) => {
+                if (this.logger) {
+                    this.logger(data);
+                }
+            });
+            logP.on('exit', () => {
+                if (this.logger) {
+                    this.logger(`app log exited`);
+                }
+            });
             console.log('e2e driver init() done');
             t.log('e2e driver init() done');
         });

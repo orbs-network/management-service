@@ -126,10 +126,11 @@ export class Processor {
             }
         }
         if (this.config.verbose) {
-            console.log(`calcTopology(${vchainId})`);
-            console.log(`Port = ${Port}`);
-            console.log(`topologyOrbsAddrs = ${JSON.stringify(topologyOrbsAddrs)}`);
-            console.log(`ips = ${JSON.stringify([...ips.entries()].map((e) => e[0] + '->' + e[1]))}`);
+            console.log(
+                `calcTopology(${vchainId}) Port = ${Port} topologyOrbsAddrs = ${JSON.stringify(
+                    topologyOrbsAddrs
+                )} ips = ${JSON.stringify([...ips.entries()].map((e) => e[0] + '->' + e[1]))}`
+            );
         }
         return topologyOrbsAddrs.flatMap((OrbsAddress) => {
             const Ip = ips.get(OrbsAddress);
@@ -155,10 +156,8 @@ export class Processor {
             if (this.config.verbose) {
                 console.log(`error in getVirtualChainConfiguration(${vchainId})`);
                 console.log(`can't find StandbysChanged event prior to ${refTime}`);
-                console.log(
-                    `all StandbysChanged events : ${JSON.stringify(
-                        this.ethModel.getEventsFromTime('StandbysChanged', 0, nowUTC() * 2)
-                    )}`
+                [...this.ethModel.getEventsFromTime('StandbysChanged', 0, nowUTC() * 2)].forEach((e) =>
+                    console.log(`existing event : ${JSON.stringify(e)}`)
                 );
             }
             throw new Error(`can't find StandbysChanged event prior to ${refTime}`);
@@ -171,14 +170,16 @@ export class Processor {
         );
         const validatorRegisteredEvents = this.ethModel.getIteratorFrom('ValidatorRegistered', refTime);
         if (this.config.verbose) {
-            console.log(`getVirtualChainConfiguration(${vchainId})`);
-            console.log(`refTime = ${refTime}`);
-            console.log(`standbysChangedEvent = ${JSON.stringify(standbysChangedEvent.returnValues)}`);
             console.log(
-                `committeeChangedEvents = ${JSON.stringify(committeeChangedEvents.map((e) => e.returnValues))}`
+                `getVirtualChainConfiguration(${vchainId}) refTime = ${refTime} standbysChangedEvent = ${JSON.stringify(
+                    standbysChangedEvent.returnValues
+                )} `
             );
-            console.log(
-                `subscriptionChangedEvents = ${JSON.stringify(subscriptionChangedEvents.map((e) => e.returnValues))}`
+            committeeChangedEvents.forEach((e) =>
+                console.log(`committeeChangedEvent: ${JSON.stringify(e.returnValues)}`)
+            );
+            subscriptionChangedEvents.forEach((e) =>
+                console.log(`subscriptionChangedEvent: ${JSON.stringify(e.returnValues)}`)
             );
         }
         const CurrentTopology = this.calcTopology(
@@ -216,7 +217,7 @@ export class Processor {
             chains: await this.makeChainsConfig(nodeConfiguration, virtualChains),
             services: await this.makeServicesConfig(),
         };
-        return merge(nodeConfiguration, configResult); // aggressive passthrough for legacy support as per Tal's decision
+        return merge(nodeConfiguration, configResult); // aggressive passthrough for legacy support
     }
 
     private async makeServicesConfig(): Promise<NodeManagementConfigurationOutput['services']> {

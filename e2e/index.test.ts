@@ -30,6 +30,7 @@ test.serial.before('creating virtual chains', async (t) => {
 
 test.serial('[E2E] serves boyar endpoint as expected', async (t) => {
     console.log('[E2E] serves boyar endpoint as expected');
+    env.logger = t.log;
     t.timeout(60 * 1000);
     t.deepEqual(vChainIds.length, numberOfVirtualChains, 'all VCs created before test begins');
 
@@ -55,6 +56,7 @@ async function ganacheGraceBuffer(d: Driver) {
 
 test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
     console.log('[E2E] serves ONG endpoint as expected');
+    env.logger = t.log;
     t.timeout(2.5 * 60 * 1000);
     t.deepEqual(vChainIds.length, numberOfVirtualChains, 'all VCs created before test begins');
 

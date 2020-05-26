@@ -71,10 +71,11 @@ export class EthereumModel {
         const [latestFinalBlockNumber, finalityTime] = await this.getFinalityBar();
 
         if (this.config.verbose) {
-            console.log(`pollEvents()`);
-            console.log(`getUTCRefTime() = ${await this.getUTCRefTime()}`);
-            console.log(`latestFinalBlockNumber = ${latestFinalBlockNumber}`);
-            console.log(`finalityTime = ${finalityTime + 1}`);
+            console.log(
+                `pollEvents() getUTCRefTime() = ${await this.getUTCRefTime()} latestFinalBlockNumber = ${latestFinalBlockNumber} finalityTime = ${
+                    finalityTime + 1
+                }`
+            );
         }
         const latestBlocks = await Promise.all(
             eventNames.map((n) => this.pollEvent(n, latestFinalBlockNumber, finalityTime + 1))
@@ -98,10 +99,9 @@ export class EthereumModel {
                     (e1, e2) => e1.blockNumber - e2.blockNumber
                 );
                 if (this.config.verbose) {
-                    console.log(`pollEvent(${eventName})`);
-                    console.log(`fromBlock = ${fromBlock}`);
-                    console.log(`toBlock = ${toBlock}`);
-                    console.log(`events size ${events.length}`);
+                    console.log(
+                        `pollEvent(${eventName}) fromBlock = ${fromBlock} toBlock = ${toBlock} events size ${events.length}`
+                    );
                 }
                 for (const event of events) {
                     const blockTime = await this.blockTime.getExactBlockTime(event.blockNumber, finalityTime);
