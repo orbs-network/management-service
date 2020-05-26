@@ -12,7 +12,6 @@ export interface ServiceConfiguration {
     boyarLegacyBootstrap: string;
     pollIntervalSeconds: number;
     DockerNamespace: string;
-    finalityBufferTime: number;
     finalityBufferBlocks: number;
     verbose: boolean;
 }
@@ -45,11 +44,6 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
         EthereumGenesisContract: {
             presence: { allowEmpty: false },
             type: 'string',
-        },
-        finalityBufferTime: {
-            presence: { allowEmpty: false },
-            type: 'integer',
-            numericality: { noStrings: true },
         },
         finalityBufferBlocks: {
             presence: { allowEmpty: false },

@@ -23,7 +23,6 @@ export class TestEnvironment {
             EthereumEndpoint: `http://ganache:7545`, // host.docker.internal :(
             boyarLegacyBootstrap: 'http://static:80/legacy-boyar.json',
             pollIntervalSeconds: 1,
-            finalityBufferTime: 0,
             finalityBufferBlocks: 0,
             verbose: true,
         };

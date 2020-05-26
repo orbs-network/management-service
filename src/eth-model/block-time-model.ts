@@ -10,7 +10,7 @@ export class BlocksTimeModel {
     /**
      * get the exact time of a block from ethereum
      */
-    async getExactBlockTime(blockNumber: number, finalityTime?: number): Promise<number | null> {
+    async getExactBlockTime(blockNumber: number): Promise<number | null> {
         const fromCache = this.exactBlocksTime.get(blockNumber);
         if (typeof fromCache === 'number') {
             return fromCache;
@@ -18,8 +18,6 @@ export class BlocksTimeModel {
         const result = await this.requestBlockTime(blockNumber);
         if (result == null) {
             return null;
-        } else if (finalityTime && result > finalityTime) {
-            return -1;
         } else {
             this.exactBlocksTime.set(blockNumber, result);
             return result;
