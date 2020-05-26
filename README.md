@@ -1,11 +1,12 @@
 # Orbs Network State Reader
 
-An Orbs node V2 service that reads the state of the Orbs network. 
+An Orbs node V2 service that reads the management configuration state of the Orbs network from Ethereum.
 
 ## Functionality
 
-This service serves as a source of truth for an Orbs node V2 configuration. It periodically reads several external sources:
- - A remote source for V1 node's management configuration, provided by Orbs LTD
+This service serves as a source of truth for an Orbs node V2 management configuration. It periodically reads several external sources:
+
+ - Orbs PoS V2 Ethereum contracts
  - Docker registry for the latest versions of the node's services
 
 ## How to run
@@ -16,39 +17,53 @@ This service serves as a source of truth for an Orbs node V2 configuration. It p
 
 ### Installing workspace
 
-to install a development environment, you need to have nvm and git installd.
+To install a development environment, you need to have nvm and git installed.
 Then, `git clone` this repo locally and run:
+
+```sh
+npm install
 ```
-$ nvm use
-$ npm install
-$ npm test
-```
+
 and that's it, you've just installed the development environment!
 
 This project is written with [VSCode](https://code.visualstudio.com/) in mind. specifically configured for these extensions: [dbaeumer.vscode-eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint), [esbenp.prettier-vscode](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
 
-### test
+### Test
 
-`npm run test`
+```sh
+# if you don't have a ganache instance running on localhost:7545
+npm run start:eth
 
-execute all internal tests.
+npm run test
+```
 
-### clean
+Execute unit tests (not including e2e).
 
-`npm run clean`
+### Clean
+
+```sh
+npm run clean
+```
 
 Removes any built code and any built executables.
 
-### build
+### Build
 
-`npm run build`
+```sh
+npm run build
+```
 
 Cleans, then builds the service and docker image.
 
 Your built code will be in the `./dist/` directory, the docker image will be written to the local docker exporter.
 
-### End-to-end Testing
+### End-to-end testing
 
-`npm run test:e2e`
+```sh
+# if you don't have local docker image built
+npm run build
 
-runs end-to-end tests against a built docker image (notice this command does nbot builds a docker image).
+npm run test:e2e
+```
+
+Runs end-to-end tests against a built docker image.
