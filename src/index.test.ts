@@ -24,7 +24,6 @@ test.serial('[small e2e] index serves /node/management with virtual chains', asy
         EthereumEndpoint: 'http://localhost:7545',
         boyarLegacyBootstrap: boyarConfigFakeEndpoint.congigUri + boyarConfigFakeEndpoint.configPath,
         pollIntervalSeconds: 0.1,
-        finalityBufferTime: 0,
         finalityBufferBlocks: 0,
         DockerNamespace: 'orbsnetwork',
         verbose: true,

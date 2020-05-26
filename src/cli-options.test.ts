@@ -1,7 +1,7 @@
 import test from 'ava';
 import { parseOptions } from './cli-options';
 import mock from 'mock-fs';
-import { ServiceConfiguration } from './data-types';
+import { ServiceConfiguration, validateServiceConfiguration } from './data-types';
 
 test.serial.afterEach.always(() => {
     mock.restore();
@@ -19,7 +19,6 @@ const configValue: ServiceConfiguration = {
     Port: -1,
     FirstBlock: 0,
     pollIntervalSeconds: 0.5,
-    finalityBufferTime: 0,
     finalityBufferBlocks: 0,
     DockerNamespace: 'foo',
     verbose: true,
@@ -38,16 +37,8 @@ test.serial('parseOptions with partial file (complete default values)', (t) => {
         [configPath]: JSON.stringify(minimalConfigValue),
     });
 
-    t.deepEqual(parseOptions(['--config', configPath]), {
-        ...minimalConfigValue,
-        FirstBlock: 0,
-        pollIntervalSeconds: 1,
-        Port: 8080,
-        finalityBufferTime: 20 * 60,
-        finalityBufferBlocks: 80,
-        DockerNamespace: 'orbsnetwork',
-        verbose: false,
-    });
+    const options = parseOptions(['--config', configPath]);
+    t.deepEqual(validateServiceConfiguration(options), undefined);
 });
 
 test.serial('parseOptions with no file', (t) => {

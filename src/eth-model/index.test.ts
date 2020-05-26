@@ -113,7 +113,6 @@ async function pollEvents(d: Driver) {
     };
     const ethReader = getNewEthereumReader(config);
     const ethModel = new EthereumModel(ethReader, {
-        finalityBufferTime: 0,
         finalityBufferBlocks: 0,
         verbose: true,
     });
@@ -180,7 +179,6 @@ function makeFakeReader() {
 test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow', async (t) => {
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
-        finalityBufferTime: 0,
         finalityBufferBlocks: 0,
         verbose: true,
     });
@@ -190,7 +188,6 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow', as
 test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and finality by blocks', async (t) => {
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
-        finalityBufferTime: 0,
         finalityBufferBlocks: 2,
         verbose: true,
     });
@@ -200,7 +197,6 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
 test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and finality by time', async (t) => {
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
-        finalityBufferTime: 1,
         finalityBufferBlocks: 0,
         verbose: true,
     });
@@ -210,7 +206,6 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
 test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and finality by time (2)', async (t) => {
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
-        finalityBufferTime: 19,
         finalityBufferBlocks: 1,
         verbose: true,
     });
@@ -220,7 +215,6 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
 test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and finality by time and blocks', async (t) => {
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
-        finalityBufferTime: 19,
         finalityBufferBlocks: 1,
         verbose: true,
     });
@@ -230,7 +224,6 @@ test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and 
 test('getEventsFromTime(ProtocolVersionChanged) with fake reader happy flow and finality by time and blocks (2)', async (t) => {
     const fakeReader = makeFakeReader();
     const ethModel = new EthereumModel(fakeReader, {
-        finalityBufferTime: 5,
         finalityBufferBlocks: 2,
         verbose: true,
     });

@@ -13,7 +13,6 @@ IPs need diferent model, just keeps latest per orbs address
 const pollSize = 1000;
 
 export type ModelConfig = {
-    finalityBufferTime: number;
     finalityBufferBlocks: number;
     verbose: boolean;
 };
@@ -50,13 +49,7 @@ export class EthereumModel {
         return result;
     }
     async getFinalityBar() {
-        const latestBlockNumber = await this.reader.getBlockNumber();
-        const latestFinalBlockNumber = latestBlockNumber - this.config.finalityBufferBlocks;
-        const finalityTime = Math.min(
-            ((await this.reader.getRefTime(latestBlockNumber)) || 0) - this.config.finalityBufferTime,
-            (await this.reader.getRefTime(latestFinalBlockNumber)) || 0
-        );
-        return [latestFinalBlockNumber, finalityTime];
+        return (await this.reader.getBlockNumber()) - this.config.finalityBufferBlocks;
     }
 
     /*
@@ -68,32 +61,23 @@ export class EthereumModel {
     */
     async pollEvents(): Promise<number> {
         // determine latest block after finality concerns
-        const [latestFinalBlockNumber, finalityTime] = await this.getFinalityBar();
+        const latestFinalBlockNumber = await this.getFinalityBar();
 
         if (this.config.verbose) {
             console.log(
-                `pollEvents() getUTCRefTime() = ${await this.getUTCRefTime()} latestFinalBlockNumber = ${latestFinalBlockNumber} finalityTime = ${
-                    finalityTime + 1
-                }`
+                `pollEvents() getUTCRefTime() = ${await this.getUTCRefTime()} latestFinalBlockNumber = ${latestFinalBlockNumber}`
             );
         }
-        const latestBlocks = await Promise.all(
-            eventNames.map((n) => this.pollEvent(n, latestFinalBlockNumber, finalityTime + 1))
-        );
+        const latestBlocks = await Promise.all(eventNames.map((n) => this.pollEvent(n, latestFinalBlockNumber)));
         // console.log('pollEvents() latest blocks: ' + latestBlocks.join());
         return Math.min(...latestBlocks);
     }
 
-    private async pollEvent<T extends EventName>(
-        eventName: T,
-        latestBlockNumber: number,
-        finalityTime: number
-    ): Promise<number> {
+    private async pollEvent<T extends EventName>(eventName: T, latestBlockNumber: number): Promise<number> {
         const model = this.getEventModel(eventName);
         const fromBlock = model.getNextBlock();
         if (fromBlock <= latestBlockNumber) {
             const toBlock = Math.min(latestBlockNumber, fromBlock + pollSize);
-            let skipped = false;
             try {
                 const events = (await this.reader.getPastEvents(eventName, { fromBlock, toBlock })).sort(
                     (e1, e2) => e1.blockNumber - e2.blockNumber
@@ -104,13 +88,13 @@ export class EthereumModel {
                     );
                 }
                 for (const event of events) {
-                    const blockTime = await this.blockTime.getExactBlockTime(event.blockNumber, finalityTime);
+                    const blockTime = await this.blockTime.getExactBlockTime(event.blockNumber);
                     if (blockTime == null) {
                         if (this.config.verbose) {
                             console.log(`got null time reading ${eventName} from block ${event.blockNumber}`);
                         }
                         throw new Error(`got null time reading ${eventName} from block ${event.blockNumber}`);
-                    } else if (blockTime > 0) {
+                    } else {
                         if (this.config.verbose) {
                             console.log(
                                 `saving event ${eventName} from time ${blockTime} : ${JSON.stringify(
@@ -119,21 +103,10 @@ export class EthereumModel {
                             );
                         }
                         model.rememberEvent(event, blockTime);
-                    } else {
-                        if (this.config.verbose) {
-                            console.log(
-                                `skipping ${eventName} from block ${event.blockNumber}, because it did not pass finality`
-                            );
-                            console.log(`skipped event: ${JSON.stringify(event.returnValues)}`);
-                        }
-                        skipped = true;
-                        break;
                     }
                 }
-                if (!skipped) {
-                    // assume all blocks till toBlock are read
-                    model.setNextBlock(toBlock + 1);
-                }
+                // assume all blocks till toBlock are read
+                model.setNextBlock(toBlock + 1);
             } catch (e) {
                 console.error(`failed reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(e)}`);
             }
