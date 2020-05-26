@@ -176,7 +176,7 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
 
     const config: ServiceConfiguration = {
         Port: -1,
-        FirstBlock: 0,
+        FirstBlock: await d.web3.eth.getBlockNumber(),
         EthereumGenesisContract: d.contractRegistry.address,
         EthereumEndpoint: 'http://localhost:7545',
         boyarLegacyBootstrap: 'foo',
@@ -252,6 +252,9 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
     if (!fixtureTime) {
         throw new Error('cant read ethereum time for unknown reason');
     }
+    await new Promise((res) => setTimeout(res, 5 * 1000));
+    await d.newSubscriber('defaultTier', 0); // add a block for finality
+
     while ((await model.getUTCRefTime()) < fixtureTime) {
         await model.pollEvents();
     }
@@ -266,7 +269,7 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
 
     const config: ServiceConfiguration = {
         Port: -1,
-        FirstBlock: 0,
+        FirstBlock: await d.web3.eth.getBlockNumber(),
         EthereumGenesisContract: d.contractRegistry.address,
         EthereumEndpoint: 'http://localhost:7545',
         boyarLegacyBootstrap: 'foo',
@@ -310,6 +313,9 @@ test.serial('[integration with reader] getVirtualChainConfiguration returns acco
     const vc1Subscription = (subscriptionChangedEvents(await createVC(d))[0] as unknown) as SubscriptionChangedPayload;
     const vcid = vc1Subscription.vcid;
     await createVC(d); // add a second vc to demonstrate filtering events per vc
+
+    await new Promise((res) => setTimeout(res, 5 * 1000));
+    await d.newSubscriber('defaultTier', 0); // add a block for finality
 
     const lastBlockNumber = await ethReader.getBlockNumber();
     // poll all events

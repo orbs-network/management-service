@@ -38,7 +38,7 @@ export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) 
                 maxRetries: '10',
             },
         },
-        chains: vChainIds.map(getExpectedVirtualChainConfiguration),
+        chains: vChainIds.reverse().map(getExpectedVirtualChainConfiguration),
         services: {
             'management-service': {
                 InternalPort: 8080,
