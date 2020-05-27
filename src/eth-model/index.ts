@@ -14,6 +14,7 @@ const pollSize = 1000;
 
 export type ModelConfig = {
     finalityBufferBlocks: number;
+    FirstBlock: number;
     verbose: boolean;
 };
 export interface Reader {
@@ -75,7 +76,7 @@ export class EthereumModel {
 
     private async pollEvent<T extends EventName>(eventName: T, latestBlockNumber: number): Promise<number> {
         const model = this.getEventModel(eventName);
-        const fromBlock = model.getTopBlock();
+        const fromBlock = Math.max(model.getTopBlock(), this.config.FirstBlock);
         if (fromBlock <= latestBlockNumber) {
             const toBlock = Math.min(latestBlockNumber, fromBlock + pollSize);
             try {

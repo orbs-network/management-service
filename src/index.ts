@@ -13,7 +13,7 @@ function wrapAsync(fn: RequestHandler): RequestHandler {
 export function serve(serviceConfig: ServiceConfiguration) {
     const ethReader = getNewEthereumReader(serviceConfig);
     const ethModel = new EthereumModel(ethReader, serviceConfig);
-    const processor = new Processor(serviceConfig, ethReader, ethModel);
+    const processor = new Processor(serviceConfig, ethModel);
 
     const app = express();
     app.get(
