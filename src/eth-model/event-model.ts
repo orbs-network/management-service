@@ -24,17 +24,17 @@ function getEventMatcher(event: EventData) {
 // TODO what happens in a re-org? should we confirm blockHash of events match block ?
 export class EventModel<T extends EventData> {
     private eventsPerBlock = new Array<EventBlockData<T>>();
-    private nextBlock = 0;
+    private topBlock = 0;
     constructor() {
         this.eventsPerBlock.push({ time: -1, blockNumber: -1, events: [] }); // invariant: this.eventsPerBlock has to be at least 1
     }
 
-    getNextBlock() {
-        return Math.max(this.nextBlock, this.eventsPerBlock[this.eventsPerBlock.length - 1].blockNumber + 1);
+    getTopBlock() {
+        return Math.max(this.topBlock, this.eventsPerBlock[this.eventsPerBlock.length - 1].blockNumber);
     }
 
-    setNextBlock(nextBlock: number) {
-        this.nextBlock = nextBlock;
+    setTopBlock(nextBlock: number) {
+        this.topBlock = nextBlock;
     }
     rememberEvent(event: T, blockTime: number) {
         for (let i = this.eventsPerBlock.length - 1; i >= 0; --i) {

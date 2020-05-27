@@ -41,10 +41,10 @@ export class EthereumModel {
     }
 
     async getUTCRefTime(): Promise<number> {
-        const earliestNextBlock = Math.min(...eventNames.map((n) => this.events[n].getNextBlock()));
-        const result = await this.blockTime.getExactBlockTime(Math.max(earliestNextBlock - 1, 0));
+        const earliestTopBlock = Math.min(...eventNames.map((n) => this.events[n].getTopBlock()));
+        const result = await this.blockTime.getExactBlockTime(Math.max(earliestTopBlock, 0));
         if (typeof result !== 'number') {
-            console.error(`error getting time for block ${earliestNextBlock}`);
+            console.error(`error getting time for block ${earliestTopBlock}`);
             return -1;
         }
         return result;
@@ -76,7 +76,7 @@ export class EthereumModel {
 
     private async pollEvent<T extends EventName>(eventName: T, latestBlockNumber: number): Promise<number> {
         const model = this.getEventModel(eventName);
-        const fromBlock = Math.max(model.getNextBlock(), this.config.FirstBlock);
+        const fromBlock = Math.max(model.getTopBlock(), this.config.FirstBlock);
         if (fromBlock <= latestBlockNumber) {
             const toBlock = Math.min(latestBlockNumber, fromBlock + pollSize);
             try {
@@ -107,14 +107,14 @@ export class EthereumModel {
                     }
                 }
                 // assume all blocks till toBlock are read
-                model.setNextBlock(toBlock + 1);
+                model.setTopBlock(toBlock);
             } catch (e) {
                 console.error(`failed reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(e)}`);
             }
         } else if (this.config.verbose) {
             console.log(`skipping pollEvent(${eventName}), no new final blocks`);
         }
-        return model.getNextBlock() - 1;
+        return model.getTopBlock();
     }
 
     getEventsFromTime<T extends EventName>(
