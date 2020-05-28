@@ -115,14 +115,19 @@ export class State {
 }
 
 type TopologyNodes = { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[];
+type CommiteeEvent = {
+    RefTime: number;
+    Committee: { EthAddress: string; OrbsAddress: string; EffectiveStake: number; IdentityType: number }[];
+};
 
 function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
     const inTopology: { [EthAddress: string]: string } = {}; // EthAddress -> OrbsAddress
 
     // take all committee members in last 12 hours
     const committeesInLast12Hours = findAllEventsInRange(snapshot.CommitteeEvents, time - 12 * 60 * 60, time);
-    for (const committee of committeesInLast12Hours) {
-        for (const node of committee as { EthAddress: string; OrbsAddress: string }[]) {
+    for (const committeeEvent of committeesInLast12Hours) {
+        const commitee = (committeeEvent as CommiteeEvent).Committee;
+        for (const node of commitee as { EthAddress: string; OrbsAddress: string }[]) {
             inTopology[node.EthAddress] = node.OrbsAddress; // override old Orbs addresses with new ones
         }
     }
