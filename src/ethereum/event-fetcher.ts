@@ -22,8 +22,8 @@ export class SingleEventFetcher extends EventFetcher {
 
 // more efficient fetcher that supports lookahead
 export class LookaheadEventFetcher extends EventFetcher {
-    private lookAheadSize = 50000;
-    private currentPageSize = 10000;
+    private readonly lookAheadSize = 50000;
+    private readonly currentPageSize = 10000;
     private lookAhead: EventData[] = [];
     private latestBlockInLookahead = 0;
     private fetchingPromise: Promise<unknown> | null = null;
@@ -36,13 +36,13 @@ export class LookaheadEventFetcher extends EventFetcher {
                 this.fetchingPromise == null &&
                 latestAllowedBlock > this.latestBlockInLookahead
             ) {
+                const fromBlock = this.latestBlockInLookahead + 1;
+                const toBlock = Math.min(this.latestBlockInLookahead + this.currentPageSize, latestAllowedBlock);
                 this.fetchingPromise = this.reader
-                    .getPastEvents(this.eventName, {
-                        fromBlock: this.latestBlockInLookahead + 1,
-                        toBlock: Math.min(this.latestBlockInLookahead + this.currentPageSize, latestAllowedBlock),
-                    })
+                    .getPastEvents(this.eventName, { fromBlock, toBlock })
                     .then((results) => {
                         this.lookAhead = _.concat(this.lookAhead, results);
+                        this.latestBlockInLookahead = toBlock;
                         this.fetchingPromise = null;
                     });
             }

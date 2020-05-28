@@ -122,7 +122,7 @@ function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
     // take all committee members in last 12 hours
     const committeesInLast12Hours = findAllEventsInRange(snapshot.CommitteeEvents, time - 12 * 60 * 60, time);
     for (const committee of committeesInLast12Hours) {
-        for (const node of (committee as unknown) as { EthAddress: string; OrbsAddress: string }[]) {
+        for (const node of committee as { EthAddress: string; OrbsAddress: string }[]) {
             inTopology[node.EthAddress] = node.OrbsAddress; // override old Orbs addresses with new ones
         }
     }
