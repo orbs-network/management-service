@@ -31,14 +31,14 @@ export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) 
             DynamicManagementConfig: {
                 ReadInterval: '1m',
                 ResetTimeout: '30m',
-                Url: 'http:/localhost:7666/node/management',
+                Url: 'http://localhost:7666/node/management',
             },
             'storage-driver': 'nfs',
             'storage-options': {
                 maxRetries: '10',
             },
         },
-        chains: vChainIds.map(getExpectedVirtualChainConfiguration),
+        chains: vChainIds.reverse().map(getExpectedVirtualChainConfiguration),
         services: {
             'management-service': {
                 InternalPort: 8080,

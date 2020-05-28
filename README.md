@@ -37,7 +37,19 @@ npm run start:eth
 npm run test
 ```
 
-Execute unit tests (not including e2e).
+Executes unit tests (not including e2e) after checking type correctness, and code formatting.
+
+To run only the tests without getting blocked by types or formatting errors, run:
+
+```sh
+npm run test:quick
+```
+
+To execute only a single test file, or any other customization, it's possible to chain parameters to the test command like so:
+
+```sh
+npm run test:quick -- src/index.test.ts
+```
 
 ### Clean
 

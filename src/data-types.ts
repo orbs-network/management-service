@@ -7,7 +7,7 @@ export interface ServiceConfiguration {
     Port: number;
     EthereumGenesisContract: string;
     EthereumEndpoint: string;
-    FirstBlock: string | number;
+    FirstBlock: number;
     // EthereumNetwork: EthereumNetwork;
     boyarLegacyBootstrap: string;
     pollIntervalSeconds: number;
