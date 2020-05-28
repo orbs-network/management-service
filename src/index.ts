@@ -5,6 +5,9 @@ import { errorString } from './utils';
 import { getNewEthereumReader } from './ethereum-reader';
 import { EthereumModel } from './eth-model';
 import { TaskLoop } from './task-loop';
+import { StateManager } from './model/manager';
+import { BlockSync } from './ethereum/block-sync';
+import { getVirtualChainManagement } from './model/processor-vc';
 
 function wrapAsync(fn: RequestHandler): RequestHandler {
     return (req, res, next) => fn(req, res, next).catch(next);
@@ -14,6 +17,8 @@ export function serve(serviceConfig: ServiceConfiguration) {
     const ethReader = getNewEthereumReader(serviceConfig);
     const ethModel = new EthereumModel(ethReader, serviceConfig);
     const processor = new Processor(serviceConfig, ethReader, ethModel);
+    const state = new StateManager();
+    const blockSync = new BlockSync(state, serviceConfig);
 
     const app = express();
     app.get(
@@ -23,12 +28,20 @@ export function serve(serviceConfig: ServiceConfiguration) {
             response.status(200).json(body);
         })
     );
-
     app.get(
         '/vchains/:vchainId/management',
         wrapAsync(async (request, response) => {
             const { vchainId } = request.params;
             const body = await processor.getVirtualChainConfiguration(vchainId);
+            response.status(200).json(body);
+        })
+    );
+    app.get(
+        '/vchains/:vchainId/management2',
+        wrapAsync((request, response) => {
+            const { vchainId } = request.params;
+            const snapshot = state.getCurrentSnapshot();
+            const body = getVirtualChainManagement(vchainId, snapshot, serviceConfig);
             response.status(200).json(body);
         })
     );
@@ -44,8 +57,11 @@ export function serve(serviceConfig: ServiceConfiguration) {
         }
         return next(error);
     });
+
     const pollEvents = new TaskLoop(() => ethModel.pollEvents(), serviceConfig.pollIntervalSeconds * 1000);
     pollEvents.start();
+    const blockSyncTask = new TaskLoop(() => blockSync.run(), serviceConfig.pollIntervalSeconds * 1000);
+    blockSyncTask.start();
     const server = app.listen(serviceConfig.Port, '0.0.0.0', () =>
         console.log(`Management service listening on port ${serviceConfig.Port}!`)
     );
