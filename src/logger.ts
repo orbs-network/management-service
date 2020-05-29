@@ -7,5 +7,5 @@ export function log(msg?: string) {
 }
 
 export function error(msg?: string) {
-    console.error(format(msg));
+    console.error('[ERROR]', format(msg));
 }

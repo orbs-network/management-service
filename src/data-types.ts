@@ -113,53 +113,6 @@ export interface ManagementNodeService extends GenericNodeService {
     DockerConfig: DockerConfig;
     Config: ServiceConfiguration;
 }
-export type CommitteeElement = {
-    EthAddress: string;
-    OrbsAddress: string;
-    EffectiveStake: number;
-    IdentityType: IdentityType;
-};
-export type CommitteeEvent = {
-    RefTime: number;
-    Committee: Array<CommitteeElement>;
-};
-export type SubscriptionEvent = {
-    RefTime: number;
-    Data: {
-        Status: string;
-        Tier: string;
-        RolloutGroup: string;
-        IdentityType: IdentityType;
-        Params: object;
-    };
-};
-export type ProtocolVersionEvent = {
-    RefTime: number;
-    Data: {
-        RolloutGroup: string;
-        Version: number;
-    };
-};
-export type TopologyElement = {
-    OrbsAddress: string;
-    Ip: string;
-    Port: number;
-};
-
-export type VirtualChainConfigurationOutput = {
-    CurrentRefTime: number;
-    PageStartRefTime: number;
-    PageEndRefTime: number;
-    VirtualChains: {
-        [VirtualChainId: string]: {
-            VirtualChainId: string;
-            CurrentTopology: Array<TopologyElement>;
-            CommitteeEvents: Array<CommitteeEvent>;
-            SubscriptionEvents: Array<SubscriptionEvent>;
-            ProtocolVersionEvents: Array<ProtocolVersionEvent>;
-        };
-    };
-};
 
 export type NodeManagementConfigurationOutput = {
     network: LegacyBoyarBootstrapInput['network'];

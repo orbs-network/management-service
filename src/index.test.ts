@@ -7,7 +7,7 @@ import { NodeManagementConfigurationOutput, ServiceConfiguration } from './data-
 import { nockBoyarConfig } from './test-kit';
 
 test.serial('[small e2e] index serves /node/management with virtual chains', async (t) => {
-    t.timeout(60 * 1000);
+    t.timeout(5 * 60 * 1000);
     let boyarConfigFakeEndpoint = nockBoyarConfig();
 
     const d = await Driver.new();

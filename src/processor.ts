@@ -1,22 +1,17 @@
 import { DockerHubRepo, fetchDockerHubToken } from 'docker-hub-utils';
 import fetch from 'node-fetch';
 import {
-    CommitteeEvent,
     DockerConfig,
     LegacyBoyarBootstrapInput,
     NodeManagementConfigurationOutput,
     ServiceConfiguration,
-    SubscriptionEvent,
-    TopologyElement,
 } from './data-types';
-import { EthereumModel } from './eth-model';
-import { Timed } from './eth-model/event-model';
-import { EventTypes, DEPLOYMENT_SUBSET_MAIN } from './eth-model/events-types';
 import { merge } from './merge';
 import { getVirtualChainPort } from './ports';
 import tier1 from './tier-1.json';
-import { utcDay, nowUTC, getIpFromHex } from './utils';
 import { compare, isValid } from './versioning';
+import { StateSnapshot } from './model/state';
+import { DEPLOYMENT_SUBSET_MAIN } from './ethereum/events-types';
 
 export const ROLLOUT_GROUP_MAIN = 'ga';
 export const ROLLOUT_GROUP_CANARY = 'canary';
@@ -52,7 +47,7 @@ export class Processor {
 
     private dockerTagCache = new Map<string, LatestTagResult>();
 
-    constructor(private config: ServiceConfiguration, private ethModel: EthereumModel) {}
+    constructor(private config: ServiceConfiguration) {}
 
     private async updateDockerConfig(dc: DockerConfig): Promise<DockerConfig> {
         if (!this.dockerTagCache.has(dc.Image)) {
@@ -66,150 +61,11 @@ export class Processor {
         return dc;
     }
 
-    private translateSubscriptionChangedEvent(value: Timed & EventTypes['SubscriptionChanged']): SubscriptionEvent {
-        return {
-            RefTime: value.time,
-            Data: {
-                Status: 'active',
-                Tier: value.returnValues.tier,
-                RolloutGroup: translateDeploymentSubsetToRouuloutGroup(value.returnValues.deploymentSubset),
-                IdentityType: 0,
-                Params: {},
-            },
-        };
-    }
-
-    private translateCommitteeChangedEvent(value: Timed & EventTypes['CommitteeChanged']): CommitteeEvent {
-        return {
-            RefTime: value.time,
-            Committee: value.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
-                OrbsAddress,
-                EthAddress: value.returnValues.addrs[idx],
-                EffectiveStake: parseInt(value.returnValues.weights[idx]),
-                IdentityType: 0,
-            })),
-        };
-    }
-
-    private calcTopology(
-        vchainId: string,
-        standbysChangedEvent: Timed & EventTypes['StandbysChanged'],
-        committeeChangedEvents: Array<Timed & EventTypes['CommitteeChanged']>,
-        validatorRegisteredEvents: Iterable<Timed & EventTypes['ValidatorRegistered']>
-    ): TopologyElement[] {
-        if (!standbysChangedEvent) {
-            return []; // not yet polled a single event
-        }
-        const Port = getVirtualChainPort(vchainId);
-        const validatorsLeft = new Set<string>(standbysChangedEvent.returnValues.orbsAddrs);
-        for (const committeeChangedEvent of committeeChangedEvents) {
-            for (const orbsAddress of committeeChangedEvent.returnValues.orbsAddrs) {
-                validatorsLeft.add(orbsAddress);
-            }
-        }
-        const topologyOrbsAddrs = Array.from(validatorsLeft);
-
-        // look for the IP addresses of all validators in topology
-        const ips = new Map<string, string>();
-        for (const validator of validatorRegisteredEvents) {
-            const orbsAddress = validator.returnValues.orbsAddr;
-            if (validatorsLeft.delete(orbsAddress)) {
-                ips.set(orbsAddress, getIpFromHex(validator.returnValues.ip));
-                if (validatorsLeft.size === 0) {
-                    break;
-                }
-            }
-        }
-        if (this.config.verbose) {
-            console.log(
-                `calcTopology(${vchainId}) Port = ${Port} topologyOrbsAddrs = ${JSON.stringify(
-                    topologyOrbsAddrs
-                )} ips = ${JSON.stringify([...ips.entries()].map((e) => e[0] + '->' + e[1]))}`
-            );
-        }
-        return topologyOrbsAddrs.flatMap((OrbsAddress) => {
-            const Ip = ips.get(OrbsAddress);
-            if (Ip) {
-                return [
-                    {
-                        OrbsAddress,
-                        Ip,
-                        Port,
-                    },
-                ];
-            } else {
-                console.error(`invalid: validator ${OrbsAddress} has no associated ValidatorRegisteredEvent`);
-                return [];
-            }
-        });
-    }
-
-    async getVirtualChainConfiguration(vchainId: string) {
-        const refTime = await this.ethModel.getUTCRefTime();
-        const standbysChangedEvent = this.ethModel.getLastEvent('StandbysChanged', refTime);
-        if (!standbysChangedEvent) {
-            if (this.config.verbose) {
-                console.log(`error in getVirtualChainConfiguration(${vchainId})`);
-                console.log(`can't find StandbysChanged event prior to ${refTime}`);
-                [...this.ethModel.getEventsFromTime('StandbysChanged', 0, nowUTC() * 2)].forEach((e) =>
-                    console.log(`existing event : ${JSON.stringify(e)}`)
-                );
-            }
-            throw new Error(`can't find StandbysChanged event prior to ${refTime}`);
-        }
-        const committeeChangedEvents = this.ethModel.getEventsFromTime('CommitteeChanged', refTime - utcDay, refTime);
-        const subscriptionChangedEvents = this.ethModel.getEventsFromTime(
-            'SubscriptionChanged',
-            refTime - utcDay,
-            refTime
-        );
-        const validatorRegisteredEvents = this.ethModel.getIteratorFrom('ValidatorRegistered', refTime);
-        if (this.config.verbose) {
-            console.log(
-                `getVirtualChainConfiguration(${vchainId}) refTime = ${refTime} standbysChangedEvent = ${JSON.stringify(
-                    standbysChangedEvent.returnValues
-                )} `
-            );
-            committeeChangedEvents.forEach((e) =>
-                console.log(`committeeChangedEvent: ${JSON.stringify(e.returnValues)}`)
-            );
-            subscriptionChangedEvents.forEach((e) =>
-                console.log(`subscriptionChangedEvent: ${JSON.stringify(e.returnValues)}`)
-            );
-        }
-        const CurrentTopology = this.calcTopology(
-            vchainId,
-            standbysChangedEvent,
-            committeeChangedEvents,
-            validatorRegisteredEvents
-        );
-        return {
-            CurrentRefTime: refTime,
-            PageStartRefTime: refTime - utcDay,
-            PageEndRefTime: refTime,
-            VirtualChains: {
-                [vchainId]: {
-                    VirtualChainId: vchainId,
-                    CurrentTopology,
-                    CommitteeEvents: committeeChangedEvents.map((d) => this.translateCommitteeChangedEvent(d)),
-                    SubscriptionEvents: subscriptionChangedEvents
-                        .filter((v) => v.returnValues.vcid === vchainId)
-                        .map((d) => this.translateSubscriptionChangedEvent(d)),
-                    ProtocolVersionEvents: [
-                        { RefTime: refTime, Data: { RolloutGroup: ROLLOUT_GROUP_MAIN, Version: 1 } },
-                        { RefTime: refTime, Data: { RolloutGroup: ROLLOUT_GROUP_CANARY, Version: 1 } },
-                    ],
-                },
-            },
-        };
-    }
-
-    async getNodeManagementConfiguration(): Promise<NodeManagementConfigurationOutput & LegacyBoyarBootstrapInput> {
+    async getNodeManagementConfiguration(
+        snapshot: StateSnapshot
+    ): Promise<NodeManagementConfigurationOutput & LegacyBoyarBootstrapInput> {
         const nodeConfiguration = await this.getLegacyBoyarBootstrap();
-        const refTime = await this.ethModel.getUTCRefTime();
-        const virtualChains = [...this.ethModel.getIteratorFrom('SubscriptionChanged', refTime)].map(
-            (event) => event.returnValues.vcid
-        );
+        const virtualChains = Object.keys(snapshot.CurrentVirtualChains).sort();
         const configResult = {
             orchestrator: this.makeOrchestratorConfig(nodeConfiguration),
             chains: await this.makeChainsConfig(nodeConfiguration, virtualChains),

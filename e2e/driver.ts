@@ -7,13 +7,13 @@ import { join } from 'path';
 import { writeFileSync, unlinkSync } from 'fs';
 import Web3 from 'web3';
 import HDWalletProvider from 'truffle-hdwallet-provider';
-import { exec, ChildProcess } from 'child_process';
+import { exec } from 'child_process';
 
 export class TestEnvironment {
     private envName: string = '';
     public contractsDriver: Driver;
     public logger: (lines: string) => void;
-    constructor(private pathToCompose: string) { }
+    constructor(private pathToCompose: string) {}
 
     getAppConfig() {
         return {
@@ -28,7 +28,6 @@ export class TestEnvironment {
         };
     }
     init() {
-
         test.serial.before('(log step)', async (t) => {
             console.log('e2e driver init() start');
             t.log('e2e driver init() start');
@@ -73,7 +72,7 @@ export class TestEnvironment {
             // clean up old config file
             try {
                 unlinkSync(configFilePath);
-            } catch (err) { }
+            } catch (err) {}
             // prepare file
             writeFileSync(configFilePath, JSON.stringify(this.getAppConfig()));
         });

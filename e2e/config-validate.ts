@@ -4,12 +4,16 @@ import { deepDataMatcher } from '../src/test-kit';
 import { getIpFromHex } from '../src/utils';
 import { addParticipant } from '../src/pos-v2-simulations';
 import { Dictionary } from 'lodash';
-import { validatorRegisteredEvents, standbysChangedEvents, committeeChangedEvents } from '@orbs-network/orbs-ethereum-contracts-v2';
+import {
+    validatorRegisteredEvents,
+    standbysChangedEvents,
+    committeeChangedEvents,
+} from '@orbs-network/orbs-ethereum-contracts-v2';
 import {
     StandbysChangedPayload,
     CommitteeChangedPayload,
     ValidatorRegisteredPayload,
-} from '../src/eth-model/events-types';
+} from '../src/ethereum/events-types';
 /*
 Below is the expected behaviour of the management service in the E2E test.
 The goal is to keep the expectations as static as reasonably possible, to help readability.
@@ -38,7 +42,7 @@ export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) 
                 maxRetries: '10',
             },
         },
-        chains: vChainIds.reverse().map(getExpectedVirtualChainConfiguration),
+        chains: vChainIds.map(getExpectedVirtualChainConfiguration),
         services: {
             'management-service': {
                 InternalPort: 8080,
@@ -96,10 +100,15 @@ function getExpectedVirtualChainConfiguration(vcid: string) {
 /**
  * extract the value type from a promise type
  */
-type Await<T> = T extends PromiseLike<infer U> ? U : T
+type Await<T> = T extends PromiseLike<infer U> ? U : T;
 
 type ParticipantResult = Await<ReturnType<typeof addParticipant>>;
-export function getOngConfigValidator(vcid: string, comittyResult: ParticipantResult, participantResult: ParticipantResult, committeeContractAddress: string) {
+export function getOngConfigValidator(
+    vcid: string,
+    comittyResult: ParticipantResult,
+    participantResult: ParticipantResult,
+    committeeContractAddress: string
+) {
     const ips: Dictionary<string> = {};
     const participant1Registraion = validatorRegisteredEvents(
         comittyResult.validatorTxResult
@@ -129,18 +138,19 @@ export function getOngConfigValidator(vcid: string, comittyResult: ParticipantRe
                 VirtualChainId: vcid,
                 CurrentTopology: [
                     {
-                        OrbsAddress: standbyEvent.orbsAddrs[0],
-                        Ip: ips[standbyEvent.orbsAddrs[0]],
+                        OrbsAddress: comittyEvent.orbsAddrs[0],
+                        Ip: ips[comittyEvent.orbsAddrs[0]],
                         Port: getVirtualChainPort(vcid),
                     },
                     {
-                        OrbsAddress: comittyEvent.orbsAddrs[0],
-                        Ip: ips[comittyEvent.orbsAddrs[0]],
+                        OrbsAddress: standbyEvent.orbsAddrs[0],
+                        Ip: ips[standbyEvent.orbsAddrs[0]],
                         Port: getVirtualChainPort(vcid),
                     },
                 ],
                 CommitteeEvents: [
                     {
+                        RefTime: isNumber,
                         Committee: [
                             {
                                 EthAddress: comittyEvent.addrs[0],
@@ -157,9 +167,17 @@ export function getOngConfigValidator(vcid: string, comittyResult: ParticipantRe
                         Data: {
                             Status: 'active',
                             Tier: 'defaultTier',
-                            RolloutGroup: 'ga',
+                            RolloutGroup: 'main',
                             IdentityType: 0,
-                            Params: {},
+                        },
+                    },
+                    {
+                        RefTime: isNumber,
+                        Data: {
+                            Status: 'expired',
+                            Tier: 'defaultTier',
+                            RolloutGroup: 'main',
+                            IdentityType: 0,
                         },
                     },
                 ],
