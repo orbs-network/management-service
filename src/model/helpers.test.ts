@@ -8,7 +8,7 @@ test('findAllEventsInRange on empty array', (t) => {
 test('findAllEventsInRange with all times different', (t) => {
     const allDifferent = [{ RefTime: 12 }, { RefTime: 17 }, { RefTime: 23 }, { RefTime: 29 }];
 
-    t.deepEqual(findAllEventsInRange(allDifferent, 900, 1000), []);
+    t.deepEqual(findAllEventsInRange(allDifferent, 900, 1000), [{ RefTime: 29 }]);
 
     t.deepEqual(findAllEventsInRange(allDifferent, 0, 10), []);
 
@@ -25,6 +25,8 @@ test('findAllEventsInRange with all times different', (t) => {
     t.deepEqual(findAllEventsInRange(allDifferent, 20, 25), [{ RefTime: 17 }, { RefTime: 23 }]);
 
     t.deepEqual(findAllEventsInRange(allDifferent, 17, 23), [{ RefTime: 17 }, { RefTime: 23 }]);
+
+    t.deepEqual(findAllEventsInRange(allDifferent, 19, 21), [{ RefTime: 17 }]);
 });
 
 test('findAllEventsInRange with some times identical', (t) => {
@@ -80,4 +82,12 @@ test('findAllEventsInRange with some times identical', (t) => {
         { RefTime: 23, Data: 'F' },
         { RefTime: 23, Data: 'G' },
     ]);
+
+    t.deepEqual(findAllEventsInRange(someIdentical, 23, 23), [
+        { RefTime: 23, Data: 'E' },
+        { RefTime: 23, Data: 'F' },
+        { RefTime: 23, Data: 'G' },
+    ]);
+
+    t.deepEqual(findAllEventsInRange(someIdentical, 19, 21), [{ RefTime: 17, Data: 'D' }]);
 });

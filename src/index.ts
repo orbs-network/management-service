@@ -41,7 +41,7 @@ export function serve(serviceConfig: ServiceConfiguration) {
         wrapAsync((request, response) => {
             const { vchainId } = request.params;
             const snapshot = state.getCurrentSnapshot();
-            const body = getVirtualChainManagement(vchainId, snapshot, serviceConfig);
+            const body = getVirtualChainManagement(vchainId, snapshot);
             response.status(200).json(body);
         })
     );

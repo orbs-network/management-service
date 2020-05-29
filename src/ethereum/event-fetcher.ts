@@ -13,7 +13,7 @@ export abstract class EventFetcher {
 // the simplest fetcher, yet inefficient, good for testing
 export class SingleEventFetcher extends EventFetcher {
     async fetchBlock(blockNumber: number): Promise<EventData[]> {
-        return await this.reader.getPastEvents(this.eventName, {
+        return await this.reader.getPastEventsUnsafe(this.eventName, {
             fromBlock: blockNumber,
             toBlock: blockNumber,
         });

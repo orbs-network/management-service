@@ -9,7 +9,7 @@ export function findAllEventsInRange(collection: RefTimed[], fromTime: number, t
         const item = collection[i];
         if (item.RefTime > toTime) continue;
         if (item.RefTime < fromTime) {
-            if (res[0] && res[0].RefTime != fromTime) res.unshift(item);
+            if (!res[0] || res[0].RefTime != fromTime) res.unshift(item);
             return res;
         }
         res.unshift(item);

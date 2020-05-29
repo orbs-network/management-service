@@ -1,9 +1,8 @@
 import _ from 'lodash';
 import { StateSnapshot } from './state';
-import { ServiceConfiguration } from '../data-types';
 import { getVirtualChainPort } from '../ports';
 
-export function getVirtualChainManagement(vchainId: string, snapshot: StateSnapshot, _config: ServiceConfiguration) {
+export function getVirtualChainManagement(vchainId: string, snapshot: StateSnapshot) {
     // topology includes vchain specific data (port)
     const vchainPort = getVirtualChainPort(vchainId);
     const vchainTopology = _.cloneDeep(snapshot.CurrentTopology);
@@ -20,7 +19,7 @@ export function getVirtualChainManagement(vchainId: string, snapshot: StateSnaps
             [vchainId]: {
                 VirtualChainId: vchainId,
                 CurrentTopology: vchainTopology,
-                CommitteeEvents: snapshot.CurrentTopology,
+                CommitteeEvents: snapshot.CommitteeEvents,
                 SubscriptionEvents: snapshot.SubscriptionEvents[vchainId],
                 ProtocolVersionEvents: snapshot.ProtocolVersionEvents,
             },

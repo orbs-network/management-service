@@ -40,6 +40,11 @@ class MockEthereumReader {
         if (this.delays) await new Promise((resolve) => setTimeout(resolve, 1)); // sleep 1 ms
         return res;
     }
+    async getPastEventsUnsafe(_en: EventName, { fromBlock, toBlock }: PastEventOptions): Promise<Array<MockEvent>> {
+        const res = _.filter(mockEventsData, (event) => event.blockNumber >= fromBlock && event.blockNumber <= toBlock);
+        if (this.delays) await new Promise((resolve) => setTimeout(resolve, 1)); // sleep 1 ms
+        return res;
+    }
 }
 
 function getMockReader(delays: boolean): EthereumReader {

@@ -36,7 +36,7 @@ test('state applies commitee, standby, IPs and topology', (t) => {
     StandbysChanged(s, day + 3000, ['O', 'P'], ['o3', 'p3']);
     s.applyNewTimeRef(day + 3000);
 
-    console.log(s.getSnapshot());
+    console.log(JSON.stringify(s.getSnapshot(), null, 2));
 
     t.is(s.getSnapshot().CurrentIp['A'], '7.7.7.7');
     t.is(s.getSnapshot().CurrentIp['B'], '2.2.2.2');
@@ -103,7 +103,7 @@ test('state applies virtual chain subscriptions', (t) => {
 
     s.applyNewTimeRef(5000);
 
-    console.log(s.getSnapshot());
+    console.log(JSON.stringify(s.getSnapshot(), null, 2));
 
     t.is(s.getSnapshot().CurrentVirtualChains['V1'].Expiration, 9010);
     t.is(s.getSnapshot().CurrentVirtualChains['V2'].Expiration, 3500);
@@ -167,7 +167,7 @@ test('state applies protocol version changes', (t) => {
 
     s.applyNewTimeRef(5000);
 
-    console.log(s.getSnapshot());
+    console.log(JSON.stringify(s.getSnapshot(), null, 2));
 
     t.is(s.getSnapshot().ProtocolVersionEvents.length, 3);
     t.is(s.getSnapshot().ProtocolVersionEvents[0].RefTime, 1500);
@@ -220,7 +220,7 @@ function SubscriptionChanged(s: State, time: number, vcid: string, expiresAt: nu
             genRef: 'gR',
             expiresAt: expiresAt.toString(),
             tier: 'defaultTier',
-            deploymentSubset: 'main'
+            deploymentSubset: 'main',
         },
     });
 }
@@ -232,7 +232,7 @@ function ProtocolVersionChanged(s: State, time: number, nextVersion: number, fro
             deploymentSubset: 'main',
             currentVersion: 'xxx',
             nextVersion: nextVersion.toString(),
-            fromTimestamp: fromTimestamp.toString()
+            fromTimestamp: fromTimestamp.toString(),
         },
     });
 }
