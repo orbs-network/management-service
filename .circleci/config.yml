@@ -56,11 +56,11 @@ jobs:
       - node/install:
         node-version: '12.13.0'
       - docker/install-docker
-      - run: ./create-version-file.sh
+      - run: ./boyar/create-version-file.sh
       - node/with-cache:
           steps:
             - run: npm install
-      - run: ./docker-build.sh
+      - run: ./boyar/docker-build.sh
       - run: ./.circleci/release.sh
 
 workflows:
