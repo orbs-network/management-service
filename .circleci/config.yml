@@ -69,8 +69,8 @@ workflows:
       - build-and-test
       - build-and-release-to-staging
       - build-and-release:
-        filters:
-          tags:
-            only: /^v.*/
-          branches:
-            only: master
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: master
