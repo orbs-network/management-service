@@ -35,12 +35,12 @@ interface MockEvent {
 
 class MockEthereumReader {
     constructor(private delays: boolean) {}
-    async getPastEvents(_en: EventName, { fromBlock, toBlock }: PastEventOptions): Promise<Array<MockEvent>> {
+    async getPastEventsAutoPaged(_en: EventName, { fromBlock, toBlock }: PastEventOptions): Promise<Array<MockEvent>> {
         const res = _.filter(mockEventsData, (event) => event.blockNumber >= fromBlock && event.blockNumber <= toBlock);
         if (this.delays) await new Promise((resolve) => setTimeout(resolve, 1)); // sleep 1 ms
         return res;
     }
-    async getPastEventsUnsafe(_en: EventName, { fromBlock, toBlock }: PastEventOptions): Promise<Array<MockEvent>> {
+    async getPastEvents(_en: EventName, { fromBlock, toBlock }: PastEventOptions): Promise<Array<MockEvent>> {
         const res = _.filter(mockEventsData, (event) => event.blockNumber >= fromBlock && event.blockNumber <= toBlock);
         if (this.delays) await new Promise((resolve) => setTimeout(resolve, 1)); // sleep 1 ms
         return res;

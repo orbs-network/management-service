@@ -207,8 +207,9 @@ export class EthereumReader {
         return toNumber(block.timestamp);
     }
 
-    // safe, if fails tries to decrease page size with multiple requests until it works
-    async getPastEvents<T extends EventName>(
+    // if fails tries to decrease page size with multiple requests until it works
+    // TODO: retire this function since auto page logic will move to event-fetcher
+    async getPastEventsAutoPaged<T extends EventName>(
         eventName: T,
         { fromBlock, toBlock }: PastEventOptions
     ): Promise<Array<EventTypes[T]>> {
@@ -216,8 +217,8 @@ export class EthereumReader {
         return await getEventsPaged(web3Contract, eventName, fromBlock, toBlock, toBlock - fromBlock);
     }
 
-    // unsafe, throws error if fails, caller needs to decrease page size if needed
-    async getPastEventsUnsafe<T extends EventName>(
+    // throws error if fails, caller needs to decrease page size if needed
+    async getPastEvents<T extends EventName>(
         eventName: T,
         { fromBlock, toBlock }: PastEventOptions
     ): Promise<Array<EventTypes[T]>> {

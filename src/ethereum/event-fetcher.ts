@@ -13,7 +13,7 @@ export abstract class EventFetcher {
 // the simplest fetcher, yet inefficient, good for testing
 export class SingleEventFetcher extends EventFetcher {
     async fetchBlock(blockNumber: number): Promise<EventData[]> {
-        return await this.reader.getPastEventsUnsafe(this.eventName, {
+        return await this.reader.getPastEvents(this.eventName, {
             fromBlock: blockNumber,
             toBlock: blockNumber,
         });
@@ -39,7 +39,7 @@ export class LookaheadEventFetcher extends EventFetcher {
                 const fromBlock = this.latestBlockInLookahead + 1;
                 const toBlock = Math.min(this.latestBlockInLookahead + this.currentPageSize, latestAllowedBlock);
                 this.fetchingPromise = this.reader
-                    .getPastEvents(this.eventName, { fromBlock, toBlock })
+                    .getPastEventsAutoPaged(this.eventName, { fromBlock, toBlock })
                     .then((results) => {
                         this.lookAhead = _.concat(this.lookAhead, results);
                         this.latestBlockInLookahead = toBlock;
