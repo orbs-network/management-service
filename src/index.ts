@@ -25,15 +25,12 @@ export function serve(serviceConfig: ServiceConfiguration) {
             response.status(200).json(body);
         })
     );
-    app.get(
-        '/vchains/:vchainId/management',
-        wrapAsync((request, response) => {
-            const { vchainId } = request.params;
-            const snapshot = state.getCurrentSnapshot();
-            const body = getVirtualChainManagement(vchainId, snapshot);
-            response.status(200).json(body);
-        })
-    );
+    app.get('/vchains/:vchainId/management', (request, response) => {
+        const { vchainId } = request.params;
+        const snapshot = state.getCurrentSnapshot();
+        const body = getVirtualChainManagement(vchainId, snapshot);
+        response.status(200).json(body);
+    });
     app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
         if (error instanceof Error) {
             if (serviceConfig.verbose) {
