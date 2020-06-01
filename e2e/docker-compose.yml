@@ -8,12 +8,6 @@ services:
     app:
         build:
             context: .
-            dockerfile: ./Dockerfile.test
+            dockerfile: ./Dockerfile-app.test
         ports:
             - 8080
-    static:
-        build:
-            context: .
-            dockerfile: ./Dockerfile-static.test
-        ports:
-            - 80

@@ -13,15 +13,10 @@ export interface ServiceConfiguration {
     FinalityBufferBlocks: number;
     FirstBlock: number;
     verbose: boolean;
-    boyarLegacyBootstrap: string;
 }
 
 export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): string[] | undefined {
     const serviceConfigConstraints = {
-        boyarLegacyBootstrap: {
-            presence: { allowEmpty: false },
-            type: 'string',
-        },
         EthereumPollIntervalSeconds: {
             presence: { allowEmpty: false },
             type: 'number',

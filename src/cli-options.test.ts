@@ -12,7 +12,6 @@ const configPath = 'some/path/config.json';
 const minimalConfigValue = {
     EthereumGenesisContract: 'bar',
     EthereumEndpoint: 'http://localhost:7545',
-    boyarLegacyBootstrap: 'foo',
 };
 const configValue: ServiceConfiguration = {
     ...minimalConfigValue,

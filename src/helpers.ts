@@ -29,3 +29,7 @@ export function getIpFromHex(ipStr: string): string {
     const ipBytes = Number(ipStr);
     return byte(ipBytes, 3) + '.' + byte(ipBytes, 2) + '.' + byte(ipBytes, 1) + '.' + byte(ipBytes, 0);
 }
+
+export function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}

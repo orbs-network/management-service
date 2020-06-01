@@ -10,5 +10,4 @@ export const exampleConfig: ServiceConfiguration = {
     FinalityBufferBlocks: 10,
     FirstBlock: 0,
     verbose: false,
-    boyarLegacyBootstrap: 'http://static:80/legacy-boyar.json',
 };

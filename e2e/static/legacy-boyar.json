@@ -1,9 +1,0 @@
-{
-    "network": [],
-    "orchestrator": {
-        "storage-driver": "nfs",
-        "storage-options": {
-            "maxRetries": "10"
-        }
-    }
-}

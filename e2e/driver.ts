@@ -1,5 +1,5 @@
-import test, { ExecutionContext } from 'ava';
-import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
+import test from 'ava';
+import { Driver as EthereumPosDriver } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { dockerComposeTool, getAddressForService, getLogsForService } from 'docker-compose-mocha';
 import fetch from 'node-fetch';
 import { retry } from 'ts-retry-promise';
@@ -8,55 +8,62 @@ import { writeFileSync, unlinkSync } from 'fs';
 import Web3 from 'web3';
 import HDWalletProvider from 'truffle-hdwallet-provider';
 import { exec } from 'child_process';
+import { sleep } from '../src/helpers';
 
 export class TestEnvironment {
     private envName: string = '';
-    public contractsDriver: Driver;
-    public logger: (lines: string) => void;
-    constructor(private pathToCompose: string) {}
+    public ethereumPosDriver: EthereumPosDriver;
+    public testLogger: (lines: string) => void;
+
+    constructor(private pathToDockerCompose: string) {}
 
     getAppConfig() {
         return {
             Port: 8080,
-            EthereumGenesisContract: this.contractsDriver.contractRegistry.address,
-            FirstBlock: 0,
-            EthereumEndpoint: `http://ganache:7545`, // host.docker.internal :(
-            boyarLegacyBootstrap: 'http://static:80/legacy-boyar.json',
-            EthereumPollIntervalSeconds: 1,
+            EthereumGenesisContract: this.ethereumPosDriver.contractRegistry.address,
+            EthereumEndpoint: `http://ganache:7545`,
+            DockerNamespace: 'orbsnetwork',
             DockerHubPollIntervalSeconds: 1,
+            EthereumPollIntervalSeconds: 1,
             FinalityBufferBlocks: 0,
+            FirstBlock: 0,
             verbose: true,
         };
     }
-    init() {
-        test.serial.before('(log step)', async (t) => {
-            console.log('e2e driver init() start');
-            t.log('e2e driver init() start');
-        });
+
+    // runs all the docker instances with docker-compose
+    launchServices() {
+        test.serial.before((t) => t.log('[E2E] driver launchServices() start'));
+
+        // step 1 - launch ganache docker
+        test.serial.before((t) => t.log('[E2E] launch ganache docker'));
         this.envName = dockerComposeTool(
             test.serial.before.bind(test.serial),
             test.serial.after.always.bind(test.serial.after),
-            this.pathToCompose,
+            this.pathToDockerCompose,
             {
-                startOnlyTheseServices: ['ganache', 'static'],
+                startOnlyTheseServices: ['ganache'],
                 containerCleanUp: false,
             } as any
         );
-        test.serial.before(
-            'wait 5 seconds for ganache to warm up',
-            () => new Promise((res) => setTimeout(res, 5 * 1000))
-        );
-        test.serial.before('start contracts driver', async (t) => {
-            console.log('starting contracts driver');
-            t.log('starting contracts driver');
+
+        // step 2 - let ganache warm up
+        test.serial.before(async (t) => {
+            t.log('[E2E] wait 5 seconds for ganache to warm up');
+            await sleep(5000);
+        });
+
+        // step 3 - deploy ethereum PoS contracts to ganache
+        test.serial.before(async (t) => {
+            t.log('[E2E] deploy ethereum PoS contracts to ganache');
             t.timeout(60 * 1000);
-            const ganacheAddress = await getAddressForService(this.envName, this.pathToCompose, 'ganache', 7545);
-            this.contractsDriver = await Driver.new({
+            const ganacheAddress = await getAddressForService(this.envName, this.pathToDockerCompose, 'ganache', 7545);
+            this.ethereumPosDriver = await EthereumPosDriver.new({
                 web3Provider: () => {
                     return new Web3(
                         new (HDWalletProvider as any)(
                             'vanish junk genuine web seminar cook absurd royal ability series taste method identify elevator liquid',
-                            `http://localhost:${ganacheAddress.split(':')[1]}`,
+                            `http://localhost:${portFromAddress(ganacheAddress)}`,
                             0,
                             100,
                             false
@@ -64,33 +71,25 @@ export class TestEnvironment {
                     );
                 },
             });
-
-            console.log('contracts driver initialized');
-            t.log('contracts driver initialized');
+            t.log('[E2E] ethereum PoS contracts deployed');
         });
-        test.serial.before('write management service config file', async (t) => {
+
+        // step 4 - write config file for app
+        test.serial.before((t) => {
+            t.log('[E2E] write config file for app');
             const configFilePath = join(__dirname, 'app-config.json');
-            // clean up old config file
             try {
                 unlinkSync(configFilePath);
             } catch (err) {}
-            // prepare file
             writeFileSync(configFilePath, JSON.stringify(this.getAppConfig()));
         });
 
-        // old code to dump entire log of app at the end of test
-        // let emittedLogLines = 0;
-        // test.serial.afterEach.always('print app logs', async (t: ExecutionContext) => {
-        //     const logs: string = await getLogsForService(this.envName, this.pathToCompose, 'app');
-        //     const logLines = logs.split('\n').slice(emittedLogLines);
-        //     emittedLogLines += logLines.length - 1;
-        //     t.log(logLines.join('\n'));
-        // });
-
+        // step 5 - launch app docker
+        test.serial.before((t) => t.log('[E2E] launch app docker'));
         dockerComposeTool(
             test.serial.before.bind(test.serial),
             test.serial.after.always.bind(test.serial.after),
-            this.pathToCompose,
+            this.pathToDockerCompose,
             {
                 envName: this.envName,
                 startOnlyTheseServices: ['app'],
@@ -99,26 +98,32 @@ export class TestEnvironment {
                 // containerCleanUp: false
             } as any
         );
-        test.serial.before('(log step)', async (t) => {
-            const logP = exec(`docker-compose -p ${this.envName} -f "${this.pathToCompose}" logs -f app`);
-            this.logger = t.log;
+
+        // // old step - print app logs from docker on failure
+        // test.serial.afterEach.always('print logs on failures', async (t) => {
+        //     if (t.passed) return;
+        //     const logs = await getLogsForService(this.envName, this.pathToDockerCompose, 'app');
+        //     console.log(logs);
+        // });
+
+        // step 6 - start live dump of logs from app to test logger
+        test.serial.before(async (t) => {
+            t.log('[E2E] start live dump of logs from app to test logger');
+            const logP = exec(`docker-compose -p ${this.envName} -f "${this.pathToDockerCompose}" logs -f app`);
+            this.testLogger = t.log;
             logP.stdout.on('data', (data) => {
-                if (this.logger) {
-                    this.logger(data);
-                }
+                if (this.testLogger) this.testLogger(data);
             });
             logP.on('exit', () => {
-                if (this.logger) {
-                    this.logger(`app log exited`);
-                }
+                if (this.testLogger) this.testLogger(`app log exited`);
             });
-            console.log('e2e driver init() done');
-            t.log('e2e driver init() done');
         });
+
+        test.serial.before((t) => t.log('[E2E] driver launchServices() finished'));
     }
 
     async fetch(serviceName: string, port: number, path: string) {
-        const addr = await getAddressForService(this.envName, this.pathToCompose, serviceName, port);
+        const addr = await getAddressForService(this.envName, this.pathToDockerCompose, serviceName, port);
         return await retry(
             async () => {
                 const response = await fetch(`http://${addr}/${path}`);
@@ -132,4 +137,8 @@ export class TestEnvironment {
             { retries: 10, delay: 300 }
         );
     }
+}
+
+function portFromAddress(address: string) {
+    return address.split(':')[1];
 }
