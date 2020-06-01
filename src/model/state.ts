@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { EventTypes } from '../ethereum/events-types';
-import { getIpFromHex, toNumber } from '../utils';
+import { getIpFromHex, toNumber } from '../helpers';
 import { findAllEventsInRange } from './helpers';
 import * as Versioning from '../dockerhub/versioning';
 

@@ -1,5 +1,5 @@
 import test from 'ava';
-import { range } from '../utils';
+import { range } from '../helpers';
 import { getVirtualChainPort } from './helpers';
 
 test('two ids with 1-2 character diff dont get the same port (1000000s scenario)', (t) => {

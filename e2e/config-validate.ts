@@ -1,7 +1,7 @@
-import { getVirtualChainPort } from '../src/ports';
+import { getVirtualChainPort } from '../src/api/helpers';
 import { isNumber } from 'util';
-import { deepDataMatcher } from '../src/test-kit';
-import { getIpFromHex } from '../src/utils';
+import { deepDataMatcher } from '../src/test-helpers';
+import { getIpFromHex } from '../src/helpers';
 import { addParticipant } from '../src/pos-v2-simulations';
 import { Dictionary } from 'lodash';
 import {
@@ -33,14 +33,12 @@ export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) 
         network: [],
         orchestrator: {
             DynamicManagementConfig: {
-                ReadInterval: '1m',
+                ReadInterval: '30s',
                 ResetTimeout: '30m',
                 Url: 'http://localhost:7666/node/management',
             },
-            'storage-driver': 'nfs',
-            'storage-options': {
-                maxRetries: '10',
-            },
+            'storage-driver': 'local',
+            'storage-mount-type': 'bind',
         },
         chains: vChainIds.map(getExpectedVirtualChainConfiguration),
         services: {
@@ -49,18 +47,13 @@ export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) 
                 ExternalPort: 7666,
                 DockerConfig: {
                     Image: 'orbsnetwork/management-service',
-                    Tag: 'G-0-N', // v0.0.1
-                    Pull: undefined, // true
+                    Tag: 'v0.1.0',
+                    Pull: true,
                 },
                 Config: appConfig,
             },
             signer: {
                 InternalPort: 7777,
-                DockerConfig: {
-                    Image: 'orbsnetwork/signer',
-                    Tag: 'v1.3.13',
-                    Pull: true,
-                },
                 Config: {
                     api: 'v1',
                 },
@@ -73,22 +66,12 @@ export function getBoyarConfigValidator(appConfig: object, vChainIds: string[]) 
 function getExpectedVirtualChainConfiguration(vcid: string) {
     return {
         Config: {
-            ManagementConfigUrl: `http://management-service/vchains/${vcid}/management`,
-            SignerUrl: 'http://signer:7777',
-            'ethereum-endpoint': 'http://eth.orbs.com',
+            'management-file-path': `http://management-service:8080/vchains/${vcid}/management`,
+            'signer-endpoint': 'http://signer:7777',
+            'ethereum-endpoint': 'http://ganache:7545',
         },
         DockerConfig: {
             Image: 'orbsnetwork/node',
-            Resources: {
-                Limits: {
-                    CPUs: 1,
-                    Memory: 1024,
-                },
-                Reservations: {
-                    CPUs: 0.5,
-                    Memory: 512,
-                },
-            },
             Tag: 'v1.3.13',
         },
         ExternalPort: getVirtualChainPort(vcid),

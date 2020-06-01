@@ -15,7 +15,7 @@ export function getNodeManagement(snapshot: StateSnapshot, config: ServiceConfig
         network: [],
         orchestrator: {
             DynamicManagementConfig: {
-                Url: 'http:/localhost:7666/node/management',
+                Url: 'http://localhost:7666/node/management',
                 ReadInterval: '30s',
                 ResetTimeout: '30m',
             },

@@ -4,7 +4,7 @@ import { EventData, Contract, PastEventOptions } from 'web3-eth-contract';
 import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/compiled-contracts';
 import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
-import { errorString, toNumber } from '../utils';
+import { errorString, toNumber } from '../helpers';
 import { EventName, EventTypes } from './events-types';
 
 export function getNewEthereumReader(config: EthereumConfiguration) {

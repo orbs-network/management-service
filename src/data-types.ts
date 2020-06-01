@@ -82,15 +82,6 @@ export type DockerConfig = {
     };
 };
 
-export type LegacyBoyarBootstrapInput = {
-    network?: Array<unknown>;
-    orchestrator: {
-        [name: string]: string;
-    };
-    chains: Array<ChainConfiguration>;
-    services: { [name: string]: unknown };
-};
-
 export type ChainConfiguration = {
     Id: string | number;
     InternalPort: number; // for gossip, identical for all vchains
@@ -101,36 +92,6 @@ export type ChainConfiguration = {
         ManagementConfigUrl: string; //`http://management-service/vchains/${vcid}/management`;
         SignerUrl: string; //'http://signer:7777';
         'ethereum-endpoint': string; //'http://eth.orbs.com'; // eventually rename to EthereumEndpoint
-    };
-};
-
-export interface GenericNodeService {
-    InternalPort: number;
-    ExternalPort?: number;
-    DockerConfig: DockerConfig;
-    Config: object;
-}
-
-export type IdentityType = 0;
-export interface ManagementNodeService extends GenericNodeService {
-    DockerConfig: DockerConfig;
-    Config: ServiceConfiguration;
-}
-
-export type NodeManagementConfigurationOutput = {
-    network: LegacyBoyarBootstrapInput['network'];
-    orchestrator: {
-        [name: string]: string | object;
-        DynamicManagementConfig: {
-            Url: string;
-            ReadInterval: string;
-            ResetTimeout: string;
-        };
-    };
-    chains: Array<ChainConfiguration>;
-    services: {
-        [name: string]: GenericNodeService;
-        'management-service': ManagementNodeService;
     };
 };
 
