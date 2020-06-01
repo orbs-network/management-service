@@ -2,11 +2,7 @@ import test from 'ava';
 import { join } from 'path';
 import { TestEnvironment } from './driver';
 import { getBoyarConfigValidator, getOngConfigValidator } from './config-validate';
-import {
-    createVC,
-    Driver,
-    subscriptionChangedEvents,
-} from '@orbs-network/orbs-ethereum-contracts-v2';
+import { createVC, Driver, subscriptionChangedEvents } from '@orbs-network/orbs-ethereum-contracts-v2';
 import { isErrorResponse } from '../src/data-types';
 import { addParticipant } from '../src/pos-v2-simulations';
 
@@ -72,7 +68,9 @@ test.serial('[E2E] serves ONG endpoint as expected', async (t) => {
     const participantResult = await addParticipant(d, false);
 
     t.log('lastFixtureBlock : ' + participantResult.syncTxResult.blockNumber);
-    const lastFixtureBlockTime = Number((await d.web3.eth.getBlock(participantResult.syncTxResult.blockNumber)).timestamp);
+    const lastFixtureBlockTime = Number(
+        (await d.web3.eth.getBlock(participantResult.syncTxResult.blockNumber)).timestamp
+    );
     t.log('lastFixtureBlockTime : ' + lastFixtureBlockTime);
 
     const lastBlock = await ganacheGraceBuffer(d);

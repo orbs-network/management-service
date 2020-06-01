@@ -6,6 +6,7 @@ export class TaskLoop {
     constructor(private task: () => Promise<unknown>, private pause: number) {}
 
     runTask = () => {
+        // TODO: handle exceptions in task()
         this.task().then(
             () => {
                 if (this.started) {

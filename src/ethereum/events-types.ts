@@ -42,6 +42,7 @@ export type ProtocolChangedPayload = {
 export type ValidatorRegisteredPayload = {
     ip: string;
     orbsAddr: string;
+    addr: string;
 };
 
 export type EventTypes = {

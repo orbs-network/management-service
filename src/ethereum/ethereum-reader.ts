@@ -4,13 +4,14 @@ import { EventData, Contract, PastEventOptions } from 'web3-eth-contract';
 import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/compiled-contracts';
 import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
-import { errorString, toNumber } from './utils';
-import { EventName, EventTypes } from './eth-model/events-types';
+import { errorString, toNumber } from '../utils';
+import { EventName, EventTypes } from './events-types';
 
 export function getNewEthereumReader(config: ServiceEthereumConfiguration) {
     const ethConfig = new EthereumConfigReader(config).readEthereumConfig();
     return new EthereumReader(ethConfig);
 }
+
 type ContractAddressUpdatedEvent = EventData & { returnValues: ContractAddressUpdatedEventValues };
 
 export type ContractName =
@@ -59,6 +60,7 @@ export type ServiceEthereumConfiguration = {
     FirstBlock: BlockNumber;
     verbose: boolean;
 };
+
 export class EthereumConfigReader {
     private web3: Web3;
 
@@ -98,6 +100,7 @@ export class EthereumConfigReader {
         };
     }
 }
+
 async function retryGetPastEventsWithLatest(
     event: string,
     web3: Web3,
@@ -151,6 +154,7 @@ type ContractMetadata = {
     address: string;
     firstBlock: BlockNumber;
 };
+
 export type EthereumConfig = {
     contracts: Promise<{ [t in ContractName]?: ContractMetadata }>;
     firstBlock: BlockNumber;
@@ -174,6 +178,7 @@ export function contractByEventName(eventName: EventName): ContractName {
             throw new Error(`unknown event name '${eventName}'`);
     }
 }
+
 export class EthereumReader {
     private web3: Web3;
 
@@ -194,17 +199,34 @@ export class EthereumReader {
         return this.web3.eth.getBlockNumber();
     }
 
-    async getRefTime(blockNumber: number | 'latest'): Promise<number | null> {
+    async getRefTime(blockNumber: number | 'latest'): Promise<number> {
         const block = await this.web3.eth.getBlock(blockNumber);
-        return block && toNumber(block.timestamp);
+        if (!block) {
+            throw new Error(`web3.eth.getBlock for ${blockNumber} return empty block`);
+        }
+        return toNumber(block.timestamp);
     }
 
-    async getPastEvents<T extends EventName>(
+    // if fails tries to decrease page size with multiple requests until it works
+    // TODO: retire this function since auto page logic will move to event-fetcher
+    async getPastEventsAutoPaged<T extends EventName>(
         eventName: T,
         { fromBlock, toBlock }: PastEventOptions
     ): Promise<Array<EventTypes[T]>> {
         const web3Contract = await this.connect(contractByEventName(eventName));
         return await getEventsPaged(web3Contract, eventName, fromBlock, toBlock, toBlock - fromBlock);
+    }
+
+    // throws error if fails, caller needs to decrease page size if needed
+    async getPastEvents<T extends EventName>(
+        eventName: T,
+        { fromBlock, toBlock }: PastEventOptions
+    ): Promise<Array<EventTypes[T]>> {
+        const web3Contract = await this.connect(contractByEventName(eventName));
+        return (await web3Contract.getPastEvents(eventName, {
+            fromBlock,
+            toBlock,
+        })) as Array<EventTypes[T]>;
     }
 }
 
