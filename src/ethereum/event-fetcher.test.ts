@@ -86,3 +86,6 @@ test('LookaheadEventFetcher contract test', async (t) => {
 
     t.deepEqual(resFetcher, resContract);
 });
+
+// TODO: add test to verify fetcher doesn't look beyond latestAllowedBlock
+//  so fetch once, then change the model and fetch again to see the new value is returned
