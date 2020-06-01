@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { EventTypes } from '../ethereum/events-types';
 import { getIpFromHex, toNumber } from '../helpers';
-import { findAllEventsInRange } from './helpers';
+import { findAllEventsCoveringRange } from './helpers';
 import * as Versioning from '../dockerhub/versioning';
 
 export interface StateSnapshot {
@@ -135,7 +135,7 @@ function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
     const inTopology: { [EthAddress: string]: string } = {}; // EthAddress -> OrbsAddress
 
     // take all committee members in last 12 hours
-    const committeesInLast12Hours = findAllEventsInRange(snapshot.CommitteeEvents, time - 12 * 60 * 60, time);
+    const committeesInLast12Hours = findAllEventsCoveringRange(snapshot.CommitteeEvents, time - 12 * 60 * 60, time);
     for (const committeeEvent of committeesInLast12Hours) {
         const commitee = (committeeEvent as CommiteeEvent).Committee;
         for (const node of commitee as { EthAddress: string; OrbsAddress: string }[]) {

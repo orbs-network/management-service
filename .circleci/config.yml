@@ -33,7 +33,43 @@ jobs:
           path: _out
       - store_artifacts:
           path: _out    
+  
+  build-and-release-to-staging:
+    machine: true
+    steps:
+      - checkout
+      - node/install:
+        node-version: '12.13.0'
+      - docker/install-docker
+      - run: ./boyar/create-version-file.sh
+      - node/with-cache:
+          steps:
+            - run: npm install
+      - run: ./boyar/docker-build.sh
+      - run: ./.circleci/release-to-staging.sh
+
+  build-and-release:
+    machine: true
+    steps:
+      - checkout
+      - node/install:
+        node-version: '12.13.0'
+      - docker/install-docker
+      - run: ./boyar/create-version-file.sh
+      - node/with-cache:
+          steps:
+            - run: npm install
+      - run: ./boyar/docker-build.sh
+      - run: ./.circleci/release.sh
+
 workflows:
-    build-and-test:
-      jobs:
-        - build-and-test
+  build-and-test:
+    jobs:
+      - build-and-test
+      - build-and-release-to-staging
+      - build-and-release:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: master
