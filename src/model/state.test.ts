@@ -178,6 +178,25 @@ test('state applies protocol version changes', (t) => {
     t.is(s.getSnapshot().ProtocolVersionEvents[2].Data.Version, 8);
 });
 
+test('state applies monotonous image version changes', (t) => {
+    const s = new State();
+
+    s.applyNewImageVersion('node', 'v1.0.0');
+    s.applyNewImageVersion('management-service', 'v1.0.1');
+    s.applyNewImageVersion('node', 'v1.5.3+hotfix');
+    s.applyNewImageVersion('node', 'v3.1.1');
+    s.applyNewImageVersion('management-service', 'v1.9.0+hotfix');
+    s.applyNewImageVersion('node', 'v2.9.9'); // ignore versions going backwards
+    s.applyNewImageVersion('node', 'v1.0.0');
+    s.applyNewImageVersion('node', 'v9.9.9-cc1cc788');
+
+    console.log(JSON.stringify(s.getSnapshot(), null, 2));
+
+    t.is(Object.keys(s.getSnapshot().CurrentImageVersions).length, 2);
+    t.is(s.getSnapshot().CurrentImageVersions['node'], 'v3.1.1');
+    t.is(s.getSnapshot().CurrentImageVersions['management-service'], 'v1.9.0+hotfix');
+});
+
 const day = 24 * 60 * 60;
 
 function CommitteeChanged(s: State, time: number, addrs: string[], orbsAddrs: string[]) {

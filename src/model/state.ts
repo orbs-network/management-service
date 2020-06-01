@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { EventTypes } from '../ethereum/events-types';
 import { getIpFromHex, toNumber } from '../utils';
 import { findAllEventsInRange } from './helpers';
+import * as Versioning from '../dockerhub/versioning';
 
 export interface StateSnapshot {
     CurrentRefTime: number;
@@ -27,6 +28,7 @@ export interface StateSnapshot {
         RefTime: number;
         Data: { RolloutGroup: string; Version: number };
     }[];
+    CurrentImageVersions: { [ImageName: string]: string };
 }
 
 export class State {
@@ -41,6 +43,7 @@ export class State {
         CurrentVirtualChains: {},
         SubscriptionEvents: {},
         ProtocolVersionEvents: [],
+        CurrentImageVersions: {},
     };
 
     getSnapshot(): StateSnapshot {
@@ -111,6 +114,14 @@ export class State {
     // TODO: replace with ValidatorsRegistration.ValidatorDataUpdated
     applyNewValidatorRegistered(_time: number, event: EventTypes['ValidatorRegistered']) {
         this.snapshot.CurrentIp[event.returnValues.addr] = getIpFromHex(event.returnValues.ip);
+    }
+
+    applyNewImageVersion(imageName: string, imageVersion: string) {
+        if (!Versioning.isValid(imageVersion)) return;
+        const currentVersion = this.snapshot.CurrentImageVersions[imageName];
+        if (!currentVersion || Versioning.compare(imageVersion, currentVersion) > 0) {
+            this.snapshot.CurrentImageVersions[imageName] = imageVersion;
+        }
     }
 }
 

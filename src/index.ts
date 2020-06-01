@@ -5,7 +5,8 @@ import { errorString } from './utils';
 import { TaskLoop } from './task-loop';
 import { StateManager } from './model/manager';
 import { BlockSync } from './ethereum/block-sync';
-import { getVirtualChainManagement } from './model/processor-vc';
+import { getVirtualChainManagement } from './api/processor-vc';
+import { ImagePoll } from './dockerhub/image-poll';
 
 function wrapAsync(fn: RequestHandler): RequestHandler {
     return (req, res, next) => fn(req, res, next).catch(next);
@@ -15,6 +16,7 @@ export function serve(serviceConfig: ServiceConfiguration) {
     const processor = new Processor(serviceConfig);
     const state = new StateManager();
     const blockSync = new BlockSync(state, serviceConfig);
+    const imagePoll = new ImagePoll(state, serviceConfig);
 
     const app = express();
     app.get(
@@ -44,12 +46,17 @@ export function serve(serviceConfig: ServiceConfiguration) {
         return next(error);
     });
 
-    const blockSyncTask = new TaskLoop(() => blockSync.run(), serviceConfig.pollIntervalSeconds * 1000);
+    const blockSyncTask = new TaskLoop(() => blockSync.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
+    const imagePollTask = new TaskLoop(() => imagePoll.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
     blockSyncTask.start();
+    imagePollTask.start();
     const server = app.listen(serviceConfig.Port, '0.0.0.0', () =>
         console.log(`Management service listening on port ${serviceConfig.Port}!`)
     );
-    server.on('close', blockSyncTask.stop);
+    server.on('close', () => {
+        blockSyncTask.stop();
+        imagePollTask.stop();
+    });
     console.log('Management service starting..');
     return server;
 }

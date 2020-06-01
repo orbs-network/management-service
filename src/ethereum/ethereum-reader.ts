@@ -7,7 +7,7 @@ import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from
 import { errorString, toNumber } from '../utils';
 import { EventName, EventTypes } from './events-types';
 
-export function getNewEthereumReader(config: ServiceEthereumConfiguration) {
+export function getNewEthereumReader(config: EthereumConfiguration) {
     const ethConfig = new EthereumConfigReader(config).readEthereumConfig();
     return new EthereumReader(ethConfig);
 }
@@ -54,7 +54,7 @@ export function getContractTypeName(key: ContractName): ContractTypeName {
     }
 }
 
-export type ServiceEthereumConfiguration = {
+export type EthereumConfiguration = {
     EthereumGenesisContract: string;
     EthereumEndpoint: string;
     FirstBlock: BlockNumber;
@@ -64,7 +64,7 @@ export type ServiceEthereumConfiguration = {
 export class EthereumConfigReader {
     private web3: Web3;
 
-    constructor(private config: ServiceEthereumConfiguration) {
+    constructor(private config: EthereumConfiguration) {
         this.web3 = new Web3(new Web3.providers.HttpProvider(config.EthereumEndpoint));
     }
 

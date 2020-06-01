@@ -24,8 +24,9 @@ test.serial('[small e2e] index serves /node/management with virtual chains', asy
         EthereumGenesisContract: d.contractRegistry.web3Contract.options.address,
         EthereumEndpoint: 'http://localhost:7545',
         boyarLegacyBootstrap: boyarConfigFakeEndpoint.congigUri + boyarConfigFakeEndpoint.configPath,
-        pollIntervalSeconds: 0.5,
-        finalityBufferBlocks: 0,
+        EthereumPollIntervalSeconds: 0.5,
+        DockerHubPollIntervalSeconds: 1,
+        FinalityBufferBlocks: 0,
         DockerNamespace: 'orbsnetwork',
         verbose: true,
     };

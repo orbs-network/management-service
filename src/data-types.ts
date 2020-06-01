@@ -7,16 +7,14 @@ export interface ServiceConfiguration {
     Port: number;
     EthereumGenesisContract: string;
     EthereumEndpoint: string;
-    FirstBlock: number;
-    // EthereumNetwork: EthereumNetwork;
-    boyarLegacyBootstrap: string;
-    pollIntervalSeconds: number;
     DockerNamespace: string;
-    finalityBufferBlocks: number;
+    DockerHubPollIntervalSeconds: number;
+    EthereumPollIntervalSeconds: number;
+    FinalityBufferBlocks: number;
+    FirstBlock: number;
     verbose: boolean;
+    boyarLegacyBootstrap: string;
 }
-
-// export type EthereumNetwork = 'ganache' | 'mainnet' | 'ropsten';
 
 export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): string[] | undefined {
     const serviceConfigConstraints = {
@@ -24,7 +22,12 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
             presence: { allowEmpty: false },
             type: 'string',
         },
-        pollIntervalSeconds: {
+        EthereumPollIntervalSeconds: {
+            presence: { allowEmpty: false },
+            type: 'number',
+            numericality: { noStrings: true },
+        },
+        DockerHubPollIntervalSeconds: {
             presence: { allowEmpty: false },
             type: 'number',
             numericality: { noStrings: true },
@@ -45,7 +48,7 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
             presence: { allowEmpty: false },
             type: 'string',
         },
-        finalityBufferBlocks: {
+        FinalityBufferBlocks: {
             presence: { allowEmpty: false },
             type: 'integer',
             numericality: { noStrings: true },

@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { StateSnapshot } from './state';
-import { getVirtualChainPort } from '../ports';
+import { StateSnapshot } from '../model/state';
+import { getVirtualChainPort } from './helpers';
 
 export function getVirtualChainManagement(vchainId: string, snapshot: StateSnapshot) {
     // topology includes vchain specific data (port)

@@ -14,11 +14,13 @@ export function parseOptions(argv: string[]): ServiceConfiguration {
 
     const config = Object.assign(
         {
-            pollIntervalSeconds: 1,
             Port: 8080,
-            FirstBlock: 0,
-            finalityBufferBlocks: 100,
+            // TODO: add EthereumGenesisContract with default mainnet address
             DockerNamespace: 'orbsnetwork',
+            DockerHubPollIntervalSeconds: 3 * 60,
+            EthereumPollIntervalSeconds: 30,
+            FirstBlock: 0,
+            FinalityBufferBlocks: 100,
             verbose: false,
         },
         ...options.config.map((configFile) => JSON.parse(readFileSync(configFile).toString()))

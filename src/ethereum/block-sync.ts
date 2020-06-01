@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import { StateManager } from '../model/manager';
-import { EthereumReader, ServiceEthereumConfiguration, getNewEthereumReader } from './ethereum-reader';
+import { EthereumReader, EthereumConfiguration, getNewEthereumReader } from './ethereum-reader';
 import { SingleEventFetcher, EventFetcher } from './event-fetcher';
 import { EventName, eventNames } from './events-types';
-import { log } from '../logger';
+import * as Logger from '../logger';
 
-export type BlockSyncConfig = ServiceEthereumConfiguration & {
-    finalityBufferBlocks: number;
+export type BlockSyncConfiguration = EthereumConfiguration & {
+    FinalityBufferBlocks: number;
 };
 
 export class BlockSync {
@@ -14,7 +14,7 @@ export class BlockSync {
     private lastProcessedBlock = 0;
     private eventFetchers: { [T in EventName]: EventFetcher };
 
-    constructor(private state: StateManager, private config: BlockSyncConfig) {
+    constructor(private state: StateManager, private config: BlockSyncConfiguration) {
         this.reader = getNewEthereumReader(config);
         this.eventFetchers = {
             CommitteeChanged: new SingleEventFetcher('CommitteeChanged', this.reader),
@@ -23,13 +23,13 @@ export class BlockSync {
             ProtocolVersionChanged: new SingleEventFetcher('ProtocolVersionChanged', this.reader),
             ValidatorRegistered: new SingleEventFetcher('ValidatorRegistered', this.reader),
         };
-        log(`BlockSync: initialized.`);
+        Logger.log(`BlockSync: initialized.`);
     }
 
     // single tick of the run loop
     async run() {
         const latestAllowedBlock = await this.getLatestBlockUnderFinality();
-        log(`BlockSync: run started at ${this.lastProcessedBlock} allowed to go to ${latestAllowedBlock}.`);
+        Logger.log(`BlockSync: run started at ${this.lastProcessedBlock} allowed to go to ${latestAllowedBlock}.`);
 
         // go over blocks one by one and process their events
         while (this.lastProcessedBlock < latestAllowedBlock) {
@@ -40,11 +40,13 @@ export class BlockSync {
         // notify state about time of latest block (in case no events in it)
         const latestAllowedBlockTime = await this.reader.getRefTime(latestAllowedBlock);
         this.state.applyNewTimeRef(latestAllowedBlockTime);
-        log(`BlockSync: run finished processing up to ${latestAllowedBlock} with time ${latestAllowedBlockTime}.`);
+        Logger.log(
+            `BlockSync: run finished processing up to ${latestAllowedBlock} with time ${latestAllowedBlockTime}.`
+        );
     }
 
     async getLatestBlockUnderFinality(): Promise<number> {
-        return (await this.reader.getBlockNumber()) - this.config.finalityBufferBlocks;
+        return (await this.reader.getBlockNumber()) - this.config.FinalityBufferBlocks;
     }
 
     async processEventsInBlock(blockNumber: number, latestAllowedBlock: number) {
@@ -60,6 +62,6 @@ export class BlockSync {
         const blockTime = await this.reader.getRefTime(blockNumber);
         this.state.applyNewEvents(blockTime, sorted);
         this.state.applyNewTimeRef(blockTime);
-        log(`BlockSync: processed ${sorted.length} events in block ${blockNumber} with time ${blockTime}.`);
+        Logger.log(`BlockSync: processed ${sorted.length} events in block ${blockNumber} with time ${blockTime}.`);
     }
 }

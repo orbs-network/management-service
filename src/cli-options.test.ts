@@ -18,8 +18,9 @@ const configValue: ServiceConfiguration = {
     ...minimalConfigValue,
     Port: -1,
     FirstBlock: 0,
-    pollIntervalSeconds: 0.5,
-    finalityBufferBlocks: 0,
+    EthereumPollIntervalSeconds: 0.5,
+    DockerHubPollIntervalSeconds: 1,
+    FinalityBufferBlocks: 0,
     DockerNamespace: 'foo',
     verbose: true,
 };

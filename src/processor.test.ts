@@ -87,8 +87,9 @@ test.serial(
             EthereumGenesisContract: 'foo',
             EthereumEndpoint: 'bar',
             boyarLegacyBootstrap: boyarConfigFakeEndpoint.congigUri + boyarConfigFakeEndpoint.configPath,
-            pollIntervalSeconds: -1,
-            finalityBufferBlocks: 0,
+            EthereumPollIntervalSeconds: -1,
+            DockerHubPollIntervalSeconds: -1,
+            FinalityBufferBlocks: 0,
             DockerNamespace: 'myDockerNamespace',
             verbose: true,
         };
@@ -154,8 +155,9 @@ test.serial('[integration with reader] getBoyarConfiguration returns chains acco
         EthereumGenesisContract: d.contractRegistry.address,
         EthereumEndpoint: 'http://localhost:7545',
         boyarLegacyBootstrap: 'foo',
-        pollIntervalSeconds: -1,
-        finalityBufferBlocks: 0,
+        EthereumPollIntervalSeconds: -1,
+        DockerHubPollIntervalSeconds: -1,
+        FinalityBufferBlocks: 0,
         DockerNamespace: 'myDockerNamespace',
         verbose: true,
     };
