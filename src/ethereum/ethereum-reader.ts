@@ -4,10 +4,10 @@ import { EventData, Contract, PastEventOptions } from 'web3-eth-contract';
 import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/compiled-contracts';
 import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
-import { errorString, toNumber } from '../utils';
+import { errorString, toNumber } from '../helpers';
 import { EventName, EventTypes } from './events-types';
 
-export function getNewEthereumReader(config: ServiceEthereumConfiguration) {
+export function getNewEthereumReader(config: EthereumConfiguration) {
     const ethConfig = new EthereumConfigReader(config).readEthereumConfig();
     return new EthereumReader(ethConfig);
 }
@@ -54,7 +54,7 @@ export function getContractTypeName(key: ContractName): ContractTypeName {
     }
 }
 
-export type ServiceEthereumConfiguration = {
+export type EthereumConfiguration = {
     EthereumGenesisContract: string;
     EthereumEndpoint: string;
     FirstBlock: BlockNumber;
@@ -64,7 +64,7 @@ export type ServiceEthereumConfiguration = {
 export class EthereumConfigReader {
     private web3: Web3;
 
-    constructor(private config: ServiceEthereumConfiguration) {
+    constructor(private config: EthereumConfiguration) {
         this.web3 = new Web3(new Web3.providers.HttpProvider(config.EthereumEndpoint));
     }
 

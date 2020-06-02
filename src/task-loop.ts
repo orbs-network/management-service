@@ -1,4 +1,5 @@
-import { errorString } from './utils';
+import * as Logger from './logger';
+import { errorString } from './helpers';
 
 export class TaskLoop {
     private handle: NodeJS.Timeout | undefined;
@@ -14,7 +15,7 @@ export class TaskLoop {
                 }
             },
             (e) => {
-                console.error(`Error polling for events: ${errorString(e)}`);
+                Logger.error(`Error in runTask: ${errorString(e)}.`);
                 if (this.started) {
                     this.handle = setTimeout(this.runTask, this.pause);
                 }
@@ -25,7 +26,7 @@ export class TaskLoop {
     start = () => {
         if (!this.started) {
             this.started = true;
-            this.handle = setTimeout(this.runTask, this.pause);
+            this.handle = setTimeout(this.runTask, 0);
         }
     };
 
