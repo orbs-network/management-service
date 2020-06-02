@@ -1,10 +1,13 @@
+import Web3 from 'web3';
 import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
 import {
     evmIncreaseTime,
     evmMine,
     getTopBlockTimestamp,
 } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/helpers';
+import { DriverOptions } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/driver';
 import { MonthlySubscriptionPlanContract } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/monthly-subscription-plan-contract';
+import { toNumber } from '../helpers';
 
 const SCENARIO_MAX_STANDBYS = 1;
 const SCENARIO_MAX_COMMITTEE_SIZE = 2;
@@ -17,12 +20,14 @@ export class EthereumTestDriver {
 
     constructor(public verbose = false) {}
 
-    async deployContracts() {
+    async deployContracts(customWeb3Provider?: () => Web3) {
         if (this.verbose) console.log(`[posv2] about to deploy contracts`);
-        this.orbsPosV2Driver = await Driver.new({
+        const options: Partial<DriverOptions> = {
             maxStandbys: SCENARIO_MAX_STANDBYS,
             maxCommitteeSize: SCENARIO_MAX_COMMITTEE_SIZE,
-        });
+        };
+        if (customWeb3Provider) options.web3Provider = customWeb3Provider;
+        this.orbsPosV2Driver = await Driver.new(options);
         if (this.verbose) console.log(`[posv2] about to deploy subscriber`);
         this.subscriber = await this.orbsPosV2Driver.newSubscriber('defaultTier', SUBSCRIPTION_MONTHLY_RATE);
     }
@@ -121,5 +126,13 @@ export class EthereumTestDriver {
         const d = this.orbsPosV2Driver;
 
         return await d.web3.eth.getBlockNumber();
+    }
+
+    async getCurrentBlockTime(): Promise<number> {
+        if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
+        const d = this.orbsPosV2Driver;
+
+        const block = await d.web3.eth.getBlock('latest');
+        return toNumber(block.timestamp);
     }
 }

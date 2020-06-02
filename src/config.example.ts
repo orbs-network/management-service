@@ -1,4 +1,4 @@
-import { ServiceConfiguration } from './data-types';
+import { ServiceConfiguration } from './config';
 
 export const exampleConfig: ServiceConfiguration = {
     Port: 8080,

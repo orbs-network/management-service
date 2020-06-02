@@ -6,6 +6,7 @@ import { StateManager } from '../model/manager';
 import { nockDockerHub } from '../dockerhub/test-driver';
 import { ImagePoll } from '../dockerhub/image-poll';
 import { exampleConfig } from '../config.example';
+import { day } from '../helpers';
 
 test.serial('[integration] getNodeManagement responds according to Ethereum and DockerHub state', async (t) => {
     t.timeout(5 * 60 * 1000);
@@ -74,5 +75,3 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
 
     scope.done();
 });
-
-const day = 24 * 60 * 60;

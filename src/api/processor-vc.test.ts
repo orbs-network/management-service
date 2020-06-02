@@ -3,6 +3,7 @@ import { EthereumTestDriver } from '../ethereum/test-driver';
 import { getVirtualChainManagement } from './processor-vc';
 import { BlockSync } from '../ethereum/block-sync';
 import { StateManager } from '../model/manager';
+import { day } from '../helpers';
 
 test.serial('[integration] getVirtualChainManagement responds according to Ethereum state', async (t) => {
     t.timeout(5 * 60 * 1000);
@@ -111,5 +112,3 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
     t.is(res.VirtualChains['1000000'].ProtocolVersionEvents[0].Data.Version, 1);
     t.is(res.VirtualChains['1000000'].ProtocolVersionEvents[1].Data.Version, 19);
 });
-
-const day = 24 * 60 * 60;

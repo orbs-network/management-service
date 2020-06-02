@@ -1,5 +1,5 @@
 import { serve } from '.';
-import { parseOptions } from './cli-options';
+import { parseArgs } from './cli-args';
 
 process.on('uncaughtException', function (e) {
     console.log(e.stack);
@@ -7,7 +7,7 @@ process.on('uncaughtException', function (e) {
 });
 
 try {
-    const config = parseOptions(process.argv);
+    const config = parseArgs(process.argv);
     const server = serve(config);
 
     process.on('SIGINT', function () {

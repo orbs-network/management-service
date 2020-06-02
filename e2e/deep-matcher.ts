@@ -34,3 +34,15 @@ export function deepDataMatcher(data: any, pattern: any, path = 'ROOT'): string[
     }
     return errors;
 }
+
+export function isValidEthereumAddress(str: string) {
+    return str && str.startsWith('0x') && str.length == '0x5cd0D270C30EDa5ADa6b45a5289AFF1D425759b3'.length;
+}
+
+export function isValidImageVersion(str: string) {
+    return str && str.startsWith('v') && str.split('.').length == 3;
+}
+
+export function isValidTimeRef(str: string) {
+    return str && parseInt(str) > 1400000000;
+}

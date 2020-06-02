@@ -1,5 +1,6 @@
 import test from 'ava';
 import { State } from './state';
+import { day } from '../helpers';
 
 test('state applies time ref', (t) => {
     const s = new State();
@@ -196,8 +197,6 @@ test('state applies monotonous image version changes', (t) => {
     t.is(s.getSnapshot().CurrentImageVersions['node'], 'v3.1.1');
     t.is(s.getSnapshot().CurrentImageVersions['management-service'], 'v1.9.0+hotfix');
 });
-
-const day = 24 * 60 * 60;
 
 function CommitteeChanged(s: State, time: number, addrs: string[], orbsAddrs: string[]) {
     s.applyNewCommitteeChanged(time, {

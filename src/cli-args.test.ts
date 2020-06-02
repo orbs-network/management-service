@@ -1,7 +1,7 @@
 import test from 'ava';
-import { parseOptions } from './cli-options';
+import { parseArgs } from './cli-args';
 import mock from 'mock-fs';
-import { ServiceConfiguration, validateServiceConfiguration } from './data-types';
+import { ServiceConfiguration, validateServiceConfiguration } from './config';
 
 test.serial.afterEach.always(() => {
     mock.restore();
@@ -29,7 +29,7 @@ test.serial('parseOptions with file', (t) => {
         [configPath]: JSON.stringify(configValue),
     });
 
-    t.deepEqual(parseOptions(['--config', configPath]), configValue);
+    t.deepEqual(parseArgs(['--config', configPath]), configValue);
 });
 
 test.serial('parseOptions with partial file (complete default values)', (t) => {
@@ -37,14 +37,14 @@ test.serial('parseOptions with partial file (complete default values)', (t) => {
         [configPath]: JSON.stringify(minimalConfigValue),
     });
 
-    const options = parseOptions(['--config', configPath]);
+    const options = parseArgs(['--config', configPath]);
     t.deepEqual(validateServiceConfiguration(options), undefined);
 });
 
 test.serial('parseOptions with no file', (t) => {
-    t.throws(() => parseOptions(['--config', configPath]));
+    t.throws(() => parseArgs(['--config', configPath]));
 });
 
 test.serial('parseOptions with no config', (t) => {
-    t.throws(() => parseOptions([]));
+    t.throws(() => parseArgs([]));
 });

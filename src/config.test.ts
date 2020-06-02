@@ -1,5 +1,5 @@
 import test from 'ava';
-import { validateServiceConfiguration } from './data-types';
+import { validateServiceConfiguration } from './config';
 
 test('accepts legal config', (t) => {
     t.deepEqual(

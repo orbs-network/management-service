@@ -33,3 +33,5 @@ export function getIpFromHex(ipStr: string): string {
 export function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export const day = 24 * 60 * 60;

@@ -1,5 +1,5 @@
 import test from 'ava';
-import { Driver as EthereumPosDriver } from '@orbs-network/orbs-ethereum-contracts-v2';
+import { EthereumTestDriver } from '../src/ethereum/test-driver';
 import { dockerComposeTool, getAddressForService, getLogsForService } from 'docker-compose-mocha';
 import fetch from 'node-fetch';
 import { retry } from 'ts-retry-promise';
@@ -12,7 +12,7 @@ import { sleep } from '../src/helpers';
 
 export class TestEnvironment {
     private envName: string = '';
-    public ethereumPosDriver: EthereumPosDriver;
+    public ethereum: EthereumTestDriver = new EthereumTestDriver(true);
     public testLogger: (lines: string) => void;
 
     constructor(private pathToDockerCompose: string) {}
@@ -20,12 +20,12 @@ export class TestEnvironment {
     getAppConfig() {
         return {
             Port: 8080,
-            EthereumGenesisContract: this.ethereumPosDriver.contractRegistry.address,
+            EthereumGenesisContract: this.ethereum.getContractRegistryAddress(),
             EthereumEndpoint: `http://ganache:7545`,
             DockerNamespace: 'orbsnetwork',
             DockerHubPollIntervalSeconds: 1,
             EthereumPollIntervalSeconds: 1,
-            FinalityBufferBlocks: 0,
+            FinalityBufferBlocks: 10,
             FirstBlock: 0,
             verbose: true,
         };
@@ -58,18 +58,16 @@ export class TestEnvironment {
             t.log('[E2E] deploy ethereum PoS contracts to ganache');
             t.timeout(60 * 1000);
             const ganacheAddress = await getAddressForService(this.envName, this.pathToDockerCompose, 'ganache', 7545);
-            this.ethereumPosDriver = await EthereumPosDriver.new({
-                web3Provider: () => {
-                    return new Web3(
-                        new (HDWalletProvider as any)(
-                            'vanish junk genuine web seminar cook absurd royal ability series taste method identify elevator liquid',
-                            `http://localhost:${portFromAddress(ganacheAddress)}`,
-                            0,
-                            100,
-                            false
-                        )
-                    );
-                },
+            await this.ethereum.deployContracts(() => {
+                return new Web3(
+                    new (HDWalletProvider as any)(
+                        'vanish junk genuine web seminar cook absurd royal ability series taste method identify elevator liquid',
+                        `http://localhost:${portFromAddress(ganacheAddress)}`,
+                        0,
+                        100,
+                        false
+                    )
+                );
             });
             t.log('[E2E] ethereum PoS contracts deployed');
         });

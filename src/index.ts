@@ -1,4 +1,4 @@
-import { ServiceConfiguration } from './data-types';
+import { ServiceConfiguration } from './config';
 import express, { Request, Response, NextFunction } from 'express';
 import { errorString } from './helpers';
 import { TaskLoop } from './task-loop';

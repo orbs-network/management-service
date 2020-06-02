@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
-import { ServiceConfiguration } from '../data-types';
+import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './helpers';
 
 export function getNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {

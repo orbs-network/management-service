@@ -119,6 +119,7 @@ export class State {
     applyNewImageVersion(imageName: string, imageVersion: string) {
         if (!Versioning.isValid(imageVersion)) return;
         const currentVersion = this.snapshot.CurrentImageVersions[imageName];
+        // image version upgrades only go forward (we don't allow downgrade)
         if (!currentVersion || Versioning.compare(imageVersion, currentVersion) > 0) {
             this.snapshot.CurrentImageVersions[imageName] = imageVersion;
         }
