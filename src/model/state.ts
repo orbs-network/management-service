@@ -58,8 +58,8 @@ export class State {
 
   applyNewCommitteeChanged(time: number, event: EventTypes['CommitteeChanged']) {
     const committee = event.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
-      OrbsAddress,
-      EthAddress: event.returnValues.addrs[idx],
+      OrbsAddress: normalizeAddress(OrbsAddress),
+      EthAddress: normalizeAddress(event.returnValues.addrs[idx]),
       EffectiveStake: parseInt(event.returnValues.weights[idx]),
       IdentityType: 0,
     }));
@@ -71,8 +71,8 @@ export class State {
 
   applyNewStandbysChanged(_time: number, event: EventTypes['StandbysChanged']) {
     const standbys = event.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
-      OrbsAddress,
-      EthAddress: event.returnValues.addrs[idx],
+      OrbsAddress: normalizeAddress(OrbsAddress),
+      EthAddress: normalizeAddress(event.returnValues.addrs[idx]),
     }));
     this.snapshot.CurrentStandbys = standbys;
   }
@@ -113,7 +113,8 @@ export class State {
 
   // TODO: replace with ValidatorsRegistration.ValidatorDataUpdated
   applyNewValidatorRegistered(_time: number, event: EventTypes['ValidatorRegistered']) {
-    this.snapshot.CurrentIp[event.returnValues.addr] = getIpFromHex(event.returnValues.ip);
+    const EthAddress = normalizeAddress(event.returnValues.addr);
+    this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
   }
 
   applyNewImageVersion(imageName: string, imageVersion: string) {
@@ -156,4 +157,10 @@ function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
     Ip: snapshot.CurrentIp[EthAddress],
     Port: 0,
   }));
+}
+
+function normalizeAddress(address: string): string {
+  if (!address) return address;
+  if (address.startsWith('0x')) return address.substr(2).toLowerCase();
+  return address.toLowerCase();
 }

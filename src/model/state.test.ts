@@ -13,73 +13,73 @@ test('state applies time ref', (t) => {
 test('state applies commitee, standby, IPs and topology', (t) => {
   const s = new State();
 
-  ValidatorRegistered(s, 1000, 'A', 'a1', '0x01010101');
-  ValidatorRegistered(s, 1000, 'B', 'b1', '0x02020202');
-  ValidatorRegistered(s, 1000, 'C', 'c1', '0x03030303');
-  ValidatorRegistered(s, 1000, 'M', 'm1', '0x04040404');
-  ValidatorRegistered(s, 1000, 'N', 'n1', '0x05050505');
-  CommitteeChanged(s, 1000, ['A', 'B', 'C'], ['a1', 'b1', 'c1']);
-  StandbysChanged(s, 1000, ['M', 'N'], ['m1', 'n1']);
+  ValidatorRegistered(s, 1000, '0xA', '0xa1', '0x01010101');
+  ValidatorRegistered(s, 1000, '0xB', '0xb1', '0x02020202');
+  ValidatorRegistered(s, 1000, '0xC', '0xc1', '0x03030303');
+  ValidatorRegistered(s, 1000, '0xM', '0xm1', '0x04040404');
+  ValidatorRegistered(s, 1000, '0xN', '0xn1', '0x05050505');
+  CommitteeChanged(s, 1000, ['0xA', '0xB', '0xC'], ['0xa1', '0xb1', '0xc1']);
+  StandbysChanged(s, 1000, ['0xM', '0xN'], ['0xm1', '0xn1']);
   s.applyNewTimeRef(1000);
 
-  ValidatorRegistered(s, 2000, 'Z', 'z2', '0x06060606');
-  ValidatorRegistered(s, 2000, 'A', 'a2', '0x07070707');
-  ValidatorRegistered(s, 2000, 'O', 'o2', '0x08080808');
-  CommitteeChanged(s, 2000, ['Z', 'B', 'C'], ['z2', 'b2', 'c2']);
-  StandbysChanged(s, 2000, ['N', 'O'], ['n2', 'o2']);
+  ValidatorRegistered(s, 2000, '0xZ', '0xz2', '0x06060606');
+  ValidatorRegistered(s, 2000, '0xA', '0xa2', '0x07070707');
+  ValidatorRegistered(s, 2000, '0xO', '0xo2', '0x08080808');
+  CommitteeChanged(s, 2000, ['0xZ', '0xB', '0xC'], ['0xz2', '0xb2', '0xc2']);
+  StandbysChanged(s, 2000, ['0xN', '0xO'], ['0xn2', '0xo2']);
   s.applyNewTimeRef(2000);
 
-  ValidatorRegistered(s, day + 3000, 'X', 'x3', '0x09090909');
-  ValidatorRegistered(s, day + 3000, 'Z', 'z3', '0x0a0a0a0a');
-  ValidatorRegistered(s, day + 3000, 'Z', 'z3', '0x0b0b0b0b');
-  ValidatorRegistered(s, day + 3000, 'P', 'p3', '0x0c0c0c0c');
-  CommitteeChanged(s, day + 3000, ['X', 'Z'], ['x3', 'z3']);
-  StandbysChanged(s, day + 3000, ['O', 'P'], ['o3', 'p3']);
+  ValidatorRegistered(s, day + 3000, '0xX', '0xx3', '0x09090909');
+  ValidatorRegistered(s, day + 3000, '0xZ', '0xz3', '0x0a0a0a0a');
+  ValidatorRegistered(s, day + 3000, '0xZ', '0xz3', '0x0b0b0b0b');
+  ValidatorRegistered(s, day + 3000, '0xP', '0xp3', '0x0c0c0c0c');
+  CommitteeChanged(s, day + 3000, ['0xX', '0xZ'], ['0xx3', '0xz3']);
+  StandbysChanged(s, day + 3000, ['0xO', '0xP'], ['0xo3', '0xp3']);
   s.applyNewTimeRef(day + 3000);
 
   console.log(JSON.stringify(s.getSnapshot(), null, 2));
 
-  t.is(s.getSnapshot().CurrentIp['A'], '7.7.7.7');
-  t.is(s.getSnapshot().CurrentIp['B'], '2.2.2.2');
-  t.is(s.getSnapshot().CurrentIp['C'], '3.3.3.3');
-  t.is(s.getSnapshot().CurrentIp['M'], '4.4.4.4');
-  t.is(s.getSnapshot().CurrentIp['N'], '5.5.5.5');
-  t.is(s.getSnapshot().CurrentIp['Z'], '11.11.11.11');
-  t.is(s.getSnapshot().CurrentIp['O'], '8.8.8.8');
-  t.is(s.getSnapshot().CurrentIp['X'], '9.9.9.9');
-  t.is(s.getSnapshot().CurrentIp['P'], '12.12.12.12');
+  t.is(s.getSnapshot().CurrentIp['a'], '7.7.7.7');
+  t.is(s.getSnapshot().CurrentIp['b'], '2.2.2.2');
+  t.is(s.getSnapshot().CurrentIp['c'], '3.3.3.3');
+  t.is(s.getSnapshot().CurrentIp['m'], '4.4.4.4');
+  t.is(s.getSnapshot().CurrentIp['n'], '5.5.5.5');
+  t.is(s.getSnapshot().CurrentIp['z'], '11.11.11.11');
+  t.is(s.getSnapshot().CurrentIp['o'], '8.8.8.8');
+  t.is(s.getSnapshot().CurrentIp['x'], '9.9.9.9');
+  t.is(s.getSnapshot().CurrentIp['p'], '12.12.12.12');
 
   t.deepEqual(s.getSnapshot().CurrentStandbys, [
-    { EthAddress: 'O', OrbsAddress: 'o3' },
-    { EthAddress: 'P', OrbsAddress: 'p3' },
+    { EthAddress: 'o', OrbsAddress: 'o3' },
+    { EthAddress: 'p', OrbsAddress: 'p3' },
   ]);
 
   t.is(s.getSnapshot().CommitteeEvents.length, 3);
   t.is(s.getSnapshot().CommitteeEvents[0].RefTime, 1000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[0].Committee, [
-    { EthAddress: 'A', OrbsAddress: 'a1', EffectiveStake: 1, IdentityType: 0 },
-    { EthAddress: 'B', OrbsAddress: 'b1', EffectiveStake: 1, IdentityType: 0 },
-    { EthAddress: 'C', OrbsAddress: 'c1', EffectiveStake: 1, IdentityType: 0 },
+    { EthAddress: 'a', OrbsAddress: 'a1', EffectiveStake: 1, IdentityType: 0 },
+    { EthAddress: 'b', OrbsAddress: 'b1', EffectiveStake: 1, IdentityType: 0 },
+    { EthAddress: 'c', OrbsAddress: 'c1', EffectiveStake: 1, IdentityType: 0 },
   ]);
   t.is(s.getSnapshot().CommitteeEvents[1].RefTime, 2000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[1].Committee, [
-    { EthAddress: 'Z', OrbsAddress: 'z2', EffectiveStake: 1, IdentityType: 0 },
-    { EthAddress: 'B', OrbsAddress: 'b2', EffectiveStake: 1, IdentityType: 0 },
-    { EthAddress: 'C', OrbsAddress: 'c2', EffectiveStake: 1, IdentityType: 0 },
+    { EthAddress: 'z', OrbsAddress: 'z2', EffectiveStake: 1, IdentityType: 0 },
+    { EthAddress: 'b', OrbsAddress: 'b2', EffectiveStake: 1, IdentityType: 0 },
+    { EthAddress: 'c', OrbsAddress: 'c2', EffectiveStake: 1, IdentityType: 0 },
   ]);
   t.is(s.getSnapshot().CommitteeEvents[2].RefTime, day + 3000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[2].Committee, [
-    { EthAddress: 'X', OrbsAddress: 'x3', EffectiveStake: 1, IdentityType: 0 },
-    { EthAddress: 'Z', OrbsAddress: 'z3', EffectiveStake: 1, IdentityType: 0 },
+    { EthAddress: 'x', OrbsAddress: 'x3', EffectiveStake: 1, IdentityType: 0 },
+    { EthAddress: 'z', OrbsAddress: 'z3', EffectiveStake: 1, IdentityType: 0 },
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentTopology, [
-    { EthAddress: 'Z', OrbsAddress: 'z3', Ip: '11.11.11.11', Port: 0 },
-    { EthAddress: 'B', OrbsAddress: 'b2', Ip: '2.2.2.2', Port: 0 },
-    { EthAddress: 'C', OrbsAddress: 'c2', Ip: '3.3.3.3', Port: 0 },
-    { EthAddress: 'X', OrbsAddress: 'x3', Ip: '9.9.9.9', Port: 0 },
-    { EthAddress: 'O', OrbsAddress: 'o3', Ip: '8.8.8.8', Port: 0 },
-    { EthAddress: 'P', OrbsAddress: 'p3', Ip: '12.12.12.12', Port: 0 },
+    { EthAddress: 'z', OrbsAddress: 'z3', Ip: '11.11.11.11', Port: 0 },
+    { EthAddress: 'b', OrbsAddress: 'b2', Ip: '2.2.2.2', Port: 0 },
+    { EthAddress: 'c', OrbsAddress: 'c2', Ip: '3.3.3.3', Port: 0 },
+    { EthAddress: 'x', OrbsAddress: 'x3', Ip: '9.9.9.9', Port: 0 },
+    { EthAddress: 'o', OrbsAddress: 'o3', Ip: '8.8.8.8', Port: 0 },
+    { EthAddress: 'p', OrbsAddress: 'p3', Ip: '12.12.12.12', Port: 0 },
   ]);
 });
 
