@@ -1,7 +1,9 @@
-import { ServiceConfiguration, validateServiceConfiguration } from './data-types';
+import { ServiceConfiguration, validateServiceConfiguration, defaultServiceConfiguration } from './config';
 import { readFileSync } from 'fs';
 import yargs from 'yargs';
-export function parseOptions(argv: string[]): ServiceConfiguration {
+import * as Logger from './logger';
+
+export function parseArgs(argv: string[]): ServiceConfiguration {
     const options = yargs(argv)
         .option('config', {
             type: 'array',
@@ -13,22 +15,15 @@ export function parseOptions(argv: string[]): ServiceConfiguration {
         .parse();
 
     const config = Object.assign(
-        {
-            Port: 8080,
-            // TODO: add EthereumGenesisContract with default mainnet address
-            DockerNamespace: 'orbsnetwork',
-            DockerHubPollIntervalSeconds: 3 * 60,
-            EthereumPollIntervalSeconds: 30,
-            FirstBlock: 0,
-            FinalityBufferBlocks: 100,
-            verbose: false,
-        },
+        defaultServiceConfiguration,
         ...options.config.map((configFile) => JSON.parse(readFileSync(configFile).toString()))
     );
 
     const validationErrors = validateServiceConfiguration(config);
     if (validationErrors) {
+        Logger.error(`Invalid JSON config: '${JSON.stringify(config)}'.`);
         throw new Error(`illegal configuration value ${JSON.stringify(config)}\n ${validationErrors.join('\n')}`);
     }
+
     return config;
 }

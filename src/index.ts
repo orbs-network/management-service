@@ -1,4 +1,4 @@
-import { ServiceConfiguration } from './data-types';
+import { ServiceConfiguration } from './config';
 import express, { Request, Response, NextFunction } from 'express';
 import { errorString } from './helpers';
 import { TaskLoop } from './task-loop';
@@ -27,7 +27,7 @@ export function serve(serviceConfig: ServiceConfiguration) {
     app.get('/vchains/:vchainId/management', (request, response) => {
         const { vchainId } = request.params;
         const snapshot = state.getCurrentSnapshot();
-        const body = getVirtualChainManagement(vchainId, snapshot);
+        const body = getVirtualChainManagement(parseInt(vchainId), snapshot);
         response.status(200).json(body);
     });
     app.use((error: Error, req: Request, res: Response, next: NextFunction) => {

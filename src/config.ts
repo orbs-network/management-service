@@ -1,8 +1,5 @@
 import validate from 'validate.js';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ABI = any;
-
 export interface ServiceConfiguration {
     Port: number;
     EthereumGenesisContract: string;
@@ -13,15 +10,21 @@ export interface ServiceConfiguration {
     FinalityBufferBlocks: number;
     FirstBlock: number;
     verbose: boolean;
-    boyarLegacyBootstrap: string;
 }
+
+export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
+    Port: 8080,
+    // TODO: add EthereumGenesisContract with default mainnet address
+    DockerNamespace: 'orbsnetwork',
+    DockerHubPollIntervalSeconds: 3 * 60,
+    EthereumPollIntervalSeconds: 30,
+    FirstBlock: 0,
+    FinalityBufferBlocks: 100,
+    verbose: false,
+};
 
 export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): string[] | undefined {
     const serviceConfigConstraints = {
-        boyarLegacyBootstrap: {
-            presence: { allowEmpty: false },
-            type: 'string',
-        },
         EthereumPollIntervalSeconds: {
             presence: { allowEmpty: false },
             type: 'number',
@@ -63,45 +66,4 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
         },
     };
     return validate(c, serviceConfigConstraints, { format: 'flat' });
-}
-
-export type DockerConfig = {
-    ContainerNamePrefix?: string;
-    Image: string;
-    Tag: string;
-    Pull?: boolean;
-    Resources?: {
-        Limits?: {
-            Memory?: number;
-            CPUs?: number;
-        };
-        Reservations?: {
-            Memory?: number;
-            CPUs?: number;
-        };
-    };
-};
-
-export type ChainConfiguration = {
-    Id: string | number;
-    InternalPort: number; // for gossip, identical for all vchains
-    ExternalPort: number; // for gossip, different for all vchains
-    InternalHttpPort: number; // identical for all vchains
-    DockerConfig: DockerConfig;
-    Config: {
-        ManagementConfigUrl: string; //`http://management-service/vchains/${vcid}/management`;
-        SignerUrl: string; //'http://signer:7777';
-        'ethereum-endpoint': string; //'http://eth.orbs.com'; // eventually rename to EthereumEndpoint
-    };
-};
-
-export type ErrorResponse = {
-    error: string;
-    stack?: string | undefined;
-    status: 'error';
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isErrorResponse(res: any): res is ErrorResponse {
-    return res && res.status === 'error';
 }

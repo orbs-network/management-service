@@ -25,7 +25,7 @@
         "test:quick": "echo '-- TEST --' && ava --verbose --timeout=10m --serial",
         "test:e2e": "ava --verbose --timeout=10m --serial --config ./ava.config.e2e.js",
         "prepack": "npm run build",
-        "prettify": "npx prettier \"src/**/*.ts\" --write",
+        "prettify": "npx prettier \"src/**/*.ts\" --write && npx prettier \"e2e/**/*.ts\" --write",
         "start": "node --async-stack-traces ./dist/main.js",
         "start:eth": "ganache-cli -p 7545 -i 5777 -a 100 --gasLimit 0x7FFFFFFF --gasPrice 1 -m  \"vanish junk genuine web seminar cook absurd royal ability series taste method identify elevator liquid\""
     },

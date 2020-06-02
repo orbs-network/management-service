@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
-import { ServiceConfiguration } from '../data-types';
+import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './helpers';
 
 export function getNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
@@ -45,11 +45,11 @@ export function getNodeManagement(snapshot: StateSnapshot, config: ServiceConfig
                 Config: config, // forward my own input config + defaults for what's missing
             },
         },
-        chains: Object.keys(snapshot.CurrentVirtualChains).map((vcId) => getChain(vcId, snapshot, config)),
+        chains: Object.keys(snapshot.CurrentVirtualChains).map((vcId) => getChain(parseInt(vcId), snapshot, config)),
     };
 }
 
-function getChain(vchainId: string, snapshot: StateSnapshot, config: ServiceConfiguration) {
+function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConfiguration) {
     return {
         Id: vchainId,
         InternalPort: 4400,

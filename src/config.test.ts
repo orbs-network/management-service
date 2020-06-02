@@ -1,5 +1,5 @@
 import test from 'ava';
-import { validateServiceConfiguration } from './data-types';
+import { validateServiceConfiguration } from './config';
 
 test('accepts legal config', (t) => {
     t.deepEqual(
@@ -7,7 +7,6 @@ test('accepts legal config', (t) => {
             Port: 2,
             EthereumGenesisContract: 'foo',
             EthereumEndpoint: 'http://localhost:7545',
-            boyarLegacyBootstrap: 'https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json',
             EthereumPollIntervalSeconds: 0.1,
             DockerHubPollIntervalSeconds: 0.1,
             FinalityBufferBlocks: 0,
@@ -24,7 +23,6 @@ test('declines illegal config (1)', (t) => {
             Port: 2,
             EthereumGenesisContract: 'foo',
             EthereumEndpoint: 'http://localhost:7545',
-            boyarLegacyBootstrap: 'https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json',
             EthereumPollIntervalSeconds: 0.1,
             DockerHubPollIntervalSeconds: 0.1,
             DockerNamespace: 'foo',
@@ -39,7 +37,6 @@ test('declines illegal config (2)', (t) => {
             Port: 2,
             EthereumGenesisContract: 'foo',
             EthereumEndpoint: 'foo-bar:123',
-            boyarLegacyBootstrap: 'https://s3.amazonaws.com/orbs-bootstrap-prod/boyar/config.json',
             EthereumPollIntervalSeconds: 0.1,
             DockerHubPollIntervalSeconds: 0.1,
             FinalityBufferBlocks: 0,
