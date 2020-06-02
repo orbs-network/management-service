@@ -51,10 +51,10 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
 
   t.is(res.chains.length, 2);
   t.is(res.chains[0].Id, 1000000);
-  t.is(res.chains[0].ExternalPort, 32768);
+  t.is(res.chains[0].ExternalPort, 10000);
   t.is(res.chains[0].Config['management-file-path'], 'http://management-service:8080/vchains/1000000/management');
   t.is(res.chains[1].Id, 1000001);
-  t.is(res.chains[1].ExternalPort, 32769);
+  t.is(res.chains[1].ExternalPort, 10001);
   t.is(res.chains[1].Config['management-file-path'], 'http://management-service:8080/vchains/1000001/management');
   for (const chain of res.chains) {
     t.deepEqual(chain.DockerConfig, {

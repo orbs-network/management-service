@@ -51,19 +51,19 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
       EthAddress: '174dc3b45bdbbc32aa0b95e64d0247ce99b08f69',
       OrbsAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
       Ip: '23.77.195.180',
-      Port: 32768,
+      Port: 10000,
     },
     {
       EthAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
       OrbsAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
       Ip: '22.252.247.40',
-      Port: 32768,
+      Port: 10000,
     },
     {
       EthAddress: '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
       OrbsAddress: 'cb6642be414696f77336dae06fed3775f08de0ea',
       Ip: '124.35.0.211',
-      Port: 32768,
+      Port: 10000,
     },
   ]);
   t.is(res.VirtualChains['1000000'].CommitteeEvents.length, 3);
