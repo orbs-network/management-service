@@ -14,46 +14,46 @@ import * as Logger from './logger';
 // }
 
 export function serve(serviceConfig: ServiceConfiguration) {
-    const state = new StateManager();
-    const blockSync = new BlockSync(state, serviceConfig);
-    const imagePoll = new ImagePoll(state, serviceConfig);
+  const state = new StateManager();
+  const blockSync = new BlockSync(state, serviceConfig);
+  const imagePoll = new ImagePoll(state, serviceConfig);
 
-    const app = express();
-    app.get('/node/management', (_request, response) => {
-        const snapshot = state.getCurrentSnapshot();
-        const body = getNodeManagement(snapshot, serviceConfig);
-        response.status(200).json(body);
-    });
-    app.get('/vchains/:vchainId/management', (request, response) => {
-        const { vchainId } = request.params;
-        const snapshot = state.getCurrentSnapshot();
-        const body = getVirtualChainManagement(parseInt(vchainId), snapshot);
-        response.status(200).json(body);
-    });
-    app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-        if (error instanceof Error) {
-            if (serviceConfig.verbose) {
-                Logger.error(`Error response to ${req.url} : ${errorString(error)}`);
-            }
-            return res.status(500).json({
-                status: 'error',
-                error: errorString(error),
-            });
-        }
-        return next(error);
-    });
+  const app = express();
+  app.get('/node/management', (_request, response) => {
+    const snapshot = state.getCurrentSnapshot();
+    const body = getNodeManagement(snapshot, serviceConfig);
+    response.status(200).json(body);
+  });
+  app.get('/vchains/:vchainId/management', (request, response) => {
+    const { vchainId } = request.params;
+    const snapshot = state.getCurrentSnapshot();
+    const body = getVirtualChainManagement(parseInt(vchainId), snapshot);
+    response.status(200).json(body);
+  });
+  app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+    if (error instanceof Error) {
+      if (serviceConfig.verbose) {
+        Logger.error(`Error response to ${req.url} : ${errorString(error)}`);
+      }
+      return res.status(500).json({
+        status: 'error',
+        error: errorString(error),
+      });
+    }
+    return next(error);
+  });
 
-    const blockSyncTask = new TaskLoop(() => blockSync.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
-    const imagePollTask = new TaskLoop(() => imagePoll.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
-    blockSyncTask.start();
-    imagePollTask.start();
-    const server = app.listen(serviceConfig.Port, '0.0.0.0', () =>
-        Logger.log(`Management service listening on port ${serviceConfig.Port}!`)
-    );
-    server.on('close', () => {
-        blockSyncTask.stop();
-        imagePollTask.stop();
-    });
-    Logger.log('Management service starting..');
-    return server;
+  const blockSyncTask = new TaskLoop(() => blockSync.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
+  const imagePollTask = new TaskLoop(() => imagePoll.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
+  blockSyncTask.start();
+  imagePollTask.start();
+  const server = app.listen(serviceConfig.Port, '0.0.0.0', () =>
+    Logger.log(`Management service listening on port ${serviceConfig.Port}!`)
+  );
+  server.on('close', () => {
+    blockSyncTask.stop();
+    imagePollTask.stop();
+  });
+  Logger.log('Management service starting..');
+  return server;
 }

@@ -30,26 +30,26 @@ regex reference : // https://regex101.com/r/Ly7O1x/310
 const REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-canary)?(\+hotfix)?$/m;
 
 export function isValid(src: string): boolean {
-    return REGULAR_EXPRESSION.test(src);
+  return REGULAR_EXPRESSION.test(src);
 }
 
 export function compare(a: string, b: string): number {
-    const aResult = REGULAR_EXPRESSION.exec(a);
-    if (!aResult) {
-        return -1;
+  const aResult = REGULAR_EXPRESSION.exec(a);
+  if (!aResult) {
+    return -1;
+  }
+  const bResult = REGULAR_EXPRESSION.exec(b);
+  if (!bResult) {
+    return 1;
+  }
+  for (let i = 1; i <= 3; ++i) {
+    if (aResult[i] === bResult[i]) {
+      continue;
+    } else if (Number(aResult[i]) > Number(bResult[i])) {
+      return 1;
+    } else {
+      return -1;
     }
-    const bResult = REGULAR_EXPRESSION.exec(b);
-    if (!bResult) {
-        return 1;
-    }
-    for (let i = 1; i <= 3; ++i) {
-        if (aResult[i] === bResult[i]) {
-            continue;
-        } else if (Number(aResult[i]) > Number(bResult[i])) {
-            return 1;
-        } else {
-            return -1;
-        }
-    }
-    return 0;
+  }
+  return 0;
 }

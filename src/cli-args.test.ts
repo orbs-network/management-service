@@ -4,47 +4,47 @@ import mock from 'mock-fs';
 import { ServiceConfiguration, validateServiceConfiguration } from './config';
 
 test.serial.afterEach.always(() => {
-    mock.restore();
+  mock.restore();
 });
 
 const configPath = 'some/path/config.json';
 
 const minimalConfigValue = {
-    EthereumGenesisContract: 'bar',
-    EthereumEndpoint: 'http://localhost:7545',
+  EthereumGenesisContract: 'bar',
+  EthereumEndpoint: 'http://localhost:7545',
 };
 const configValue: ServiceConfiguration = {
-    ...minimalConfigValue,
-    Port: -1,
-    FirstBlock: 0,
-    EthereumPollIntervalSeconds: 0.5,
-    DockerHubPollIntervalSeconds: 1,
-    FinalityBufferBlocks: 0,
-    DockerNamespace: 'foo',
-    verbose: true,
+  ...minimalConfigValue,
+  Port: -1,
+  FirstBlock: 0,
+  EthereumPollIntervalSeconds: 0.5,
+  DockerHubPollIntervalSeconds: 1,
+  FinalityBufferBlocks: 0,
+  DockerNamespace: 'foo',
+  verbose: true,
 };
 
 test.serial('parseOptions with file', (t) => {
-    mock({
-        [configPath]: JSON.stringify(configValue),
-    });
+  mock({
+    [configPath]: JSON.stringify(configValue),
+  });
 
-    t.deepEqual(parseArgs(['--config', configPath]), configValue);
+  t.deepEqual(parseArgs(['--config', configPath]), configValue);
 });
 
 test.serial('parseOptions with partial file (complete default values)', (t) => {
-    mock({
-        [configPath]: JSON.stringify(minimalConfigValue),
-    });
+  mock({
+    [configPath]: JSON.stringify(minimalConfigValue),
+  });
 
-    const options = parseArgs(['--config', configPath]);
-    t.deepEqual(validateServiceConfiguration(options), undefined);
+  const options = parseArgs(['--config', configPath]);
+  t.deepEqual(validateServiceConfiguration(options), undefined);
 });
 
 test.serial('parseOptions with no file', (t) => {
-    t.throws(() => parseArgs(['--config', configPath]));
+  t.throws(() => parseArgs(['--config', configPath]));
 });
 
 test.serial('parseOptions with no config', (t) => {
-    t.throws(() => parseArgs([]));
+  t.throws(() => parseArgs([]));
 });
