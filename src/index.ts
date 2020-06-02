@@ -19,17 +19,21 @@ export function serve(serviceConfig: ServiceConfiguration) {
   const imagePoll = new ImagePoll(state, serviceConfig);
 
   const app = express();
+  app.set('json spaces', 2);
+
   app.get('/node/management', (_request, response) => {
     const snapshot = state.getCurrentSnapshot();
     const body = getNodeManagement(snapshot, serviceConfig);
     response.status(200).json(body);
   });
+
   app.get('/vchains/:vchainId/management', (request, response) => {
     const { vchainId } = request.params;
     const snapshot = state.getCurrentSnapshot();
     const body = getVirtualChainManagement(parseInt(vchainId), snapshot);
     response.status(200).json(body);
   });
+
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (error instanceof Error) {
       if (serviceConfig.verbose) {
@@ -47,6 +51,7 @@ export function serve(serviceConfig: ServiceConfiguration) {
   const imagePollTask = new TaskLoop(() => imagePoll.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
   blockSyncTask.start();
   imagePollTask.start();
+
   const server = app.listen(serviceConfig.Port, '0.0.0.0', () =>
     Logger.log(`Management service listening on port ${serviceConfig.Port}!`)
   );
