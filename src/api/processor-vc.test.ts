@@ -38,14 +38,14 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
     console.log('state snapshot:', JSON.stringify(state.getCurrentSnapshot(), null, 2));
 
     // process
-    const res = getVirtualChainManagement('1000000', state.getCurrentSnapshot());
+    const res = getVirtualChainManagement(1000000, state.getCurrentSnapshot());
 
     console.log('result:', JSON.stringify(res, null, 2));
 
     t.assert(res.CurrentRefTime > 1400000000);
     t.is(res.PageStartRefTime, 0);
     t.is(res.PageEndRefTime, res.CurrentRefTime);
-    t.is(res.VirtualChains['1000000'].VirtualChainId, '1000000');
+    t.is(res.VirtualChains['1000000'].VirtualChainId, 1000000);
     t.deepEqual(res.VirtualChains['1000000'].CurrentTopology, [
         {
             EthAddress: '0x174dC3B45BdBbc32Aa0b95e64d0247cE99B08F69',
@@ -111,4 +111,8 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
     t.is(res.VirtualChains['1000000'].ProtocolVersionEvents.length, 2);
     t.is(res.VirtualChains['1000000'].ProtocolVersionEvents[0].Data.Version, 1);
     t.is(res.VirtualChains['1000000'].ProtocolVersionEvents[1].Data.Version, 19);
+
+    // process non-existent virtual chain
+    const resNonExistent = getVirtualChainManagement(1009999, state.getCurrentSnapshot());
+    t.deepEqual(resNonExistent.VirtualChains['1009999'].SubscriptionEvents, []);
 });

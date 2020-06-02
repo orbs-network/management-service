@@ -87,7 +87,7 @@ test.serial('[E2E] serves /node/management as expected', async (t) => {
                 },
             },
         },
-        chains: ['1000000', '1000001', '1000002'].map((vcId) => {
+        chains: [1000000, 1000001, 1000002].map((vcId) => {
             return {
                 Id: vcId,
                 InternalPort: 4400,
@@ -142,7 +142,7 @@ test.serial('[E2E] serves /vchains/1000000/management as expected', async (t) =>
         PageEndRefTime: isValidTimeRef,
         VirtualChains: {
             '1000000': {
-                VirtualChainId: '1000000',
+                VirtualChainId: 1000000,
                 CurrentTopology: [
                     {
                         EthAddress: '0x174dC3B45BdBbc32Aa0b95e64d0247cE99B08F69',
