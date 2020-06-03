@@ -101,7 +101,7 @@ export class TestEnvironment {
     // test.serial.afterEach.always('print logs on failures', async (t) => {
     //     if (t.passed) return;
     //     const logs = await getLogsForService(this.envName, this.pathToDockerCompose, 'app');
-    //     console.log(logs);
+    //     t.log(logs);
     // });
 
     // step 6 - start live dump of logs from app to test logger

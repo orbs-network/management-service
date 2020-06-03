@@ -37,7 +37,7 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   StandbysChanged(s, day + 3000, ['0xO', '0xP'], ['0xo3', '0xp3']);
   s.applyNewTimeRef(day + 3000);
 
-  console.log(JSON.stringify(s.getSnapshot(), null, 2));
+  t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
   t.is(s.getSnapshot().CurrentIp['a'], '7.7.7.7');
   t.is(s.getSnapshot().CurrentIp['b'], '2.2.2.2');
@@ -104,7 +104,7 @@ test('state applies virtual chain subscriptions', (t) => {
 
   s.applyNewTimeRef(5000);
 
-  console.log(JSON.stringify(s.getSnapshot(), null, 2));
+  t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
   t.is(s.getSnapshot().CurrentVirtualChains['V1'].Expiration, 9010);
   t.is(s.getSnapshot().CurrentVirtualChains['V2'].Expiration, 3500);
@@ -149,6 +149,42 @@ test('state applies virtual chain subscriptions', (t) => {
   t.is(s.getSnapshot().SubscriptionEvents['V5'][2].Data.Status, 'active');
   t.is(s.getSnapshot().SubscriptionEvents['V5'][3].RefTime, 9030);
   t.is(s.getSnapshot().SubscriptionEvents['V5'][3].Data.Status, 'expired');
+
+  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V1'], {
+    Expiration: 9010,
+    RolloutGroup: 'main',
+    IdentityType: 0,
+    GenesisBlock: 123,
+    Tier: 'defaultTier',
+  });
+  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V2'], {
+    Expiration: 3500,
+    Tier: 'defaultTier',
+    RolloutGroup: 'main',
+    IdentityType: 0,
+    GenesisBlock: 123,
+  });
+  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V3'], {
+    Expiration: 9020,
+    Tier: 'defaultTier',
+    RolloutGroup: 'main',
+    IdentityType: 0,
+    GenesisBlock: 123,
+  });
+  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V4'], {
+    Expiration: 4700,
+    Tier: 'defaultTier',
+    RolloutGroup: 'main',
+    IdentityType: 0,
+    GenesisBlock: 123,
+  });
+  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V5'], {
+    Expiration: 9030,
+    Tier: 'defaultTier',
+    RolloutGroup: 'main',
+    IdentityType: 0,
+    GenesisBlock: 123,
+  });
 });
 
 test('state applies protocol version changes', (t) => {
@@ -168,7 +204,7 @@ test('state applies protocol version changes', (t) => {
 
   s.applyNewTimeRef(5000);
 
-  console.log(JSON.stringify(s.getSnapshot(), null, 2));
+  t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
   t.is(s.getSnapshot().ProtocolVersionEvents.length, 3);
   t.is(s.getSnapshot().ProtocolVersionEvents[0].RefTime, 1500);
@@ -191,7 +227,7 @@ test('state applies monotonous image version changes', (t) => {
   s.applyNewImageVersion('node', 'v1.0.0');
   s.applyNewImageVersion('node', 'v9.9.9-cc1cc788');
 
-  console.log(JSON.stringify(s.getSnapshot(), null, 2));
+  t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
   t.is(Object.keys(s.getSnapshot().CurrentImageVersions).length, 2);
   t.is(s.getSnapshot().CurrentImageVersions['node'], 'v3.1.1');
@@ -235,7 +271,7 @@ function SubscriptionChanged(s: State, time: number, vcid: string, expiresAt: nu
     ...eventBase,
     returnValues: {
       vcid,
-      genRef: 'gR',
+      genRef: '123',
       expiresAt: expiresAt.toString(),
       tier: 'defaultTier',
       deploymentSubset: 'main',

@@ -1,8 +1,9 @@
 import { serve } from '.';
 import { parseArgs } from './cli-args';
+import * as Logger from './logger';
 
 process.on('uncaughtException', function (e) {
-  console.log(e.stack);
+  Logger.error(e.stack);
   process.exit(1);
 });
 
@@ -14,12 +15,12 @@ try {
     // graceful shutdown
     server.close(function (err) {
       if (err) {
-        console.log(err.stack || err);
+        Logger.error(err.stack || err.toString());
       }
       process.exit();
     });
   });
 } catch (err) {
-  console.error(err?.message);
+  Logger.error(err?.message);
   process.exit(128);
 }

@@ -3,6 +3,7 @@ import { EthereumTestDriver } from '../ethereum/test-driver';
 import { getVirtualChainManagement } from './processor-vc';
 import { BlockSync } from '../ethereum/block-sync';
 import { StateManager } from '../model/manager';
+import { exampleConfig } from '../config.example';
 import { day } from '../helpers';
 
 test.serial('[integration] getVirtualChainManagement responds according to Ethereum state', async (t) => {
@@ -21,10 +22,12 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   await ethereum.extendVchain('1000000', 90 * day);
   await ethereum.upgradeProtocolVersion(19, 2 * day);
   await ethereum.increaseTime(10 * day);
+  await ethereum.increaseBlocks(300); // for virtual chain genesis, TODO: remove after temp genesis block hack (!)
   await ethereum.increaseBlocks(FinalityBufferBlocks + 1);
 
   // setup local state
   const config = {
+    ...exampleConfig,
     FirstBlock: 0,
     EthereumGenesisContract: ethereum.getContractRegistryAddress(),
     EthereumEndpoint: 'http://localhost:7545',
@@ -35,17 +38,18 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   const blockSync = new BlockSync(state, config);
   await blockSync.run();
 
-  console.log('state snapshot:', JSON.stringify(state.getCurrentSnapshot(), null, 2));
+  t.log('state snapshot:', JSON.stringify(state.getCurrentSnapshot(), null, 2));
 
   // process
-  const res = getVirtualChainManagement(1000000, state.getCurrentSnapshot());
+  const res = await getVirtualChainManagement(1000000, state.getCurrentSnapshot(), config);
 
-  console.log('result:', JSON.stringify(res, null, 2));
+  t.log('result:', JSON.stringify(res, null, 2));
 
   t.assert(res.CurrentRefTime > 1400000000);
   t.is(res.PageStartRefTime, 0);
   t.is(res.PageEndRefTime, res.CurrentRefTime);
   t.is(res.VirtualChains['1000000'].VirtualChainId, 1000000);
+  t.assert(res.VirtualChains['1000000'].GenesisRefTime > 1400000000);
   t.deepEqual(res.VirtualChains['1000000'].CurrentTopology, [
     {
       EthAddress: '174dc3b45bdbbc32aa0b95e64d0247ce99b08f69',
@@ -113,6 +117,8 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   t.is(res.VirtualChains['1000000'].ProtocolVersionEvents[1].Data.Version, 19);
 
   // process non-existent virtual chain
-  const resNonExistent = getVirtualChainManagement(1009999, state.getCurrentSnapshot());
-  t.deepEqual(resNonExistent.VirtualChains['1009999'].SubscriptionEvents, []);
+  await t.throwsAsync(async () => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    await getVirtualChainManagement(1009999, state.getCurrentSnapshot(), config);
+  });
 });

@@ -27,10 +27,11 @@ export function serve(serviceConfig: ServiceConfiguration) {
     response.status(200).json(body);
   });
 
-  app.get('/vchains/:vchainId/management', (request, response) => {
+  // TODO: remove async after temp genesis block hack (!)
+  app.get('/vchains/:vchainId/management', async (request, response) => {
     const { vchainId } = request.params;
     const snapshot = state.getCurrentSnapshot();
-    const body = getVirtualChainManagement(parseInt(vchainId), snapshot);
+    const body = await getVirtualChainManagement(parseInt(vchainId), snapshot, serviceConfig);
     response.status(200).json(body);
   });
 

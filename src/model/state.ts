@@ -16,7 +16,13 @@ export interface StateSnapshot {
   CurrentStandbys: { EthAddress: string; OrbsAddress: string }[];
   CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[]; // Port overridden by processor
   CurrentVirtualChains: {
-    [VirtualChainId: string]: { Expiration: number; RolloutGroup: string; IdentityType: number };
+    [VirtualChainId: string]: {
+      Expiration: number;
+      RolloutGroup: string;
+      IdentityType: number;
+      Tier: string;
+      GenesisBlock: number;
+    }; // TODO: change GenesisBlock to GenesisRefTime when events allow that
   };
   SubscriptionEvents: {
     [VirtualChainId: string]: {
@@ -82,6 +88,7 @@ export class State {
       Tier: event.returnValues.tier,
       RolloutGroup: event.returnValues.deploymentSubset,
       IdentityType: 0,
+      GenesisBlock: toNumber(event.returnValues.genRef), // TODO: change GenesisBlock to GenesisRefTime when events allow that
     };
     this.snapshot.CurrentVirtualChains[event.returnValues.vcid] = {
       Expiration: toNumber(event.returnValues.expiresAt),

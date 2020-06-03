@@ -63,6 +63,7 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
     },
     Config: {
       'management-file-path': `http://management-service:8080/vchains/${vchainId}/management`,
+      'management-consensus-grace-timeout': '0s', // TODO: temporary to simplify staging, remove eventually
       'signer-endpoint': 'http://signer:7777',
       'ethereum-endpoint': config.EthereumEndpoint,
       'active-consensus-algo': 2,

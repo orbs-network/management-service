@@ -42,12 +42,12 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   const imagePoll = new ImagePoll(state, config);
   await imagePoll.run();
 
-  console.log('state snapshot:', JSON.stringify(state.getCurrentSnapshot(), null, 2));
+  t.log('state snapshot:', JSON.stringify(state.getCurrentSnapshot(), null, 2));
 
   // process
   const res = getNodeManagement(state.getCurrentSnapshot(), config);
 
-  console.log('result:', JSON.stringify(res, null, 2));
+  t.log('result:', JSON.stringify(res, null, 2));
 
   t.is(res.chains.length, 2);
   t.is(res.chains[0].Id, 1000000);

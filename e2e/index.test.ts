@@ -22,6 +22,7 @@ test.serial.before(async (t) => {
   await driver.ethereum.addVchain(90 * day);
   await driver.ethereum.increaseTime(10 * day);
   await driver.ethereum.increaseBlocks(1);
+  await driver.ethereum.increaseBlocks(300); // for virtual chain genesis, TODO: remove after temp genesis block hack (!)
   stateReadyBlockTime = await driver.ethereum.getCurrentBlockTime();
   await driver.ethereum.increaseBlocks(driver.getAppConfig().FinalityBufferBlocks);
   t.log('[E2E] set up ethereum state done, block time:', stateReadyBlockTime);
@@ -101,6 +102,7 @@ test.serial('[E2E] serves /node/management as expected', async (t) => {
         },
         Config: {
           'management-file-path': `http://management-service:8080/vchains/${vcId}/management`,
+          'management-consensus-grace-timeout': '0s',
           'signer-endpoint': 'http://signer:7777',
           'ethereum-endpoint': 'http://ganache:7545',
           'active-consensus-algo': 2,
@@ -143,6 +145,7 @@ test.serial('[E2E] serves /vchains/1000000/management as expected', async (t) =>
     VirtualChains: {
       '1000000': {
         VirtualChainId: 1000000,
+        GenesisRefTime: isValidTimeRef,
         CurrentTopology: [
           {
             EthAddress: '174dc3b45bdbbc32aa0b95e64d0247ce99b08f69',
