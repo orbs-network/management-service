@@ -1,5 +1,5 @@
 import { ServiceConfiguration } from './config';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction, RequestHandler } from 'express';
 import { errorString } from './helpers';
 import { TaskLoop } from './task-loop';
 import { StateManager } from './model/manager';
@@ -9,9 +9,9 @@ import { getNodeManagement } from './api/processor-node';
 import { getVirtualChainManagement } from './api/processor-vc';
 import * as Logger from './logger';
 
-// function wrapAsync(fn: RequestHandler): RequestHandler {
-//    return (req, res, next) => fn(req, res, next).catch(next);
-// }
+function wrapAsync(fn: RequestHandler): RequestHandler {
+  return (req, res, next) => fn(req, res, next).catch(next);
+}
 
 export function serve(serviceConfig: ServiceConfiguration) {
   const state = new StateManager();
@@ -28,12 +28,26 @@ export function serve(serviceConfig: ServiceConfiguration) {
   });
 
   // TODO: remove async after temp genesis block hack (!)
-  app.get('/vchains/:vchainId/management', async (request, response) => {
-    const { vchainId } = request.params;
-    const snapshot = state.getCurrentSnapshot();
-    const body = await getVirtualChainManagement(parseInt(vchainId), snapshot, serviceConfig);
-    response.status(200).json(body);
-  });
+  app.get(
+    '/vchains/:vchainId/management',
+    wrapAsync(async (request, response) => {
+      const { vchainId } = request.params;
+      const snapshot = state.getCurrentSnapshot();
+      const body = await getVirtualChainManagement(parseInt(vchainId), snapshot, serviceConfig);
+      response.status(200).json(body);
+    })
+  );
+
+  // TODO: remove async after temp genesis block hack (!)
+  app.get(
+    '/vchains/:vchainId/management/:time',
+    wrapAsync(async (request, response) => {
+      const { vchainId, time } = request.params;
+      const snapshot = state.getHistoricSnapshot(parseInt(time));
+      const body = await getVirtualChainManagement(parseInt(vchainId), snapshot, serviceConfig);
+      response.status(200).json(body);
+    })
+  );
 
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (error instanceof Error) {

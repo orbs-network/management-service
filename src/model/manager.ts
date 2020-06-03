@@ -38,4 +38,15 @@ export class StateManager {
   getCurrentSnapshot(): StateSnapshot {
     return this.current.getSnapshot();
   }
+
+  getHistoricSnapshot(containingTime: number): StateSnapshot {
+    const latestAvailableRefTime = this.current.getSnapshot().CurrentRefTime;
+    if (latestAvailableRefTime < containingTime) {
+      throw new Error(
+        `Latest available RefTime ${latestAvailableRefTime} is earlier than requested time ${containingTime}.`
+      );
+    }
+    // TODO: improve to a more efficient implementation
+    return this.current.getSnapshot();
+  }
 }

@@ -13,7 +13,7 @@ export async function getVirtualChainManagement(
 ) {
   // make sure the virtual chain exists
   if (!snapshot.CurrentVirtualChains[vchainId.toString()]) {
-    throw new Error(`Virtual chain ${vchainId} does not exist.`)
+    throw new Error(`Virtual chain ${vchainId} does not exist.`);
   }
 
   // topology includes vchain specific data (port)

@@ -35,3 +35,5 @@ export function sleep(ms: number) {
 }
 
 export const day = 24 * 60 * 60;
+
+export const year = day * 365;
