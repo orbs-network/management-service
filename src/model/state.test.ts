@@ -81,6 +81,11 @@ test('state applies commitee, standby, IPs and topology', (t) => {
     { EthAddress: 'o', OrbsAddress: 'o3', Ip: '8.8.8.8', Port: 0 },
     { EthAddress: 'p', OrbsAddress: 'p3', Ip: '12.12.12.12', Port: 0 },
   ]);
+
+  t.deepEqual(s.getSnapshot().CurrentCommittee, [
+    { EthAddress: 'x', OrbsAddress: 'x3', EffectiveStake: 1, IdentityType: 0 },
+    { EthAddress: 'z', OrbsAddress: 'z3', EffectiveStake: 1, IdentityType: 0 },
+  ]);
 });
 
 test('state applies virtual chain subscriptions', (t) => {

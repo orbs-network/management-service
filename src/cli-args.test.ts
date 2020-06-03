@@ -21,7 +21,7 @@ const configValue: ServiceConfiguration = {
   DockerHubPollIntervalSeconds: 1,
   FinalityBufferBlocks: 0,
   DockerNamespace: 'foo',
-  verbose: true,
+  Verbose: true,
 };
 
 test.serial('parseOptions with file', (t) => {

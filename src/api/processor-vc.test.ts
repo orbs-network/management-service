@@ -32,7 +32,6 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
     EthereumGenesisContract: ethereum.getContractRegistryAddress(),
     EthereumEndpoint: 'http://localhost:7545',
     FinalityBufferBlocks: FinalityBufferBlocks,
-    verbose: false,
   };
   const state = new StateManager();
   const blockSync = new BlockSync(state, config);

@@ -9,7 +9,7 @@ export interface ServiceConfiguration {
   EthereumPollIntervalSeconds: number;
   FinalityBufferBlocks: number;
   FirstBlock: number;
-  verbose: boolean;
+  Verbose: boolean;
 }
 
 export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
@@ -20,7 +20,7 @@ export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
   EthereumPollIntervalSeconds: 30,
   FirstBlock: 0,
   FinalityBufferBlocks: 100,
-  verbose: false,
+  Verbose: false,
 };
 
 export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): string[] | undefined {
@@ -60,7 +60,7 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       presence: { allowEmpty: false },
       type: 'string',
     },
-    verbose: {
+    Verbose: {
       presence: { allowEmpty: false },
       type: 'boolean',
     },

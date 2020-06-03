@@ -15,7 +15,7 @@ test.serial('EthereumConfigReader reads registry for contracts address', async (
     EthereumGenesisContract: d.contractRegistry.web3Contract.options.address,
     EthereumEndpoint: 'http://localhost:7545',
     FirstBlock: 0,
-    verbose: true,
+    Verbose: true,
   });
 
   const config = reader.readEthereumConfig();

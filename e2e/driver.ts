@@ -27,7 +27,7 @@ export class TestEnvironment {
       EthereumPollIntervalSeconds: 1,
       FinalityBufferBlocks: 10,
       FirstBlock: 0,
-      verbose: true,
+      Verbose: true,
     };
   }
 

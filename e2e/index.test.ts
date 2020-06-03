@@ -5,6 +5,7 @@ import { day, sleep, year } from '../src/helpers';
 import { deepDataMatcher } from './deep-matcher';
 import { expectationNodeManagement } from './expectations-node';
 import { expectationVcManagement } from './expectations-vc';
+import { expectationStatus } from './expectations-status';
 
 let stateReadyBlockTime = 0;
 const driver = new TestEnvironment(join(__dirname, 'docker-compose.yml'));
@@ -31,7 +32,6 @@ test.serial.before(async (t) => {
 
 test.serial('[E2E] serves /node/management as expected', async (t) => {
   t.log('started');
-
   driver.testLogger = t.log;
   t.timeout(60 * 1000);
 
@@ -51,7 +51,6 @@ test.serial('[E2E] serves /node/management as expected', async (t) => {
 
 test.serial('[E2E] serves /vchains/1000000/management as expected', async (t) => {
   t.log('started');
-
   driver.testLogger = t.log;
   t.timeout(60 * 1000);
 
@@ -72,13 +71,12 @@ test.serial('[E2E] serves /vchains/1000000/management as expected', async (t) =>
 
 test.serial('[E2E] serves /vchains/1000000/management/time as expected', async (t) => {
   t.log('started');
-
   driver.testLogger = t.log;
   t.timeout(60 * 1000);
 
   t.log('fetching vchains/1000000/management/time within limit');
   let res = await driver.fetch('app', 8080, `vchains/1000000/management/${stateReadyBlockTime}`);
-  while (!res || isErrorResponse(res) || res.CurrentRefTime < stateReadyBlockTime) {
+  while (!res || isErrorResponse(res)) {
     await sleep(1000);
     console.log('fetching node/management/time again, since last response:', res);
     t.log('fetching vchains/1000000/management/time again, since last response:', res);
@@ -96,6 +94,19 @@ test.serial('[E2E] serves /vchains/1000000/management/time as expected', async (
   t.log('[E2E] result:', res);
 
   t.true(isErrorResponse(res));
+});
+
+test.serial('[E2E] serves /status as expected', async (t) => {
+  t.log('started');
+  driver.testLogger = t.log;
+
+  t.log('fetching status');
+  const res = await driver.fetch('app', 8080, `status`);
+
+  t.log('[E2E] result:', JSON.stringify(res, null, 2));
+
+  const errors = deepDataMatcher(res, expectationStatus);
+  t.deepEqual(errors, []);
 });
 
 function isErrorResponse(res: any): res is { error: string; stack?: string | undefined; status: 'error' } {

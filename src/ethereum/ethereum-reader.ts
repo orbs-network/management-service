@@ -58,7 +58,7 @@ export type EthereumConfiguration = {
   EthereumGenesisContract: string;
   EthereumEndpoint: string;
   FirstBlock: BlockNumber;
-  verbose: boolean;
+  Verbose: boolean;
 };
 
 export class EthereumConfigReader {
@@ -96,7 +96,7 @@ export class EthereumConfigReader {
       contracts: this.readContractsConfig(),
       firstBlock: this.config.FirstBlock, // events[0].blockNumber,
       httpEndpoint: this.config.EthereumEndpoint,
-      verbose: this.config.verbose,
+      verbose: this.config.Verbose,
     };
   }
 }

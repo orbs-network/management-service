@@ -9,5 +9,5 @@ export const exampleConfig: ServiceConfiguration = {
   EthereumPollIntervalSeconds: 1,
   FinalityBufferBlocks: 10,
   FirstBlock: 0,
-  verbose: false,
+  Verbose: false,
 };

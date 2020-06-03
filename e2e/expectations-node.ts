@@ -39,7 +39,7 @@ export const expectationNodeManagement = {
         EthereumPollIntervalSeconds: 1,
         FirstBlock: 0,
         FinalityBufferBlocks: 10,
-        verbose: true,
+        Verbose: true,
         EthereumGenesisContract: isValidEthereumAddress,
         EthereumEndpoint: 'http://ganache:7545',
       },

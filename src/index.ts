@@ -7,6 +7,7 @@ import { BlockSync } from './ethereum/block-sync';
 import { ImagePoll } from './dockerhub/image-poll';
 import { getNodeManagement } from './api/processor-node';
 import { getVirtualChainManagement } from './api/processor-vc';
+import { getServiceStatus } from './api/processor-status';
 import * as Logger from './logger';
 
 function wrapAsync(fn: RequestHandler): RequestHandler {
@@ -49,9 +50,15 @@ export function serve(serviceConfig: ServiceConfiguration) {
     })
   );
 
+  app.get('/status', (_request, response) => {
+    const snapshot = state.getCurrentSnapshot();
+    const body = getServiceStatus(snapshot, serviceConfig);
+    response.status(200).json(body);
+  });
+
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (error instanceof Error) {
-      if (serviceConfig.verbose) {
+      if (serviceConfig.Verbose) {
         Logger.error(`Error response to ${req.url} : ${errorString(error)}`);
       }
       return res.status(500).json({

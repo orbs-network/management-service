@@ -11,7 +11,7 @@ test('accepts legal config', (t) => {
       DockerHubPollIntervalSeconds: 0.1,
       FinalityBufferBlocks: 0,
       DockerNamespace: 'foo',
-      verbose: true,
+      Verbose: true,
     }),
     undefined
   );
@@ -26,11 +26,12 @@ test('declines illegal config (1)', (t) => {
       EthereumPollIntervalSeconds: 0.1,
       DockerHubPollIntervalSeconds: 0.1,
       DockerNamespace: 'foo',
-      verbose: true,
+      Verbose: true,
     }),
     ["Finality buffer blocks can't be blank"]
   );
 });
+
 test('declines illegal config (2)', (t) => {
   t.deepEqual(
     validateServiceConfiguration({
@@ -41,7 +42,7 @@ test('declines illegal config (2)', (t) => {
       DockerHubPollIntervalSeconds: 0.1,
       FinalityBufferBlocks: 0,
       DockerNamespace: 'foo',
-      verbose: true,
+      Verbose: true,
     }),
     ['Ethereum endpoint is not a valid url']
   );

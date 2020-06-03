@@ -8,6 +8,7 @@ export interface StateSnapshot {
   CurrentRefTime: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
+  CurrentCommittee: { EthAddress: string; OrbsAddress: string; EffectiveStake: number; IdentityType: number }[];
   CommitteeEvents: {
     RefTime: number;
     Committee: { EthAddress: string; OrbsAddress: string; EffectiveStake: number; IdentityType: number }[];
@@ -42,6 +43,7 @@ export class State {
     CurrentRefTime: 0,
     PageStartRefTime: 0,
     PageEndRefTime: 0,
+    CurrentCommittee: [],
     CommitteeEvents: [],
     CurrentIp: {},
     CurrentStandbys: [],
@@ -73,6 +75,7 @@ export class State {
       RefTime: time,
       Committee: committee,
     });
+    this.snapshot.CurrentCommittee = committee;
   }
 
   applyNewStandbysChanged(_time: number, event: EventTypes['StandbysChanged']) {
