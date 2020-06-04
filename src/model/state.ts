@@ -8,10 +8,10 @@ export interface StateSnapshot {
   CurrentRefTime: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
-  CurrentCommittee: { EthAddress: string; OrbsAddress: string; EffectiveStake: number; IdentityType: number }[];
+  CurrentCommittee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
   CommitteeEvents: {
     RefTime: number;
-    Committee: { EthAddress: string; OrbsAddress: string; EffectiveStake: number; IdentityType: number }[];
+    Committee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
   }[];
   CurrentIp: { [EthAddress: string]: string };
   CurrentStandbys: { EthAddress: string; OrbsAddress: string }[];
@@ -75,10 +75,14 @@ export class State {
   }
 
   applyNewCommitteeChanged(time: number, event: EventTypes['CommitteeChanged']) {
+    const totalCommitteeWeight = _.sum(_.map(event.returnValues.weights, (w) => parseInt(w)));
     const committee = event.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
       OrbsAddress: normalizeAddress(OrbsAddress),
       EthAddress: normalizeAddress(event.returnValues.addrs[idx]),
-      EffectiveStake: parseInt(event.returnValues.weights[idx]),
+      Weight: Math.min(
+        parseInt(event.returnValues.weights[idx]),
+        Math.round(totalCommitteeWeight / event.returnValues.orbsAddrs.length)
+      ),
       IdentityType: 0,
     }));
     this.snapshot.CommitteeEvents.push({
@@ -150,7 +154,7 @@ export class State {
 type TopologyNodes = { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[];
 type CommiteeEvent = {
   RefTime: number;
-  Committee: { EthAddress: string; OrbsAddress: string; EffectiveStake: number; IdentityType: number }[];
+  Committee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
 };
 
 function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
