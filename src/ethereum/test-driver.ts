@@ -32,7 +32,7 @@ export class EthereumTestDriver {
 
     if (this.verbose) console.log(`[posv2] about to deploy subscriber and deployment subset`);
     this.subscriber = await d.newSubscriber('defaultTier', SUBSCRIPTION_MONTHLY_RATE);
-    await d.protocol.createDeploymentSubset('canary', 1, { from: d.contractsOwner });
+    await d.protocol.createDeploymentSubset('canary', 1, { from: d.functionalOwner.address });
   }
 
   getContractRegistryAddress(): string {
@@ -65,7 +65,7 @@ export class EthereumTestDriver {
 
     if (this.verbose) console.log(`[posv2] about to add vchain`);
     const payment = Math.round(SUBSCRIPTION_MONTHLY_RATE * (timeUntilExpires / SECONDS_IN_MONTH));
-    const payerAddress = d.contractsOwner;
+    const payerAddress = d.contractsOwnerAddress;
     await d.erc20.assign(payerAddress, payment);
     await d.erc20.approve(this.subscriber.address, payment, { from: payerAddress });
     await this.subscriber.createVC(payment, false, rolloutGroup, { from: payerAddress });
@@ -79,7 +79,7 @@ export class EthereumTestDriver {
 
     if (this.verbose) console.log(`[posv2] about to extend vchain`);
     const payment = Math.round(SUBSCRIPTION_MONTHLY_RATE * (timeUntilExpires / SECONDS_IN_MONTH));
-    const payerAddress = d.contractsOwner;
+    const payerAddress = d.contractsOwnerAddress;
     await d.erc20.assign(payerAddress, payment);
     await d.erc20.approve(this.subscriber.address, payment, { from: payerAddress });
     await this.subscriber.extendSubscription(vcId, payment, { from: payerAddress });
@@ -92,7 +92,9 @@ export class EthereumTestDriver {
 
     if (this.verbose) console.log(`[posv2] about to upgrade protocol version`);
     const currTime: number = await getTopBlockTimestamp(d);
-    await d.protocol.setProtocolVersion(rolloutGroup, newVersion, currTime + timeUntilUpgrade);
+    await d.protocol.setProtocolVersion(rolloutGroup, newVersion, currTime + timeUntilUpgrade, {
+      from: d.functionalOwner.address,
+    });
   }
 
   async addValidator(committee: boolean, stake = 10000) {

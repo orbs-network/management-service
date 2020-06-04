@@ -14,31 +14,29 @@ export function getNewEthereumReader(config: EthereumConfiguration) {
 
 type ContractAddressUpdatedEvent = EventData & { returnValues: ContractAddressUpdatedEventValues };
 
+// from https://github.com/orbs-network/orbs-ethereum-contracts-v2/blob/master/test/driver.ts
 export type ContractName =
   | 'protocol'
-  | 'fees'
-  | 'committee-general'
-  | 'committee-compliance'
+  | 'committee'
   | 'elections'
   | 'delegations'
   | 'validatorsRegistration'
   | 'compliance'
   | 'staking'
-  | 'subscriptions';
+  | 'subscriptions'
+  | 'rewards';
 
 type ContractTypeName = keyof Contracts;
 
+// from https://github.com/orbs-network/orbs-ethereum-contracts-v2/blob/master/test/driver.ts
 export function getContractTypeName(key: ContractName): ContractTypeName {
   switch (key) {
     case 'protocol':
       return 'Protocol';
-    case 'fees':
-      return 'Fees';
-    case 'committee-general':
-    case 'committee-compliance':
+    case 'committee':
       return 'Committee';
     case 'elections':
-      return 'Delegations';
+      return 'Elections';
     case 'delegations':
       return 'Delegations';
     case 'validatorsRegistration':
@@ -49,6 +47,8 @@ export function getContractTypeName(key: ContractName): ContractTypeName {
       return 'StakingContract';
     case 'subscriptions':
       return 'Subscriptions';
+    case 'rewards':
+      return 'Rewards';
     default:
       throw new Error(`unknown event name '${key}'`);
   }
@@ -83,7 +83,7 @@ export class EthereumConfigReader {
     )) as ContractAddressUpdatedEvent[];
     const contracts: { [t in ContractName]?: ContractMetadata } = {};
     events.forEach((e) => {
-      contracts[e.returnValues.contractName as ContractName] = {
+      contracts[e.returnValues.contractName] = {
         address: e.returnValues.addr,
         firstBlock: this.config.FirstBlock, // TODO: max with contract genesis once it exists
       };
@@ -163,9 +163,9 @@ export type EthereumConfig = {
 export function contractByEventName(eventName: EventName): ContractName {
   switch (eventName) {
     case 'CommitteeChanged':
-      return 'committee-general';
+      return 'committee';
     case 'StandbysChanged':
-      return 'committee-general';
+      return 'committee';
     case 'SubscriptionChanged':
       return 'subscriptions';
     case 'ProtocolVersionChanged':

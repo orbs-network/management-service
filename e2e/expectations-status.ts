@@ -4,22 +4,22 @@ export const expectationStatus = {
   CurrentRefTime: isValidTimeRef,
   CurrentCommittee: [
     {
-      OrbsAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
-      EthAddress: '174dc3b45bdbbc32aa0b95e64d0247ce99b08f69',
+      OrbsAddress: '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
+      EthAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
       EffectiveStake: 40000,
       IdentityType: 0,
     },
     {
-      OrbsAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
-      EthAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
+      OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
+      EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
       EffectiveStake: 20000,
       IdentityType: 0,
     },
   ],
   CurrentStandbys: [
     {
-      EthAddress: '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
-      OrbsAddress: 'cb6642be414696f77336dae06fed3775f08de0ea',
+      OrbsAddress: '33546759bdcfb5c753a4102b86b3e73e714d5213',
+      EthAddress: 'cb6642be414696f77336dae06fed3775f08de0ea',
     },
   ],
   CurrentImageVersions: {
@@ -53,30 +53,30 @@ export const expectationStatus = {
   },
   CurrentTopology: [
     {
-      EthAddress: '174dc3b45bdbbc32aa0b95e64d0247ce99b08f69',
-      OrbsAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
-      Ip: '23.77.195.180',
+      EthAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
+      OrbsAddress: '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
+      Ip: '138.103.13.220',
       Port: 0,
     },
     {
-      EthAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
-      OrbsAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
-      Ip: '22.252.247.40',
+      EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
+      OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
+      Ip: '225.110.150.90',
       Port: 0,
     },
     {
-      EthAddress: '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
-      OrbsAddress: 'cb6642be414696f77336dae06fed3775f08de0ea',
-      Ip: '124.35.0.211',
+      EthAddress: 'cb6642be414696f77336dae06fed3775f08de0ea',
+      OrbsAddress: '33546759bdcfb5c753a4102b86b3e73e714d5213',
+      Ip: '203.102.66.190',
       Port: 0,
     },
   ],
   CurrentIp: {
-    '3fced656acbd6700ce7d546f6efdcdd482d8142a': '63.206.214.86',
-    '16fcf728f8dc3f687132f2157d8379c021a08c12': '22.252.247.40',
-    '86544bdd6c8b957cd198252c45fa215fc3892126': '134.84.75.221',
-    '174dc3b45bdbbc32aa0b95e64d0247ce99b08f69': '23.77.195.180',
-    '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e': '124.35.0.211',
+    '29ce860a2247d97160d6dfc087a15f41e2349087': '41.206.134.10',
+    e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9: '225.110.150.90',
+    '51baa09f2f7dfc7a0f65886b68720958d389cac7': '81.186.160.159',
+    '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5': '138.103.13.220',
+    cb6642be414696f77336dae06fed3775f08de0ea: '203.102.66.190',
   },
   ProtocolVersionEvents: {
     main: [

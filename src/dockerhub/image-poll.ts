@@ -24,6 +24,6 @@ export class ImagePoll {
       if (imageVersion['main']) this.state.applyNewImageVersion('main', imageName, imageVersion['main']);
       if (imageVersion['canary']) this.state.applyNewImageVersion('canary', imageName, imageVersion['canary']);
     }
-    Logger.log(`ImagePoll: run processed versions ${latestVersions}.`);
+    Logger.log(`ImagePoll: run processed versions ${JSON.stringify(latestVersions)}.`);
   }
 }
