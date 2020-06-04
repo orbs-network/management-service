@@ -6,8 +6,8 @@ import { getVirtualChainPort } from './helpers';
 export function getNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
   // make sure we have all service image versions
   for (const imageName of ['node', 'management-service']) {
-    if (!snapshot.CurrentImageVersions[imageName]) {
-      throw new Error(`Could not find image version for '${imageName}'.`);
+    if (!snapshot.CurrentImageVersions['main'][imageName]) {
+      throw new Error(`Could not find main image version for '${imageName}'.`);
     }
   }
 
@@ -39,7 +39,7 @@ export function getNodeManagement(snapshot: StateSnapshot, config: ServiceConfig
         ExternalPort: 7666,
         DockerConfig: {
           Image: `${config.DockerNamespace}/management-service`,
-          Tag: snapshot.CurrentImageVersions['management-service'],
+          Tag: snapshot.CurrentImageVersions['main']['management-service'],
           Pull: true,
         },
         Config: config, // forward my own input config + defaults for what's missing
@@ -50,6 +50,8 @@ export function getNodeManagement(snapshot: StateSnapshot, config: ServiceConfig
 }
 
 function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const rolloutGroup = snapshot.CurrentVirtualChains[vchainId.toString()].RolloutGroup;
+
   return {
     Id: vchainId,
     InternalPort: 4400,
@@ -58,7 +60,7 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
     Disabled: false,
     DockerConfig: {
       Image: `${config.DockerNamespace}/node`,
-      Tag: snapshot.CurrentImageVersions['node'],
+      Tag: snapshot.CurrentImageVersions[rolloutGroup]?.['node'] ?? snapshot.CurrentImageVersions['main']['node'],
       Pull: true,
     },
     Config: {

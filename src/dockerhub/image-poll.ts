@@ -21,7 +21,8 @@ export class ImagePoll {
     for (let i = 0; i < this.imageNamesToPoll.length; i++) {
       const imageName = this.imageNamesToPoll[i];
       const imageVersion = latestVersions[i];
-      if (imageVersion) this.state.applyNewImageVersion(imageName, imageVersion);
+      if (imageVersion['main']) this.state.applyNewImageVersion('main', imageName, imageVersion['main']);
+      if (imageVersion['canary']) this.state.applyNewImageVersion('canary', imageName, imageVersion['canary']);
     }
     Logger.log(`ImagePoll: run processed versions ${latestVersions}.`);
   }

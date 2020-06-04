@@ -28,8 +28,11 @@ export class EthereumTestDriver {
     };
     if (customWeb3Provider) options.web3Provider = customWeb3Provider;
     this.orbsPosV2Driver = await Driver.new(options);
-    if (this.verbose) console.log(`[posv2] about to deploy subscriber`);
-    this.subscriber = await this.orbsPosV2Driver.newSubscriber('defaultTier', SUBSCRIPTION_MONTHLY_RATE);
+    const d = this.orbsPosV2Driver;
+
+    if (this.verbose) console.log(`[posv2] about to deploy subscriber and deployment subset`);
+    this.subscriber = await d.newSubscriber('defaultTier', SUBSCRIPTION_MONTHLY_RATE);
+    await d.protocol.createDeploymentSubset('canary', 1, { from: d.contractsOwner });
   }
 
   getContractRegistryAddress(): string {
@@ -55,7 +58,7 @@ export class EthereumTestDriver {
     return { v1, v2, v3, v4, v5 };
   }
 
-  async addVchain(timeUntilExpires: number) {
+  async addVchain(timeUntilExpires: number, rolloutGroup = 'main') {
     if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
     if (!this.subscriber) throw new Error(`Subscriber contract not deployed`);
     const d = this.orbsPosV2Driver;
@@ -65,11 +68,11 @@ export class EthereumTestDriver {
     const payerAddress = d.contractsOwner;
     await d.erc20.assign(payerAddress, payment);
     await d.erc20.approve(this.subscriber.address, payment, { from: payerAddress });
-    await this.subscriber.createVC(payment, false, 'main', { from: payerAddress });
+    await this.subscriber.createVC(payment, false, rolloutGroup, { from: payerAddress });
     await this.increaseTime(1000);
   }
 
-  async extendVchain(vcid: string, timeUntilExpires: number) {
+  async extendVchain(vcId: string, timeUntilExpires: number) {
     if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
     if (!this.subscriber) throw new Error(`Subscriber contract not deployed`);
     const d = this.orbsPosV2Driver;
@@ -79,17 +82,17 @@ export class EthereumTestDriver {
     const payerAddress = d.contractsOwner;
     await d.erc20.assign(payerAddress, payment);
     await d.erc20.approve(this.subscriber.address, payment, { from: payerAddress });
-    await this.subscriber.extendSubscription(vcid, payment, { from: payerAddress });
+    await this.subscriber.extendSubscription(vcId, payment, { from: payerAddress });
     await this.increaseTime(1000);
   }
 
-  async upgradeProtocolVersion(newVersion: number, timeUntilUpgrade: number) {
+  async upgradeProtocolVersion(newVersion: number, timeUntilUpgrade: number, rolloutGroup = 'main') {
     if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
     const d = this.orbsPosV2Driver;
 
     if (this.verbose) console.log(`[posv2] about to upgrade protocol version`);
     const currTime: number = await getTopBlockTimestamp(d);
-    await d.protocol.setProtocolVersion('main', newVersion, currTime + timeUntilUpgrade);
+    await d.protocol.setProtocolVersion(rolloutGroup, newVersion, currTime + timeUntilUpgrade);
   }
 
   async addValidator(committee: boolean, stake = 10000) {

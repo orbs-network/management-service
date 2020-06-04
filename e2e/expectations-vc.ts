@@ -118,14 +118,12 @@ export const expectationVcManagement = {
           RefTime: isValidTimeRef,
           Data: {
             Version: 1,
-            RolloutGroup: 'main',
           },
         },
         {
           RefTime: isValidTimeRef,
           Data: {
             Version: 19,
-            RolloutGroup: 'main',
           },
         },
       ],

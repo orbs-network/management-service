@@ -31,8 +31,8 @@ export class StateManager {
     this.current.applyNewTimeRef(time);
   }
 
-  applyNewImageVersion(imageName: string, imageVersion: string) {
-    this.current.applyNewImageVersion(imageName, imageVersion);
+  applyNewImageVersion(rolloutGroup: string, imageName: string, imageVersion: string) {
+    this.current.applyNewImageVersion(rolloutGroup, imageName, imageVersion);
   }
 
   getCurrentSnapshot(): StateSnapshot {

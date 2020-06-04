@@ -15,13 +15,14 @@ test.serial.before(async (t) => {
   t.log('[E2E] set up ethereum state');
   t.timeout(60 * 1000);
   await driver.ethereum.setupInitialCommittee();
-  await driver.ethereum.addVchain(30 * day);
-  await driver.ethereum.addVchain(30 * day);
-  await driver.ethereum.upgradeProtocolVersion(17, 60 * day);
+  await driver.ethereum.addVchain(30 * day, 'main');
+  await driver.ethereum.addVchain(30 * day, 'canary');
+  await driver.ethereum.upgradeProtocolVersion(17, 60 * day, 'main');
   await driver.ethereum.increaseTime(40 * day);
   await driver.ethereum.extendVchain('1000000', 90 * day);
-  await driver.ethereum.upgradeProtocolVersion(19, 2 * day);
-  await driver.ethereum.addVchain(90 * day);
+  await driver.ethereum.upgradeProtocolVersion(19, 2 * day, 'main');
+  await driver.ethereum.upgradeProtocolVersion(20, 2 * day, 'canary');
+  await driver.ethereum.addVchain(90 * day, 'main');
   await driver.ethereum.increaseTime(10 * day);
   await driver.ethereum.increaseBlocks(1);
   await driver.ethereum.increaseBlocks(300); // for virtual chain genesis, TODO: remove after temp genesis block hack (!)

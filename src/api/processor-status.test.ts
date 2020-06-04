@@ -15,11 +15,11 @@ test.serial('[integration] getServiceStatus responds', (t) => {
     CurrentRefTime: 0,
     CurrentCommittee: [],
     CurrentStandbys: [],
-    CurrentImageVersions: {},
+    CurrentImageVersions: { main: {}, canary: {} },
     CurrentVirtualChains: {},
     CurrentTopology: [],
     CurrentIp: {},
-    ProtocolVersionEvents: [],
+    ProtocolVersionEvents: { main: [], canary: [] },
     Config: exampleConfig,
   });
 });

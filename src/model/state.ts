@@ -32,10 +32,14 @@ export interface StateSnapshot {
     }[];
   };
   ProtocolVersionEvents: {
-    RefTime: number;
-    Data: { RolloutGroup: string; Version: number };
-  }[];
-  CurrentImageVersions: { [ImageName: string]: string };
+    [RolloutGroup: string]: {
+      RefTime: number;
+      Data: { Version: number };
+    }[];
+  };
+  CurrentImageVersions: {
+    [RolloutGroup: string]: { [ImageName: string]: string };
+  };
 }
 
 export class State {
@@ -50,8 +54,14 @@ export class State {
     CurrentTopology: [],
     CurrentVirtualChains: {},
     SubscriptionEvents: {},
-    ProtocolVersionEvents: [],
-    CurrentImageVersions: {},
+    ProtocolVersionEvents: {
+      main: [],
+      canary: [],
+    },
+    CurrentImageVersions: {
+      main: {},
+      canary: {},
+    },
   };
 
   getSnapshot(): StateSnapshot {
@@ -111,14 +121,14 @@ export class State {
   }
 
   applyNewProtocolVersionChanged(time: number, event: EventTypes['ProtocolVersionChanged']) {
-    const eventBody = { RolloutGroup: event.returnValues.deploymentSubset };
-    const existingEvents = this.snapshot.ProtocolVersionEvents;
+    const rolloutGroup = event.returnValues.deploymentSubset;
+    const existingEvents = this.snapshot.ProtocolVersionEvents[rolloutGroup];
     const noFutureEvents = _.filter(existingEvents, (event) => event.RefTime <= time);
     noFutureEvents.push({
       RefTime: toNumber(event.returnValues.fromTimestamp),
-      Data: { Version: toNumber(event.returnValues.nextVersion), ...eventBody },
+      Data: { Version: toNumber(event.returnValues.nextVersion) },
     });
-    this.snapshot.ProtocolVersionEvents = noFutureEvents;
+    this.snapshot.ProtocolVersionEvents[rolloutGroup] = noFutureEvents;
   }
 
   // TODO: replace with ValidatorsRegistration.ValidatorDataUpdated
@@ -127,12 +137,12 @@ export class State {
     this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
   }
 
-  applyNewImageVersion(imageName: string, imageVersion: string) {
+  applyNewImageVersion(rolloutGroup: string, imageName: string, imageVersion: string) {
     if (!Versioning.isValid(imageVersion)) return;
-    const currentVersion = this.snapshot.CurrentImageVersions[imageName];
+    const currentVersion = this.snapshot.CurrentImageVersions[rolloutGroup][imageName];
     // image version upgrades only go forward (we don't allow downgrade)
     if (!currentVersion || Versioning.compare(imageVersion, currentVersion) > 0) {
-      this.snapshot.CurrentImageVersions[imageName] = imageVersion;
+      this.snapshot.CurrentImageVersions[rolloutGroup][imageName] = imageVersion;
     }
   }
 }

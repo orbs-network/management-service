@@ -23,8 +23,10 @@ export const expectationStatus = {
     },
   ],
   CurrentImageVersions: {
-    'management-service': isValidImageVersion,
-    node: isValidImageVersion,
+    main: {
+      'management-service': isValidImageVersion,
+      node: isValidImageVersion,
+    },
   },
   CurrentVirtualChains: {
     '1000000': {
@@ -38,7 +40,7 @@ export const expectationStatus = {
       Expiration: isValidTimeRef,
       GenesisBlock: isValidBlock,
       IdentityType: 0,
-      RolloutGroup: 'main',
+      RolloutGroup: 'canary',
       Tier: 'defaultTier',
     },
     '1000002': {
@@ -76,22 +78,36 @@ export const expectationStatus = {
     '174dc3b45bdbbc32aa0b95e64d0247ce99b08f69': '23.77.195.180',
     '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e': '124.35.0.211',
   },
-  ProtocolVersionEvents: [
-    {
-      RefTime: isValidTimeRef,
-      Data: {
-        Version: 1,
-        RolloutGroup: 'main',
+  ProtocolVersionEvents: {
+    main: [
+      {
+        RefTime: isValidTimeRef,
+        Data: {
+          Version: 1,
+        },
       },
-    },
-    {
-      RefTime: isValidTimeRef,
-      Data: {
-        Version: 19,
-        RolloutGroup: 'main',
+      {
+        RefTime: isValidTimeRef,
+        Data: {
+          Version: 19,
+        },
       },
-    },
-  ],
+    ],
+    canary: [
+      {
+        RefTime: isValidTimeRef,
+        Data: {
+          Version: 1,
+        },
+      },
+      {
+        RefTime: isValidTimeRef,
+        Data: {
+          Version: 20,
+        },
+      },
+    ],
+  },
   Config: {
     Port: 8080,
     EthereumGenesisContract: isValidEthereumAddress,

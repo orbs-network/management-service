@@ -13,21 +13,26 @@ export class DockerHubReader {
   //  https://registry.hub.docker.com/v2/repositories/orbsnetwork/node/tags/experimental
   //  check what is more likely to exist in private self-hosted docker repos
 
-  async fetchLatestVersion(repositoryName: string): Promise<string | undefined> {
+  async fetchLatestVersion(repositoryName: string): Promise<{ [RolloutGroup: string]: string }> {
+    const res: { [RolloutGroup: string]: string } = {};
     const repository = { user: this.config.DockerNamespace, name: repositoryName };
     const token = await fetchDockerHubToken(repository as DockerHubRepo);
-    const res = await fetch(`https://registry.hub.docker.com/v2/${repository.user}/${repository.name}/tags/list`, {
+    const response = await fetch(`https://registry.hub.docker.com/v2/${repository.user}/${repository.name}/tags/list`, {
       headers: { Authorization: 'Bearer ' + token },
     });
-    const textRes = await res.text();
-    const body = JSON.parse(textRes);
+    const text = await response.text();
+    const body = JSON.parse(text);
     const tags = body?.tags;
     if (tags && Array.isArray(tags) && tags.every((t) => typeof t === 'string')) {
-      const versions = tags.filter(Versioning.isValid).sort(Versioning.compare);
-      if (versions.length) {
-        return versions[versions.length - 1];
+      const mainVersions = tags.filter(Versioning.isMain).sort(Versioning.compare);
+      if (mainVersions.length) {
+        res['main'] = mainVersions[mainVersions.length - 1];
+      }
+      const canaryVersions = tags.filter(Versioning.isCanary).sort(Versioning.compare);
+      if (canaryVersions.length) {
+        res['canary'] = canaryVersions[canaryVersions.length - 1];
       }
     }
-    return undefined;
+    return res;
   }
 }

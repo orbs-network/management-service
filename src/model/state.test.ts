@@ -211,32 +211,32 @@ test('state applies protocol version changes', (t) => {
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
-  t.is(s.getSnapshot().ProtocolVersionEvents.length, 3);
-  t.is(s.getSnapshot().ProtocolVersionEvents[0].RefTime, 1500);
-  t.is(s.getSnapshot().ProtocolVersionEvents[0].Data.Version, 5);
-  t.is(s.getSnapshot().ProtocolVersionEvents[1].RefTime, 2500);
-  t.is(s.getSnapshot().ProtocolVersionEvents[1].Data.Version, 6);
-  t.is(s.getSnapshot().ProtocolVersionEvents[2].RefTime, 5500);
-  t.is(s.getSnapshot().ProtocolVersionEvents[2].Data.Version, 8);
+  t.is(s.getSnapshot().ProtocolVersionEvents['main'].length, 3);
+  t.is(s.getSnapshot().ProtocolVersionEvents['main'][0].RefTime, 1500);
+  t.is(s.getSnapshot().ProtocolVersionEvents['main'][0].Data.Version, 5);
+  t.is(s.getSnapshot().ProtocolVersionEvents['main'][1].RefTime, 2500);
+  t.is(s.getSnapshot().ProtocolVersionEvents['main'][1].Data.Version, 6);
+  t.is(s.getSnapshot().ProtocolVersionEvents['main'][2].RefTime, 5500);
+  t.is(s.getSnapshot().ProtocolVersionEvents['main'][2].Data.Version, 8);
 });
 
 test('state applies monotonous image version changes', (t) => {
   const s = new State();
 
-  s.applyNewImageVersion('node', 'v1.0.0');
-  s.applyNewImageVersion('management-service', 'v1.0.1');
-  s.applyNewImageVersion('node', 'v1.5.3+hotfix');
-  s.applyNewImageVersion('node', 'v3.1.1');
-  s.applyNewImageVersion('management-service', 'v1.9.0+hotfix');
-  s.applyNewImageVersion('node', 'v2.9.9'); // ignore versions going backwards
-  s.applyNewImageVersion('node', 'v1.0.0');
-  s.applyNewImageVersion('node', 'v9.9.9-cc1cc788');
+  s.applyNewImageVersion('main', 'node', 'v1.0.0');
+  s.applyNewImageVersion('main', 'management-service', 'v1.0.1');
+  s.applyNewImageVersion('main', 'node', 'v1.5.3+hotfix');
+  s.applyNewImageVersion('main', 'node', 'v3.1.1');
+  s.applyNewImageVersion('main', 'management-service', 'v1.9.0+hotfix');
+  s.applyNewImageVersion('main', 'node', 'v2.9.9'); // ignore versions going backwards
+  s.applyNewImageVersion('main', 'node', 'v1.0.0');
+  s.applyNewImageVersion('main', 'node', 'v9.9.9-cc1cc788');
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
-  t.is(Object.keys(s.getSnapshot().CurrentImageVersions).length, 2);
-  t.is(s.getSnapshot().CurrentImageVersions['node'], 'v3.1.1');
-  t.is(s.getSnapshot().CurrentImageVersions['management-service'], 'v1.9.0+hotfix');
+  t.is(Object.keys(s.getSnapshot().CurrentImageVersions['main']).length, 2);
+  t.is(s.getSnapshot().CurrentImageVersions['main']['node'], 'v3.1.1');
+  t.is(s.getSnapshot().CurrentImageVersions['main']['management-service'], 'v1.9.0+hotfix');
 });
 
 function CommitteeChanged(s: State, time: number, addrs: string[], orbsAddrs: string[]) {

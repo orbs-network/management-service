@@ -15,12 +15,13 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   // setup Ethereum state
   await ethereum.deployContracts();
   await ethereum.setupInitialCommittee();
-  await ethereum.addVchain(60 * day);
-  await ethereum.addVchain(30 * day);
-  await ethereum.upgradeProtocolVersion(17, 60 * day);
+  await ethereum.addVchain(60 * day, 'main');
+  await ethereum.addVchain(30 * day, 'canary');
+  await ethereum.upgradeProtocolVersion(17, 60 * day, 'main');
   await ethereum.increaseTime(40 * day);
   await ethereum.extendVchain('1000000', 90 * day);
-  await ethereum.upgradeProtocolVersion(19, 2 * day);
+  await ethereum.upgradeProtocolVersion(19, 2 * day, 'main');
+  await ethereum.upgradeProtocolVersion(20, 2 * day, 'canary');
   await ethereum.increaseTime(10 * day);
   await ethereum.increaseBlocks(300); // for virtual chain genesis, TODO: remove after temp genesis block hack (!)
   await ethereum.increaseBlocks(FinalityBufferBlocks + 1);

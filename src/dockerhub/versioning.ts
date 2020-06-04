@@ -28,9 +28,19 @@ regex reference : // https://regex101.com/r/Ly7O1x/310
 */
 
 const REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-canary)?(\+hotfix)?$/m;
+const MAIN_REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(\+hotfix)?$/m;
+const CANARY_REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-canary(\+hotfix)?$/m;
 
 export function isValid(src: string): boolean {
   return REGULAR_EXPRESSION.test(src);
+}
+
+export function isMain(src: string): boolean {
+  return MAIN_REGULAR_EXPRESSION.test(src);
+}
+
+export function isCanary(src: string): boolean {
+  return CANARY_REGULAR_EXPRESSION.test(src);
 }
 
 export function compare(a: string, b: string): number {

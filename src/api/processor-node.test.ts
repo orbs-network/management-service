@@ -16,14 +16,14 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
 
   // mock docker hub state
   const scope = nockDockerHub(
-    { user: 'mydockernamespace', name: 'node', tags: ['v0.0.1', 'v1.2.3', 'v1.0.0'] },
-    { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v3.9.9'] }
+    { user: 'mydockernamespace', name: 'node', tags: ['v0.0.1', 'v1.2.3', 'v1.2.4-canary', 'v1.0.0'] },
+    { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v3.9.9'] }
   );
 
   // setup Ethereum state
   await ethereum.deployContracts();
-  await ethereum.addVchain(30 * day);
-  await ethereum.addVchain(30 * day);
+  await ethereum.addVchain(30 * day, 'main');
+  await ethereum.addVchain(30 * day, 'canary');
   await ethereum.increaseTime(40 * day);
   await ethereum.extendVchain('1000000', 90 * day);
   await ethereum.increaseBlocks(FinalityBufferBlocks + 1);
@@ -53,15 +53,20 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.is(res.chains[0].Id, 1000000);
   t.is(res.chains[0].ExternalPort, 10000);
   t.is(res.chains[0].Config['management-file-path'], 'http://management-service:8080/vchains/1000000/management');
+  t.deepEqual(res.chains[0].DockerConfig, {
+    Image: 'mydockernamespace/node',
+    Tag: 'v1.2.3',
+    Pull: true,
+  });
   t.is(res.chains[1].Id, 1000001);
   t.is(res.chains[1].ExternalPort, 10001);
   t.is(res.chains[1].Config['management-file-path'], 'http://management-service:8080/vchains/1000001/management');
+  t.deepEqual(res.chains[1].DockerConfig, {
+    Image: 'mydockernamespace/node',
+    Tag: 'v1.2.4-canary',
+    Pull: true,
+  });
   for (const chain of res.chains) {
-    t.deepEqual(chain.DockerConfig, {
-      Image: 'mydockernamespace/node',
-      Tag: 'v1.2.3',
-      Pull: true,
-    });
     t.is(chain.Config['ethereum-endpoint'], config.EthereumEndpoint);
   }
   t.deepEqual(res.services['management-service'].DockerConfig, {

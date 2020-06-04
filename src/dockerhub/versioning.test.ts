@@ -1,5 +1,5 @@
 import test from 'ava';
-import { isValid, compare } from './versioning';
+import { isValid, compare, isMain, isCanary } from './versioning';
 
 test('isValid returns true on valid versions', (t) => {
   const validTags = [
@@ -12,6 +12,20 @@ test('isValid returns true on valid versions', (t) => {
   ];
   for (const tag of validTags) {
     t.true(isValid(tag), tag);
+  }
+});
+
+test('isMain returns true on valid versions', (t) => {
+  const validTags = ['v0.0.0', 'v1.22.333', 'v0.0.0+hotfix', 'v1.22.333+hotfix'];
+  for (const tag of validTags) {
+    t.true(isMain(tag), tag);
+  }
+});
+
+test('isCanary returns true on valid versions', (t) => {
+  const validTags = ['v0.0.0-canary', 'v0.0.0-canary+hotfix'];
+  for (const tag of validTags) {
+    t.true(isCanary(tag), tag);
   }
 });
 
@@ -33,6 +47,54 @@ test('isValid returns false on invalid versions', (t) => {
   ];
   for (const tag of invalidTags) {
     t.false(isValid(tag), tag);
+  }
+});
+
+test('isMain returns false on invalid versions', (t) => {
+  const invalidTags = [
+    'v0.0.0-canary',
+    'v0.0.0-canary+hotfix',
+    'G-0-H',
+    'C-0-N',
+    '0.0.0',
+    'v0.0.0 foo',
+    'foo v0.0.0',
+    'v0.0',
+    'v0.0.',
+    'v0.0.0 -canary',
+    'v0.0.0-canar y',
+    'v01.22.333',
+    'v0.0.0-ferrary',
+    'v0.0.0-ferrary+slow',
+    'v1.3.13-cc1cc788',
+  ];
+  for (const tag of invalidTags) {
+    t.false(isMain(tag), tag);
+  }
+});
+
+test('isCanary returns false on invalid versions', (t) => {
+  const invalidTags = [
+    'v0.0.0',
+    'v1.22.333',
+    'v0.0.0+hotfix',
+    'v1.22.333+hotfix',
+    'G-0-H',
+    'C-0-N',
+    '0.0.0',
+    'v0.0.0 foo',
+    'foo v0.0.0',
+    'v0.0',
+    'v0.0.',
+    'v0.0.0 -canary',
+    'v0.0.0-canar y',
+    'v01.22.333',
+    'v0.0.0-ferrary',
+    'v0.0.0-ferrary+slow',
+    'v1.3.13-cc1cc788',
+  ];
+  for (const tag of invalidTags) {
+    t.false(isCanary(tag), tag);
   }
 });
 

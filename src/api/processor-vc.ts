@@ -16,6 +16,8 @@ export async function getVirtualChainManagement(
     throw new Error(`Virtual chain ${vchainId} does not exist.`);
   }
 
+  const rolloutGroup = snapshot.CurrentVirtualChains[vchainId.toString()].RolloutGroup;
+
   // topology includes vchain specific data (port)
   const vchainPort = getVirtualChainPort(vchainId);
   const vchainTopology = _.cloneDeep(snapshot.CurrentTopology);
@@ -40,7 +42,7 @@ export async function getVirtualChainManagement(
         CurrentTopology: vchainTopology,
         CommitteeEvents: snapshot.CommitteeEvents,
         SubscriptionEvents: snapshot.SubscriptionEvents[vchainId.toString()],
-        ProtocolVersionEvents: snapshot.ProtocolVersionEvents,
+        ProtocolVersionEvents: snapshot.ProtocolVersionEvents[rolloutGroup],
       },
     },
   };
