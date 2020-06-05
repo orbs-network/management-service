@@ -79,7 +79,7 @@ export class State {
     const committee = event.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
       OrbsAddress: normalizeAddress(OrbsAddress),
       EthAddress: normalizeAddress(event.returnValues.addrs[idx]),
-      Weight: Math.min(
+      Weight: Math.max(
         parseInt(event.returnValues.weights[idx]),
         Math.round(totalCommitteeWeight / event.returnValues.orbsAddrs.length)
       ),

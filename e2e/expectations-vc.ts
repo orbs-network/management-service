@@ -46,13 +46,13 @@ export const expectationVcManagement = {
             {
               OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
               EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
-              Weight: 15000,
+              Weight: 20000,
               IdentityType: 0,
             },
             {
               OrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
               EthAddress: '29ce860a2247d97160d6dfc087a15f41e2349087',
-              Weight: 10000,
+              Weight: 15000,
               IdentityType: 0,
             },
           ],
@@ -63,13 +63,13 @@ export const expectationVcManagement = {
             {
               OrbsAddress: '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
               EthAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
-              Weight: 30000,
+              Weight: 40000,
               IdentityType: 0,
             },
             {
               OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
               EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
-              Weight: 20000,
+              Weight: 30000,
               IdentityType: 0,
             },
           ],

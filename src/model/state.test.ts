@@ -57,20 +57,20 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   t.is(s.getSnapshot().CommitteeEvents.length, 3);
   t.is(s.getSnapshot().CommitteeEvents[0].RefTime, 1000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[0].Committee, [
-    { EthAddress: 'a', OrbsAddress: 'a1', Weight: 1, IdentityType: 0 },
-    { EthAddress: 'b', OrbsAddress: 'b1', Weight: 1, IdentityType: 0 },
-    { EthAddress: 'c', OrbsAddress: 'c1', Weight: 1, IdentityType: 0 },
+    { EthAddress: 'a', OrbsAddress: 'a1', Weight: 10000, IdentityType: 0 },
+    { EthAddress: 'b', OrbsAddress: 'b1', Weight: 10000, IdentityType: 0 },
+    { EthAddress: 'c', OrbsAddress: 'c1', Weight: 10000, IdentityType: 0 },
   ]);
   t.is(s.getSnapshot().CommitteeEvents[1].RefTime, 2000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[1].Committee, [
-    { EthAddress: 'z', OrbsAddress: 'z2', Weight: 1, IdentityType: 0 },
-    { EthAddress: 'b', OrbsAddress: 'b2', Weight: 1, IdentityType: 0 },
-    { EthAddress: 'c', OrbsAddress: 'c2', Weight: 1, IdentityType: 0 },
+    { EthAddress: 'z', OrbsAddress: 'z2', Weight: 10000, IdentityType: 0 },
+    { EthAddress: 'b', OrbsAddress: 'b2', Weight: 10000, IdentityType: 0 },
+    { EthAddress: 'c', OrbsAddress: 'c2', Weight: 10000, IdentityType: 0 },
   ]);
   t.is(s.getSnapshot().CommitteeEvents[2].RefTime, day + 3000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[2].Committee, [
-    { EthAddress: 'x', OrbsAddress: 'x3', Weight: 1, IdentityType: 0 },
-    { EthAddress: 'z', OrbsAddress: 'z3', Weight: 1, IdentityType: 0 },
+    { EthAddress: 'x', OrbsAddress: 'x3', Weight: 10000, IdentityType: 0 },
+    { EthAddress: 'z', OrbsAddress: 'z3', Weight: 10000, IdentityType: 0 },
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentTopology, [
@@ -83,8 +83,8 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'x', OrbsAddress: 'x3', Weight: 1, IdentityType: 0 },
-    { EthAddress: 'z', OrbsAddress: 'z3', Weight: 1, IdentityType: 0 },
+    { EthAddress: 'x', OrbsAddress: 'x3', Weight: 10000, IdentityType: 0 },
+    { EthAddress: 'z', OrbsAddress: 'z3', Weight: 10000, IdentityType: 0 },
   ]);
 });
 
@@ -245,7 +245,7 @@ function CommitteeChanged(s: State, time: number, addrs: string[], orbsAddrs: st
     returnValues: {
       addrs,
       orbsAddrs,
-      weights: ['1', '1', '1'],
+      weights: addrs.map(() => '10000'),
     },
   });
 }

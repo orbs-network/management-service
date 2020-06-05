@@ -6,13 +6,13 @@ export const expectationStatus = {
     {
       OrbsAddress: '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
       EthAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
-      Weight: 30000,
+      Weight: 40000,
       IdentityType: 0,
     },
     {
       OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
       EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
-      Weight: 20000,
+      Weight: 30000,
       IdentityType: 0,
     },
   ],
