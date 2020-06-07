@@ -2,10 +2,11 @@ import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
 import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './helpers';
+import { imageNamesToPollForNewVersions } from '../dockerhub/image-poll';
 
 export function getNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
   // make sure we have all service image versions
-  for (const imageName of ['node', 'management-service']) {
+  for (const imageName of imageNamesToPollForNewVersions) {
     if (!snapshot.CurrentImageVersions['main'][imageName]) {
       throw new Error(`Could not find main image version for '${imageName}'.`);
     }

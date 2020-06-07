@@ -11,7 +11,12 @@ test.serial('[integration] getServiceStatus responds', (t) => {
 
   t.log('result:', JSON.stringify(res, null, 2));
 
-  t.deepEqual(res, {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  t.assert(res.Error.length > 0);
+  t.assert(res.Status.length > 0);
+  t.assert(new Date(res.Timestamp).getTime() > 1400000000);
+  t.deepEqual(res.Payload, {
     CurrentRefTime: 0,
     CurrentCommittee: [],
     CurrentStandbys: [],

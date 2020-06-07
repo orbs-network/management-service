@@ -1,5 +1,14 @@
 const http = require('http');
 
+function getStatusFailureJson(errorMessage) {
+  const json = {
+    Timestamp: new Date().toISOString(),
+    Status: 'Failed retreiving /status HTTP endpoint.',
+    Error: errorMessage,
+  };
+  return JSON.stringify(json, null, 2);
+}
+
 http.get('http://localhost:8080/status', (res) => {
   const { statusCode } = res;
   let data = '';
@@ -9,13 +18,15 @@ http.get('http://localhost:8080/status', (res) => {
   });
 
   res.on('end', () => {
-    console.log(data);
-    if (statusCode == 200) process.exit(0);
-    console.log('Error: HTTP status code ' + statusCode);
+    if (statusCode == 200 && JSON.parse(data).Timestamp) {
+      console.log(data);
+      process.exit(0);
+    }
+    console.log(getStatusFailureJson(`HTTP code: ${statusCode}, response: '${data}'.`));
     process.exit(128);
   });
 
 }).on('error', (err) => {
-  console.log('Error: ' + err.message);
+  console.log(getStatusFailureJson(err.message));
   process.exit(128);
 });

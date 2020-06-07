@@ -223,20 +223,25 @@ test('state applies protocol version changes', (t) => {
 test('state applies monotonous image version changes', (t) => {
   const s = new State();
 
-  s.applyNewImageVersion('main', 'node', 'v1.0.0');
-  s.applyNewImageVersion('main', 'management-service', 'v1.0.1');
-  s.applyNewImageVersion('main', 'node', 'v1.5.3+hotfix');
-  s.applyNewImageVersion('main', 'node', 'v3.1.1');
-  s.applyNewImageVersion('main', 'management-service', 'v1.9.0+hotfix');
-  s.applyNewImageVersion('main', 'node', 'v2.9.9'); // ignore versions going backwards
-  s.applyNewImageVersion('main', 'node', 'v1.0.0');
-  s.applyNewImageVersion('main', 'node', 'v9.9.9-cc1cc788');
+  s.applyNewImageVersion(1000, 'main', 'node', 'v1.0.0');
+  s.applyNewImageVersion(1000, 'main', 'management-service', 'v1.0.1');
+  s.applyNewImageVersion(2000, 'main', 'node', 'v1.5.3+hotfix');
+  s.applyNewImageVersion(3000, 'canary', 'node', 'v1.5.5-canary');
+  s.applyNewImageVersion(4000, 'main', 'node', 'v3.1.1');
+  s.applyNewImageVersion(4000, 'main', 'management-service', 'v1.9.0+hotfix');
+  s.applyNewImageVersion(5000, 'main', 'node', 'v2.9.9'); // ignore versions going backwards
+  s.applyNewImageVersion(6000, 'main', 'node', 'v1.0.0');
+  s.applyNewImageVersion(7000, 'main', 'node', 'v9.9.9-cc1cc788');
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
   t.is(Object.keys(s.getSnapshot().CurrentImageVersions['main']).length, 2);
   t.is(s.getSnapshot().CurrentImageVersions['main']['node'], 'v3.1.1');
   t.is(s.getSnapshot().CurrentImageVersions['main']['management-service'], 'v1.9.0+hotfix');
+  t.is(s.getSnapshot().CurrentImageVersions['canary']['node'], 'v1.5.5-canary');
+  t.is(s.getSnapshot().CurrentImageVersionsUpdateTime['main']['node'], 6000);
+  t.is(s.getSnapshot().CurrentImageVersionsUpdateTime['main']['management-service'], 4000);
+  t.is(s.getSnapshot().CurrentImageVersionsUpdateTime['canary']['node'], 3000);
 });
 
 function CommitteeChanged(s: State, time: number, addrs: string[], orbsAddrs: string[]) {

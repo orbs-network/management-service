@@ -40,6 +40,9 @@ export interface StateSnapshot {
   CurrentImageVersions: {
     [RolloutGroup: string]: { [ImageName: string]: string };
   };
+  CurrentImageVersionsUpdateTime: {
+    [RolloutGroup: string]: { [ImageName: string]: number };
+  };
 }
 
 export class State {
@@ -59,6 +62,10 @@ export class State {
       canary: [],
     },
     CurrentImageVersions: {
+      main: {},
+      canary: {},
+    },
+    CurrentImageVersionsUpdateTime: {
       main: {},
       canary: {},
     },
@@ -141,8 +148,9 @@ export class State {
     this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
   }
 
-  applyNewImageVersion(rolloutGroup: string, imageName: string, imageVersion: string) {
+  applyNewImageVersion(time: number, rolloutGroup: string, imageName: string, imageVersion: string) {
     if (!Versioning.isValid(imageVersion)) return;
+    this.snapshot.CurrentImageVersionsUpdateTime[rolloutGroup][imageName] = time;
     const currentVersion = this.snapshot.CurrentImageVersions[rolloutGroup][imageName];
     // image version upgrades only go forward (we don't allow downgrade)
     if (!currentVersion || Versioning.compare(imageVersion, currentVersion) > 0) {

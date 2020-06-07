@@ -35,6 +35,11 @@ export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// returns UTC clock time in seconds (similar to unix timestamp / Ethereum block time / RefTime)
+export function getCurrentClockTime() {
+  return Math.round(new Date().getTime() / 1000);
+}
+
 export const day = 24 * 60 * 60;
 
 export const year = day * 365;
