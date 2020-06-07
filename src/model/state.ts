@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { EventTypes } from '../ethereum/events-types';
 import { getIpFromHex, toNumber } from '../helpers';
-import { findAllEventsCoveringRange } from './helpers';
+import { findAllEventsCoveringRange } from './find';
 import * as Versioning from '../dockerhub/versioning';
 
 export interface StateSnapshot {

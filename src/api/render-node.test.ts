@@ -1,6 +1,6 @@
 import test from 'ava';
 import { EthereumTestDriver } from '../ethereum/test-driver';
-import { getNodeManagement } from './processor-node';
+import { renderNodeManagement } from './render-node';
 import { BlockSync } from '../ethereum/block-sync';
 import { StateManager } from '../model/manager';
 import { nockDockerHub } from '../dockerhub/test-driver';
@@ -45,7 +45,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.log('state snapshot:', JSON.stringify(state.getCurrentSnapshot(), null, 2));
 
   // process
-  const res = getNodeManagement(state.getCurrentSnapshot(), config);
+  const res = renderNodeManagement(state.getCurrentSnapshot(), config);
 
   t.log('result:', JSON.stringify(res, null, 2));
 

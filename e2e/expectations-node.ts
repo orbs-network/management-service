@@ -1,5 +1,5 @@
 import { isValidImageVersion, isValidEthereumAddress } from './deep-matcher';
-import { getVirtualChainPort } from '../src/api/helpers';
+import { getVirtualChainPort } from '../src/api/ports';
 
 export const expectationNodeManagement = {
   network: [],

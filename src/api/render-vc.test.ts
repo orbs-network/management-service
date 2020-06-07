@@ -1,6 +1,6 @@
 import test from 'ava';
 import { EthereumTestDriver } from '../ethereum/test-driver';
-import { getVirtualChainManagement } from './processor-vc';
+import { renderVirtualChainManagement } from './render-vc';
 import { BlockSync } from '../ethereum/block-sync';
 import { StateManager } from '../model/manager';
 import { exampleConfig } from '../config.example';
@@ -41,7 +41,7 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   t.log('state snapshot:', JSON.stringify(state.getCurrentSnapshot(), null, 2));
 
   // process
-  const res = await getVirtualChainManagement(1000000, state.getCurrentSnapshot(), config);
+  const res = await renderVirtualChainManagement(1000000, state.getCurrentSnapshot(), config);
 
   t.log('result:', JSON.stringify(res, null, 2));
 
@@ -119,6 +119,6 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   // process non-existent virtual chain
   await t.throwsAsync(async () => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    await getVirtualChainManagement(1009999, state.getCurrentSnapshot(), config);
+    await renderVirtualChainManagement(1009999, state.getCurrentSnapshot(), config);
   });
 });

@@ -43,3 +43,6 @@ export function getCurrentClockTime() {
 export const day = 24 * 60 * 60;
 
 export const year = day * 365;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type JsonResponse = any;

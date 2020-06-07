@@ -1,18 +1,11 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
 import { ServiceConfiguration } from '../config';
-import { getVirtualChainPort } from './helpers';
-import { imageNamesToPollForNewVersions } from '../dockerhub/image-poll';
+import { getVirtualChainPort } from './ports';
+import { JsonResponse } from '../helpers';
 
-export function getNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
-  // make sure we have all service image versions
-  for (const imageName of imageNamesToPollForNewVersions) {
-    if (!snapshot.CurrentImageVersions['main'][imageName]) {
-      throw new Error(`Could not find main image version for '${imageName}'.`);
-    }
-  }
-
-  return {
+export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const response: JsonResponse = {
     network: [],
     orchestrator: {
       DynamicManagementConfig: {
@@ -23,36 +16,58 @@ export function getNodeManagement(snapshot: StateSnapshot, config: ServiceConfig
       'storage-driver': 'local',
       'storage-mount-type': 'bind',
     },
-    services: {
-      signer: {
-        InternalPort: 7777,
-        DockerConfig: {
-          Image: 'orbsnetwork/signer', // TODO: what's the spec for signer location?
-          Tag: 'experimental', // TODO: what's the spec for the signer version?
-          Pull: true, // TODO: should signer be pull false?
-        },
-        Config: {
-          api: 'v1',
-        },
-      },
-      'management-service': {
-        InternalPort: 8080,
-        ExternalPort: 7666,
-        DockerConfig: {
-          Image: `${config.DockerNamespace}/management-service`,
-          Tag: snapshot.CurrentImageVersions['main']['management-service'],
-          Pull: true,
-        },
-        Config: config, // forward my own input config + defaults for what's missing
-      },
+    services: {},
+  };
+
+  // always return signer
+  response.services['signer'] = getSigner();
+
+  // include management-service if found a viable image for it
+  if (snapshot.CurrentImageVersions['main']['management-service']) {
+    response.services['management-service'] = getManagementService(snapshot, config);
+  }
+
+  // include chains if found a viable image for node
+  if (snapshot.CurrentImageVersions['main']['node']) {
+    response.chains = Object.keys(snapshot.CurrentVirtualChains).map((vcId) =>
+      getChain(parseInt(vcId), snapshot, config)
+    );
+  }
+
+  return response;
+}
+
+// helpers
+
+function getSigner() {
+  return {
+    InternalPort: 7777,
+    DockerConfig: {
+      Image: 'orbsnetwork/signer', // TODO: what's the spec for signer location?
+      Tag: 'experimental', // TODO: what's the spec for the signer version?
+      Pull: true, // TODO: should signer be pull false?
     },
-    chains: Object.keys(snapshot.CurrentVirtualChains).map((vcId) => getChain(parseInt(vcId), snapshot, config)),
+    Config: {
+      api: 'v1',
+    },
+  };
+}
+
+function getManagementService(snapshot: StateSnapshot, config: ServiceConfiguration) {
+  return {
+    InternalPort: 8080,
+    ExternalPort: 7666,
+    DockerConfig: {
+      Image: `${config.DockerNamespace}/management-service`,
+      Tag: snapshot.CurrentImageVersions['main']['management-service'],
+      Pull: true,
+    },
+    Config: config, // forward my own input config + defaults for what's missing
   };
 }
 
 function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConfiguration) {
   const rolloutGroup = snapshot.CurrentVirtualChains[vchainId.toString()].RolloutGroup;
-
   return {
     Id: vchainId,
     InternalPort: 4400,

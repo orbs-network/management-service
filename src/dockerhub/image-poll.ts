@@ -3,7 +3,7 @@ import * as Logger from '../logger';
 import { DockerHubConfiguration, DockerHubReader } from './dockerhub-reader';
 import { getCurrentClockTime } from '../helpers';
 
-export const imageNamesToPollForNewVersions = ['node', 'management-service'];
+export const imageNamesToPollForNewVersions = ['management-service', 'node'];
 
 export type ImagePollConfiguration = DockerHubConfiguration & {};
 
@@ -17,15 +17,16 @@ export class ImagePoll {
 
   // single tick of the run loop
   async run() {
-    const time = getCurrentClockTime();
-    const promises = imageNamesToPollForNewVersions.map((imageName) => this.reader.fetchLatestVersion(imageName));
-    const latestVersions = await Promise.all(promises);
-    for (let i = 0; i < imageNamesToPollForNewVersions.length; i++) {
-      const imageName = imageNamesToPollForNewVersions[i];
-      const imageVersion = latestVersions[i];
-      if (imageVersion['main']) this.state.applyNewImageVersion(time, 'main', imageName, imageVersion['main']);
-      if (imageVersion['canary']) this.state.applyNewImageVersion(time, 'canary', imageName, imageVersion['canary']);
+    for (const imageName of imageNamesToPollForNewVersions) {
+      await this.pollImageForImmediateUpdate(imageName);
     }
-    Logger.log(`ImagePoll: run processed versions ${JSON.stringify(latestVersions)}.`);
+  }
+
+  async pollImageForImmediateUpdate(imageName: string) {
+    const time = getCurrentClockTime();
+    const imageVersion = await this.reader.fetchLatestVersion(imageName);
+    if (imageVersion['main']) this.state.applyNewImageVersion(time, 'main', imageName, imageVersion['main']);
+    if (imageVersion['canary']) this.state.applyNewImageVersion(time, 'canary', imageName, imageVersion['canary']);
+    Logger.log(`ImagePoll: found ${imageName} versions: ${imageVersion}.`);
   }
 }

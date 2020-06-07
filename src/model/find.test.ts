@@ -1,5 +1,5 @@
 import test from 'ava';
-import { findAllEventsCoveringRange } from './helpers';
+import { findAllEventsCoveringRange } from './find';
 
 test('findAllEventsCoveringRange on empty array', (t) => {
   t.deepEqual(findAllEventsCoveringRange([], 0, 1000), []);
