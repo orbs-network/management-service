@@ -27,6 +27,6 @@ export class ImagePoll {
     const imageVersion = await this.reader.fetchLatestVersion(imageName);
     if (imageVersion['main']) this.state.applyNewImageVersion(time, 'main', imageName, imageVersion['main']);
     if (imageVersion['canary']) this.state.applyNewImageVersion(time, 'canary', imageName, imageVersion['canary']);
-    Logger.log(`ImagePoll: found ${imageName} versions: ${imageVersion}.`);
+    Logger.log(`ImagePoll: '${imageName}' versions ${JSON.stringify(imageVersion)}.`);
   }
 }
