@@ -31,8 +31,16 @@ export class StateManager {
     this.current.applyNewTimeRef(time);
   }
 
-  applyNewImageVersion(time: number, rolloutGroup: string, imageName: string, imageVersion: string) {
-    this.current.applyNewImageVersion(time, rolloutGroup, imageName, imageVersion);
+  applyNewImageVersion(rolloutGroup: string, imageName: string, imageVersion: string) {
+    this.current.applyNewImageVersion(rolloutGroup, imageName, imageVersion);
+  }
+
+  applyNewImageVersionPollTime(time: number, rolloutGroup: string, imageName: string) {
+    this.current.applyNewImageVersionPollTime(time, rolloutGroup, imageName);
+  }
+
+  applyNewImageVersionPendingUpdate(rolloutGroup: string, imageName: string, pendingVersion = '', pendingTime = 0) {
+    this.current.applyNewImageVersionPendingUpdate(rolloutGroup, imageName, pendingVersion, pendingTime);
   }
 
   getCurrentSnapshot(): StateSnapshot {
@@ -46,7 +54,7 @@ export class StateManager {
         `Latest available RefTime ${latestAvailableRefTime} is earlier than requested time ${containingTime}.`
       );
     }
-    // TODO: improve to a more efficient implementation
+    // TODO: improve to a more efficient implementation that only returns a subset of events
     return this.current.getSnapshot();
   }
 }

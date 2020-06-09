@@ -6,6 +6,8 @@ export const exampleConfig: ServiceConfiguration = {
   EthereumEndpoint: 'http://ganache:7545',
   DockerNamespace: 'orbsnetwork',
   DockerHubPollIntervalSeconds: 1,
+  RegularRolloutWindow: 5,
+  HotfixRolloutWindow: 1,
   EthereumPollIntervalSeconds: 1,
   FinalityBufferBlocks: 10,
   FirstBlock: 0,

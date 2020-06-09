@@ -39,6 +39,20 @@ export const expectationStatus = {
         node: isValidImageVersion,
       },
     },
+    CurrentImageVersionsUpdater: {
+      main: {
+        'management-service': {
+          LastPollTime: isValidTimeRef,
+          PendingVersion: '',
+          PendingVersionTime: 0,
+        },
+        node: {
+          LastPollTime: isValidTimeRef,
+          PendingVersion: '',
+          PendingVersionTime: 0,
+        },
+      },
+    },
     CurrentVirtualChains: {
       '1000000': {
         Expiration: isValidTimeRef,
@@ -125,6 +139,8 @@ export const expectationStatus = {
       EthereumEndpoint: `http://ganache:7545`,
       DockerNamespace: 'orbsnetwork',
       DockerHubPollIntervalSeconds: 1,
+      RegularRolloutWindow: 2,
+      HotfixRolloutWindow: 2,
       EthereumPollIntervalSeconds: 1,
       FinalityBufferBlocks: 10,
       FirstBlock: 0,

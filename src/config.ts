@@ -6,6 +6,8 @@ export interface ServiceConfiguration {
   EthereumEndpoint: string;
   DockerNamespace: string;
   DockerHubPollIntervalSeconds: number;
+  RegularRolloutWindow: number;
+  HotfixRolloutWindow: number;
   EthereumPollIntervalSeconds: number;
   FinalityBufferBlocks: number;
   FirstBlock: number;
@@ -17,6 +19,8 @@ export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
   // TODO: add EthereumGenesisContract with default mainnet address
   DockerNamespace: 'orbsnetwork',
   DockerHubPollIntervalSeconds: 3 * 60,
+  RegularRolloutWindow: 24 * 60 * 60,
+  HotfixRolloutWindow: 60 * 60,
   EthereumPollIntervalSeconds: 30,
   FirstBlock: 0,
   FinalityBufferBlocks: 100,
@@ -31,6 +35,16 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       numericality: { noStrings: true },
     },
     DockerHubPollIntervalSeconds: {
+      presence: { allowEmpty: false },
+      type: 'number',
+      numericality: { noStrings: true },
+    },
+    RegularRolloutWindow: {
+      presence: { allowEmpty: false },
+      type: 'number',
+      numericality: { noStrings: true },
+    },
+    HotfixRolloutWindow: {
       presence: { allowEmpty: false },
       type: 'number',
       numericality: { noStrings: true },

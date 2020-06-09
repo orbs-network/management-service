@@ -1,5 +1,5 @@
 import test from 'ava';
-import { isValid, compare, isMain, isCanary } from './versioning';
+import { isValid, compare, isMain, isCanary, isHotfix } from './versioning';
 
 test('isValid returns true on valid versions', (t) => {
   const validTags = [
@@ -26,6 +26,13 @@ test('isCanary returns true on valid versions', (t) => {
   const validTags = ['v0.0.0-canary', 'v0.0.0-canary+hotfix'];
   for (const tag of validTags) {
     t.true(isCanary(tag), tag);
+  }
+});
+
+test('isHotfix returns true on valid versions', (t) => {
+  const validTags = ['v0.0.0+hotfix', 'v1.22.333+hotfix', 'v0.0.0-canary+hotfix'];
+  for (const tag of validTags) {
+    t.true(isHotfix(tag), tag);
   }
 });
 
@@ -98,7 +105,32 @@ test('isCanary returns false on invalid versions', (t) => {
   }
 });
 
-test('copmpare sorts the latest version at the smallest index', (t) => {
+test('isHotfix returns false on invalid versions', (t) => {
+  const invalidTags = [
+    'v0.0.0',
+    'v1.22.333',
+    'G-0-H',
+    'C-0-N',
+    '0.0.0',
+    '0.0.0-hotfix',
+    '0.0.0+hot',
+    'v0.0.0 foo',
+    'foo v0.0.0',
+    'v0.0',
+    'v0.0.',
+    'v0.0.0 -canary',
+    'v0.0.0-canar y',
+    'v01.22.333',
+    'v0.0.0-ferrary',
+    'v0.0.0-ferrary+slow',
+    'v1.3.13-cc1cc788',
+  ];
+  for (const tag of invalidTags) {
+    t.false(isHotfix(tag), tag);
+  }
+});
+
+test('compare sorts the latest version at the smallest index', (t) => {
   const validTags = [
     'v1.1.4-canary',
     'v1.0.6-canary+hotfix',
