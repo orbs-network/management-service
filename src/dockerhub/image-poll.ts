@@ -75,6 +75,8 @@ export class ImagePoll {
       Logger.log(
         `ImagePoll: existing pending update of '${imageName}:${rolloutGroup}' to ${existingPending.pendingVersion} canceled.`
       );
+    } else {
+      if (!this.isUpgradeAllowed(imageVersion, currentVersion)) return;
     }
 
     // create a new pending update

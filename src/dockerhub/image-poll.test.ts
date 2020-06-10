@@ -43,6 +43,7 @@ test('performImmediateUpdate does not downgrade', (t) => {
   const p = new ImagePoll(s, exampleConfig);
 
   p.performImmediateUpdate('main', 'node', 'v1.0.0');
+  p.performImmediateUpdate('main', 'node', 'v1.0.0'); // if poll provides the same version
   p.performImmediateUpdate('main', 'node', 'v2.0.0');
   p.performImmediateUpdate('main', 'node', 'v1.8.0'); // downgrade not allowed
   p.performImmediateUpdate('canary', 'node', 'v5.0.0');
@@ -62,10 +63,23 @@ test('performGradualRollout works as expected', async (t) => {
     HotfixRolloutWindow: 2,
   });
 
+  // just to initialize CurrentImageVersionsUpdater in state
+  s.applyNewImageVersionPollTime(0, 'main', 'node');
+  s.applyNewImageVersionPollTime(0, 'canary', 'node');
+
   p.performGradualRollout('main', 'node', 'v1.1.0');
   p.performGradualRollout('canary', 'node', 'v1.1.0-canary');
   t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.1.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, '');
+  t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime == 0);
   t.is(s.getCurrentSnapshot().CurrentImageVersions['canary']['node'], 'v1.1.0-canary');
+  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['canary']['node'].PendingVersion, '');
+  t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['canary']['node'].PendingVersionTime == 0);
+
+  p.performGradualRollout('main', 'node', 'v1.1.0'); // if poll provides the same version
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.1.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, '');
+  t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime == 0);
 
   p.performGradualRollout('main', 'node', 'v1.2.0');
   t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.1.0');
