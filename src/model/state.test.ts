@@ -18,23 +18,27 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ValidatorRegistered(s, 1000, '0xC', '0xc1', '0x03030303');
   ValidatorRegistered(s, 1000, '0xM', '0xm1', '0x04040404');
   ValidatorRegistered(s, 1000, '0xN', '0xn1', '0x05050505');
-  CommitteeChanged(s, 1000, ['0xA', '0xB', '0xC'], ['0xa1', '0xb1', '0xc1']);
-  StandbysChanged(s, 1000, ['0xM', '0xN'], ['0xm1', '0xn1']);
+  CommitteeChanged(s, 1000, ['0xA', '0xB', '0xC']);
+  StandbysChanged(s, 1000, ['0xM', '0xN']);
   s.applyNewTimeRef(1000);
 
   ValidatorRegistered(s, 2000, '0xZ', '0xz2', '0x06060606');
   ValidatorRegistered(s, 2000, '0xA', '0xa2', '0x07070707');
   ValidatorRegistered(s, 2000, '0xO', '0xo2', '0x08080808');
-  CommitteeChanged(s, 2000, ['0xZ', '0xB', '0xC'], ['0xz2', '0xb2', '0xc2']);
-  StandbysChanged(s, 2000, ['0xN', '0xO'], ['0xn2', '0xo2']);
+  ValidatorDataUpdated(s, 2000, '0xB', '0xb2', '0x02020202');
+  ValidatorDataUpdated(s, 2000, '0xC', '0xc2', '0x03030303');
+  ValidatorDataUpdated(s, 2000, '0xN', '0xn2', '0x05050505');
+  CommitteeChanged(s, 2000, ['0xZ', '0xB', '0xC']);
+  StandbysChanged(s, 2000, ['0xN', '0xO']);
   s.applyNewTimeRef(2000);
 
   ValidatorRegistered(s, day + 3000, '0xX', '0xx3', '0x09090909');
   ValidatorRegistered(s, day + 3000, '0xZ', '0xz3', '0x0a0a0a0a');
   ValidatorRegistered(s, day + 3000, '0xZ', '0xz3', '0x0b0b0b0b');
   ValidatorRegistered(s, day + 3000, '0xP', '0xp3', '0x0c0c0c0c');
-  CommitteeChanged(s, day + 3000, ['0xX', '0xZ'], ['0xx3', '0xz3']);
-  StandbysChanged(s, day + 3000, ['0xO', '0xP'], ['0xo3', '0xp3']);
+  ValidatorDataUpdated(s, day + 3000, '0xO', '0xo3', '0x08080808');
+  CommitteeChanged(s, day + 3000, ['0xX', '0xZ']);
+  StandbysChanged(s, day + 3000, ['0xO', '0xP']);
   s.applyNewTimeRef(day + 3000);
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
@@ -49,26 +53,33 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   t.is(s.getSnapshot().CurrentIp['x'], '9.9.9.9');
   t.is(s.getSnapshot().CurrentIp['p'], '12.12.12.12');
 
-  t.deepEqual(s.getSnapshot().CurrentStandbys, [
-    { EthAddress: 'o', OrbsAddress: 'o3' },
-    { EthAddress: 'p', OrbsAddress: 'p3' },
-  ]);
+  t.is(s.getSnapshot().CurrentOrbsAddress['a'], 'a2');
+  t.is(s.getSnapshot().CurrentOrbsAddress['b'], 'b2');
+  t.is(s.getSnapshot().CurrentOrbsAddress['c'], 'c2');
+  t.is(s.getSnapshot().CurrentOrbsAddress['m'], 'm1');
+  t.is(s.getSnapshot().CurrentOrbsAddress['n'], 'n2');
+  t.is(s.getSnapshot().CurrentOrbsAddress['z'], 'z3');
+  t.is(s.getSnapshot().CurrentOrbsAddress['o'], 'o3');
+  t.is(s.getSnapshot().CurrentOrbsAddress['x'], 'x3');
+  t.is(s.getSnapshot().CurrentOrbsAddress['p'], 'p3');
 
-  t.is(s.getSnapshot().CommitteeEvents.length, 3);
+  t.deepEqual(s.getSnapshot().CurrentStandbys, [{ EthAddress: 'o' }, { EthAddress: 'p' }]);
+
+  t.is(s.getSnapshot().CommitteeEvents.length, 7);
   t.is(s.getSnapshot().CommitteeEvents[0].RefTime, 1000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[0].Committee, [
     { EthAddress: 'a', OrbsAddress: 'a1', Weight: 10000, IdentityType: 0 },
     { EthAddress: 'b', OrbsAddress: 'b1', Weight: 10000, IdentityType: 0 },
     { EthAddress: 'c', OrbsAddress: 'c1', Weight: 10000, IdentityType: 0 },
   ]);
-  t.is(s.getSnapshot().CommitteeEvents[1].RefTime, 2000);
-  t.deepEqual(s.getSnapshot().CommitteeEvents[1].Committee, [
+  t.is(s.getSnapshot().CommitteeEvents[4].RefTime, 2000);
+  t.deepEqual(s.getSnapshot().CommitteeEvents[4].Committee, [
     { EthAddress: 'z', OrbsAddress: 'z2', Weight: 10000, IdentityType: 0 },
     { EthAddress: 'b', OrbsAddress: 'b2', Weight: 10000, IdentityType: 0 },
     { EthAddress: 'c', OrbsAddress: 'c2', Weight: 10000, IdentityType: 0 },
   ]);
-  t.is(s.getSnapshot().CommitteeEvents[2].RefTime, day + 3000);
-  t.deepEqual(s.getSnapshot().CommitteeEvents[2].Committee, [
+  t.is(s.getSnapshot().CommitteeEvents[6].RefTime, day + 3000);
+  t.deepEqual(s.getSnapshot().CommitteeEvents[6].Committee, [
     { EthAddress: 'x', OrbsAddress: 'x3', Weight: 10000, IdentityType: 0 },
     { EthAddress: 'z', OrbsAddress: 'z3', Weight: 10000, IdentityType: 0 },
   ]);
@@ -83,8 +94,8 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'x', OrbsAddress: 'x3', Weight: 10000, IdentityType: 0 },
-    { EthAddress: 'z', OrbsAddress: 'z3', Weight: 10000, IdentityType: 0 },
+    { EthAddress: 'x', Weight: 10000 },
+    { EthAddress: 'z', Weight: 10000 },
   ]);
 });
 
@@ -159,7 +170,7 @@ test('state applies virtual chain subscriptions', (t) => {
     Expiration: 9010,
     RolloutGroup: 'main',
     IdentityType: 0,
-    GenesisBlock: 123,
+    GenesisRefTime: 9999,
     Tier: 'defaultTier',
   });
   t.deepEqual(s.getSnapshot().CurrentVirtualChains['V2'], {
@@ -167,28 +178,28 @@ test('state applies virtual chain subscriptions', (t) => {
     Tier: 'defaultTier',
     RolloutGroup: 'main',
     IdentityType: 0,
-    GenesisBlock: 123,
+    GenesisRefTime: 9999,
   });
   t.deepEqual(s.getSnapshot().CurrentVirtualChains['V3'], {
     Expiration: 9020,
     Tier: 'defaultTier',
     RolloutGroup: 'main',
     IdentityType: 0,
-    GenesisBlock: 123,
+    GenesisRefTime: 9999,
   });
   t.deepEqual(s.getSnapshot().CurrentVirtualChains['V4'], {
     Expiration: 4700,
     Tier: 'defaultTier',
     RolloutGroup: 'main',
     IdentityType: 0,
-    GenesisBlock: 123,
+    GenesisRefTime: 9999,
   });
   t.deepEqual(s.getSnapshot().CurrentVirtualChains['V5'], {
     Expiration: 9030,
     Tier: 'defaultTier',
     RolloutGroup: 'main',
     IdentityType: 0,
-    GenesisBlock: 123,
+    GenesisRefTime: 9999,
   });
 });
 
@@ -257,23 +268,21 @@ test('state applies image version changes', (t) => {
   });
 });
 
-function CommitteeChanged(s: State, time: number, addrs: string[], orbsAddrs: string[]) {
+function CommitteeChanged(s: State, time: number, addrs: string[]) {
   s.applyNewCommitteeChanged(time, {
     ...eventBase,
     returnValues: {
       addrs,
-      orbsAddrs,
       weights: addrs.map(() => '10000'),
     },
   });
 }
 
-function StandbysChanged(s: State, time: number, addrs: string[], orbsAddrs: string[]) {
+function StandbysChanged(s: State, time: number, addrs: string[]) {
   s.applyNewStandbysChanged(time, {
     ...eventBase,
     returnValues: {
       addrs,
-      orbsAddrs,
     },
   });
 }
@@ -289,12 +298,23 @@ function ValidatorRegistered(s: State, time: number, addr: string, orbsAddr: str
   });
 }
 
+function ValidatorDataUpdated(s: State, time: number, addr: string, orbsAddr: string, ip: string) {
+  s.applyNewValidatorDataUpdated(time, {
+    ...eventBase,
+    returnValues: {
+      ip,
+      addr,
+      orbsAddr,
+    },
+  });
+}
+
 function SubscriptionChanged(s: State, time: number, vcid: string, expiresAt: number) {
   s.applyNewSubscriptionChanged(time, {
     ...eventBase,
     returnValues: {
       vcid,
-      genRef: '123',
+      genRefTime: '9999',
       expiresAt: expiresAt.toString(),
       tier: 'defaultTier',
       deploymentSubset: 'main',

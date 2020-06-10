@@ -25,7 +25,6 @@ test.serial.before(async (t) => {
   await driver.ethereum.addVchain(90 * day, 'main');
   await driver.ethereum.increaseTime(10 * day);
   await driver.ethereum.increaseBlocks(1);
-  await driver.ethereum.increaseBlocks(300); // for virtual chain genesis, TODO: remove after temp genesis block hack (!)
   stateReadyBlockTime = await driver.ethereum.getCurrentBlockTime();
   await driver.ethereum.increaseBlocks(driver.getAppConfig().FinalityBufferBlocks);
   t.log('[E2E] set up ethereum state done, block time:', stateReadyBlockTime);

@@ -22,6 +22,7 @@ export class BlockSync {
       SubscriptionChanged: new SingleEventFetcher('SubscriptionChanged', this.reader),
       ProtocolVersionChanged: new SingleEventFetcher('ProtocolVersionChanged', this.reader),
       ValidatorRegistered: new SingleEventFetcher('ValidatorRegistered', this.reader),
+      ValidatorDataUpdated: new SingleEventFetcher('ValidatorDataUpdated', this.reader),
     };
     Logger.log(`BlockSync: initialized.`);
   }

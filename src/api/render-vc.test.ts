@@ -23,7 +23,6 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   await ethereum.upgradeProtocolVersion(19, 2 * day, 'main');
   await ethereum.upgradeProtocolVersion(20, 2 * day, 'canary');
   await ethereum.increaseTime(10 * day);
-  await ethereum.increaseBlocks(300); // for virtual chain genesis, TODO: remove after temp genesis block hack (!)
   await ethereum.increaseBlocks(FinalityBufferBlocks + 1);
 
   // setup local state
@@ -41,7 +40,7 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   t.log('state snapshot:', JSON.stringify(state.getCurrentSnapshot(), null, 2));
 
   // process
-  const res = await renderVirtualChainManagement(1000000, state.getCurrentSnapshot(), config);
+  const res = renderVirtualChainManagement(1000000, state.getCurrentSnapshot(), config);
 
   t.log('result:', JSON.stringify(res, null, 2));
 
@@ -117,8 +116,7 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   t.is(res.VirtualChains['1000000'].ProtocolVersionEvents[1].Data.Version, 19);
 
   // process non-existent virtual chain
-  await t.throwsAsync(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    await renderVirtualChainManagement(1009999, state.getCurrentSnapshot(), config);
+  t.throws(() => {
+    renderVirtualChainManagement(1009999, state.getCurrentSnapshot(), config);
   });
 });
