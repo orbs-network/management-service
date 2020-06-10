@@ -1,4 +1,4 @@
-# Orbs Network State Reader
+# Management Service
 
 An Orbs node V2 service that reads the management configuration state of the Orbs network from Ethereum.
 
