@@ -13,6 +13,7 @@ test('accepts legal config', (t) => {
       DockerHubPollIntervalSeconds: 0.1,
       FinalityBufferBlocks: 0,
       DockerNamespace: 'foo',
+      DockerRegistry: 'bar',
       Verbose: true,
     }),
     undefined
@@ -30,6 +31,7 @@ test('declines illegal config (1)', (t) => {
       HotfixRolloutWindow: 1,
       DockerHubPollIntervalSeconds: 0.1,
       DockerNamespace: 'foo',
+      DockerRegistry: 'bar',
       Verbose: true,
     }),
     ["Finality buffer blocks can't be blank"]
@@ -48,6 +50,7 @@ test('declines illegal config (2)', (t) => {
       DockerHubPollIntervalSeconds: 0.1,
       FinalityBufferBlocks: 0,
       DockerNamespace: 'foo',
+      DockerRegistry: 'bar',
       Verbose: true,
     }),
     ['Ethereum endpoint is not a valid url']

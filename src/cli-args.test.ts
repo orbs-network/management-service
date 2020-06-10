@@ -23,6 +23,7 @@ const configValue: ServiceConfiguration = {
   DockerHubPollIntervalSeconds: 1,
   FinalityBufferBlocks: 0,
   DockerNamespace: 'foo',
+  DockerRegistry: 'bar',
   Verbose: true,
 };
 

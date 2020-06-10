@@ -5,6 +5,7 @@ export interface ServiceConfiguration {
   EthereumGenesisContract: string;
   EthereumEndpoint: string;
   DockerNamespace: string;
+  DockerRegistry: string;
   DockerHubPollIntervalSeconds: number;
   RegularRolloutWindow: number;
   HotfixRolloutWindow: number;
@@ -18,6 +19,7 @@ export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
   Port: 8080,
   // TODO: add EthereumGenesisContract with default mainnet address
   DockerNamespace: 'orbsnetwork',
+  DockerRegistry: 'https://registry.hub.docker.com',
   DockerHubPollIntervalSeconds: 3 * 60,
   RegularRolloutWindow: 24 * 60 * 60,
   HotfixRolloutWindow: 60 * 60,
@@ -71,6 +73,10 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       numericality: { noStrings: true },
     },
     DockerNamespace: {
+      presence: { allowEmpty: false },
+      type: 'string',
+    },
+    DockerRegistry: {
       presence: { allowEmpty: false },
       type: 'string',
     },
