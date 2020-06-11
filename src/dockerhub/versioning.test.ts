@@ -108,6 +108,7 @@ test('isCanary returns false on invalid versions', (t) => {
 test('isHotfix returns false on invalid versions', (t) => {
   const invalidTags = [
     'v0.0.0',
+    'v1.2.3-canary',
     'v1.22.333',
     'G-0-H',
     'C-0-N',
@@ -118,10 +119,10 @@ test('isHotfix returns false on invalid versions', (t) => {
     'foo v0.0.0',
     'v0.0',
     'v0.0.',
-    'v0.0.0 -canary',
-    'v0.0.0-canar y',
+    'v0.0.0 +hotfix',
+    'v0.0.0+hotfi x',
     'v01.22.333',
-    'v0.0.0-ferrary',
+    'v0.0.0+ferrary',
     'v0.0.0-ferrary+slow',
     'v1.3.13-cc1cc788',
   ];

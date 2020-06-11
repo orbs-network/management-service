@@ -35,8 +35,8 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     EthereumEndpoint: 'http://localhost:7545',
     DockerNamespace: 'mydockernamespace',
     FinalityBufferBlocks: FinalityBufferBlocks,
-    RegularRolloutWindow: 1000000,
-    HotfixRolloutWindow: 2,
+    RegularRolloutWindowSeconds: 1000000,
+    HotfixRolloutWindowSeconds: 2,
   };
   const state = new StateManager();
   const blockSync = new BlockSync(state, config);

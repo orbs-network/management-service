@@ -31,8 +31,8 @@ The service is packaged as a Docker image. It is routinely published from this r
 | `DockerNamespace` | Namespace for images in the docker registry.<br>Default: `orbsnetwork` |
 | `DockerRegistry` | URL of the docker registry to rely on.<br>Default: `https://registry.hub.docker.com` |
 | `DockerHubPollIntervalSeconds` | How often should the docker registry be polled to search for new image versions. In seconds.<br>Default: `180` (3 minutes) |
-| `RegularRolloutWindow` | During gradual rollout of image versions, over how long of a period should regular images (non-hotfix) should be rolled out. In seconds.<br>Default: `86400` (24 hours) |
-| `HotfixRolloutWindow` | During gradual rollout of image versions, over how long of a period should hotfix images (non-regular) should be rolled out. In seconds.<br>Default: `3600` (1 hour) |
+| `RegularRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should regular images (non-hotfix) should be rolled out. In seconds.<br>Default: `86400` (24 hours) |
+| `HotfixRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should hotfix images (non-regular) should be rolled out. In seconds.<br>Default: `3600` (1 hour) |
 | `EthereumPollIntervalSeconds` | How often should Ethereum be polled for new blocks containing events. In seconds.<br>Default: `30` (30 seconds) |
 | `FinalityBufferBlocks` | Ethereum finality boundary in blocks, meaning how many blocks from the tip we look it to reduce the chance of re-org.<br>Default: `100` |
 | `FirstBlock` | Optimization. The earliest block number in Ethereum we can start scanning from (the block number when the genesis registry contract was deployed for example). |

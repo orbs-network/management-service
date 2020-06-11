@@ -173,6 +173,7 @@ export class State {
     };
   }
 
+  // defaults in place to show how to clear a pending update
   applyNewImageVersionPendingUpdate(rolloutGroup: string, imageName: string, pendingVersion = '', pendingTime = 0) {
     const updaterStats = this.snapshot.CurrentImageVersionsUpdater[rolloutGroup][imageName] ?? {
       LastPollTime: 0,
