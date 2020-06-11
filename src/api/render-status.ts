@@ -15,6 +15,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConf
       CurrentCommittee: snapshot.CurrentCommittee,
       CurrentStandbys: snapshot.CurrentStandbys,
       CurrentImageVersions: snapshot.CurrentImageVersions,
+      CurrentImageVersionsUpdater: snapshot.CurrentImageVersionsUpdater,
       CurrentVirtualChains: snapshot.CurrentVirtualChains,
       CurrentTopology: snapshot.CurrentTopology,
       CurrentIp: snapshot.CurrentIp,
@@ -50,7 +51,7 @@ function getErrorText(snapshot: StateSnapshot) {
     res.push(`Ethereum RefTime is too old (${refTimeAgo} sec ago).`);
   }
   for (const imageName of imageNamesToPollForNewVersions) {
-    const polledAgo = now - (snapshot.CurrentImageVersionsUpdateTime['main'][imageName] ?? 0);
+    const polledAgo = now - (snapshot.CurrentImageVersionsUpdater['main'][imageName]?.LastPollTime ?? 0);
     if (polledAgo > DOCKER_HUB_POLL_ALLOWED_DELAY) {
       res.push(`Stable version poll for ${imageName} is too old (${polledAgo} sec ago).`);
     }

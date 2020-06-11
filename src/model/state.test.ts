@@ -220,28 +220,41 @@ test('state applies protocol version changes', (t) => {
   t.is(s.getSnapshot().ProtocolVersionEvents['main'][2].Data.Version, 8);
 });
 
-test('state applies monotonous image version changes', (t) => {
+test('state applies image version changes', (t) => {
   const s = new State();
 
-  s.applyNewImageVersion(1000, 'main', 'node', 'v1.0.0');
-  s.applyNewImageVersion(1000, 'main', 'management-service', 'v1.0.1');
-  s.applyNewImageVersion(2000, 'main', 'node', 'v1.5.3+hotfix');
-  s.applyNewImageVersion(3000, 'canary', 'node', 'v1.5.5-canary');
-  s.applyNewImageVersion(4000, 'main', 'node', 'v3.1.1');
-  s.applyNewImageVersion(4000, 'main', 'management-service', 'v1.9.0+hotfix');
-  s.applyNewImageVersion(5000, 'main', 'node', 'v2.9.9'); // ignore versions going backwards
-  s.applyNewImageVersion(6000, 'main', 'node', 'v1.0.0');
-  s.applyNewImageVersion(7000, 'main', 'node', 'v9.9.9-cc1cc788');
+  s.applyNewImageVersionPollTime(1000, 'main', 'node');
+  s.applyNewImageVersion('main', 'node', 'v1.0.0');
+  s.applyNewImageVersionPollTime(2000, 'main', 'management-service');
+  s.applyNewImageVersionPendingUpdate('canary', 'node', 'v9.9.1', 8000);
+  s.applyNewImageVersion('main', 'management-service', 'v1.0.1');
+  s.applyNewImageVersionPollTime(3000, 'main', 'node');
+  s.applyNewImageVersion('main', 'node', 'v1.5.3+hotfix');
+  s.applyNewImageVersionPendingUpdate('canary', 'node', 'v9.9.2', 9000);
+  s.applyNewImageVersionPollTime(4000, 'canary', 'node');
+  s.applyNewImageVersion('canary', 'node', 'v1.5.5-canary');
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
   t.is(Object.keys(s.getSnapshot().CurrentImageVersions['main']).length, 2);
-  t.is(s.getSnapshot().CurrentImageVersions['main']['node'], 'v3.1.1');
-  t.is(s.getSnapshot().CurrentImageVersions['main']['management-service'], 'v1.9.0+hotfix');
+  t.is(s.getSnapshot().CurrentImageVersions['main']['node'], 'v1.5.3+hotfix');
+  t.is(s.getSnapshot().CurrentImageVersions['main']['management-service'], 'v1.0.1');
   t.is(s.getSnapshot().CurrentImageVersions['canary']['node'], 'v1.5.5-canary');
-  t.is(s.getSnapshot().CurrentImageVersionsUpdateTime['main']['node'], 6000);
-  t.is(s.getSnapshot().CurrentImageVersionsUpdateTime['main']['management-service'], 4000);
-  t.is(s.getSnapshot().CurrentImageVersionsUpdateTime['canary']['node'], 3000);
+  t.deepEqual(s.getSnapshot().CurrentImageVersionsUpdater['main']['node'], {
+    LastPollTime: 3000,
+    PendingVersion: '',
+    PendingVersionTime: 0,
+  });
+  t.deepEqual(s.getSnapshot().CurrentImageVersionsUpdater['main']['management-service'], {
+    LastPollTime: 2000,
+    PendingVersion: '',
+    PendingVersionTime: 0,
+  });
+  t.deepEqual(s.getSnapshot().CurrentImageVersionsUpdater['canary']['node'], {
+    LastPollTime: 4000,
+    PendingVersion: 'v9.9.2',
+    PendingVersionTime: 9000,
+  });
 });
 
 function CommitteeChanged(s: State, time: number, addrs: string[], orbsAddrs: string[]) {

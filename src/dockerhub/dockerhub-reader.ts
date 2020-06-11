@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 
 export type DockerHubConfiguration = {
   DockerNamespace: string;
+  DockerRegistry: string;
 };
 
 export class DockerHubReader {
@@ -17,7 +18,7 @@ export class DockerHubReader {
     const res: { [RolloutGroup: string]: string } = {};
     const repository = { user: this.config.DockerNamespace, name: repositoryName };
     const token = await fetchDockerHubToken(repository as DockerHubRepo);
-    const response = await fetch(`https://registry.hub.docker.com/v2/${repository.user}/${repository.name}/tags/list`, {
+    const response = await fetch(`${this.config.DockerRegistry}/v2/${repository.user}/${repository.name}/tags/list`, {
       headers: { Authorization: 'Bearer ' + token },
     });
     const text = await response.text();

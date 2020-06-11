@@ -1,32 +1,123 @@
+import crypto from 'crypto';
 import { StateManager } from '../model/manager';
-import * as Logger from '../logger';
 import { DockerHubConfiguration, DockerHubReader } from './dockerhub-reader';
 import { getCurrentClockTime } from '../helpers';
+import * as Versioning from '../dockerhub/versioning';
+import * as Logger from '../logger';
 
 export const imageNamesToPollForNewVersions = ['management-service', 'node'];
+export const imageNamesWithGradualRollout = ['node'];
 
-export type ImagePollConfiguration = DockerHubConfiguration & {};
+export type ImagePollConfiguration = DockerHubConfiguration & {
+  RegularRolloutWindow: number;
+  HotfixRolloutWindow: number;
+};
+
+interface PendingUpdate {
+  pendingVersion: string;
+  timer: ReturnType<typeof setTimeout>;
+}
 
 export class ImagePoll {
   private reader: DockerHubReader;
+  private delayedUpdates: { [RolloutGroup: string]: { [ImageName: string]: PendingUpdate } };
 
-  constructor(private state: StateManager, config: ImagePollConfiguration) {
+  constructor(private state: StateManager, private config: ImagePollConfiguration) {
     this.reader = new DockerHubReader(config);
-    Logger.log(`DockerHubPoll: initialized.`);
+    this.delayedUpdates = { main: {}, canary: {} };
+    Logger.log(`ImagePoll: initialized.`);
   }
 
   // single tick of the run loop
   async run() {
     for (const imageName of imageNamesToPollForNewVersions) {
-      await this.pollImageForImmediateUpdate(imageName);
+      const time = getCurrentClockTime();
+      const fetchedVersions = await this.reader.fetchLatestVersion(imageName);
+      for (const [rolloutGroup, imageVersion] of Object.entries(fetchedVersions)) {
+        if (imageNamesWithGradualRollout.includes(imageName)) {
+          this.performGradualRollout(rolloutGroup, imageName, imageVersion);
+        } else {
+          this.performImmediateUpdate(rolloutGroup, imageName, imageVersion);
+        }
+        this.state.applyNewImageVersionPollTime(time, rolloutGroup, imageName);
+      }
     }
   }
 
-  async pollImageForImmediateUpdate(imageName: string) {
+  isUpgradeAllowed(newVersion: string, currentVersion: string): boolean {
+    if (!Versioning.isValid(newVersion)) return false;
+    if (!currentVersion) return true;
+    // image version upgrades only go forward (we don't allow downgrade)
+    return Versioning.compare(newVersion, currentVersion) > 0;
+  }
+
+  performImmediateUpdate(rolloutGroup: string, imageName: string, imageVersion: string) {
+    const currentVersion = this.getCurrentVersion(rolloutGroup, imageName);
+    if (!this.isUpgradeAllowed(imageVersion, currentVersion)) return;
+    this.state.applyNewImageVersion(rolloutGroup, imageName, imageVersion);
+    Logger.log(`ImagePoll: immediate update of '${imageName}:${rolloutGroup}' to ${imageVersion}.`);
+  }
+
+  performGradualRollout(rolloutGroup: string, imageName: string, imageVersion: string) {
+    // initialize first version immediately
+    const currentVersion = this.getCurrentVersion(rolloutGroup, imageName);
+    if (!currentVersion) {
+      return this.performImmediateUpdate(rolloutGroup, imageName, imageVersion);
+    }
+
+    // check if we have a pending update
+    const existingPending = this.delayedUpdates[rolloutGroup][imageName];
+    if (existingPending) {
+      if (!this.isUpgradeAllowed(imageVersion, existingPending.pendingVersion)) return;
+      // we want to update over this update, let's cancel it
+      clearTimeout(existingPending.timer);
+      this.clearPendingUpdate(rolloutGroup, imageName);
+      Logger.log(
+        `ImagePoll: existing pending update of '${imageName}:${rolloutGroup}' to ${existingPending.pendingVersion} canceled.`
+      );
+    } else {
+      if (!this.isUpgradeAllowed(imageVersion, currentVersion)) return;
+    }
+
+    // create a new pending update
+    const delaySeconds = this.getGradualRolloutDelay(imageVersion);
+    this.setPendingUpdate(rolloutGroup, imageName, imageVersion, delaySeconds);
+    Logger.log(
+      `ImagePoll: new pending update of '${imageName}:${rolloutGroup}' to ${imageVersion} in ${delaySeconds} seconds.`
+    );
+  }
+
+  getCurrentVersion(rolloutGroup: string, imageName: string) {
+    return this.state.getCurrentSnapshot().CurrentImageVersions[rolloutGroup][imageName];
+  }
+
+  getGradualRolloutDelay(imageVersion: string): number {
+    const rolloutWindow = Versioning.isHotfix(imageVersion)
+      ? this.config.HotfixRolloutWindow
+      : this.config.RegularRolloutWindow;
+    const randomNumbers = new Uint32Array(1);
+    crypto.randomFillSync(randomNumbers);
+    return randomNumbers[0] % rolloutWindow;
+  }
+
+  clearPendingUpdate(rolloutGroup: string, imageName: string) {
+    delete this.delayedUpdates[rolloutGroup][imageName];
+    this.state.applyNewImageVersionPendingUpdate(rolloutGroup, imageName);
+  }
+
+  setPendingUpdate(rolloutGroup: string, imageName: string, imageVersion: string, delaySeconds: number) {
+    if (delaySeconds > 20 * 24 * 60 * 60) {
+      throw new Error(`Pending update delay seconds ${delaySeconds} is above 20 days (setTimeout can overflow).`);
+    }
     const time = getCurrentClockTime();
-    const imageVersion = await this.reader.fetchLatestVersion(imageName);
-    if (imageVersion['main']) this.state.applyNewImageVersion(time, 'main', imageName, imageVersion['main']);
-    if (imageVersion['canary']) this.state.applyNewImageVersion(time, 'canary', imageName, imageVersion['canary']);
-    Logger.log(`ImagePoll: '${imageName}' versions ${JSON.stringify(imageVersion)}.`);
+    const newPendingUpdate = {
+      pendingVersion: imageVersion,
+      timer: setTimeout(() => {
+        this.performImmediateUpdate(rolloutGroup, imageName, imageVersion);
+        this.clearPendingUpdate(rolloutGroup, imageName);
+      }, delaySeconds * 1000),
+    };
+    this.delayedUpdates[rolloutGroup][imageName] = newPendingUpdate;
+    this.state.applyNewImageVersionPendingUpdate(rolloutGroup, imageName, imageVersion, time + delaySeconds);
   }
 }

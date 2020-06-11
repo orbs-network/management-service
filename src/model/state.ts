@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { EventTypes } from '../ethereum/events-types';
 import { getIpFromHex, toNumber } from '../helpers';
 import { findAllEventsCoveringRange } from './find';
-import * as Versioning from '../dockerhub/versioning';
 
 export interface StateSnapshot {
   CurrentRefTime: number;
@@ -40,8 +39,14 @@ export interface StateSnapshot {
   CurrentImageVersions: {
     [RolloutGroup: string]: { [ImageName: string]: string };
   };
-  CurrentImageVersionsUpdateTime: {
-    [RolloutGroup: string]: { [ImageName: string]: number };
+  CurrentImageVersionsUpdater: {
+    [RolloutGroup: string]: {
+      [ImageName: string]: {
+        LastPollTime: number;
+        PendingVersion: string;
+        PendingVersionTime: number;
+      };
+    };
   };
 }
 
@@ -65,7 +70,7 @@ export class State {
       main: {},
       canary: {},
     },
-    CurrentImageVersionsUpdateTime: {
+    CurrentImageVersionsUpdater: {
       main: {},
       canary: {},
     },
@@ -148,14 +153,33 @@ export class State {
     this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
   }
 
-  applyNewImageVersion(time: number, rolloutGroup: string, imageName: string, imageVersion: string) {
-    if (!Versioning.isValid(imageVersion)) return;
-    this.snapshot.CurrentImageVersionsUpdateTime[rolloutGroup][imageName] = time;
-    const currentVersion = this.snapshot.CurrentImageVersions[rolloutGroup][imageName];
-    // image version upgrades only go forward (we don't allow downgrade)
-    if (!currentVersion || Versioning.compare(imageVersion, currentVersion) > 0) {
-      this.snapshot.CurrentImageVersions[rolloutGroup][imageName] = imageVersion;
-    }
+  applyNewImageVersion(rolloutGroup: string, imageName: string, imageVersion: string) {
+    this.snapshot.CurrentImageVersions[rolloutGroup][imageName] = imageVersion;
+  }
+
+  applyNewImageVersionPollTime(time: number, rolloutGroup: string, imageName: string) {
+    const updaterStats = this.snapshot.CurrentImageVersionsUpdater[rolloutGroup][imageName] ?? {
+      LastPollTime: 0,
+      PendingVersion: '',
+      PendingVersionTime: 0,
+    };
+    this.snapshot.CurrentImageVersionsUpdater[rolloutGroup][imageName] = {
+      ...updaterStats,
+      LastPollTime: time,
+    };
+  }
+
+  applyNewImageVersionPendingUpdate(rolloutGroup: string, imageName: string, pendingVersion = '', pendingTime = 0) {
+    const updaterStats = this.snapshot.CurrentImageVersionsUpdater[rolloutGroup][imageName] ?? {
+      LastPollTime: 0,
+      PendingVersion: '',
+      PendingVersionTime: 0,
+    };
+    this.snapshot.CurrentImageVersionsUpdater[rolloutGroup][imageName] = {
+      ...updaterStats,
+      PendingVersion: pendingVersion,
+      PendingVersionTime: pendingTime,
+    };
   }
 }
 

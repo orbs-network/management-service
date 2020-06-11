@@ -6,7 +6,7 @@ import { StateManager } from '../model/manager';
 import { nockDockerHub } from '../dockerhub/test-driver';
 import { ImagePoll } from '../dockerhub/image-poll';
 import { exampleConfig } from '../config.example';
-import { day } from '../helpers';
+import { day, sleep } from '../helpers';
 
 test.serial('[integration] getNodeManagement responds according to Ethereum and DockerHub state', async (t) => {
   t.timeout(5 * 60 * 1000);
@@ -35,6 +35,8 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     EthereumEndpoint: 'http://localhost:7545',
     DockerNamespace: 'mydockernamespace',
     FinalityBufferBlocks: FinalityBufferBlocks,
+    RegularRolloutWindow: 1000000,
+    HotfixRolloutWindow: 2,
   };
   const state = new StateManager();
   const blockSync = new BlockSync(state, config);
@@ -79,4 +81,35 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.assert(res.orchestrator);
 
   scope.done();
+
+  // mock docker hub state with a few new versions
+  const scope2 = nockDockerHub(
+    { user: 'mydockernamespace', name: 'node', tags: ['v1.2.3', 'v1.2.4-canary', 'v1.2.5', 'v1.2.6-canary+hotfix'] },
+    { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v4.5.8'] }
+  );
+
+  // run poller and process again
+  await imagePoll.run();
+  await sleep(3000); // enough time for hotfix to take place
+  const res2 = renderNodeManagement(state.getCurrentSnapshot(), config);
+
+  t.log('result2:', JSON.stringify(res2, null, 2));
+
+  t.deepEqual(res2.chains[0].DockerConfig, {
+    Image: 'mydockernamespace/node',
+    Tag: 'v1.2.3', // slow gradual rollout so no change yet
+    Pull: true,
+  });
+  t.deepEqual(res2.chains[1].DockerConfig, {
+    Image: 'mydockernamespace/node',
+    Tag: 'v1.2.6-canary+hotfix', // gradual rollout with fast change
+    Pull: true,
+  });
+  t.deepEqual(res2.services['management-service'].DockerConfig, {
+    Image: 'mydockernamespace/management-service',
+    Tag: 'v4.5.8', // no gradual rollout so immediate update
+    Pull: true,
+  });
+
+  scope2.done();
 });

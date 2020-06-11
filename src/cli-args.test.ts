@@ -18,9 +18,12 @@ const configValue: ServiceConfiguration = {
   Port: -1,
   FirstBlock: 0,
   EthereumPollIntervalSeconds: 0.5,
+  RegularRolloutWindow: 1,
+  HotfixRolloutWindow: 1,
   DockerHubPollIntervalSeconds: 1,
   FinalityBufferBlocks: 0,
   DockerNamespace: 'foo',
+  DockerRegistry: 'bar',
   Verbose: true,
 };
 
