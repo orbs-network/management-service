@@ -7,13 +7,14 @@ export interface StateSnapshot {
   CurrentRefTime: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
-  CurrentCommittee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
+  CurrentCommittee: { EthAddress: string; Weight: number }[];
   CommitteeEvents: {
     RefTime: number;
     Committee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
   }[];
   CurrentIp: { [EthAddress: string]: string };
-  CurrentStandbys: { EthAddress: string; OrbsAddress: string }[];
+  CurrentOrbsAddress: { [EthAddress: string]: string };
+  CurrentStandbys: { EthAddress: string }[];
   CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[]; // Port overridden by processor
   CurrentVirtualChains: {
     [VirtualChainId: string]: {
@@ -21,8 +22,8 @@ export interface StateSnapshot {
       RolloutGroup: string;
       IdentityType: number;
       Tier: string;
-      GenesisBlock: number;
-    }; // TODO: change GenesisBlock to GenesisRefTime when events allow that
+      GenesisRefTime: number;
+    };
   };
   SubscriptionEvents: {
     [VirtualChainId: string]: {
@@ -58,6 +59,7 @@ export class State {
     CurrentCommittee: [],
     CommitteeEvents: [],
     CurrentIp: {},
+    CurrentOrbsAddress: {},
     CurrentStandbys: [],
     CurrentTopology: [],
     CurrentVirtualChains: {},
@@ -88,28 +90,36 @@ export class State {
 
   applyNewCommitteeChanged(time: number, event: EventTypes['CommitteeChanged']) {
     const totalCommitteeWeight = _.sum(_.map(event.returnValues.weights, (w) => parseInt(w)));
-    const committee = event.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
-      OrbsAddress: normalizeAddress(OrbsAddress),
-      EthAddress: normalizeAddress(event.returnValues.addrs[idx]),
+    const committee = event.returnValues.addrs.map((EthAddress, idx) => ({
+      EthAddress: normalizeAddress(EthAddress),
       Weight: Math.max(
         parseInt(event.returnValues.weights[idx]),
-        Math.round(totalCommitteeWeight / event.returnValues.orbsAddrs.length)
+        Math.round(totalCommitteeWeight / event.returnValues.addrs.length)
       ),
-      IdentityType: 0,
     }));
-    this.snapshot.CommitteeEvents.push({
-      RefTime: time,
-      Committee: committee,
-    });
     this.snapshot.CurrentCommittee = committee;
+    this.snapshot.CommitteeEvents.push(calcNewCommitteeEvent(time, this.snapshot));
   }
 
   applyNewStandbysChanged(_time: number, event: EventTypes['StandbysChanged']) {
-    const standbys = event.returnValues.orbsAddrs.map((OrbsAddress, idx) => ({
-      OrbsAddress: normalizeAddress(OrbsAddress),
-      EthAddress: normalizeAddress(event.returnValues.addrs[idx]),
+    const standbys = event.returnValues.addrs.map((EthAddress, _idx) => ({
+      EthAddress: normalizeAddress(EthAddress),
     }));
     this.snapshot.CurrentStandbys = standbys;
+  }
+
+  // TODO: remove this event if we emit ValidatorDataUpdated on register
+  applyNewValidatorRegistered(_time: number, event: EventTypes['ValidatorRegistered']) {
+    const EthAddress = normalizeAddress(event.returnValues.addr);
+    this.snapshot.CurrentOrbsAddress[EthAddress] = normalizeAddress(event.returnValues.orbsAddr);
+    this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
+  }
+
+  applyNewValidatorDataUpdated(time: number, event: EventTypes['ValidatorDataUpdated']) {
+    const EthAddress = normalizeAddress(event.returnValues.addr);
+    this.snapshot.CurrentOrbsAddress[EthAddress] = normalizeAddress(event.returnValues.orbsAddr);
+    this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
+    this.snapshot.CommitteeEvents.push(calcNewCommitteeEvent(time, this.snapshot));
   }
 
   applyNewSubscriptionChanged(time: number, event: EventTypes['SubscriptionChanged']) {
@@ -117,7 +127,7 @@ export class State {
       Tier: event.returnValues.tier,
       RolloutGroup: event.returnValues.deploymentSubset,
       IdentityType: 0,
-      GenesisBlock: toNumber(event.returnValues.genRef), // TODO: change GenesisBlock to GenesisRefTime when events allow that
+      GenesisRefTime: toNumber(event.returnValues.genRefTime),
     };
     this.snapshot.CurrentVirtualChains[event.returnValues.vcid] = {
       Expiration: toNumber(event.returnValues.expiresAt),
@@ -147,12 +157,6 @@ export class State {
     this.snapshot.ProtocolVersionEvents[rolloutGroup] = noFutureEvents;
   }
 
-  // TODO: replace with ValidatorsRegistration.ValidatorDataUpdated
-  applyNewValidatorRegistered(_time: number, event: EventTypes['ValidatorRegistered']) {
-    const EthAddress = normalizeAddress(event.returnValues.addr);
-    this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
-  }
-
   applyNewImageVersion(rolloutGroup: string, imageName: string, imageVersion: string) {
     this.snapshot.CurrentImageVersions[rolloutGroup][imageName] = imageVersion;
   }
@@ -169,6 +173,7 @@ export class State {
     };
   }
 
+  // defaults in place to show how to clear a pending update
   applyNewImageVersionPendingUpdate(rolloutGroup: string, imageName: string, pendingVersion = '', pendingTime = 0) {
     const updaterStats = this.snapshot.CurrentImageVersionsUpdater[rolloutGroup][imageName] ?? {
       LastPollTime: 0,
@@ -190,29 +195,41 @@ type CommiteeEvent = {
 };
 
 function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
-  const inTopology: { [EthAddress: string]: string } = {}; // EthAddress -> OrbsAddress
+  const inTopology: { [EthAddress: string]: boolean } = {}; // EthAddress -> true
 
   // take all committee members in last 12 hours
   const committeesInLast12Hours = findAllEventsCoveringRange(snapshot.CommitteeEvents, time - 12 * 60 * 60, time);
   for (const committeeEvent of committeesInLast12Hours) {
     const commitee = (committeeEvent as CommiteeEvent).Committee;
-    for (const node of commitee as { EthAddress: string; OrbsAddress: string }[]) {
-      inTopology[node.EthAddress] = node.OrbsAddress; // override old Orbs addresses with new ones
+    for (const node of commitee as { EthAddress: string }[]) {
+      inTopology[node.EthAddress] = true;
     }
   }
 
   // take last standbys
   for (const node of snapshot.CurrentStandbys) {
-    inTopology[node.EthAddress] = node.OrbsAddress;
+    inTopology[node.EthAddress] = true;
   }
 
   // done
   return Object.keys(inTopology).map((EthAddress) => ({
     EthAddress,
-    OrbsAddress: inTopology[EthAddress],
+    OrbsAddress: snapshot.CurrentOrbsAddress[EthAddress],
     Ip: snapshot.CurrentIp[EthAddress],
     Port: 0,
   }));
+}
+
+function calcNewCommitteeEvent(time: number, snapshot: StateSnapshot): CommiteeEvent {
+  return {
+    RefTime: time,
+    Committee: snapshot.CurrentCommittee.map(({ EthAddress, Weight }) => ({
+      EthAddress,
+      OrbsAddress: snapshot.CurrentOrbsAddress[EthAddress],
+      Weight,
+      IdentityType: 0,
+    })),
+  };
 }
 
 function normalizeAddress(address: string): string {

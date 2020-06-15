@@ -23,6 +23,7 @@ test.serial('[integration] getServiceStatus responds', (t) => {
     CurrentVirtualChains: {},
     CurrentTopology: [],
     CurrentIp: {},
+    CurrentOrbsAddress: {},
     ProtocolVersionEvents: { main: [], canary: [] },
     Config: exampleConfig,
   });

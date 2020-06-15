@@ -9,8 +9,8 @@ test('getGradualRolloutDelay returns random values in window', (t) => {
   const s = new StateManager();
   const p = new ImagePoll(s, {
     ...exampleConfig,
-    RegularRolloutWindow: 20000,
-    HotfixRolloutWindow: 2000,
+    RegularRolloutWindowSeconds: 20000,
+    HotfixRolloutWindowSeconds: 2000,
   });
 
   let sumRegular = 0;
@@ -59,8 +59,8 @@ test('performGradualRollout works as expected', async (t) => {
   const s = new StateManager();
   const p = new ImagePoll(s, {
     ...exampleConfig,
-    RegularRolloutWindow: 1000000,
-    HotfixRolloutWindow: 2,
+    RegularRolloutWindowSeconds: 1000000,
+    HotfixRolloutWindowSeconds: 2,
   });
 
   // just to initialize CurrentImageVersionsUpdater in state

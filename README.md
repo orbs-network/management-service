@@ -11,7 +11,32 @@ This service serves as a source of truth for an Orbs node V2 management configur
 
 ## How to run
 
- [still missing]
+The service is packaged as a Docker image. It is routinely published from this repo to [Docker Hub](https://hub.docker.com/repository/docker/orbsnetwork/management-service).
+
+### Command-line arguments
+
+| Argument | Description |
+| -------- | ----------- |
+| `--config <path>` | Path for a JSON configuration file. Multiple files can be given one after the other. (see JSON format below). | 
+
+### Static JSON config file
+
+* [Example as JavaScript code](src/config.example.ts)
+
+| Field Name | Description |
+| ---------- | ----------- |
+| `Port` | The port the service listens on for its endpoints.<br>Default: `8080` | 
+| `EthereumGenesisContract` | The hex address (including the leading `0x`) of the Ethereum registry contract used as genesis for all management events. Provide the address of the original contract during the launch of the network. |
+| `EthereumEndpoint` | Optional URL for an Ethereum full node which will be used for all Ethereum queries. If not given, a local Ethereum light client will be instantiated. |
+| `DockerNamespace` | Namespace for images in the docker registry.<br>Default: `orbsnetwork` |
+| `DockerRegistry` | URL of the docker registry to rely on.<br>Default: `https://registry.hub.docker.com` |
+| `DockerHubPollIntervalSeconds` | How often should the docker registry be polled to search for new image versions. In seconds.<br>Default: `180` (3 minutes) |
+| `RegularRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should regular images (non-hotfix) should be rolled out. In seconds.<br>Default: `86400` (24 hours) |
+| `HotfixRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should hotfix images (non-regular) should be rolled out. In seconds.<br>Default: `3600` (1 hour) |
+| `EthereumPollIntervalSeconds` | How often should Ethereum be polled for new blocks containing events. In seconds.<br>Default: `30` (30 seconds) |
+| `FinalityBufferBlocks` | Ethereum finality boundary in blocks, meaning how many blocks from the tip we look it to reduce the chance of re-org.<br>Default: `100` |
+| `FirstBlock` | Optimization. The earliest block number in Ethereum we can start scanning from (the block number when the genesis registry contract was deployed for example). |
+| `Verbose` | Whether logging is extra verbose or not.<br>Default: `false` |
 
 ## Developer instructions
 

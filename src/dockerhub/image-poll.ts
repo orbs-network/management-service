@@ -9,8 +9,8 @@ export const imageNamesToPollForNewVersions = ['management-service', 'node'];
 export const imageNamesWithGradualRollout = ['node'];
 
 export type ImagePollConfiguration = DockerHubConfiguration & {
-  RegularRolloutWindow: number;
-  HotfixRolloutWindow: number;
+  RegularRolloutWindowSeconds: number;
+  HotfixRolloutWindowSeconds: number;
 };
 
 interface PendingUpdate {
@@ -59,7 +59,7 @@ export class ImagePoll {
   }
 
   performGradualRollout(rolloutGroup: string, imageName: string, imageVersion: string) {
-    // initialize first version immediately
+    // initialize first version immediately (no delays before first update)
     const currentVersion = this.getCurrentVersion(rolloutGroup, imageName);
     if (!currentVersion) {
       return this.performImmediateUpdate(rolloutGroup, imageName, imageVersion);
@@ -93,8 +93,8 @@ export class ImagePoll {
 
   getGradualRolloutDelay(imageVersion: string): number {
     const rolloutWindow = Versioning.isHotfix(imageVersion)
-      ? this.config.HotfixRolloutWindow
-      : this.config.RegularRolloutWindow;
+      ? this.config.HotfixRolloutWindowSeconds
+      : this.config.RegularRolloutWindowSeconds;
     const randomNumbers = new Uint32Array(1);
     crypto.randomFillSync(randomNumbers);
     return randomNumbers[0] % rolloutWindow;

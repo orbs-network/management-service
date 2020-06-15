@@ -3,8 +3,8 @@ import { nockDockerHub } from './test-driver';
 import { DockerHubReader } from './dockerhub-reader';
 
 test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) => {
-  const config = { 
-    DockerNamespace: 'orbsnetwork', 
+  const config = {
+    DockerNamespace: 'orbsnetwork',
     DockerRegistry: 'https://registry.hub.docker.com',
   };
   const reader = new DockerHubReader(config);

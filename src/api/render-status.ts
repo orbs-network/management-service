@@ -19,6 +19,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConf
       CurrentVirtualChains: snapshot.CurrentVirtualChains,
       CurrentTopology: snapshot.CurrentTopology,
       CurrentIp: snapshot.CurrentIp,
+      CurrentOrbsAddress: snapshot.CurrentOrbsAddress,
       ProtocolVersionEvents: snapshot.ProtocolVersionEvents,
       Config: config,
     },
@@ -54,6 +55,13 @@ function getErrorText(snapshot: StateSnapshot) {
     const polledAgo = now - (snapshot.CurrentImageVersionsUpdater['main'][imageName]?.LastPollTime ?? 0);
     if (polledAgo > DOCKER_HUB_POLL_ALLOWED_DELAY) {
       res.push(`Stable version poll for ${imageName} is too old (${polledAgo} sec ago).`);
+    }
+  }
+  // only go over images that we really care if the canary version is found or not
+  for (const imageName of ['node']) {
+    const polledAgo = now - (snapshot.CurrentImageVersionsUpdater['canary'][imageName]?.LastPollTime ?? 0);
+    if (polledAgo > DOCKER_HUB_POLL_ALLOWED_DELAY) {
+      res.push(`Canary version poll for ${imageName} is too old (${polledAgo} sec ago).`);
     }
   }
   return res.join(' ');

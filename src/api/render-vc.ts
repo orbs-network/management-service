@@ -2,24 +2,13 @@ import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
 import { getVirtualChainPort } from './ports';
 import { ServiceConfiguration } from '../config';
-// TODO: remove both after temp genesis block hack (!)
-import Web3 from 'web3';
-import { toNumber, JsonResponse } from '../helpers';
+import { JsonResponse } from '../helpers';
 
-export async function renderVirtualChainManagement(
-  vchainId: number,
-  snapshot: StateSnapshot,
-  config: ServiceConfiguration
-) {
+export function renderVirtualChainManagement(vchainId: number, snapshot: StateSnapshot, _config: ServiceConfiguration) {
   // make sure the virtual chain exists
   if (!snapshot.CurrentVirtualChains[vchainId.toString()]) {
     throw new Error(`Virtual chain ${vchainId} does not exist.`);
   }
-
-  // TODO: temp genesis block hack (!) make func sync again and remove once events GenesisBlock -> GenesisRefTime
-  const web3 = new Web3(config.EthereumEndpoint);
-  const genesisBlock = await web3.eth.getBlock(snapshot.CurrentVirtualChains[vchainId.toString()].GenesisBlock);
-  const genesisRefTime = toNumber(genesisBlock.timestamp);
 
   const response: JsonResponse = {
     CurrentRefTime: snapshot.CurrentRefTime,
@@ -28,7 +17,7 @@ export async function renderVirtualChainManagement(
     VirtualChains: {
       [vchainId.toString()]: {
         VirtualChainId: vchainId,
-        GenesisRefTime: genesisRefTime,
+        GenesisRefTime: snapshot.CurrentVirtualChains[vchainId.toString()].GenesisRefTime,
         CurrentTopology: getCurrentTopology(vchainId, snapshot),
         CommitteeEvents: snapshot.CommitteeEvents,
         SubscriptionEvents: snapshot.SubscriptionEvents[vchainId.toString()],

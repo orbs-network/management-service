@@ -7,8 +7,8 @@ export interface ServiceConfiguration {
   DockerNamespace: string;
   DockerRegistry: string;
   DockerHubPollIntervalSeconds: number;
-  RegularRolloutWindow: number;
-  HotfixRolloutWindow: number;
+  RegularRolloutWindowSeconds: number;
+  HotfixRolloutWindowSeconds: number;
   EthereumPollIntervalSeconds: number;
   FinalityBufferBlocks: number;
   FirstBlock: number;
@@ -21,8 +21,8 @@ export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
   DockerNamespace: 'orbsnetwork',
   DockerRegistry: 'https://registry.hub.docker.com',
   DockerHubPollIntervalSeconds: 3 * 60,
-  RegularRolloutWindow: 24 * 60 * 60,
-  HotfixRolloutWindow: 60 * 60,
+  RegularRolloutWindowSeconds: 24 * 60 * 60,
+  HotfixRolloutWindowSeconds: 60 * 60,
   EthereumPollIntervalSeconds: 30,
   FirstBlock: 0,
   FinalityBufferBlocks: 100,
@@ -41,12 +41,12 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       type: 'number',
       numericality: { noStrings: true },
     },
-    RegularRolloutWindow: {
+    RegularRolloutWindowSeconds: {
       presence: { allowEmpty: false },
       type: 'number',
       numericality: { noStrings: true },
     },
-    HotfixRolloutWindow: {
+    HotfixRolloutWindowSeconds: {
       presence: { allowEmpty: false },
       type: 'number',
       numericality: { noStrings: true },
