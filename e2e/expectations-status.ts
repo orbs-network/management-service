@@ -105,6 +105,33 @@ export const expectationStatus = {
       '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5': '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
       cb6642be414696f77336dae06fed3775f08de0ea: '33546759bdcfb5c753a4102b86b3e73e714d5213',
     },
+    CurrentElectionsStatus: {
+      '29ce860a2247d97160d6dfc087a15f41e2349087': {
+        LastUpdateTime: isValidTimeRef,
+        ReadyToSync: true,
+        ReadyForCommittee: true,
+      },
+      e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9: {
+        LastUpdateTime: isValidTimeRef,
+        ReadyToSync: true,
+        ReadyForCommittee: true,
+      },
+      '51baa09f2f7dfc7a0f65886b68720958d389cac7': {
+        LastUpdateTime: isValidTimeRef,
+        ReadyToSync: true,
+        ReadyForCommittee: false,
+      },
+      '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5': {
+        LastUpdateTime: isValidTimeRef,
+        ReadyToSync: true,
+        ReadyForCommittee: true,
+      },
+      cb6642be414696f77336dae06fed3775f08de0ea: {
+        LastUpdateTime: isValidTimeRef,
+        ReadyToSync: true,
+        ReadyForCommittee: false,
+      },
+    },
     ProtocolVersionEvents: {
       main: [
         {

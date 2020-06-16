@@ -23,6 +23,9 @@ export class StateManager {
         case 'ValidatorDataUpdated':
           this.current.applyNewValidatorDataUpdated(time, event as EventTypes['ValidatorDataUpdated']);
           break;
+        case 'ValidatorStatusUpdated':
+          this.current.applyNewValidatorStatusUpdated(time, event as EventTypes['ValidatorStatusUpdated']);
+          break;
       }
     }
   }

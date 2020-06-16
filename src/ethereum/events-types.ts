@@ -6,6 +6,7 @@ export const eventNames: Readonly<Array<EventName>> = [
   'StandbysChanged',
   'ProtocolVersionChanged',
   'ValidatorDataUpdated',
+  'ValidatorStatusUpdated',
 ];
 
 export type EventName = keyof EventTypes;
@@ -40,10 +41,17 @@ export type ValidatorDataUpdatedPayload = {
   orbsAddr: string;
 };
 
+export type ValidatorStatusUpdatedPayload = {
+  addr: string;
+  readyToSync: boolean;
+  readyForCommittee: boolean;
+};
+
 export type EventTypes = {
   CommitteeChanged: EventData & { returnValues: CommitteeChangedPayload };
   StandbysChanged: EventData & { returnValues: StandbysChangedPayload };
   SubscriptionChanged: EventData & { returnValues: SubscriptionChangedPayload };
   ProtocolVersionChanged: EventData & { returnValues: ProtocolChangedPayload };
   ValidatorDataUpdated: EventData & { returnValues: ValidatorDataUpdatedPayload };
+  ValidatorStatusUpdated: EventData & { returnValues: ValidatorStatusUpdatedPayload };
 };

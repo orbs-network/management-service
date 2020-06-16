@@ -16,6 +16,13 @@ export interface StateSnapshot {
   CurrentOrbsAddress: { [EthAddress: string]: string };
   CurrentStandbys: { EthAddress: string }[];
   CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[]; // Port overridden by processor
+  CurrentElectionsStatus: {
+    [EthAddress: string]: {
+      LastUpdateTime: number;
+      ReadyToSync: boolean;
+      ReadyForCommittee: boolean;
+    };
+  };
   CurrentVirtualChains: {
     [VirtualChainId: string]: {
       Expiration: number;
@@ -62,6 +69,7 @@ export class State {
     CurrentOrbsAddress: {},
     CurrentStandbys: [],
     CurrentTopology: [],
+    CurrentElectionsStatus: {},
     CurrentVirtualChains: {},
     SubscriptionEvents: {},
     ProtocolVersionEvents: {
@@ -115,6 +123,15 @@ export class State {
     if (isValidatorInCurrentCommittee(EthAddress, this.snapshot)) {
       this.snapshot.CommitteeEvents.push(calcNewCommitteeEvent(time, this.snapshot));
     }
+  }
+
+  applyNewValidatorStatusUpdated(time: number, event: EventTypes['ValidatorStatusUpdated']) {
+    const EthAddress = normalizeAddress(event.returnValues.addr);
+    this.snapshot.CurrentElectionsStatus[EthAddress] = {
+      LastUpdateTime: time,
+      ReadyToSync: event.returnValues.readyToSync,
+      ReadyForCommittee: event.returnValues.readyForCommittee,
+    };
   }
 
   applyNewSubscriptionChanged(time: number, event: EventTypes['SubscriptionChanged']) {

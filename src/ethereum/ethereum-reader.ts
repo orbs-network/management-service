@@ -50,7 +50,7 @@ export function getContractTypeName(key: ContractName): ContractTypeName {
     case 'rewards':
       return 'Rewards';
     default:
-      throw new Error(`unknown event name '${key}'`);
+      throw new Error(`unknown contract name '${key}'`);
   }
 }
 
@@ -172,6 +172,8 @@ export function contractByEventName(eventName: EventName): ContractName {
       return 'protocol';
     case 'ValidatorDataUpdated':
       return 'validatorsRegistration';
+    case 'ValidatorStatusUpdated':
+      return 'elections';
     default:
       throw new Error(`unknown event name '${eventName}'`);
   }

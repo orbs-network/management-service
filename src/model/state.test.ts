@@ -99,6 +99,27 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ]);
 });
 
+test('state applies elections status updates', (t) => {
+  const s = new State();
+
+  ValidatorStatusUpdated(s, 1000, '0xA', true, false);
+  ValidatorStatusUpdated(s, 2000, '0xB', false, false);
+  ValidatorStatusUpdated(s, 3000, '0xB', true, true);
+
+  t.log(JSON.stringify(s.getSnapshot(), null, 2));
+
+  t.deepEqual(s.getSnapshot().CurrentElectionsStatus['a'], {
+    LastUpdateTime: 1000,
+    ReadyToSync: true,
+    ReadyForCommittee: false,
+  });
+  t.deepEqual(s.getSnapshot().CurrentElectionsStatus['b'], {
+    LastUpdateTime: 3000,
+    ReadyToSync: true,
+    ReadyForCommittee: true,
+  });
+});
+
 test('state applies virtual chain subscriptions', (t) => {
   const s = new State();
 
@@ -319,6 +340,23 @@ function ProtocolVersionChanged(s: State, time: number, nextVersion: number, fro
       currentVersion: 'xxx',
       nextVersion: nextVersion.toString(),
       fromTimestamp: fromTimestamp.toString(),
+    },
+  });
+}
+
+function ValidatorStatusUpdated(
+  s: State,
+  time: number,
+  addr: string,
+  readyToSync: boolean,
+  readyForCommittee: boolean
+) {
+  s.applyNewValidatorStatusUpdated(time, {
+    ...eventBase,
+    returnValues: {
+      addr,
+      readyToSync,
+      readyForCommittee,
     },
   });
 }

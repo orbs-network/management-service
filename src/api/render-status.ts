@@ -20,6 +20,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConf
       CurrentTopology: snapshot.CurrentTopology,
       CurrentIp: snapshot.CurrentIp,
       CurrentOrbsAddress: snapshot.CurrentOrbsAddress,
+      CurrentElectionsStatus: snapshot.CurrentElectionsStatus,
       ProtocolVersionEvents: snapshot.ProtocolVersionEvents,
       Config: config,
     },
