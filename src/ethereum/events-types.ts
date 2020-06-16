@@ -5,7 +5,6 @@ export const eventNames: Readonly<Array<EventName>> = [
   'CommitteeChanged',
   'StandbysChanged',
   'ProtocolVersionChanged',
-  'ValidatorRegistered', // TODO: remove this event if we emit ValidatorDataUpdated on register
   'ValidatorDataUpdated',
 ];
 
@@ -41,17 +40,10 @@ export type ValidatorDataUpdatedPayload = {
   orbsAddr: string;
 };
 
-export type ValidatorRegisteredPayload = {
-  addr: string;
-  ip: string;
-  orbsAddr: string;
-};
-
 export type EventTypes = {
   CommitteeChanged: EventData & { returnValues: CommitteeChangedPayload };
   StandbysChanged: EventData & { returnValues: StandbysChangedPayload };
   SubscriptionChanged: EventData & { returnValues: SubscriptionChangedPayload };
   ProtocolVersionChanged: EventData & { returnValues: ProtocolChangedPayload };
-  ValidatorRegistered: EventData & { returnValues: ValidatorRegisteredPayload };
   ValidatorDataUpdated: EventData & { returnValues: ValidatorDataUpdatedPayload };
 };

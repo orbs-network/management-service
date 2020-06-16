@@ -108,18 +108,13 @@ export class State {
     this.snapshot.CurrentStandbys = standbys;
   }
 
-  // TODO: remove this event if we emit ValidatorDataUpdated on register
-  applyNewValidatorRegistered(_time: number, event: EventTypes['ValidatorRegistered']) {
-    const EthAddress = normalizeAddress(event.returnValues.addr);
-    this.snapshot.CurrentOrbsAddress[EthAddress] = normalizeAddress(event.returnValues.orbsAddr);
-    this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
-  }
-
   applyNewValidatorDataUpdated(time: number, event: EventTypes['ValidatorDataUpdated']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentOrbsAddress[EthAddress] = normalizeAddress(event.returnValues.orbsAddr);
     this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
-    this.snapshot.CommitteeEvents.push(calcNewCommitteeEvent(time, this.snapshot));
+    if (isValidatorInCurrentCommittee(EthAddress, this.snapshot)) {
+      this.snapshot.CommitteeEvents.push(calcNewCommitteeEvent(time, this.snapshot));
+    }
   }
 
   applyNewSubscriptionChanged(time: number, event: EventTypes['SubscriptionChanged']) {
@@ -230,6 +225,13 @@ function calcNewCommitteeEvent(time: number, snapshot: StateSnapshot): CommiteeE
       IdentityType: 0,
     })),
   };
+}
+
+function isValidatorInCurrentCommittee(ethAddress: string, snapshot: StateSnapshot): boolean {
+  for (const node of snapshot.CurrentCommittee) {
+    if (node.EthAddress == ethAddress) return true;
+  }
+  return false;
 }
 
 function normalizeAddress(address: string): string {

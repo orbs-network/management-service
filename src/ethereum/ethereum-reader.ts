@@ -170,8 +170,6 @@ export function contractByEventName(eventName: EventName): ContractName {
       return 'subscriptions';
     case 'ProtocolVersionChanged':
       return 'protocol';
-    case 'ValidatorRegistered':
-      return 'validatorsRegistration';
     case 'ValidatorDataUpdated':
       return 'validatorsRegistration';
     default:
