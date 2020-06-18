@@ -3,7 +3,7 @@ import { ServiceConfiguration } from '../config';
 import { getCurrentClockTime, JsonResponse } from '../helpers';
 import { imageNamesToPollForNewVersions } from '../dockerhub/image-poll';
 
-const ETHEREUM_REF_TIME_ALLOWED_DELAY = 60 * 60; // seconds
+const ETHEREUM_REF_TIME_ALLOWED_DELAY = 20 * 60; // seconds
 const DOCKER_HUB_POLL_ALLOWED_DELAY = 20 * 60; // seconds
 
 export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConfiguration) {
@@ -12,6 +12,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConf
     Timestamp: new Date().toISOString(),
     Payload: {
       CurrentRefTime: snapshot.CurrentRefTime,
+      CurrentRefBlock: snapshot.CurrentRefBlock,
       CurrentCommittee: snapshot.CurrentCommittee,
       CurrentStandbys: snapshot.CurrentStandbys,
       CurrentImageVersions: snapshot.CurrentImageVersions,

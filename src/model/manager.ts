@@ -30,8 +30,8 @@ export class StateManager {
     }
   }
 
-  applyNewTimeRef(time: number) {
-    this.current.applyNewTimeRef(time);
+  applyNewTimeRef(time: number, block: number) {
+    this.current.applyNewTimeRef(time, block);
   }
 
   applyNewImageVersion(rolloutGroup: string, imageName: string, imageVersion: string) {

@@ -2,10 +2,11 @@ import test from 'ava';
 import { State } from './state';
 import { day } from '../helpers';
 
-test('state applies time ref', (t) => {
+test('state applies time ref and ref block', (t) => {
   const s = new State();
-  s.applyNewTimeRef(1000);
+  s.applyNewTimeRef(1000, 100);
   t.is(s.getSnapshot().CurrentRefTime, 1000);
+  t.is(s.getSnapshot().CurrentRefBlock, 100);
   t.is(s.getSnapshot().PageStartRefTime, 0);
   t.is(s.getSnapshot().PageEndRefTime, 1000);
 });
@@ -20,7 +21,7 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ValidatorDataUpdated(s, 1000, '0xN', '0xn1', '0x05050505');
   CommitteeChanged(s, 1000, ['0xA', '0xB', '0xC']);
   StandbysChanged(s, 1000, ['0xM', '0xN']);
-  s.applyNewTimeRef(1000);
+  s.applyNewTimeRef(1000, 100);
 
   ValidatorDataUpdated(s, 2000, '0xZ', '0xz2', '0x06060606');
   ValidatorDataUpdated(s, 2000, '0xA', '0xa2', '0x07070707');
@@ -30,7 +31,7 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ValidatorDataUpdated(s, 2000, '0xN', '0xn2', '0x05050505');
   CommitteeChanged(s, 2000, ['0xZ', '0xB', '0xC']);
   StandbysChanged(s, 2000, ['0xN', '0xO']);
-  s.applyNewTimeRef(2000);
+  s.applyNewTimeRef(2000, 200);
 
   ValidatorDataUpdated(s, day + 3000, '0xX', '0xx3', '0x09090909');
   ValidatorDataUpdated(s, day + 3000, '0xZ', '0xz3', '0x0a0a0a0a');
@@ -39,7 +40,7 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ValidatorDataUpdated(s, day + 3000, '0xO', '0xo3', '0x08080808');
   CommitteeChanged(s, day + 3000, ['0xX', '0xZ']);
   StandbysChanged(s, day + 3000, ['0xO', '0xP']);
-  s.applyNewTimeRef(day + 3000);
+  s.applyNewTimeRef(day + 3000, 300);
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
@@ -124,22 +125,22 @@ test('state applies virtual chain subscriptions', (t) => {
   const s = new State();
 
   SubscriptionChanged(s, 1000, 'V1', 9010);
-  s.applyNewTimeRef(1000);
+  s.applyNewTimeRef(1000, 100);
 
   SubscriptionChanged(s, 2000, 'V2', 3500);
   SubscriptionChanged(s, 2000, 'V3', 3500);
-  s.applyNewTimeRef(2000);
+  s.applyNewTimeRef(2000, 200);
 
   SubscriptionChanged(s, 3000, 'V3', 9020);
   SubscriptionChanged(s, 3000, 'V4', 4500);
   SubscriptionChanged(s, 3000, 'V5', 3500);
-  s.applyNewTimeRef(3000);
+  s.applyNewTimeRef(3000, 300);
 
   SubscriptionChanged(s, 4000, 'V4', 4700);
   SubscriptionChanged(s, 4000, 'V5', 9030);
-  s.applyNewTimeRef(4000);
+  s.applyNewTimeRef(4000, 400);
 
-  s.applyNewTimeRef(5000);
+  s.applyNewTimeRef(5000, 500);
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
@@ -228,18 +229,18 @@ test('state applies protocol version changes', (t) => {
   const s = new State();
 
   ProtocolVersionChanged(s, 1000, 5, 1500);
-  s.applyNewTimeRef(1000);
+  s.applyNewTimeRef(1000, 100);
 
   ProtocolVersionChanged(s, 2000, 6, 2500);
-  s.applyNewTimeRef(2000);
+  s.applyNewTimeRef(2000, 200);
 
   ProtocolVersionChanged(s, 3000, 7, 4500);
-  s.applyNewTimeRef(3000);
+  s.applyNewTimeRef(3000, 300);
 
   ProtocolVersionChanged(s, 4000, 8, 5500);
-  s.applyNewTimeRef(4000);
+  s.applyNewTimeRef(4000, 400);
 
-  s.applyNewTimeRef(5000);
+  s.applyNewTimeRef(5000, 500);
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
 

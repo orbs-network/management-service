@@ -13,6 +13,7 @@ export const expectationStatus = {
   Error: undefined,
   Payload: {
     CurrentRefTime: isValidTimeRef,
+    CurrentRefBlock: isValidBlock,
     CurrentCommittee: [
       {
         EthAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',

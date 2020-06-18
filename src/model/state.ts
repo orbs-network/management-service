@@ -4,7 +4,8 @@ import { getIpFromHex, toNumber } from '../helpers';
 import { findAllEventsCoveringRange } from './find';
 
 export interface StateSnapshot {
-  CurrentRefTime: number;
+  CurrentRefTime: number; // primary, everything is by time
+  CurrentRefBlock: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
   CurrentCommittee: { EthAddress: string; Weight: number }[];
@@ -61,6 +62,7 @@ export interface StateSnapshot {
 export class State {
   private snapshot: StateSnapshot = {
     CurrentRefTime: 0,
+    CurrentRefBlock: 0,
     PageStartRefTime: 0,
     PageEndRefTime: 0,
     CurrentCommittee: [],
@@ -90,8 +92,9 @@ export class State {
     return this.snapshot;
   }
 
-  applyNewTimeRef(time: number) {
+  applyNewTimeRef(time: number, block: number) {
     this.snapshot.CurrentRefTime = time;
+    this.snapshot.CurrentRefBlock = block;
     this.snapshot.PageEndRefTime = time;
     this.snapshot.CurrentTopology = calcTopology(time, this.snapshot);
   }

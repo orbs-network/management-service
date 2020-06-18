@@ -16,6 +16,7 @@ test.serial('[integration] getServiceStatus responds', (t) => {
   t.assert(new Date(res.Timestamp).getTime() > 1400000000);
   t.deepEqual(res.Payload, {
     CurrentRefTime: 0,
+    CurrentRefBlock: 0,
     CurrentCommittee: [],
     CurrentStandbys: [],
     CurrentImageVersions: { main: {}, canary: {} },

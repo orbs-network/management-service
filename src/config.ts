@@ -25,7 +25,7 @@ export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
   HotfixRolloutWindowSeconds: 60 * 60,
   EthereumPollIntervalSeconds: 30,
   FirstBlock: 0,
-  FinalityBufferBlocks: 100,
+  FinalityBufferBlocks: 40,
   Verbose: false,
 };
 

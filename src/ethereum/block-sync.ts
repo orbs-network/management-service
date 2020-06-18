@@ -40,7 +40,7 @@ export class BlockSync {
 
     // notify state about time of latest block (in case no events in it)
     const latestAllowedBlockTime = await this.reader.getRefTime(latestAllowedBlock);
-    this.state.applyNewTimeRef(latestAllowedBlockTime);
+    this.state.applyNewTimeRef(latestAllowedBlockTime, latestAllowedBlock);
     Logger.log(`BlockSync: run finished processing up to ${latestAllowedBlock} with time ${latestAllowedBlockTime}.`);
   }
 
@@ -60,7 +60,7 @@ export class BlockSync {
     if (sorted.length == 0) return;
     const blockTime = await this.reader.getRefTime(blockNumber);
     this.state.applyNewEvents(blockTime, sorted);
-    this.state.applyNewTimeRef(blockTime);
+    this.state.applyNewTimeRef(blockTime, blockNumber);
     Logger.log(`BlockSync: processed ${sorted.length} events in block ${blockNumber} with time ${blockTime}.`);
   }
 }
