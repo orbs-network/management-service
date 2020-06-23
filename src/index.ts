@@ -62,7 +62,7 @@ export function serve(serviceConfig: ServiceConfiguration) {
   });
 
   const blockSyncTask = new TaskLoop(() => blockSync.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
-  const imagePollTask = new TaskLoop(() => imagePoll.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
+  const imagePollTask = new TaskLoop(() => imagePoll.run(), serviceConfig.DockerHubPollIntervalSeconds * 1000);
   blockSyncTask.start();
   imagePollTask.start();
 

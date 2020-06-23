@@ -5,6 +5,7 @@ import {
   isValidBlock,
   isValidTimestamp,
   isNonEmptyString,
+  isPositiveNumber,
 } from './deep-matcher';
 
 export const expectationStatus = {
@@ -12,6 +13,7 @@ export const expectationStatus = {
   Timestamp: isValidTimestamp,
   Error: undefined,
   Payload: {
+    Uptime: isPositiveNumber,
     CurrentRefTime: isValidTimeRef,
     CurrentRefBlock: isValidBlock,
     CurrentCommittee: [

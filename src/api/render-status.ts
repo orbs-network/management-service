@@ -6,11 +6,14 @@ import { imageNamesToPollForNewVersions } from '../dockerhub/image-poll';
 const ETHEREUM_REF_TIME_ALLOWED_DELAY = 20 * 60; // seconds
 const DOCKER_HUB_POLL_ALLOWED_DELAY = 20 * 60; // seconds
 
+const timeOriginallyLaunched = getCurrentClockTime();
+
 export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const response: JsonResponse = {
     Status: getStatusText(snapshot),
     Timestamp: new Date().toISOString(),
     Payload: {
+      Uptime: getCurrentClockTime() - timeOriginallyLaunched,
       CurrentRefTime: snapshot.CurrentRefTime,
       CurrentRefBlock: snapshot.CurrentRefBlock,
       CurrentCommittee: snapshot.CurrentCommittee,

@@ -57,3 +57,7 @@ export function isValidTimestamp(str: string) {
 export function isNonEmptyString(str: string) {
   return str && str.length > 0;
 }
+
+export function isPositiveNumber(str: string) {
+  return str && parseInt(str) > 0;
+}
