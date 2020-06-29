@@ -16,15 +16,15 @@ export const expectationVcManagement = {
           Port: 10000,
         },
         {
-          EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
-          OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
-          Ip: '225.110.150.90',
-          Port: 10000,
-        },
-        {
           EthAddress: 'cb6642be414696f77336dae06fed3775f08de0ea',
           OrbsAddress: '33546759bdcfb5c753a4102b86b3e73e714d5213',
           Ip: '203.102.66.190',
+          Port: 10000,
+        },
+        {
+          EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
+          OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
+          Ip: '225.110.150.90',
           Port: 10000,
         },
       ],

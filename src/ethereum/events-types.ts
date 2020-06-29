@@ -2,8 +2,7 @@ import { EventData } from 'web3-eth-contract';
 
 export const eventNames: Readonly<Array<EventName>> = [
   'SubscriptionChanged',
-  'CommitteeChanged',
-  'StandbysChanged',
+  'ValidatorCommitteeChange',
   'ProtocolVersionChanged',
   'ValidatorDataUpdated',
   'ValidatorStatusUpdated',
@@ -19,13 +18,12 @@ export type SubscriptionChangedPayload = {
   deploymentSubset: 'main' | 'canary';
 };
 
-export type StandbysChangedPayload = {
-  addrs: string[];
-};
-
-export type CommitteeChangedPayload = {
-  addrs: string[];
-  weights: string[];
+export type ValidatorCommitteeChangePayload = {
+  addr: string;
+  weight: string;
+  compliance: boolean;
+  inCommittee: boolean;
+  isStandby: boolean;
 };
 
 export type ProtocolChangedPayload = {
@@ -48,8 +46,7 @@ export type ValidatorStatusUpdatedPayload = {
 };
 
 export type EventTypes = {
-  CommitteeChanged: EventData & { returnValues: CommitteeChangedPayload };
-  StandbysChanged: EventData & { returnValues: StandbysChangedPayload };
+  ValidatorCommitteeChange: EventData & { returnValues: ValidatorCommitteeChangePayload };
   SubscriptionChanged: EventData & { returnValues: SubscriptionChangedPayload };
   ProtocolVersionChanged: EventData & { returnValues: ProtocolChangedPayload };
   ValidatorDataUpdated: EventData & { returnValues: ValidatorDataUpdatedPayload };

@@ -8,11 +8,8 @@ export class StateManager {
   applyNewEvents(time: number, events: EventData[]) {
     for (const event of events) {
       switch (event.event) {
-        case 'CommitteeChanged':
-          this.current.applyNewCommitteeChanged(time, event as EventTypes['CommitteeChanged']);
-          break;
-        case 'StandbysChanged':
-          this.current.applyNewStandbysChanged(time, event as EventTypes['StandbysChanged']);
+        case 'ValidatorCommitteeChange':
+          this.current.applyNewValidatorCommitteeChange(time, event as EventTypes['ValidatorCommitteeChange']);
           break;
         case 'SubscriptionChanged':
           this.current.applyNewSubscriptionChanged(time, event as EventTypes['SubscriptionChanged']);

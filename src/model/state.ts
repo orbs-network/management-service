@@ -8,11 +8,12 @@ export interface StateSnapshot {
   CurrentRefBlock: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
-  CurrentCommittee: { EthAddress: string; Weight: number }[];
+  CurrentCommittee: { EthAddress: string; Weight: number; OriginalWeight: number }[];
   CommitteeEvents: {
     RefTime: number;
     Committee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
   }[];
+  LastCommitteeEvent: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[],
   CurrentIp: { [EthAddress: string]: string };
   CurrentOrbsAddress: { [EthAddress: string]: string };
   CurrentStandbys: { EthAddress: string }[];
@@ -67,6 +68,7 @@ export class State {
     PageEndRefTime: 0,
     CurrentCommittee: [],
     CommitteeEvents: [],
+    LastCommitteeEvent: [],
     CurrentIp: {},
     CurrentOrbsAddress: {},
     CurrentStandbys: [],
@@ -96,36 +98,44 @@ export class State {
     this.snapshot.CurrentRefTime = time;
     this.snapshot.CurrentRefBlock = block;
     this.snapshot.PageEndRefTime = time;
+    const committeeEvent = calcNewCommitteeEvent(time, this.snapshot);
+    if (!_.isEqual(committeeEvent.Committee, this.snapshot.LastCommitteeEvent)) {
+      this.snapshot.CommitteeEvents.push(committeeEvent);
+      this.snapshot.LastCommitteeEvent = _.cloneDeep(committeeEvent.Committee);
+    }
     this.snapshot.CurrentTopology = calcTopology(time, this.snapshot);
   }
 
-  applyNewCommitteeChanged(time: number, event: EventTypes['CommitteeChanged']) {
-    const totalCommitteeWeight = _.sum(_.map(event.returnValues.weights, (w) => parseInt(w)));
-    const committee = event.returnValues.addrs.map((EthAddress, idx) => ({
-      EthAddress: normalizeAddress(EthAddress),
-      Weight: Math.max(
-        parseInt(event.returnValues.weights[idx]),
-        Math.round(totalCommitteeWeight / event.returnValues.addrs.length)
-      ),
-    }));
-    this.snapshot.CurrentCommittee = committee;
-    this.snapshot.CommitteeEvents.push(calcNewCommitteeEvent(time, this.snapshot));
+  applyNewValidatorCommitteeChange(_time: number, event: EventTypes['ValidatorCommitteeChange']) {
+    const EthAddress = normalizeAddress(event.returnValues.addr);
+
+    // current standbys
+    _.remove(this.snapshot.CurrentStandbys, (node) => node.EthAddress == EthAddress);
+    if (event.returnValues.isStandby) {
+      this.snapshot.CurrentStandbys.push({
+        EthAddress,
+      });
+    }
+    this.snapshot.CurrentStandbys = _.sortBy(this.snapshot.CurrentStandbys, (node) => node.EthAddress);
+
+    // current committee
+    _.remove(this.snapshot.CurrentCommittee, (node) => node.EthAddress == EthAddress);
+    if (event.returnValues.inCommittee) {
+      this.snapshot.CurrentCommittee.push({
+        EthAddress,
+        OriginalWeight: parseInt(event.returnValues.weight),
+        Weight: 0,
+      });
+    }
+    fixCommitteeWeights(this.snapshot.CurrentCommittee);
+    this.snapshot.CurrentCommittee = _.sortBy(this.snapshot.CurrentCommittee, (node) => node.EthAddress);
+    this.snapshot.CurrentCommittee = _.sortBy(this.snapshot.CurrentCommittee, (node) => -1 * node.Weight);
   }
 
-  applyNewStandbysChanged(_time: number, event: EventTypes['StandbysChanged']) {
-    const standbys = event.returnValues.addrs.map((EthAddress, _idx) => ({
-      EthAddress: normalizeAddress(EthAddress),
-    }));
-    this.snapshot.CurrentStandbys = standbys;
-  }
-
-  applyNewValidatorDataUpdated(time: number, event: EventTypes['ValidatorDataUpdated']) {
+  applyNewValidatorDataUpdated(_time: number, event: EventTypes['ValidatorDataUpdated']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentOrbsAddress[EthAddress] = normalizeAddress(event.returnValues.orbsAddr);
     this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
-    if (isValidatorInCurrentCommittee(EthAddress, this.snapshot)) {
-      this.snapshot.CommitteeEvents.push(calcNewCommitteeEvent(time, this.snapshot));
-    }
   }
 
   applyNewValidatorStatusUpdated(time: number, event: EventTypes['ValidatorStatusUpdated']) {
@@ -203,6 +213,7 @@ export class State {
   }
 }
 
+type CommiteeNodes = { EthAddress: string; Weight: number; OriginalWeight: number }[];
 type TopologyNodes = { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[];
 type CommiteeEvent = {
   RefTime: number;
@@ -227,12 +238,20 @@ function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
   }
 
   // done
-  return Object.keys(inTopology).map((EthAddress) => ({
+  const res = Object.keys(inTopology).map((EthAddress) => ({
     EthAddress,
     OrbsAddress: snapshot.CurrentOrbsAddress[EthAddress],
     Ip: snapshot.CurrentIp[EthAddress],
     Port: 0,
   }));
+  return _.sortBy(res, (node) => node.EthAddress);
+}
+
+function fixCommitteeWeights(committee: CommiteeNodes): void {
+  const totalOriginalWeight = _.sum(_.map(committee, (node) => node.OriginalWeight));
+  for (const node of committee) {
+    node.Weight = Math.max(node.OriginalWeight, Math.round(totalOriginalWeight / committee.length));
+  }
 }
 
 function calcNewCommitteeEvent(time: number, snapshot: StateSnapshot): CommiteeEvent {
@@ -245,13 +264,6 @@ function calcNewCommitteeEvent(time: number, snapshot: StateSnapshot): CommiteeE
       IdentityType: 0,
     })),
   };
-}
-
-function isValidatorInCurrentCommittee(ethAddress: string, snapshot: StateSnapshot): boolean {
-  for (const node of snapshot.CurrentCommittee) {
-    if (node.EthAddress == ethAddress) return true;
-  }
-  return false;
 }
 
 function normalizeAddress(address: string): string {

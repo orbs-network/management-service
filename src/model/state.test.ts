@@ -19,8 +19,16 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ValidatorDataUpdated(s, 1000, '0xC', '0xc1', '0x03030303');
   ValidatorDataUpdated(s, 1000, '0xM', '0xm1', '0x04040404');
   ValidatorDataUpdated(s, 1000, '0xN', '0xn1', '0x05050505');
-  CommitteeChanged(s, 1000, ['0xA', '0xB', '0xC']);
-  StandbysChanged(s, 1000, ['0xM', '0xN']);
+
+  // change committee to [A, B, C]
+  ValidatorCommitteeChange(s, 1000, '0xA', true, false);
+  ValidatorCommitteeChange(s, 1000, '0xB', true, false);
+  ValidatorCommitteeChange(s, 1000, '0xC', true, false);
+
+  // change standbys to [M, N]
+  ValidatorCommitteeChange(s, 1000, '0xM', false, true);
+  ValidatorCommitteeChange(s, 1000, '0xN', false, true);
+
   s.applyNewTimeRef(1000, 100);
 
   ValidatorDataUpdated(s, 2000, '0xZ', '0xz2', '0x06060606');
@@ -29,8 +37,15 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ValidatorDataUpdated(s, 2000, '0xB', '0xb2', '0x02020202');
   ValidatorDataUpdated(s, 2000, '0xC', '0xc2', '0x03030303');
   ValidatorDataUpdated(s, 2000, '0xN', '0xn2', '0x05050505');
-  CommitteeChanged(s, 2000, ['0xZ', '0xB', '0xC']);
-  StandbysChanged(s, 2000, ['0xN', '0xO']);
+
+  // change committee to [Z, B, C]
+  ValidatorCommitteeChange(s, 2000, '0xA', false, false);
+  ValidatorCommitteeChange(s, 2000, '0xZ', true, false);
+
+  // change standbys to [N, O]
+  ValidatorCommitteeChange(s, 2000, '0xM', false, false);
+  ValidatorCommitteeChange(s, 2000, '0xO', false, true);
+
   s.applyNewTimeRef(2000, 200);
 
   ValidatorDataUpdated(s, day + 3000, '0xX', '0xx3', '0x09090909');
@@ -38,8 +53,16 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ValidatorDataUpdated(s, day + 3000, '0xZ', '0xz3', '0x0b0b0b0b');
   ValidatorDataUpdated(s, day + 3000, '0xP', '0xp3', '0x0c0c0c0c');
   ValidatorDataUpdated(s, day + 3000, '0xO', '0xo3', '0x08080808');
-  CommitteeChanged(s, day + 3000, ['0xX', '0xZ']);
-  StandbysChanged(s, day + 3000, ['0xO', '0xP']);
+
+  // change committee to [X, Z]
+  ValidatorCommitteeChange(s, day + 3000, '0xB', false, false);
+  ValidatorCommitteeChange(s, day + 3000, '0xC', false, false);
+  ValidatorCommitteeChange(s, day + 3000, '0xX', true, false);
+
+  // change standbys to [O, P]
+  ValidatorCommitteeChange(s, day + 3000, '0xN', false, false);
+  ValidatorCommitteeChange(s, day + 3000, '0xP', false, true);
+
   s.applyNewTimeRef(day + 3000, 300);
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
@@ -66,37 +89,70 @@ test('state applies commitee, standby, IPs and topology', (t) => {
 
   t.deepEqual(s.getSnapshot().CurrentStandbys, [{ EthAddress: 'o' }, { EthAddress: 'p' }]);
 
-  t.is(s.getSnapshot().CommitteeEvents.length, 8);
+  t.is(s.getSnapshot().CommitteeEvents.length, 3);
   t.is(s.getSnapshot().CommitteeEvents[0].RefTime, 1000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[0].Committee, [
     { EthAddress: 'a', OrbsAddress: 'a1', Weight: 10000, IdentityType: 0 },
     { EthAddress: 'b', OrbsAddress: 'b1', Weight: 10000, IdentityType: 0 },
     { EthAddress: 'c', OrbsAddress: 'c1', Weight: 10000, IdentityType: 0 },
   ]);
-  t.is(s.getSnapshot().CommitteeEvents[4].RefTime, 2000);
-  t.deepEqual(s.getSnapshot().CommitteeEvents[4].Committee, [
-    { EthAddress: 'z', OrbsAddress: 'z2', Weight: 10000, IdentityType: 0 },
+  t.is(s.getSnapshot().CommitteeEvents[1].RefTime, 2000);
+  t.deepEqual(s.getSnapshot().CommitteeEvents[1].Committee, [
     { EthAddress: 'b', OrbsAddress: 'b2', Weight: 10000, IdentityType: 0 },
     { EthAddress: 'c', OrbsAddress: 'c2', Weight: 10000, IdentityType: 0 },
+    { EthAddress: 'z', OrbsAddress: 'z2', Weight: 10000, IdentityType: 0 },
   ]);
-  t.is(s.getSnapshot().CommitteeEvents[6].RefTime, day + 3000);
-  t.deepEqual(s.getSnapshot().CommitteeEvents[7].Committee, [
+  t.is(s.getSnapshot().CommitteeEvents[2].RefTime, day + 3000);
+  t.deepEqual(s.getSnapshot().CommitteeEvents[2].Committee, [
     { EthAddress: 'x', OrbsAddress: 'x3', Weight: 10000, IdentityType: 0 },
     { EthAddress: 'z', OrbsAddress: 'z3', Weight: 10000, IdentityType: 0 },
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentTopology, [
-    { EthAddress: 'z', OrbsAddress: 'z3', Ip: '11.11.11.11', Port: 0 },
     { EthAddress: 'b', OrbsAddress: 'b2', Ip: '2.2.2.2', Port: 0 },
     { EthAddress: 'c', OrbsAddress: 'c2', Ip: '3.3.3.3', Port: 0 },
-    { EthAddress: 'x', OrbsAddress: 'x3', Ip: '9.9.9.9', Port: 0 },
     { EthAddress: 'o', OrbsAddress: 'o3', Ip: '8.8.8.8', Port: 0 },
     { EthAddress: 'p', OrbsAddress: 'p3', Ip: '12.12.12.12', Port: 0 },
+    { EthAddress: 'x', OrbsAddress: 'x3', Ip: '9.9.9.9', Port: 0 },
+    { EthAddress: 'z', OrbsAddress: 'z3', Ip: '11.11.11.11', Port: 0 },
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'x', Weight: 10000 },
-    { EthAddress: 'z', Weight: 10000 },
+    { EthAddress: 'x', Weight: 10000, OriginalWeight: 10000 },
+    { EthAddress: 'z', Weight: 10000, OriginalWeight: 10000 },
+  ]);
+});
+
+test('state calculates committee weights correctly', (t) => {
+  const s = new State();
+
+  ValidatorCommitteeWeight(s, '0xA', '10000', true);
+  ValidatorCommitteeWeight(s, '0xB', '20000', true);
+
+  t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
+
+  t.deepEqual(s.getSnapshot().CurrentCommittee, [
+    { EthAddress: 'b', Weight: 20000, OriginalWeight: 20000 },
+    { EthAddress: 'a', Weight: 15000, OriginalWeight: 10000 },
+  ]);
+
+  ValidatorCommitteeWeight(s, '0xC', '10000', true);
+
+  t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
+
+  t.deepEqual(s.getSnapshot().CurrentCommittee, [
+    { EthAddress: 'b', Weight: 20000, OriginalWeight: 20000 },
+    { EthAddress: 'a', Weight: 13333, OriginalWeight: 10000 },
+    { EthAddress: 'c', Weight: 13333, OriginalWeight: 10000 },
+  ]);
+
+  ValidatorCommitteeWeight(s, '0xB', '20000', false);
+
+  t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
+
+  t.deepEqual(s.getSnapshot().CurrentCommittee, [
+    { EthAddress: 'a', Weight: 10000, OriginalWeight: 10000 },
+    { EthAddress: 'c', Weight: 10000, OriginalWeight: 10000 },
   ]);
 });
 
@@ -290,21 +346,28 @@ test('state applies image version changes', (t) => {
   });
 });
 
-function CommitteeChanged(s: State, time: number, addrs: string[]) {
-  s.applyNewCommitteeChanged(time, {
+function ValidatorCommitteeChange(s: State, time: number, addr: string, inCommittee: boolean, isStandby: boolean) {
+  s.applyNewValidatorCommitteeChange(time, {
     ...eventBase,
     returnValues: {
-      addrs,
-      weights: addrs.map(() => '10000'),
+      addr,
+      weight: '10000',
+      compliance: false,
+      inCommittee,
+      isStandby,
     },
   });
 }
 
-function StandbysChanged(s: State, time: number, addrs: string[]) {
-  s.applyNewStandbysChanged(time, {
+function ValidatorCommitteeWeight(s: State, addr: string, weight: string, inCommittee: boolean) {
+  s.applyNewValidatorCommitteeChange(1000, {
     ...eventBase,
     returnValues: {
-      addrs,
+      addr,
+      weight,
+      compliance: false,
+      inCommittee,
+      isStandby: false,
     },
   });
 }
