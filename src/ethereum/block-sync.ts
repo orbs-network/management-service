@@ -19,8 +19,7 @@ export class BlockSync {
     this.reader = getNewEthereumReader(config);
     this.lastProcessedBlock = config.FirstBlock;
     this.eventFetchers = {
-      CommitteeChanged: new SingleEventFetcher('CommitteeChanged', this.reader),
-      StandbysChanged: new SingleEventFetcher('StandbysChanged', this.reader),
+      ValidatorCommitteeChange: new SingleEventFetcher('ValidatorCommitteeChange', this.reader),
       SubscriptionChanged: new SingleEventFetcher('SubscriptionChanged', this.reader),
       ProtocolVersionChanged: new SingleEventFetcher('ProtocolVersionChanged', this.reader),
       ValidatorDataUpdated: new SingleEventFetcher('ValidatorDataUpdated', this.reader),

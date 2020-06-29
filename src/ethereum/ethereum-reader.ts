@@ -162,9 +162,7 @@ export type EthereumConfig = {
 
 export function contractByEventName(eventName: EventName): ContractName {
   switch (eventName) {
-    case 'CommitteeChanged':
-      return 'committee';
-    case 'StandbysChanged':
+    case 'ValidatorCommitteeChange':
       return 'committee';
     case 'SubscriptionChanged':
       return 'subscriptions';
