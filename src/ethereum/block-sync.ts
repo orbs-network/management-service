@@ -7,15 +7,17 @@ import * as Logger from '../logger';
 
 export type BlockSyncConfiguration = EthereumConfiguration & {
   FinalityBufferBlocks: number;
+  FirstBlock: number;
 };
 
 export class BlockSync {
   private reader: EthereumReader;
-  private lastProcessedBlock = 0;
+  private lastProcessedBlock: number;
   private eventFetchers: { [T in EventName]: EventFetcher };
 
   constructor(private state: StateManager, private config: BlockSyncConfiguration) {
     this.reader = getNewEthereumReader(config);
+    this.lastProcessedBlock = config.FirstBlock;
     this.eventFetchers = {
       CommitteeChanged: new SingleEventFetcher('CommitteeChanged', this.reader),
       StandbysChanged: new SingleEventFetcher('StandbysChanged', this.reader),
@@ -24,7 +26,7 @@ export class BlockSync {
       ValidatorDataUpdated: new SingleEventFetcher('ValidatorDataUpdated', this.reader),
       ValidatorStatusUpdated: new SingleEventFetcher('ValidatorStatusUpdated', this.reader),
     };
-    Logger.log(`BlockSync: initialized.`);
+    Logger.log(`BlockSync: initialized with first block ${this.lastProcessedBlock}.`);
   }
 
   // single tick of the run loop

@@ -133,6 +133,11 @@ export class EthereumTestDriver {
     return await d.web3.eth.getBlockNumber();
   }
 
+  async getCurrentBlockPreDeploy(ethereumEndpoint: string): Promise<number> {
+    const web3 = new Web3(ethereumEndpoint);
+    return await web3.eth.getBlockNumber();
+  }
+
   async getCurrentBlockTime(): Promise<number> {
     if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
     const d = this.orbsPosV2Driver;

@@ -12,7 +12,8 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.timeout(5 * 60 * 1000);
 
   const ethereum = new EthereumTestDriver(true);
-  const FinalityBufferBlocks = 5;
+  const ethereumEndpoint = 'http://localhost:7545';
+  const finalityBufferBlocks = 5;
 
   // mock docker hub state
   const scope = nockDockerHub(
@@ -21,20 +22,22 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   );
 
   // setup Ethereum state
+  const firstBlock = await ethereum.getCurrentBlockPreDeploy(ethereumEndpoint);
   await ethereum.deployContracts();
   await ethereum.addVchain(30 * day, 'main');
   await ethereum.addVchain(30 * day, 'canary');
   await ethereum.increaseTime(40 * day);
   await ethereum.extendVchain('1000000', 90 * day);
-  await ethereum.increaseBlocks(FinalityBufferBlocks + 1);
+  await ethereum.increaseBlocks(finalityBufferBlocks + 1);
 
   // setup local state
   const config = {
     ...exampleConfig,
     EthereumGenesisContract: ethereum.getContractRegistryAddress(),
-    EthereumEndpoint: 'http://localhost:7545',
+    EthereumEndpoint: ethereumEndpoint,
     DockerNamespace: 'mydockernamespace',
-    FinalityBufferBlocks: FinalityBufferBlocks,
+    FinalityBufferBlocks: finalityBufferBlocks,
+    FirstBlock: firstBlock,
     RegularRolloutWindowSeconds: 1000000,
     HotfixRolloutWindowSeconds: 2,
   };

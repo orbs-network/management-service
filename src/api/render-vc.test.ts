@@ -10,9 +10,11 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   t.timeout(5 * 60 * 1000);
 
   const ethereum = new EthereumTestDriver(true);
-  const FinalityBufferBlocks = 5;
+  const ethereumEndpoint = 'http://localhost:7545';
+  const finalityBufferBlocks = 5;
 
   // setup Ethereum state
+  const firstBlock = await ethereum.getCurrentBlockPreDeploy(ethereumEndpoint);
   await ethereum.deployContracts();
   await ethereum.setupInitialCommittee();
   await ethereum.addVchain(60 * day, 'main');
@@ -23,15 +25,15 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   await ethereum.upgradeProtocolVersion(19, 2 * day, 'main');
   await ethereum.upgradeProtocolVersion(20, 2 * day, 'canary');
   await ethereum.increaseTime(10 * day);
-  await ethereum.increaseBlocks(FinalityBufferBlocks + 1);
+  await ethereum.increaseBlocks(finalityBufferBlocks + 1);
 
   // setup local state
   const config = {
     ...exampleConfig,
-    FirstBlock: 0,
+    FirstBlock: firstBlock,
     EthereumGenesisContract: ethereum.getContractRegistryAddress(),
-    EthereumEndpoint: 'http://localhost:7545',
-    FinalityBufferBlocks: FinalityBufferBlocks,
+    EthereumEndpoint: ethereumEndpoint,
+    FinalityBufferBlocks: finalityBufferBlocks,
   };
   const state = new StateManager();
   const blockSync = new BlockSync(state, config);
