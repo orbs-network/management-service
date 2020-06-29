@@ -9,6 +9,11 @@ function getStatusFailureJson(errorMessage) {
   return JSON.stringify(json, null, 2);
 }
 
+process.on('uncaughtException', (err) => {
+  console.log(getStatusFailureJson(err.stack));
+  process.exit(128);
+});
+
 http.get('http://localhost:8080/status', (res) => {
   const { statusCode } = res;
   let data = '';
