@@ -118,41 +118,41 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'x', Weight: 10000, OriginalWeight: 10000 },
-    { EthAddress: 'z', Weight: 10000, OriginalWeight: 10000 },
+    { EthAddress: 'x', Weight: 10000, EffectiveStake: 10000 },
+    { EthAddress: 'z', Weight: 10000, EffectiveStake: 10000 },
   ]);
 });
 
 test('state calculates committee weights correctly', (t) => {
   const s = new State();
 
-  ValidatorCommitteeWeight(s, '0xA', '10000', true);
-  ValidatorCommitteeWeight(s, '0xB', '20000', true);
+  ValidatorCommitteeWeight(s, '0xA', '10000000000000000000000', true);
+  ValidatorCommitteeWeight(s, '0xB', '20000000000000000000000', true);
 
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000, OriginalWeight: 20000 },
-    { EthAddress: 'a', Weight: 15000, OriginalWeight: 10000 },
+    { EthAddress: 'b', Weight: 20000, EffectiveStake: 20000 },
+    { EthAddress: 'a', Weight: 15000, EffectiveStake: 10000 },
   ]);
 
-  ValidatorCommitteeWeight(s, '0xC', '10000', true);
+  ValidatorCommitteeWeight(s, '0xC', '10000000000000000000000', true);
 
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000, OriginalWeight: 20000 },
-    { EthAddress: 'a', Weight: 13333, OriginalWeight: 10000 },
-    { EthAddress: 'c', Weight: 13333, OriginalWeight: 10000 },
+    { EthAddress: 'b', Weight: 20000, EffectiveStake: 20000 },
+    { EthAddress: 'a', Weight: 13333, EffectiveStake: 10000 },
+    { EthAddress: 'c', Weight: 13333, EffectiveStake: 10000 },
   ]);
 
-  ValidatorCommitteeWeight(s, '0xB', '20000', false);
+  ValidatorCommitteeWeight(s, '0xB', '20000000000000000000000', false);
 
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'a', Weight: 10000, OriginalWeight: 10000 },
-    { EthAddress: 'c', Weight: 10000, OriginalWeight: 10000 },
+    { EthAddress: 'a', Weight: 10000, EffectiveStake: 10000 },
+    { EthAddress: 'c', Weight: 10000, EffectiveStake: 10000 },
   ]);
 });
 
@@ -351,7 +351,7 @@ function ValidatorCommitteeChange(s: State, time: number, addr: string, inCommit
     ...eventBase,
     returnValues: {
       addr,
-      weight: '10000',
+      weight: '10000000000000000000000',
       compliance: false,
       inCommittee,
       isStandby,

@@ -8,12 +8,12 @@ export interface StateSnapshot {
   CurrentRefBlock: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
-  CurrentCommittee: { EthAddress: string; Weight: number; OriginalWeight: number }[];
+  CurrentCommittee: { EthAddress: string; Weight: number; EffectiveStake: number }[];
   CommitteeEvents: {
     RefTime: number;
     Committee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
   }[];
-  LastCommitteeEvent: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[],
+  LastCommitteeEvent: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
   CurrentIp: { [EthAddress: string]: string };
   CurrentOrbsAddress: { [EthAddress: string]: string };
   CurrentStandbys: { EthAddress: string }[];
@@ -123,7 +123,7 @@ export class State {
     if (event.returnValues.inCommittee) {
       this.snapshot.CurrentCommittee.push({
         EthAddress,
-        OriginalWeight: parseInt(event.returnValues.weight),
+        EffectiveStake: orbitonsToOrbs(event.returnValues.weight),
         Weight: 0,
       });
     }
@@ -213,7 +213,7 @@ export class State {
   }
 }
 
-type CommiteeNodes = { EthAddress: string; Weight: number; OriginalWeight: number }[];
+type CommiteeNodes = { EthAddress: string; Weight: number; EffectiveStake: number }[];
 type TopologyNodes = { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[];
 type CommiteeEvent = {
   RefTime: number;
@@ -248,10 +248,14 @@ function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
 }
 
 function fixCommitteeWeights(committee: CommiteeNodes): void {
-  const totalOriginalWeight = _.sum(_.map(committee, (node) => node.OriginalWeight));
+  const totalStake = _.sum(_.map(committee, (node) => node.EffectiveStake));
   for (const node of committee) {
-    node.Weight = Math.max(node.OriginalWeight, Math.round(totalOriginalWeight / committee.length));
+    node.Weight = Math.max(node.EffectiveStake, Math.round(totalStake / committee.length));
   }
+}
+
+function orbitonsToOrbs(stake: string): number {
+  return Number(BigInt(stake) / BigInt(1e18));
 }
 
 function calcNewCommitteeEvent(time: number, snapshot: StateSnapshot): CommiteeEvent {

@@ -1,4 +1,5 @@
 import Web3 from 'web3';
+import BN from 'bn.js';
 import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
 import {
   evmIncreaseTime,
@@ -48,12 +49,12 @@ export class EthereumTestDriver {
     if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
 
     if (this.verbose) console.log(`[posv2] about to set up initial committee`);
-    const v1 = await this.addValidator(true, 10000);
-    const v2 = await this.addValidator(true, 20000);
-    const v3 = await this.addValidator(false, 30000);
+    const v1 = await this.addValidator(true, '10000000000000000000000');
+    const v2 = await this.addValidator(true, '20000000000000000000000');
+    const v3 = await this.addValidator(false, '30000000000000000000000');
     await this.increaseTime(1000);
-    const v4 = await this.addValidator(true, 40000);
-    const v5 = await this.addValidator(false, 50000);
+    const v4 = await this.addValidator(true, '40000000000000000000000');
+    const v5 = await this.addValidator(false, '50000000000000000000000');
     await this.increaseTime(1000);
     return { v1, v2, v3, v4, v5 };
   }
@@ -97,12 +98,12 @@ export class EthereumTestDriver {
     });
   }
 
-  async addValidator(committee: boolean, stake = 10000) {
+  async addValidator(committee: boolean, stake = '10000') {
     if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
     const d = this.orbsPosV2Driver;
 
     const p = d.newParticipant();
-    await p.stake(stake);
+    await p.stake(new BN(stake));
     await p.registerAsValidator();
     if (committee) {
       await p.notifyReadyForCommittee();
