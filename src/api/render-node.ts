@@ -19,8 +19,10 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
     services: {},
   };
 
-  // always return signer
-  response.services['signer'] = getSigner();
+  // include signer if found a viable image for it
+  if (snapshot.CurrentImageVersions['main']['signer']) {
+    response.services['signer'] = getSigner(snapshot, config);
+  }
 
   // include management-service if found a viable image for it
   if (snapshot.CurrentImageVersions['main']['management-service']) {
@@ -39,13 +41,13 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
 // helpers
 
-function getSigner() {
+function getSigner(snapshot: StateSnapshot, config: ServiceConfiguration) {
   return {
     InternalPort: 7777,
     DockerConfig: {
-      Image: 'orbsnetwork/signer', // TODO: what's the spec for signer location?
-      Tag: 'experimental', // TODO: what's the spec for the signer version?
-      Pull: true, // TODO: should signer be pull false?
+      Image: `${config.DockerNamespace}/signer`,
+      Tag: snapshot.CurrentImageVersions['main']['signer'],
+      Pull: true,
     },
     Config: {
       api: 'v1',

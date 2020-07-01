@@ -5,7 +5,7 @@ import { getCurrentClockTime } from '../helpers';
 import * as Versioning from '../dockerhub/versioning';
 import * as Logger from '../logger';
 
-export const imageNamesToPollForNewVersions = ['management-service', 'node'];
+export const imageNamesToPollForNewVersions = ['management-service', 'node', 'signer'];
 export const imageNamesWithGradualRollout = ['node'];
 
 export type ImagePollConfiguration = DockerHubConfiguration & {

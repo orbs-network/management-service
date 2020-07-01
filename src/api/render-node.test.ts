@@ -18,7 +18,8 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   // mock docker hub state
   const scope = nockDockerHub(
     { user: 'mydockernamespace', name: 'node', tags: ['v0.0.1', 'v1.2.3', 'v1.2.4-canary', 'v1.0.0'] },
-    { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v3.9.9'] }
+    { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v3.9.9'] },
+    { user: 'mydockernamespace', name: 'signer', tags: ['v1.1.0'] }
   );
 
   // setup Ethereum state
@@ -74,6 +75,11 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   for (const chain of res.chains) {
     t.is(chain.Config['ethereum-endpoint'], config.EthereumEndpoint);
   }
+  t.deepEqual(res.services['signer'].DockerConfig, {
+    Image: 'mydockernamespace/signer',
+    Tag: 'v1.1.0',
+    Pull: true,
+  });
   t.deepEqual(res.services['management-service'].DockerConfig, {
     Image: 'mydockernamespace/management-service',
     Tag: 'v4.5.6',
@@ -88,7 +94,8 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   // mock docker hub state with a few new versions
   const scope2 = nockDockerHub(
     { user: 'mydockernamespace', name: 'node', tags: ['v1.2.3', 'v1.2.4-canary', 'v1.2.5', 'v1.2.6-canary+hotfix'] },
-    { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v4.5.8'] }
+    { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v4.5.8'] },
+    { user: 'mydockernamespace', name: 'signer', tags: ['v1.1.0'] }
   );
 
   // run poller and process again
@@ -106,6 +113,11 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.deepEqual(res2.chains[1].DockerConfig, {
     Image: 'mydockernamespace/node',
     Tag: 'v1.2.6-canary+hotfix', // gradual rollout with fast change
+    Pull: true,
+  });
+  t.deepEqual(res2.services['signer'].DockerConfig, {
+    Image: 'mydockernamespace/signer',
+    Tag: 'v1.1.0', // no upgrade
     Pull: true,
   });
   t.deepEqual(res2.services['management-service'].DockerConfig, {

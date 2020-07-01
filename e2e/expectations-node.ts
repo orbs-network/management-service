@@ -17,7 +17,7 @@ export const expectationNodeManagement = {
       InternalPort: 7777,
       DockerConfig: {
         Image: 'orbsnetwork/signer',
-        Tag: 'experimental',
+        Tag: isValidImageVersion,
         Pull: true,
       },
       Config: {
