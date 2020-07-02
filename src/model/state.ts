@@ -8,16 +8,17 @@ export interface StateSnapshot {
   CurrentRefBlock: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
-  CurrentCommittee: { EthAddress: string; Weight: number; EffectiveStake: number }[];
+  CurrentCommittee: { EthAddress: string; Weight: number }[];
+  CurrentStandbys: { EthAddress: string }[];
+  CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[]; // Port overridden by processor
   CommitteeEvents: {
     RefTime: number;
     Committee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
   }[];
   LastCommitteeEvent: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
+  CurrentEffectiveStake: { [EthAddress: string]: number }; // in ORBS
   CurrentIp: { [EthAddress: string]: string };
   CurrentOrbsAddress: { [EthAddress: string]: string };
-  CurrentStandbys: { EthAddress: string }[];
-  CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[]; // Port overridden by processor
   CurrentElectionsStatus: {
     [EthAddress: string]: {
       LastUpdateTime: number;
@@ -67,12 +68,13 @@ export class State {
     PageStartRefTime: 0,
     PageEndRefTime: 0,
     CurrentCommittee: [],
-    CommitteeEvents: [],
-    LastCommitteeEvent: [],
-    CurrentIp: {},
-    CurrentOrbsAddress: {},
     CurrentStandbys: [],
     CurrentTopology: [],
+    CommitteeEvents: [],
+    LastCommitteeEvent: [],
+    CurrentEffectiveStake: {},
+    CurrentIp: {},
+    CurrentOrbsAddress: {},
     CurrentElectionsStatus: {},
     CurrentVirtualChains: {},
     SubscriptionEvents: {},
@@ -108,6 +110,7 @@ export class State {
 
   applyNewValidatorCommitteeChange(_time: number, event: EventTypes['ValidatorCommitteeChange']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
+    this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.weight);
 
     // current standbys
     _.remove(this.snapshot.CurrentStandbys, (node) => node.EthAddress == EthAddress);
@@ -123,13 +126,17 @@ export class State {
     if (event.returnValues.inCommittee) {
       this.snapshot.CurrentCommittee.push({
         EthAddress,
-        EffectiveStake: orbitonsToOrbs(event.returnValues.weight),
         Weight: 0,
       });
     }
-    fixCommitteeWeights(this.snapshot.CurrentCommittee);
+    fixCommitteeWeights(this.snapshot.CurrentCommittee, this.snapshot.CurrentEffectiveStake);
     this.snapshot.CurrentCommittee = _.sortBy(this.snapshot.CurrentCommittee, (node) => node.EthAddress);
     this.snapshot.CurrentCommittee = _.sortBy(this.snapshot.CurrentCommittee, (node) => -1 * node.Weight);
+  }
+
+  applyNewStakeChanged(_time: number, event: EventTypes['StakeChanged']) {
+    const EthAddress = normalizeAddress(event.returnValues.addr);
+    this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.effective_stake);
   }
 
   applyNewValidatorDataUpdated(_time: number, event: EventTypes['ValidatorDataUpdated']) {
@@ -213,7 +220,7 @@ export class State {
   }
 }
 
-type CommiteeNodes = { EthAddress: string; Weight: number; EffectiveStake: number }[];
+type CommiteeNodes = { EthAddress: string; Weight: number }[];
 type TopologyNodes = { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[];
 type CommiteeEvent = {
   RefTime: number;
@@ -247,10 +254,10 @@ function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
   return _.sortBy(res, (node) => node.EthAddress);
 }
 
-function fixCommitteeWeights(committee: CommiteeNodes): void {
-  const totalStake = _.sum(_.map(committee, (node) => node.EffectiveStake));
+function fixCommitteeWeights(committee: CommiteeNodes, stake: { [EthAddress: string]: number }): void {
+  const totalStake = _.sum(_.map(committee, (node) => stake[node.EthAddress] ?? 0));
   for (const node of committee) {
-    node.Weight = Math.max(node.EffectiveStake, Math.round(totalStake / committee.length));
+    node.Weight = Math.max(stake[node.EthAddress] ?? 0, Math.round(totalStake / committee.length));
   }
 }
 

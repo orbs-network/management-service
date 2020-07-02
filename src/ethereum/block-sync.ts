@@ -20,6 +20,7 @@ export class BlockSync {
     this.lastProcessedBlock = config.FirstBlock;
     this.eventFetchers = {
       ValidatorCommitteeChange: new SingleEventFetcher('ValidatorCommitteeChange', this.reader),
+      StakeChanged: new SingleEventFetcher('StakeChanged', this.reader),
       SubscriptionChanged: new SingleEventFetcher('SubscriptionChanged', this.reader),
       ProtocolVersionChanged: new SingleEventFetcher('ProtocolVersionChanged', this.reader),
       ValidatorDataUpdated: new SingleEventFetcher('ValidatorDataUpdated', this.reader),

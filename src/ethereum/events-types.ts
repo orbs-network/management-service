@@ -3,6 +3,7 @@ import { EventData } from 'web3-eth-contract';
 export const eventNames: Readonly<Array<EventName>> = [
   'SubscriptionChanged',
   'ValidatorCommitteeChange',
+  'StakeChanged',
   'ProtocolVersionChanged',
   'ValidatorDataUpdated',
   'ValidatorStatusUpdated',
@@ -26,6 +27,13 @@ export type ValidatorCommitteeChangePayload = {
   isStandby: boolean;
 };
 
+export type StakeChangedPayload = {
+  addr: string;
+  selfStake: string;
+  delegated_stake: string;
+  effective_stake: string;
+};
+
 export type ProtocolChangedPayload = {
   deploymentSubset: string;
   currentVersion: string;
@@ -47,6 +55,7 @@ export type ValidatorStatusUpdatedPayload = {
 
 export type EventTypes = {
   ValidatorCommitteeChange: EventData & { returnValues: ValidatorCommitteeChangePayload };
+  StakeChanged: EventData & { returnValues: StakeChangedPayload };
   SubscriptionChanged: EventData & { returnValues: SubscriptionChangedPayload };
   ProtocolVersionChanged: EventData & { returnValues: ProtocolChangedPayload };
   ValidatorDataUpdated: EventData & { returnValues: ValidatorDataUpdatedPayload };

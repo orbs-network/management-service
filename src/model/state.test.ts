@@ -62,6 +62,7 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   // change standbys to [O, P]
   ValidatorCommitteeChange(s, day + 3000, '0xN', false, false);
   ValidatorCommitteeChange(s, day + 3000, '0xP', false, true);
+  StakeChanged(s, day + 3000, '0xO', '20000000000000000000000');
 
   s.applyNewTimeRef(day + 3000, 300);
 
@@ -118,9 +119,20 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'x', Weight: 10000, EffectiveStake: 10000 },
-    { EthAddress: 'z', Weight: 10000, EffectiveStake: 10000 },
+    { EthAddress: 'x', Weight: 10000 },
+    { EthAddress: 'z', Weight: 10000 },
   ]);
+  t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
+    a: 10000,
+    b: 10000,
+    c: 10000,
+    m: 10000,
+    n: 10000,
+    o: 20000,
+    p: 10000,
+    x: 10000,
+    z: 10000,
+  });
 });
 
 test('state calculates committee weights correctly', (t) => {
@@ -132,28 +144,42 @@ test('state calculates committee weights correctly', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000, EffectiveStake: 20000 },
-    { EthAddress: 'a', Weight: 15000, EffectiveStake: 10000 },
+    { EthAddress: 'b', Weight: 20000 },
+    { EthAddress: 'a', Weight: 15000 },
   ]);
+  t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
+    a: 10000,
+    b: 20000,
+  });
 
   ValidatorCommitteeWeight(s, '0xC', '10000000000000000000000', true);
 
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000, EffectiveStake: 20000 },
-    { EthAddress: 'a', Weight: 13333, EffectiveStake: 10000 },
-    { EthAddress: 'c', Weight: 13333, EffectiveStake: 10000 },
+    { EthAddress: 'b', Weight: 20000 },
+    { EthAddress: 'a', Weight: 13333 },
+    { EthAddress: 'c', Weight: 13333 },
   ]);
+  t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
+    a: 10000,
+    b: 20000,
+    c: 10000,
+  });
 
   ValidatorCommitteeWeight(s, '0xB', '20000000000000000000000', false);
 
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'a', Weight: 10000, EffectiveStake: 10000 },
-    { EthAddress: 'c', Weight: 10000, EffectiveStake: 10000 },
+    { EthAddress: 'a', Weight: 10000 },
+    { EthAddress: 'c', Weight: 10000 },
   ]);
+  t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
+    a: 10000,
+    b: 20000,
+    c: 10000,
+  });
 });
 
 test('state applies elections status updates', (t) => {
@@ -368,6 +394,20 @@ function ValidatorCommitteeWeight(s: State, addr: string, weight: string, inComm
       compliance: false,
       inCommittee,
       isStandby: false,
+    },
+  });
+}
+
+function StakeChanged(s: State, time: number, addr: string, effectiveStake: string) {
+  s.applyNewStakeChanged(time, {
+    ...eventBase,
+    returnValues: {
+      addr,
+      selfStake: '0',
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      delegated_stake: effectiveStake,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      effective_stake: effectiveStake,
     },
   });
 }

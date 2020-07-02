@@ -164,6 +164,8 @@ export function contractByEventName(eventName: EventName): ContractName {
   switch (eventName) {
     case 'ValidatorCommitteeChange':
       return 'committee';
+    case 'StakeChanged':
+      return 'elections';
     case 'SubscriptionChanged':
       return 'subscriptions';
     case 'ProtocolVersionChanged':
