@@ -188,6 +188,8 @@ test('state applies elections status updates', (t) => {
   ValidatorStatusUpdated(s, 1000, '0xA', true, false);
   ValidatorStatusUpdated(s, 2000, '0xB', false, false);
   ValidatorStatusUpdated(s, 3000, '0xB', true, true);
+  ValidatorStatusUpdated(s, 4000, '0xC', true, true);
+  s.applyNewTimeRef(4000, 100);
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
@@ -195,12 +197,30 @@ test('state applies elections status updates', (t) => {
     LastUpdateTime: 1000,
     ReadyToSync: true,
     ReadyForCommittee: false,
+    TimeToStale: 7 * 24 * 60 * 60 - 3000,
   });
   t.deepEqual(s.getSnapshot().CurrentElectionsStatus['b'], {
     LastUpdateTime: 3000,
     ReadyToSync: true,
     ReadyForCommittee: true,
+    TimeToStale: 7 * 24 * 60 * 60 - 1000,
   });
+  t.deepEqual(s.getSnapshot().CurrentElectionsStatus['c'], {
+    LastUpdateTime: 4000,
+    ReadyToSync: true,
+    ReadyForCommittee: true,
+    TimeToStale: 7 * 24 * 60 * 60,
+  });
+
+  ValidatorStatusUpdated(s, 5 * day, '0xA', true, false);
+  s.getSnapshot().CurrentCommittee = [{ EthAddress: 'b', Weight: 1 }];
+  s.applyNewTimeRef(10 * day, 10000);
+
+  t.log(JSON.stringify(s.getSnapshot(), null, 2));
+
+  t.assert(s.getSnapshot().CurrentElectionsStatus['a'].TimeToStale > 0);
+  t.assert(s.getSnapshot().CurrentElectionsStatus['b'].TimeToStale == 7 * 24 * 60 * 60);
+  t.assert(s.getSnapshot().CurrentElectionsStatus['c'].TimeToStale == 0);
 });
 
 test('state applies virtual chain subscriptions', (t) => {

@@ -1,9 +1,9 @@
 import { EventData } from 'web3-eth-contract';
-import { State, StateSnapshot } from './state';
+import { State, StateSnapshot, StateConfiguration } from './state';
 import { EventTypes } from '../ethereum/events-types';
 
 export class StateManager {
-  private current: State = new State();
+  private current: State;
 
   applyNewEvents(time: number, events: EventData[]) {
     for (const event of events) {
@@ -25,6 +25,10 @@ export class StateManager {
           break;
       }
     }
+  }
+
+  constructor(private config: StateConfiguration) {
+    this.current = new State(this.config);
   }
 
   applyNewTimeRef(time: number, block: number) {

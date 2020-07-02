@@ -15,7 +15,7 @@ import * as Logger from './logger';
 // }
 
 export function serve(serviceConfig: ServiceConfiguration) {
-  const state = new StateManager();
+  const state = new StateManager(serviceConfig);
   const blockSync = new BlockSync(state, serviceConfig);
   const imagePoll = new ImagePoll(state, serviceConfig);
 

@@ -18,6 +18,7 @@ const configValue: ServiceConfiguration = {
   Port: -1,
   FirstBlock: 0,
   EthereumPollIntervalSeconds: 0.5,
+  ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
   RegularRolloutWindowSeconds: 1,
   HotfixRolloutWindowSeconds: 1,
   DockerHubPollIntervalSeconds: 1,

@@ -4,7 +4,7 @@ import { renderServiceStatus } from './render-status';
 import { exampleConfig } from '../config.example';
 
 test.serial('[integration] getServiceStatus responds', (t) => {
-  const state = new StateManager();
+  const state = new StateManager(exampleConfig);
 
   // process
   const res = renderServiceStatus(state.getCurrentSnapshot(), exampleConfig);

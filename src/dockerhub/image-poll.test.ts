@@ -6,7 +6,7 @@ import { sleep } from '../helpers';
 
 test('getGradualRolloutDelay returns random values in window', (t) => {
   const iterations = 1000;
-  const s = new StateManager();
+  const s = new StateManager(exampleConfig);
   const p = new ImagePoll(s, {
     ...exampleConfig,
     RegularRolloutWindowSeconds: 20000,
@@ -39,7 +39,7 @@ test('getGradualRolloutDelay returns random values in window', (t) => {
 });
 
 test('performImmediateUpdate does not downgrade', (t) => {
-  const s = new StateManager();
+  const s = new StateManager(exampleConfig);
   const p = new ImagePoll(s, exampleConfig);
 
   p.performImmediateUpdate('main', 'node', 'v1.0.0');
@@ -56,7 +56,7 @@ test('performImmediateUpdate does not downgrade', (t) => {
 });
 
 test('performGradualRollout works as expected', async (t) => {
-  const s = new StateManager();
+  const s = new StateManager(exampleConfig);
   const p = new ImagePoll(s, {
     ...exampleConfig,
     RegularRolloutWindowSeconds: 1000000,

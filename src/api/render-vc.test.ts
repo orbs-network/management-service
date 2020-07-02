@@ -35,7 +35,7 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
     EthereumEndpoint: ethereumEndpoint,
     FinalityBufferBlocks: finalityBufferBlocks,
   };
-  const state = new StateManager();
+  const state = new StateManager(config);
   const blockSync = new BlockSync(state, config);
   await blockSync.run();
 

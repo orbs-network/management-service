@@ -27,6 +27,7 @@ export class TestEnvironment {
       RegularRolloutWindowSeconds: 2,
       HotfixRolloutWindowSeconds: 2,
       EthereumPollIntervalSeconds: 1,
+      ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
       FinalityBufferBlocks: 10,
       FirstBlock: 0,
       Verbose: true,

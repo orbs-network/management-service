@@ -42,7 +42,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     RegularRolloutWindowSeconds: 1000000,
     HotfixRolloutWindowSeconds: 2,
   };
-  const state = new StateManager();
+  const state = new StateManager(config);
   const blockSync = new BlockSync(state, config);
   await blockSync.run();
   const imagePoll = new ImagePoll(state, config);

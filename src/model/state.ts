@@ -24,6 +24,7 @@ export interface StateSnapshot {
       LastUpdateTime: number;
       ReadyToSync: boolean;
       ReadyForCommittee: boolean;
+      TimeToStale: number;
     };
   };
   CurrentVirtualChains: {
@@ -61,6 +62,14 @@ export interface StateSnapshot {
   };
 }
 
+export type StateConfiguration = {
+  ElectionsStaleUpdateSeconds: number;
+};
+
+export const defaultStateConfiguration: StateConfiguration = {
+  ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
+};
+
 export class State {
   private snapshot: StateSnapshot = {
     CurrentRefTime: 0,
@@ -92,6 +101,8 @@ export class State {
     },
   };
 
+  constructor(private config = defaultStateConfiguration) {}
+
   getSnapshot(): StateSnapshot {
     return this.snapshot;
   }
@@ -100,11 +111,15 @@ export class State {
     this.snapshot.CurrentRefTime = time;
     this.snapshot.CurrentRefBlock = block;
     this.snapshot.PageEndRefTime = time;
+    // see if we need to generate a new CommitteeEvent
     const committeeEvent = calcNewCommitteeEvent(time, this.snapshot);
     if (!_.isEqual(committeeEvent.Committee, this.snapshot.LastCommitteeEvent)) {
       this.snapshot.CommitteeEvents.push(committeeEvent);
       this.snapshot.LastCommitteeEvent = _.cloneDeep(committeeEvent.Committee);
     }
+    // stale election updates are based on time (7d)
+    calcStaleElectionsUpdates(time, this.snapshot, this.config);
+    // topology is based on time (last 12h)
     this.snapshot.CurrentTopology = calcTopology(time, this.snapshot);
   }
 
@@ -137,6 +152,9 @@ export class State {
   applyNewStakeChanged(_time: number, event: EventTypes['StakeChanged']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.effective_stake);
+    if (this.snapshot.CurrentEffectiveStake[EthAddress] == 0) {
+      delete this.snapshot.CurrentEffectiveStake[EthAddress];
+    }
   }
 
   applyNewValidatorDataUpdated(_time: number, event: EventTypes['ValidatorDataUpdated']) {
@@ -151,6 +169,7 @@ export class State {
       LastUpdateTime: time,
       ReadyToSync: event.returnValues.readyToSync,
       ReadyForCommittee: event.returnValues.readyForCommittee,
+      TimeToStale: this.config.ElectionsStaleUpdateSeconds,
     };
   }
 
@@ -275,6 +294,20 @@ function calcNewCommitteeEvent(time: number, snapshot: StateSnapshot): CommiteeE
       IdentityType: 0,
     })),
   };
+}
+
+function calcStaleElectionsUpdates(time: number, snapshot: StateSnapshot, config: StateConfiguration) {
+  // all committee members are always up-to-date
+  for (const node of snapshot.CurrentCommittee) {
+    if (snapshot.CurrentElectionsStatus[node.EthAddress]) {
+      snapshot.CurrentElectionsStatus[node.EthAddress].LastUpdateTime = time;
+    }
+  }
+  // check who's stale
+  for (const status of Object.values(snapshot.CurrentElectionsStatus)) {
+    status.TimeToStale = config.ElectionsStaleUpdateSeconds - (time - status.LastUpdateTime);
+    if (status.TimeToStale < 0) status.TimeToStale = 0;
+  }
 }
 
 function normalizeAddress(address: string): string {
