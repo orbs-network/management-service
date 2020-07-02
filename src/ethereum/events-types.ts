@@ -45,6 +45,9 @@ export type ValidatorDataUpdatedPayload = {
   addr: string;
   ip: string;
   orbsAddr: string;
+  name: string;
+  website: string;
+  contact: string;
 };
 
 export type ValidatorStatusUpdatedPayload = {

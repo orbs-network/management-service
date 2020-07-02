@@ -10,9 +10,9 @@ export interface StateSnapshot {
   CurrentRefBlock: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
-  CurrentCommittee: { EthAddress: string; Weight: number }[];
-  CurrentCandidates: { EthAddress: string; IsStandby: boolean }[];
-  CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[]; // Port overridden by processor
+  CurrentCommittee: { EthAddress: string; Weight: number; Name: string }[];
+  CurrentCandidates: { EthAddress: string; IsStandby: boolean; Name: string }[];
+  CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number; Name: string }[]; // Port overridden by processor
   CommitteeEvents: {
     RefTime: number;
     Committee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
@@ -27,6 +27,13 @@ export interface StateSnapshot {
       ReadyToSync: boolean;
       ReadyForCommittee: boolean;
       TimeToStale: number;
+    };
+  };
+  CurrentRegistrationData: {
+    [EthAddress: string]: {
+      Name: string;
+      Website: string;
+      Contact: string;
     };
   };
   CurrentVirtualChains: {
@@ -87,6 +94,7 @@ export class State {
     CurrentIp: {},
     CurrentOrbsAddress: {},
     CurrentElectionsStatus: {},
+    CurrentRegistrationData: {},
     CurrentVirtualChains: {},
     SubscriptionEvents: {},
     ProtocolVersionEvents: {
@@ -135,6 +143,7 @@ export class State {
       this.snapshot.CurrentCommittee.push({
         EthAddress,
         Weight: 0,
+        Name: this.snapshot.CurrentRegistrationData[EthAddress]?.Name ?? '',
       });
     }
     fixCommitteeWeights(this.snapshot.CurrentCommittee, this.snapshot.CurrentEffectiveStake);
@@ -154,6 +163,11 @@ export class State {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentOrbsAddress[EthAddress] = normalizeAddress(event.returnValues.orbsAddr);
     this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
+    this.snapshot.CurrentRegistrationData[EthAddress] = {
+      Name: event.returnValues.name,
+      Website: event.returnValues.website,
+      Contact: event.returnValues.contact,
+    };
   }
 
   applyNewValidatorStatusUpdated(time: number, event: EventTypes['ValidatorStatusUpdated']) {
@@ -232,9 +246,9 @@ export class State {
   }
 }
 
-type CommiteeNodes = { EthAddress: string; Weight: number }[];
-type CandidateNodes = { EthAddress: string; IsStandby: boolean }[];
-type TopologyNodes = { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[];
+type CommiteeNodes = { EthAddress: string; Weight: number; Name: string }[];
+type CandidateNodes = { EthAddress: string; IsStandby: boolean; Name: string }[];
+type TopologyNodes = { EthAddress: string; OrbsAddress: string; Ip: string; Port: number; Name: string }[];
 type CommiteeEvent = {
   RefTime: number;
   Committee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
@@ -244,7 +258,11 @@ function calcCandidates(snapshot: StateSnapshot): CandidateNodes {
   const allRegistered = _.clone(snapshot.CurrentOrbsAddress);
   for (const node of snapshot.CurrentCommittee) delete allRegistered[node.EthAddress];
   let res = Object.keys(allRegistered).map((EthAddress) => {
-    return { EthAddress, IsStandby: false };
+    return {
+      EthAddress,
+      IsStandby: false,
+      Name: snapshot.CurrentRegistrationData[EthAddress]?.Name ?? '',
+    };
   });
   res = _.sortBy(res, (node) => node.EthAddress);
   res = _.sortBy(res, (node) => -1 * snapshot.CurrentEffectiveStake[node.EthAddress] ?? 0);
@@ -276,6 +294,7 @@ function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
     OrbsAddress: snapshot.CurrentOrbsAddress[EthAddress],
     Ip: snapshot.CurrentIp[EthAddress],
     Port: 0,
+    Name: snapshot.CurrentRegistrationData[EthAddress]?.Name ?? '',
   }));
   return _.sortBy(res, (node) => node.EthAddress);
 }

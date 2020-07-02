@@ -89,13 +89,13 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   t.is(s.getSnapshot().CurrentOrbsAddress['p'], 'p3');
 
   t.deepEqual(s.getSnapshot().CurrentCandidates, [
-    { EthAddress: 'o', IsStandby: true },
-    { EthAddress: 'a', IsStandby: true },
-    { EthAddress: 'b', IsStandby: true },
-    { EthAddress: 'c', IsStandby: true },
-    { EthAddress: 'm', IsStandby: true },
-    { EthAddress: 'n', IsStandby: false },
-    { EthAddress: 'p', IsStandby: false },
+    { EthAddress: 'o', IsStandby: true, Name: 'name' },
+    { EthAddress: 'a', IsStandby: true, Name: 'name' },
+    { EthAddress: 'b', IsStandby: true, Name: 'name' },
+    { EthAddress: 'c', IsStandby: true, Name: 'name' },
+    { EthAddress: 'm', IsStandby: true, Name: 'name' },
+    { EthAddress: 'n', IsStandby: false, Name: 'name' },
+    { EthAddress: 'p', IsStandby: false, Name: 'name' },
   ]);
 
   t.is(s.getSnapshot().CommitteeEvents.length, 3);
@@ -118,18 +118,18 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentTopology, [
-    { EthAddress: 'a', OrbsAddress: 'a2', Ip: '7.7.7.7', Port: 0 },
-    { EthAddress: 'b', OrbsAddress: 'b2', Ip: '2.2.2.2', Port: 0 },
-    { EthAddress: 'c', OrbsAddress: 'c2', Ip: '3.3.3.3', Port: 0 },
-    { EthAddress: 'm', OrbsAddress: 'm1', Ip: '4.4.4.4', Port: 0 },
-    { EthAddress: 'o', OrbsAddress: 'o3', Ip: '8.8.8.8', Port: 0 },
-    { EthAddress: 'x', OrbsAddress: 'x3', Ip: '9.9.9.9', Port: 0 },
-    { EthAddress: 'z', OrbsAddress: 'z3', Ip: '11.11.11.11', Port: 0 },
+    { EthAddress: 'a', OrbsAddress: 'a2', Ip: '7.7.7.7', Port: 0, Name: 'name' },
+    { EthAddress: 'b', OrbsAddress: 'b2', Ip: '2.2.2.2', Port: 0, Name: 'name' },
+    { EthAddress: 'c', OrbsAddress: 'c2', Ip: '3.3.3.3', Port: 0, Name: 'name' },
+    { EthAddress: 'm', OrbsAddress: 'm1', Ip: '4.4.4.4', Port: 0, Name: 'name' },
+    { EthAddress: 'o', OrbsAddress: 'o3', Ip: '8.8.8.8', Port: 0, Name: 'name' },
+    { EthAddress: 'x', OrbsAddress: 'x3', Ip: '9.9.9.9', Port: 0, Name: 'name' },
+    { EthAddress: 'z', OrbsAddress: 'z3', Ip: '11.11.11.11', Port: 0, Name: 'name' },
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'x', Weight: 10000 },
-    { EthAddress: 'z', Weight: 10000 },
+    { EthAddress: 'x', Weight: 10000, Name: 'name' },
+    { EthAddress: 'z', Weight: 10000, Name: 'name' },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -153,8 +153,8 @@ test('state calculates committee weights correctly', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000 },
-    { EthAddress: 'a', Weight: 15000 },
+    { EthAddress: 'b', Weight: 20000, Name: '' },
+    { EthAddress: 'a', Weight: 15000, Name: '' },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -166,9 +166,9 @@ test('state calculates committee weights correctly', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000 },
-    { EthAddress: 'a', Weight: 13333 },
-    { EthAddress: 'c', Weight: 13333 },
+    { EthAddress: 'b', Weight: 20000, Name: '' },
+    { EthAddress: 'a', Weight: 13333, Name: '' },
+    { EthAddress: 'c', Weight: 13333, Name: '' },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -181,8 +181,8 @@ test('state calculates committee weights correctly', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'a', Weight: 10000 },
-    { EthAddress: 'c', Weight: 10000 },
+    { EthAddress: 'a', Weight: 10000, Name: '' },
+    { EthAddress: 'c', Weight: 10000, Name: '' },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -235,17 +235,17 @@ test('state applies elections status updates and sets candidates accordingly', (
     TimeToStale: 7 * 24 * 60 * 60,
   });
   t.deepEqual(s.getSnapshot().CurrentCandidates, [
-    { EthAddress: 'c', IsStandby: true },
-    { EthAddress: 'b', IsStandby: true },
-    { EthAddress: 'a', IsStandby: true },
-    { EthAddress: 'd', IsStandby: true },
-    { EthAddress: 'x', IsStandby: true },
-    { EthAddress: 'y', IsStandby: false },
-    { EthAddress: 'z', IsStandby: false },
+    { EthAddress: 'c', IsStandby: true, Name: 'name' },
+    { EthAddress: 'b', IsStandby: true, Name: 'name' },
+    { EthAddress: 'a', IsStandby: true, Name: 'name' },
+    { EthAddress: 'd', IsStandby: true, Name: 'name' },
+    { EthAddress: 'x', IsStandby: true, Name: 'name' },
+    { EthAddress: 'y', IsStandby: false, Name: 'name' },
+    { EthAddress: 'z', IsStandby: false, Name: 'name' },
   ]);
 
   ValidatorStatusUpdated(s, 5 * day, '0xA', true, false);
-  s.getSnapshot().CurrentCommittee = [{ EthAddress: 'b', Weight: 1 }];
+  s.getSnapshot().CurrentCommittee = [{ EthAddress: 'b', Weight: 1, Name: 'name' }];
   s.applyNewTimeRef(10 * day, 10000);
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
@@ -254,12 +254,12 @@ test('state applies elections status updates and sets candidates accordingly', (
   t.assert(s.getSnapshot().CurrentElectionsStatus['b'].TimeToStale == 7 * 24 * 60 * 60);
   t.assert(s.getSnapshot().CurrentElectionsStatus['c'].TimeToStale == 0);
   t.deepEqual(s.getSnapshot().CurrentCandidates, [
-    { EthAddress: 'a', IsStandby: true },
-    { EthAddress: 'd', IsStandby: true },
-    { EthAddress: 'c', IsStandby: true },
-    { EthAddress: 'x', IsStandby: true },
-    { EthAddress: 'y', IsStandby: true },
-    { EthAddress: 'z', IsStandby: false },
+    { EthAddress: 'a', IsStandby: true, Name: 'name' },
+    { EthAddress: 'd', IsStandby: true, Name: 'name' },
+    { EthAddress: 'c', IsStandby: true, Name: 'name' },
+    { EthAddress: 'x', IsStandby: true, Name: 'name' },
+    { EthAddress: 'y', IsStandby: true, Name: 'name' },
+    { EthAddress: 'z', IsStandby: false, Name: 'name' },
   ]);
 });
 
@@ -479,6 +479,9 @@ function ValidatorDataUpdated(s: State, time: number, addr: string, orbsAddr: st
       ip,
       addr,
       orbsAddr,
+      name: 'name',
+      website: 'website',
+      contact: 'contact',
     },
   });
 }

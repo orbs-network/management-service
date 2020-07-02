@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
 import { ServiceConfiguration } from '../config';
 import { getCurrentClockTime, JsonResponse } from '../helpers';
@@ -18,14 +19,21 @@ export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConf
       CurrentRefBlock: snapshot.CurrentRefBlock,
       CurrentCommittee: snapshot.CurrentCommittee,
       CurrentCandidates: snapshot.CurrentCandidates,
+      CurrentTopology: snapshot.CurrentTopology,
       CurrentImageVersions: snapshot.CurrentImageVersions,
       CurrentImageVersionsUpdater: snapshot.CurrentImageVersionsUpdater,
       CurrentVirtualChains: snapshot.CurrentVirtualChains,
-      CurrentTopology: snapshot.CurrentTopology,
-      CurrentIp: snapshot.CurrentIp,
-      CurrentOrbsAddress: snapshot.CurrentOrbsAddress,
-      CurrentElectionsStatus: snapshot.CurrentElectionsStatus,
       ProtocolVersionEvents: snapshot.ProtocolVersionEvents,
+      Guardians: _.mapValues(snapshot.CurrentOrbsAddress, (OrbsAddress, EthAddress) => {
+        return {
+          EthAddress,
+          OrbsAddress,
+          Ip: snapshot.CurrentIp[EthAddress],
+          EffectiveStake: snapshot.CurrentEffectiveStake[EthAddress],
+          ElectionsStatus: snapshot.CurrentElectionsStatus[EthAddress],
+          ...snapshot.CurrentRegistrationData[EthAddress],
+        };
+      }),
       Config: config,
     },
   };

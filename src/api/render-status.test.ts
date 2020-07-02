@@ -20,14 +20,12 @@ test.serial('[integration] getServiceStatus responds', (t) => {
     CurrentRefBlock: 0,
     CurrentCommittee: [],
     CurrentCandidates: [],
+    CurrentTopology: [],
     CurrentImageVersions: { main: {}, canary: {} },
     CurrentImageVersionsUpdater: { main: {}, canary: {} },
     CurrentVirtualChains: {},
-    CurrentTopology: [],
-    CurrentIp: {},
-    CurrentOrbsAddress: {},
-    CurrentElectionsStatus: {},
     ProtocolVersionEvents: { main: [], canary: [] },
+    Guardians: {},
     Config: exampleConfig,
   });
 });
