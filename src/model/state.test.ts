@@ -21,13 +21,13 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ValidatorDataUpdated(s, 1000, '0xN', '0xn1', '0x05050505');
 
   // change committee to [A, B, C]
-  ValidatorCommitteeChange(s, 1000, '0xA', true, false);
-  ValidatorCommitteeChange(s, 1000, '0xB', true, false);
-  ValidatorCommitteeChange(s, 1000, '0xC', true, false);
+  ValidatorCommitteeChange(s, 1000, '0xA', true);
+  ValidatorCommitteeChange(s, 1000, '0xB', true);
+  ValidatorCommitteeChange(s, 1000, '0xC', true);
 
   // change standbys to [M, N]
-  ValidatorCommitteeChange(s, 1000, '0xM', false, true);
-  ValidatorCommitteeChange(s, 1000, '0xN', false, true);
+  ValidatorCommitteeChange(s, 1000, '0xM', false);
+  ValidatorCommitteeChange(s, 1000, '0xN', false);
 
   s.applyNewTimeRef(1000, 100);
 
@@ -39,12 +39,12 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ValidatorDataUpdated(s, 2000, '0xN', '0xn2', '0x05050505');
 
   // change committee to [Z, B, C]
-  ValidatorCommitteeChange(s, 2000, '0xA', false, false);
-  ValidatorCommitteeChange(s, 2000, '0xZ', true, false);
+  ValidatorCommitteeChange(s, 2000, '0xA', false);
+  ValidatorCommitteeChange(s, 2000, '0xZ', true);
 
-  // change standbys to [N, O]
-  ValidatorCommitteeChange(s, 2000, '0xM', false, false);
-  ValidatorCommitteeChange(s, 2000, '0xO', false, true);
+  // change standbys to [A, M, N, O]
+  ValidatorCommitteeChange(s, 2000, '0xM', false);
+  ValidatorCommitteeChange(s, 2000, '0xO', false);
 
   s.applyNewTimeRef(2000, 200);
 
@@ -55,13 +55,13 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ValidatorDataUpdated(s, day + 3000, '0xO', '0xo3', '0x08080808');
 
   // change committee to [X, Z]
-  ValidatorCommitteeChange(s, day + 3000, '0xB', false, false);
-  ValidatorCommitteeChange(s, day + 3000, '0xC', false, false);
-  ValidatorCommitteeChange(s, day + 3000, '0xX', true, false);
+  ValidatorCommitteeChange(s, day + 3000, '0xB', false);
+  ValidatorCommitteeChange(s, day + 3000, '0xC', false);
+  ValidatorCommitteeChange(s, day + 3000, '0xX', true);
 
-  // change standbys to [O, P]
-  ValidatorCommitteeChange(s, day + 3000, '0xN', false, false);
-  ValidatorCommitteeChange(s, day + 3000, '0xP', false, true);
+  // change standbys to [A, B, C, M, N]
+  ValidatorCommitteeChange(s, day + 3000, '0xN', false);
+  ValidatorCommitteeChange(s, day + 3000, '0xP', false);
   StakeChanged(s, day + 3000, '0xO', '20000000000000000000000');
 
   s.applyNewTimeRef(day + 3000, 300);
@@ -88,7 +88,15 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   t.is(s.getSnapshot().CurrentOrbsAddress['x'], 'x3');
   t.is(s.getSnapshot().CurrentOrbsAddress['p'], 'p3');
 
-  t.deepEqual(s.getSnapshot().CurrentStandbys, [{ EthAddress: 'o' }, { EthAddress: 'p' }]);
+  t.deepEqual(s.getSnapshot().CurrentCandidates, [
+    { EthAddress: 'o', IsStandby: true },
+    { EthAddress: 'a', IsStandby: true },
+    { EthAddress: 'b', IsStandby: true },
+    { EthAddress: 'c', IsStandby: true },
+    { EthAddress: 'm', IsStandby: true },
+    { EthAddress: 'n', IsStandby: false },
+    { EthAddress: 'p', IsStandby: false },
+  ]);
 
   t.is(s.getSnapshot().CommitteeEvents.length, 3);
   t.is(s.getSnapshot().CommitteeEvents[0].RefTime, 1000);
@@ -110,10 +118,11 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentTopology, [
+    { EthAddress: 'a', OrbsAddress: 'a2', Ip: '7.7.7.7', Port: 0 },
     { EthAddress: 'b', OrbsAddress: 'b2', Ip: '2.2.2.2', Port: 0 },
     { EthAddress: 'c', OrbsAddress: 'c2', Ip: '3.3.3.3', Port: 0 },
+    { EthAddress: 'm', OrbsAddress: 'm1', Ip: '4.4.4.4', Port: 0 },
     { EthAddress: 'o', OrbsAddress: 'o3', Ip: '8.8.8.8', Port: 0 },
-    { EthAddress: 'p', OrbsAddress: 'p3', Ip: '12.12.12.12', Port: 0 },
     { EthAddress: 'x', OrbsAddress: 'x3', Ip: '9.9.9.9', Port: 0 },
     { EthAddress: 'z', OrbsAddress: 'z3', Ip: '11.11.11.11', Port: 0 },
   ]);
@@ -182,8 +191,22 @@ test('state calculates committee weights correctly', (t) => {
   });
 });
 
-test('state applies elections status updates', (t) => {
+test('state applies elections status updates and sets candidates accordingly', (t) => {
   const s = new State();
+
+  ValidatorDataUpdated(s, 1000, '0xA', '0xa1', '0x01010101');
+  ValidatorDataUpdated(s, 1000, '0xB', '0xb1', '0x01010101');
+  ValidatorDataUpdated(s, 1000, '0xC', '0xc1', '0x01010101');
+  ValidatorDataUpdated(s, 1000, '0xD', '0xd1', '0x01010101');
+  ValidatorDataUpdated(s, 1000, '0xX', '0xx1', '0x01010101');
+  ValidatorDataUpdated(s, 1000, '0xY', '0xy1', '0x01010101');
+  ValidatorDataUpdated(s, 1000, '0xZ', '0xz1', '0x01010101');
+
+  StakeChanged(s, 1000, '0xA', '10000000000000000000000');
+  StakeChanged(s, 1000, '0xB', '20000000000000000000000');
+  StakeChanged(s, 1000, '0xC', '30000000000000000000000');
+  StakeChanged(s, 1000, '0xD', '40000000000000000000000');
+  StakeChanged(s, 1000, '0xE', '50000000000000000000000');
 
   ValidatorStatusUpdated(s, 1000, '0xA', true, false);
   ValidatorStatusUpdated(s, 2000, '0xB', false, false);
@@ -211,6 +234,15 @@ test('state applies elections status updates', (t) => {
     ReadyForCommittee: true,
     TimeToStale: 7 * 24 * 60 * 60,
   });
+  t.deepEqual(s.getSnapshot().CurrentCandidates, [
+    { EthAddress: 'c', IsStandby: true },
+    { EthAddress: 'b', IsStandby: true },
+    { EthAddress: 'a', IsStandby: true },
+    { EthAddress: 'd', IsStandby: true },
+    { EthAddress: 'x', IsStandby: true },
+    { EthAddress: 'y', IsStandby: false },
+    { EthAddress: 'z', IsStandby: false },
+  ]);
 
   ValidatorStatusUpdated(s, 5 * day, '0xA', true, false);
   s.getSnapshot().CurrentCommittee = [{ EthAddress: 'b', Weight: 1 }];
@@ -221,6 +253,14 @@ test('state applies elections status updates', (t) => {
   t.assert(s.getSnapshot().CurrentElectionsStatus['a'].TimeToStale > 0);
   t.assert(s.getSnapshot().CurrentElectionsStatus['b'].TimeToStale == 7 * 24 * 60 * 60);
   t.assert(s.getSnapshot().CurrentElectionsStatus['c'].TimeToStale == 0);
+  t.deepEqual(s.getSnapshot().CurrentCandidates, [
+    { EthAddress: 'a', IsStandby: true },
+    { EthAddress: 'd', IsStandby: true },
+    { EthAddress: 'c', IsStandby: true },
+    { EthAddress: 'x', IsStandby: true },
+    { EthAddress: 'y', IsStandby: true },
+    { EthAddress: 'z', IsStandby: false },
+  ]);
 });
 
 test('state applies virtual chain subscriptions', (t) => {
@@ -392,7 +432,7 @@ test('state applies image version changes', (t) => {
   });
 });
 
-function ValidatorCommitteeChange(s: State, time: number, addr: string, inCommittee: boolean, isStandby: boolean) {
+function ValidatorCommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {
   s.applyNewValidatorCommitteeChange(time, {
     ...eventBase,
     returnValues: {
@@ -400,7 +440,7 @@ function ValidatorCommitteeChange(s: State, time: number, addr: string, inCommit
       weight: '10000000000000000000000',
       compliance: false,
       inCommittee,
-      isStandby,
+      isStandby: false, // TODO: will remove soon
     },
   });
 }
@@ -413,7 +453,7 @@ function ValidatorCommitteeWeight(s: State, addr: string, weight: string, inComm
       weight,
       compliance: false,
       inCommittee,
-      isStandby: false,
+      isStandby: false, // TODO: will remove soon
     },
   });
 }

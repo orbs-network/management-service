@@ -17,7 +17,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConf
       CurrentRefTime: snapshot.CurrentRefTime,
       CurrentRefBlock: snapshot.CurrentRefBlock,
       CurrentCommittee: snapshot.CurrentCommittee,
-      CurrentStandbys: snapshot.CurrentStandbys,
+      CurrentCandidates: snapshot.CurrentCandidates,
       CurrentImageVersions: snapshot.CurrentImageVersions,
       CurrentImageVersionsUpdater: snapshot.CurrentImageVersionsUpdater,
       CurrentVirtualChains: snapshot.CurrentVirtualChains,

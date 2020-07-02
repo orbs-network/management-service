@@ -10,6 +10,18 @@ export const expectationVcManagement = {
       GenesisRefTime: isValidTimeRef,
       CurrentTopology: [
         {
+          EthAddress: '29ce860a2247d97160d6dfc087a15f41e2349087',
+          OrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
+          Ip: '41.206.134.10',
+          Port: 10000,
+        },
+        {
+          EthAddress: '51baa09f2f7dfc7a0f65886b68720958d389cac7',
+          OrbsAddress: '174dc3b45bdbbc32aa0b95e64d0247ce99b08f69',
+          Ip: '81.186.160.159',
+          Port: 10000,
+        },
+        {
           EthAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
           OrbsAddress: '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
           Ip: '138.103.13.220',

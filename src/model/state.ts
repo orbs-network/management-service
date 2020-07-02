@@ -3,13 +3,15 @@ import { EventTypes } from '../ethereum/events-types';
 import { getIpFromHex, toNumber } from '../helpers';
 import { findAllEventsCoveringRange } from './find';
 
+const NUM_STANDBYS = 5;
+
 export interface StateSnapshot {
   CurrentRefTime: number; // primary, everything is by time
   CurrentRefBlock: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
   CurrentCommittee: { EthAddress: string; Weight: number }[];
-  CurrentStandbys: { EthAddress: string }[];
+  CurrentCandidates: { EthAddress: string; IsStandby: boolean }[];
   CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[]; // Port overridden by processor
   CommitteeEvents: {
     RefTime: number;
@@ -77,7 +79,7 @@ export class State {
     PageStartRefTime: 0,
     PageEndRefTime: 0,
     CurrentCommittee: [],
-    CurrentStandbys: [],
+    CurrentCandidates: [],
     CurrentTopology: [],
     CommitteeEvents: [],
     LastCommitteeEvent: [],
@@ -117,24 +119,15 @@ export class State {
       this.snapshot.CommitteeEvents.push(committeeEvent);
       this.snapshot.LastCommitteeEvent = _.cloneDeep(committeeEvent.Committee);
     }
-    // stale election updates are based on time (7d)
+    // state sections with special business logic
     calcStaleElectionsUpdates(time, this.snapshot, this.config);
-    // topology is based on time (last 12h)
+    this.snapshot.CurrentCandidates = calcCandidates(this.snapshot);
     this.snapshot.CurrentTopology = calcTopology(time, this.snapshot);
   }
 
   applyNewValidatorCommitteeChange(_time: number, event: EventTypes['ValidatorCommitteeChange']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.weight);
-
-    // current standbys
-    _.remove(this.snapshot.CurrentStandbys, (node) => node.EthAddress == EthAddress);
-    if (event.returnValues.isStandby) {
-      this.snapshot.CurrentStandbys.push({
-        EthAddress,
-      });
-    }
-    this.snapshot.CurrentStandbys = _.sortBy(this.snapshot.CurrentStandbys, (node) => node.EthAddress);
 
     // current committee
     _.remove(this.snapshot.CurrentCommittee, (node) => node.EthAddress == EthAddress);
@@ -240,11 +233,25 @@ export class State {
 }
 
 type CommiteeNodes = { EthAddress: string; Weight: number }[];
+type CandidateNodes = { EthAddress: string; IsStandby: boolean }[];
 type TopologyNodes = { EthAddress: string; OrbsAddress: string; Ip: string; Port: number }[];
 type CommiteeEvent = {
   RefTime: number;
   Committee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
 };
+
+function calcCandidates(snapshot: StateSnapshot): CandidateNodes {
+  const allRegistered = _.clone(snapshot.CurrentOrbsAddress);
+  for (const node of snapshot.CurrentCommittee) delete allRegistered[node.EthAddress];
+  let res = Object.keys(allRegistered).map((EthAddress) => {
+    return { EthAddress, IsStandby: false };
+  });
+  res = _.sortBy(res, (node) => node.EthAddress);
+  res = _.sortBy(res, (node) => -1 * snapshot.CurrentEffectiveStake[node.EthAddress] ?? 0);
+  res = _.sortBy(res, (node) => (snapshot.CurrentElectionsStatus[node.EthAddress]?.TimeToStale > 0 ? 1 : 2));
+  for (let i = 0; i < Math.min(NUM_STANDBYS, res.length); i++) res[i].IsStandby = true;
+  return res;
+}
 
 function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
   const inTopology: { [EthAddress: string]: boolean } = {}; // EthAddress -> true
@@ -259,8 +266,8 @@ function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
   }
 
   // take last standbys
-  for (const node of snapshot.CurrentStandbys) {
-    inTopology[node.EthAddress] = true;
+  for (const node of snapshot.CurrentCandidates) {
+    if (node.IsStandby) inTopology[node.EthAddress] = true;
   }
 
   // done
@@ -307,6 +314,7 @@ function calcStaleElectionsUpdates(time: number, snapshot: StateSnapshot, config
   for (const status of Object.values(snapshot.CurrentElectionsStatus)) {
     status.TimeToStale = config.ElectionsStaleUpdateSeconds - (time - status.LastUpdateTime);
     if (status.TimeToStale < 0) status.TimeToStale = 0;
+    if (status.ReadyToSync != true) status.TimeToStale = 0;
   }
 }
 

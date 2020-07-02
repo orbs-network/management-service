@@ -19,7 +19,7 @@ test.serial('[integration] getServiceStatus responds', (t) => {
     CurrentRefTime: 0,
     CurrentRefBlock: 0,
     CurrentCommittee: [],
-    CurrentStandbys: [],
+    CurrentCandidates: [],
     CurrentImageVersions: { main: {}, canary: {} },
     CurrentImageVersionsUpdater: { main: {}, canary: {} },
     CurrentVirtualChains: {},
