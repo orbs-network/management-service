@@ -242,7 +242,7 @@ export const expectationStatus = {
       HotfixRolloutWindowSeconds: 2,
       EthereumPollIntervalSeconds: 1,
       FinalityBufferBlocks: 10,
-      FirstBlock: 0,
+      EthereumFirstBlock: 0,
       Verbose: true,
     },
   },

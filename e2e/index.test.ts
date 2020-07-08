@@ -37,7 +37,7 @@ test.serial('[E2E] serves /node/management as expected', async (t) => {
 
   t.log('fetching node/management');
   let res = await driver.fetch('app', 8080, 'node/management');
-  while (!res || isErrorResponse(res) || res.chains.length < 3) {
+  while (!res || isErrorResponse(res) || !res.chains || res.chains.length < 3) {
     await sleep(1000);
     t.log('fetching node/management again, since last response:', res);
     res = await driver.fetch('app', 8080, 'node/management');

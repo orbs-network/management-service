@@ -38,7 +38,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     EthereumEndpoint: ethereumEndpoint,
     DockerNamespace: 'mydockernamespace',
     FinalityBufferBlocks: finalityBufferBlocks,
-    FirstBlock: firstBlock,
+    EthereumFirstBlock: firstBlock,
     RegularRolloutWindowSeconds: 1000000,
     HotfixRolloutWindowSeconds: 2,
   };

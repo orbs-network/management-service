@@ -29,7 +29,7 @@ export class TestEnvironment {
       EthereumPollIntervalSeconds: 1,
       ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
       FinalityBufferBlocks: 10,
-      FirstBlock: 0,
+      EthereumFirstBlock: 0,
       Verbose: true,
     };
   }

@@ -57,7 +57,7 @@ export function getContractTypeName(key: ContractName): ContractTypeName {
 export type EthereumConfiguration = {
   EthereumGenesisContract: string;
   EthereumEndpoint: string;
-  FirstBlock: BlockNumber;
+  EthereumFirstBlock: BlockNumber;
   Verbose: boolean;
 };
 
@@ -85,7 +85,7 @@ export class EthereumConfigReader {
     events.forEach((e) => {
       contracts[e.returnValues.contractName] = {
         address: e.returnValues.addr,
-        firstBlock: this.config.FirstBlock, // TODO: max with contract genesis once it exists
+        firstBlock: this.config.EthereumFirstBlock, // TODO: max with contract genesis once it exists
       };
     });
     return contracts;
@@ -94,7 +94,7 @@ export class EthereumConfigReader {
   readEthereumConfig() {
     return {
       contracts: this.readContractsConfig(),
-      firstBlock: this.config.FirstBlock, // events[0].blockNumber,
+      firstBlock: this.config.EthereumFirstBlock, // events[0].blockNumber,
       httpEndpoint: this.config.EthereumEndpoint,
       verbose: this.config.Verbose,
     };

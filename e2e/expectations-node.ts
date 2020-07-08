@@ -37,7 +37,7 @@ export const expectationNodeManagement = {
         DockerNamespace: 'orbsnetwork',
         DockerHubPollIntervalSeconds: 1,
         EthereumPollIntervalSeconds: 1,
-        FirstBlock: 0,
+        EthereumFirstBlock: 0,
         FinalityBufferBlocks: 10,
         Verbose: true,
         EthereumGenesisContract: isValidEthereumAddress,

@@ -30,7 +30,7 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   // setup local state
   const config = {
     ...exampleConfig,
-    FirstBlock: firstBlock,
+    EthereumFirstBlock: firstBlock,
     EthereumGenesisContract: ethereum.getContractRegistryAddress(),
     EthereumEndpoint: ethereumEndpoint,
     FinalityBufferBlocks: finalityBufferBlocks,

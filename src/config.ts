@@ -12,7 +12,7 @@ export interface ServiceConfiguration {
   EthereumPollIntervalSeconds: number;
   ElectionsStaleUpdateSeconds: number;
   FinalityBufferBlocks: number;
-  FirstBlock: number;
+  EthereumFirstBlock: number;
   Verbose: boolean;
 }
 
@@ -26,7 +26,7 @@ export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
   HotfixRolloutWindowSeconds: 60 * 60,
   EthereumPollIntervalSeconds: 30,
   ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
-  FirstBlock: 0,
+  EthereumFirstBlock: 0,
   FinalityBufferBlocks: 40,
   Verbose: false,
 };

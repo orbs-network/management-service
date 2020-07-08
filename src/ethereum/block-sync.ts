@@ -7,7 +7,7 @@ import * as Logger from '../logger';
 
 export type BlockSyncConfiguration = EthereumConfiguration & {
   FinalityBufferBlocks: number;
-  FirstBlock: number;
+  EthereumFirstBlock: number;
 };
 
 export class BlockSync {
@@ -17,7 +17,7 @@ export class BlockSync {
 
   constructor(private state: StateManager, private config: BlockSyncConfiguration) {
     this.reader = getNewEthereumReader(config);
-    this.lastProcessedBlock = config.FirstBlock;
+    this.lastProcessedBlock = config.EthereumFirstBlock;
     this.eventFetchers = {
       ValidatorCommitteeChange: new SingleEventFetcher('ValidatorCommitteeChange', this.reader),
       StakeChanged: new SingleEventFetcher('StakeChanged', this.reader),

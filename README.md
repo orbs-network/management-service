@@ -35,7 +35,7 @@ The service is packaged as a Docker image. It is routinely published from this r
 | `HotfixRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should hotfix images (non-regular) should be rolled out. In seconds.<br>Default: `3600` (1 hour) |
 | `EthereumPollIntervalSeconds` | How often should Ethereum be polled for new blocks containing events. In seconds.<br>Default: `30` (30 seconds) |
 | `FinalityBufferBlocks` | Ethereum finality boundary in blocks, meaning how many blocks from the tip we look it to reduce the chance of re-org.<br>Default: `100` |
-| `FirstBlock` | Optimization. The earliest block number in Ethereum we can start scanning from (the block number when the genesis registry contract was deployed for example). |
+| `EthereumFirstBlock` | Optimization. The earliest block number in Ethereum we can start scanning from (the block number when the genesis registry contract was deployed for example). |
 | `Verbose` | Whether logging is extra verbose or not.<br>Default: `false` |
 
 ## Developer instructions

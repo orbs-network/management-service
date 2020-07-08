@@ -16,7 +16,7 @@ const minimalConfigValue = {
 const configValue: ServiceConfiguration = {
   ...minimalConfigValue,
   Port: -1,
-  FirstBlock: 0,
+  EthereumFirstBlock: 0,
   EthereumPollIntervalSeconds: 0.5,
   ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
   RegularRolloutWindowSeconds: 1,
