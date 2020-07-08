@@ -52,7 +52,9 @@ export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConf
 
 function getStatusText(snapshot: StateSnapshot) {
   const res = [];
-  res.push(`RefTime = ${snapshot.CurrentRefTime}`);
+  const now = getCurrentClockTime();
+  const refTimeAgo = now - snapshot.CurrentRefTime;
+  res.push(`RefTime = ${snapshot.CurrentRefTime} (${refTimeAgo} sec ago)`);
   res.push(`committee size = ${snapshot.CurrentCommittee.length}`);
   res.push(`stable node = ${snapshot.CurrentImageVersions['main']['node']}`);
   return res.join(', ');
