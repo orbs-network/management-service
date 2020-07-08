@@ -14,6 +14,7 @@ export const expectationStatus = {
   Error: undefined,
   Payload: {
     Uptime: isPositiveNumber,
+    MemoryBytesUsed: isPositiveNumber,
     CurrentRefTime: isValidTimeRef,
     CurrentRefBlock: isValidBlock,
     CurrentCommittee: [

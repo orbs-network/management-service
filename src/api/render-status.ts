@@ -15,6 +15,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConf
     Timestamp: new Date().toISOString(),
     Payload: {
       Uptime: getCurrentClockTime() - timeOriginallyLaunched,
+      MemoryBytesUsed: process.memoryUsage().heapUsed,
       CurrentRefTime: snapshot.CurrentRefTime,
       CurrentRefBlock: snapshot.CurrentRefBlock,
       CurrentCommittee: snapshot.CurrentCommittee,
