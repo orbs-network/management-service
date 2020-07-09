@@ -36,6 +36,16 @@ export class EthereumTestDriver {
     await d.protocol.createDeploymentSubset('canary', 1, { from: d.functionalOwner.address });
   }
 
+  async closeConnections() {
+    const provider = this.orbsPosV2Driver?.web3?.currentProvider;
+    const hdwalletProvider = (provider as unknown) as HDWalletProvider;
+    if (hdwalletProvider?.engine?.stop) {
+      await hdwalletProvider.engine.stop();
+    }
+    // sleep 2 seconds for connections to close
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+
   getContractRegistryAddress(): string {
     if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
     const d = this.orbsPosV2Driver;
@@ -146,4 +156,11 @@ export class EthereumTestDriver {
     const block = await d.web3.eth.getBlock('latest');
     return toNumber(block.timestamp);
   }
+}
+
+// needed due to missing types
+interface HDWalletProvider {
+  engine: {
+    stop: () => Promise<void>;
+  };
 }

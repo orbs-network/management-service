@@ -75,6 +75,10 @@ export class TestEnvironment {
       t.log('[E2E] ethereum PoS contracts deployed');
     });
 
+    test.serial.after(async (t) => {
+      await this.ethereum.closeConnections();
+    });
+
     // step 4 - write config file for app
     test.serial.before((t) => {
       t.log('[E2E] write config file for app');
