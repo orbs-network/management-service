@@ -1,6 +1,5 @@
 FROM local/management-service
 
-COPY ./service ./
 COPY ./healthcheck ./
 COPY ./healthcheck.js ./
 COPY ./entrypoint.sh /opt/orbs/service
