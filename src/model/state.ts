@@ -135,7 +135,7 @@ export class State {
     this.snapshot.CurrentTopology = calcTopology(time, this.snapshot);
   }
 
-  applyNewValidatorCommitteeChange(_time: number, event: EventTypes['ValidatorCommitteeChange']) {
+  applyNewGuardianCommitteeChange(_time: number, event: EventTypes['GuardianCommitteeChange']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.weight);
 
@@ -161,7 +161,7 @@ export class State {
     }
   }
 
-  applyNewValidatorDataUpdated(_time: number, event: EventTypes['ValidatorDataUpdated']) {
+  applyNewGuardianDataUpdated(_time: number, event: EventTypes['GuardianDataUpdated']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentOrbsAddress[EthAddress] = normalizeAddress(event.returnValues.orbsAddr);
     this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
@@ -172,7 +172,7 @@ export class State {
     };
   }
 
-  applyNewValidatorStatusUpdated(time: number, event: EventTypes['ValidatorStatusUpdated']) {
+  applyNewGuardianStatusUpdated(time: number, event: EventTypes['GuardianStatusUpdated']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentElectionsStatus[EthAddress] = {
       LastUpdateTime: time,

@@ -6,19 +6,19 @@ export type ContractName =
   | 'committee'
   | 'elections'
   | 'delegations'
-  | 'validatorsRegistration'
-  | 'compliance'
+  | 'guardiansRegistration'
+  | 'certification'
   | 'staking'
   | 'subscriptions'
   | 'rewards';
 
 export const eventNames: Readonly<Array<EventName>> = [
   'SubscriptionChanged',
-  'ValidatorCommitteeChange',
+  'GuardianCommitteeChange',
   'StakeChanged',
   'ProtocolVersionChanged',
-  'ValidatorDataUpdated',
-  'ValidatorStatusUpdated',
+  'GuardianDataUpdated',
+  'GuardianStatusUpdated',
 ];
 
 export type EventName = keyof EventTypes;
@@ -31,12 +31,11 @@ export type SubscriptionChangedPayload = {
   deploymentSubset: 'main' | 'canary';
 };
 
-export type ValidatorCommitteeChangePayload = {
+export type GuardianCommitteeChangePayload = {
   addr: string;
   weight: string;
-  compliance: boolean;
+  certification: boolean;
   inCommittee: boolean;
-  isStandby: boolean;
 };
 
 export type StakeChangedPayload = {
@@ -53,7 +52,7 @@ export type ProtocolChangedPayload = {
   fromTimestamp: string;
 };
 
-export type ValidatorDataUpdatedPayload = {
+export type GuardianDataUpdatedPayload = {
   addr: string;
   ip: string;
   orbsAddr: string;
@@ -62,17 +61,17 @@ export type ValidatorDataUpdatedPayload = {
   contact: string;
 };
 
-export type ValidatorStatusUpdatedPayload = {
+export type GuardianStatusUpdatedPayload = {
   addr: string;
   readyToSync: boolean;
   readyForCommittee: boolean;
 };
 
 export type EventTypes = {
-  ValidatorCommitteeChange: EventData & { returnValues: ValidatorCommitteeChangePayload };
+  GuardianCommitteeChange: EventData & { returnValues: GuardianCommitteeChangePayload };
   StakeChanged: EventData & { returnValues: StakeChangedPayload };
   SubscriptionChanged: EventData & { returnValues: SubscriptionChangedPayload };
   ProtocolVersionChanged: EventData & { returnValues: ProtocolChangedPayload };
-  ValidatorDataUpdated: EventData & { returnValues: ValidatorDataUpdatedPayload };
-  ValidatorStatusUpdated: EventData & { returnValues: ValidatorStatusUpdatedPayload };
+  GuardianDataUpdated: EventData & { returnValues: GuardianDataUpdatedPayload };
+  GuardianStatusUpdated: EventData & { returnValues: GuardianStatusUpdatedPayload };
 };

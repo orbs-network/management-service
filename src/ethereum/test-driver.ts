@@ -11,7 +11,6 @@ import { MonthlySubscriptionPlanContract } from '@orbs-network/orbs-ethereum-con
 import { toNumber } from '../helpers';
 import { ContractName } from './types';
 
-const SCENARIO_MAX_STANDBYS = 1;
 const SCENARIO_MAX_COMMITTEE_SIZE = 2;
 const SUBSCRIPTION_MONTHLY_RATE = 1000;
 const SECONDS_IN_MONTH = 30 * 24 * 60 * 60;
@@ -25,7 +24,6 @@ export class EthereumTestDriver {
   async deployContracts(customWeb3Provider?: () => Web3) {
     if (this.verbose) console.log(`[posv2] about to deploy contracts`);
     const options: Partial<DriverOptions> = {
-      maxStandbys: SCENARIO_MAX_STANDBYS,
       maxCommitteeSize: SCENARIO_MAX_COMMITTEE_SIZE,
     };
     if (customWeb3Provider) options.web3Provider = customWeb3Provider;
@@ -66,12 +64,12 @@ export class EthereumTestDriver {
     if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
 
     if (this.verbose) console.log(`[posv2] about to set up initial committee`);
-    const v1 = await this.addValidator(true, '10000000000000000000000');
-    const v2 = await this.addValidator(true, '20000000000000000000000');
-    const v3 = await this.addValidator(false, '30000000000000000000000');
+    const v1 = await this.addGuardian(true, '10000000000000000000000');
+    const v2 = await this.addGuardian(true, '20000000000000000000000');
+    const v3 = await this.addGuardian(false, '30000000000000000000000');
     await this.increaseTime(1000);
-    const v4 = await this.addValidator(true, '40000000000000000000000');
-    const v5 = await this.addValidator(false, '50000000000000000000000');
+    const v4 = await this.addGuardian(true, '40000000000000000000000');
+    const v5 = await this.addGuardian(false, '50000000000000000000000');
     await this.increaseTime(1000);
     return { v1, v2, v3, v4, v5 };
   }
@@ -115,17 +113,17 @@ export class EthereumTestDriver {
     });
   }
 
-  async addValidator(committee: boolean, stake = '10000') {
+  async addGuardian(committee: boolean, stake = '10000') {
     if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
     const d = this.orbsPosV2Driver;
 
     const p = d.newParticipant();
     await p.stake(new BN(stake));
-    await p.registerAsValidator();
+    await p.registerAsGuardian();
     if (committee) {
-      await p.notifyReadyForCommittee();
+      await p.readyForCommittee();
     } else {
-      await p.notifyReadyToSync();
+      await p.readyToSync();
     }
     return p;
   }

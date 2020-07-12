@@ -27,10 +27,10 @@ export function getContractTypeName(key: ContractName): ContractTypeName {
       return 'Elections';
     case 'delegations':
       return 'Delegations';
-    case 'validatorsRegistration':
-      return 'ValidatorsRegistration';
-    case 'compliance':
-      return 'Compliance';
+    case 'guardiansRegistration':
+      return 'GuardiansRegistration';
+    case 'certification':
+      return 'Certification';
     case 'staking':
       return 'StakingContract';
     case 'subscriptions':
@@ -71,7 +71,7 @@ export class EthereumConfigReader {
     )) as ContractAddressUpdatedEvent[];
     const contracts: { [t in ContractName]?: ContractMetadata } = {};
     events.forEach((e) => {
-      contracts[e.returnValues.contractName] = {
+      contracts[e.returnValues.contractName as ContractName] = {
         address: e.returnValues.addr,
         firstBlock: this.config.EthereumFirstBlock, // TODO: max with contract genesis once it exists
       };
@@ -150,7 +150,7 @@ export type EthereumConfig = {
 
 export function contractByEventName(eventName: EventName): ContractName {
   switch (eventName) {
-    case 'ValidatorCommitteeChange':
+    case 'GuardianCommitteeChange':
       return 'committee';
     case 'StakeChanged':
       return 'elections';
@@ -158,9 +158,9 @@ export function contractByEventName(eventName: EventName): ContractName {
       return 'subscriptions';
     case 'ProtocolVersionChanged':
       return 'protocol';
-    case 'ValidatorDataUpdated':
-      return 'validatorsRegistration';
-    case 'ValidatorStatusUpdated':
+    case 'GuardianDataUpdated':
+      return 'guardiansRegistration';
+    case 'GuardianStatusUpdated':
       return 'elections';
     default:
       throw new Error(`unknown event name '${eventName}'`);

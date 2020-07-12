@@ -14,54 +14,54 @@ test('state applies time ref and ref block', (t) => {
 test('state applies commitee, standby, IPs and topology', (t) => {
   const s = new State();
 
-  ValidatorDataUpdated(s, 1000, '0xA', '0xa1', '0x01010101');
-  ValidatorDataUpdated(s, 1000, '0xB', '0xb1', '0x02020202');
-  ValidatorDataUpdated(s, 1000, '0xC', '0xc1', '0x03030303');
-  ValidatorDataUpdated(s, 1000, '0xM', '0xm1', '0x04040404');
-  ValidatorDataUpdated(s, 1000, '0xN', '0xn1', '0x05050505');
+  GuardianDataUpdated(s, 1000, '0xA', '0xa1', '0x01010101');
+  GuardianDataUpdated(s, 1000, '0xB', '0xb1', '0x02020202');
+  GuardianDataUpdated(s, 1000, '0xC', '0xc1', '0x03030303');
+  GuardianDataUpdated(s, 1000, '0xM', '0xm1', '0x04040404');
+  GuardianDataUpdated(s, 1000, '0xN', '0xn1', '0x05050505');
 
   // change committee to [A, B, C]
-  ValidatorCommitteeChange(s, 1000, '0xA', true);
-  ValidatorCommitteeChange(s, 1000, '0xB', true);
-  ValidatorCommitteeChange(s, 1000, '0xC', true);
+  GuardianCommitteeChange(s, 1000, '0xA', true);
+  GuardianCommitteeChange(s, 1000, '0xB', true);
+  GuardianCommitteeChange(s, 1000, '0xC', true);
 
   // change standbys to [M, N]
-  ValidatorCommitteeChange(s, 1000, '0xM', false);
-  ValidatorCommitteeChange(s, 1000, '0xN', false);
+  GuardianCommitteeChange(s, 1000, '0xM', false);
+  GuardianCommitteeChange(s, 1000, '0xN', false);
 
   s.applyNewTimeRef(1000, 100);
 
-  ValidatorDataUpdated(s, 2000, '0xZ', '0xz2', '0x06060606');
-  ValidatorDataUpdated(s, 2000, '0xA', '0xa2', '0x07070707');
-  ValidatorDataUpdated(s, 2000, '0xO', '0xo2', '0x08080808');
-  ValidatorDataUpdated(s, 2000, '0xB', '0xb2', '0x02020202');
-  ValidatorDataUpdated(s, 2000, '0xC', '0xc2', '0x03030303');
-  ValidatorDataUpdated(s, 2000, '0xN', '0xn2', '0x05050505');
+  GuardianDataUpdated(s, 2000, '0xZ', '0xz2', '0x06060606');
+  GuardianDataUpdated(s, 2000, '0xA', '0xa2', '0x07070707');
+  GuardianDataUpdated(s, 2000, '0xO', '0xo2', '0x08080808');
+  GuardianDataUpdated(s, 2000, '0xB', '0xb2', '0x02020202');
+  GuardianDataUpdated(s, 2000, '0xC', '0xc2', '0x03030303');
+  GuardianDataUpdated(s, 2000, '0xN', '0xn2', '0x05050505');
 
   // change committee to [Z, B, C]
-  ValidatorCommitteeChange(s, 2000, '0xA', false);
-  ValidatorCommitteeChange(s, 2000, '0xZ', true);
+  GuardianCommitteeChange(s, 2000, '0xA', false);
+  GuardianCommitteeChange(s, 2000, '0xZ', true);
 
   // change standbys to [A, M, N, O]
-  ValidatorCommitteeChange(s, 2000, '0xM', false);
-  ValidatorCommitteeChange(s, 2000, '0xO', false);
+  GuardianCommitteeChange(s, 2000, '0xM', false);
+  GuardianCommitteeChange(s, 2000, '0xO', false);
 
   s.applyNewTimeRef(2000, 200);
 
-  ValidatorDataUpdated(s, day + 3000, '0xX', '0xx3', '0x09090909');
-  ValidatorDataUpdated(s, day + 3000, '0xZ', '0xz3', '0x0a0a0a0a');
-  ValidatorDataUpdated(s, day + 3000, '0xZ', '0xz3', '0x0b0b0b0b');
-  ValidatorDataUpdated(s, day + 3000, '0xP', '0xp3', '0x0c0c0c0c');
-  ValidatorDataUpdated(s, day + 3000, '0xO', '0xo3', '0x08080808');
+  GuardianDataUpdated(s, day + 3000, '0xX', '0xx3', '0x09090909');
+  GuardianDataUpdated(s, day + 3000, '0xZ', '0xz3', '0x0a0a0a0a');
+  GuardianDataUpdated(s, day + 3000, '0xZ', '0xz3', '0x0b0b0b0b');
+  GuardianDataUpdated(s, day + 3000, '0xP', '0xp3', '0x0c0c0c0c');
+  GuardianDataUpdated(s, day + 3000, '0xO', '0xo3', '0x08080808');
 
   // change committee to [X, Z]
-  ValidatorCommitteeChange(s, day + 3000, '0xB', false);
-  ValidatorCommitteeChange(s, day + 3000, '0xC', false);
-  ValidatorCommitteeChange(s, day + 3000, '0xX', true);
+  GuardianCommitteeChange(s, day + 3000, '0xB', false);
+  GuardianCommitteeChange(s, day + 3000, '0xC', false);
+  GuardianCommitteeChange(s, day + 3000, '0xX', true);
 
   // change standbys to [A, B, C, M, N]
-  ValidatorCommitteeChange(s, day + 3000, '0xN', false);
-  ValidatorCommitteeChange(s, day + 3000, '0xP', false);
+  GuardianCommitteeChange(s, day + 3000, '0xN', false);
+  GuardianCommitteeChange(s, day + 3000, '0xP', false);
   StakeChanged(s, day + 3000, '0xO', '20000000000000000000000');
 
   s.applyNewTimeRef(day + 3000, 300);
@@ -147,8 +147,8 @@ test('state applies commitee, standby, IPs and topology', (t) => {
 test('state calculates committee weights correctly', (t) => {
   const s = new State();
 
-  ValidatorCommitteeWeight(s, '0xA', '10000000000000000000000', true);
-  ValidatorCommitteeWeight(s, '0xB', '20000000000000000000000', true);
+  GuardianCommitteeWeight(s, '0xA', '10000000000000000000000', true);
+  GuardianCommitteeWeight(s, '0xB', '20000000000000000000000', true);
 
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
@@ -161,7 +161,7 @@ test('state calculates committee weights correctly', (t) => {
     b: 20000,
   });
 
-  ValidatorCommitteeWeight(s, '0xC', '10000000000000000000000', true);
+  GuardianCommitteeWeight(s, '0xC', '10000000000000000000000', true);
 
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
@@ -176,7 +176,7 @@ test('state calculates committee weights correctly', (t) => {
     c: 10000,
   });
 
-  ValidatorCommitteeWeight(s, '0xB', '20000000000000000000000', false);
+  GuardianCommitteeWeight(s, '0xB', '20000000000000000000000', false);
 
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
@@ -194,13 +194,13 @@ test('state calculates committee weights correctly', (t) => {
 test('state applies elections status updates and sets candidates accordingly', (t) => {
   const s = new State();
 
-  ValidatorDataUpdated(s, 1000, '0xA', '0xa1', '0x01010101');
-  ValidatorDataUpdated(s, 1000, '0xB', '0xb1', '0x01010101');
-  ValidatorDataUpdated(s, 1000, '0xC', '0xc1', '0x01010101');
-  ValidatorDataUpdated(s, 1000, '0xD', '0xd1', '0x01010101');
-  ValidatorDataUpdated(s, 1000, '0xX', '0xx1', '0x01010101');
-  ValidatorDataUpdated(s, 1000, '0xY', '0xy1', '0x01010101');
-  ValidatorDataUpdated(s, 1000, '0xZ', '0xz1', '0x01010101');
+  GuardianDataUpdated(s, 1000, '0xA', '0xa1', '0x01010101');
+  GuardianDataUpdated(s, 1000, '0xB', '0xb1', '0x01010101');
+  GuardianDataUpdated(s, 1000, '0xC', '0xc1', '0x01010101');
+  GuardianDataUpdated(s, 1000, '0xD', '0xd1', '0x01010101');
+  GuardianDataUpdated(s, 1000, '0xX', '0xx1', '0x01010101');
+  GuardianDataUpdated(s, 1000, '0xY', '0xy1', '0x01010101');
+  GuardianDataUpdated(s, 1000, '0xZ', '0xz1', '0x01010101');
 
   StakeChanged(s, 1000, '0xA', '10000000000000000000000');
   StakeChanged(s, 1000, '0xB', '20000000000000000000000');
@@ -208,10 +208,10 @@ test('state applies elections status updates and sets candidates accordingly', (
   StakeChanged(s, 1000, '0xD', '40000000000000000000000');
   StakeChanged(s, 1000, '0xE', '50000000000000000000000');
 
-  ValidatorStatusUpdated(s, 1000, '0xA', true, false);
-  ValidatorStatusUpdated(s, 2000, '0xB', false, false);
-  ValidatorStatusUpdated(s, 3000, '0xB', true, true);
-  ValidatorStatusUpdated(s, 4000, '0xC', true, true);
+  GuardianStatusUpdated(s, 1000, '0xA', true, false);
+  GuardianStatusUpdated(s, 2000, '0xB', false, false);
+  GuardianStatusUpdated(s, 3000, '0xB', true, true);
+  GuardianStatusUpdated(s, 4000, '0xC', true, true);
   s.applyNewTimeRef(4000, 100);
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
@@ -244,7 +244,7 @@ test('state applies elections status updates and sets candidates accordingly', (
     { EthAddress: 'z', IsStandby: false, Name: 'name' },
   ]);
 
-  ValidatorStatusUpdated(s, 5 * day, '0xA', true, false);
+  GuardianStatusUpdated(s, 5 * day, '0xA', true, false);
   s.getSnapshot().CurrentCommittee = [{ EthAddress: 'b', Weight: 1, Name: 'name' }];
   s.applyNewTimeRef(10 * day, 10000);
 
@@ -432,28 +432,26 @@ test('state applies image version changes', (t) => {
   });
 });
 
-function ValidatorCommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {
-  s.applyNewValidatorCommitteeChange(time, {
+function GuardianCommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {
+  s.applyNewGuardianCommitteeChange(time, {
     ...eventBase,
     returnValues: {
       addr,
       weight: '10000000000000000000000',
-      compliance: false,
+      certification: false,
       inCommittee,
-      isStandby: false, // TODO: will remove soon
     },
   });
 }
 
-function ValidatorCommitteeWeight(s: State, addr: string, weight: string, inCommittee: boolean) {
-  s.applyNewValidatorCommitteeChange(1000, {
+function GuardianCommitteeWeight(s: State, addr: string, weight: string, inCommittee: boolean) {
+  s.applyNewGuardianCommitteeChange(1000, {
     ...eventBase,
     returnValues: {
       addr,
       weight,
-      compliance: false,
+      certification: false,
       inCommittee,
-      isStandby: false, // TODO: will remove soon
     },
   });
 }
@@ -472,8 +470,8 @@ function StakeChanged(s: State, time: number, addr: string, effectiveStake: stri
   });
 }
 
-function ValidatorDataUpdated(s: State, time: number, addr: string, orbsAddr: string, ip: string) {
-  s.applyNewValidatorDataUpdated(time, {
+function GuardianDataUpdated(s: State, time: number, addr: string, orbsAddr: string, ip: string) {
+  s.applyNewGuardianDataUpdated(time, {
     ...eventBase,
     returnValues: {
       ip,
@@ -511,14 +509,8 @@ function ProtocolVersionChanged(s: State, time: number, nextVersion: number, fro
   });
 }
 
-function ValidatorStatusUpdated(
-  s: State,
-  time: number,
-  addr: string,
-  readyToSync: boolean,
-  readyForCommittee: boolean
-) {
-  s.applyNewValidatorStatusUpdated(time, {
+function GuardianStatusUpdated(s: State, time: number, addr: string, readyToSync: boolean, readyForCommittee: boolean) {
+  s.applyNewGuardianStatusUpdated(time, {
     ...eventBase,
     returnValues: {
       addr,
