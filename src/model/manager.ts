@@ -23,6 +23,9 @@ export class StateManager {
         case 'GuardianStatusUpdated':
           this.current.applyNewGuardianStatusUpdated(time, event as EventTypes['GuardianStatusUpdated']);
           break;
+        case 'StakeChanged':
+          this.current.applyNewStakeChanged(time, event as EventTypes['StakeChanged']);
+          break;
       }
     }
   }
