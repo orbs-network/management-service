@@ -52,7 +52,7 @@ function getMockReader(delays: boolean): EthereumReader {
 }
 
 test('SingleEventFetcher sanity', async (t) => {
-  const fetcher = new SingleEventFetcher('ValidatorDataUpdated', getMockReader(true));
+  const fetcher = new SingleEventFetcher('GuardianDataUpdated', getMockReader(true));
   t.deepEqual(await fetcher.fetchBlock(1), [
     { blockNumber: 1, uniqueId: 0 },
     { blockNumber: 1, uniqueId: 1 },
@@ -61,7 +61,7 @@ test('SingleEventFetcher sanity', async (t) => {
 });
 
 test('LookaheadEventFetcher sanity', async (t) => {
-  const fetcher = new LookaheadEventFetcher('ValidatorDataUpdated', getMockReader(true));
+  const fetcher = new LookaheadEventFetcher('GuardianDataUpdated', getMockReader(true));
   t.deepEqual(await fetcher.fetchBlock(1, 999999), [
     { blockNumber: 1, uniqueId: 0 },
     { blockNumber: 1, uniqueId: 1 },
@@ -71,7 +71,7 @@ test('LookaheadEventFetcher sanity', async (t) => {
 
 let resContract: unknown = [];
 test.before(async () => {
-  const fetcher = new SingleEventFetcher('ValidatorDataUpdated', getMockReader(false));
+  const fetcher = new SingleEventFetcher('GuardianDataUpdated', getMockReader(false));
   for (let blockNumber = 1; blockNumber < mockEventsDataLastBlock; blockNumber++) {
     resContract = _.concat(resContract, await fetcher.fetchBlock(blockNumber));
   }
@@ -79,7 +79,7 @@ test.before(async () => {
 
 test('LookaheadEventFetcher contract test', async (t) => {
   let resFetcher: unknown = [];
-  const fetcher = new LookaheadEventFetcher('ValidatorDataUpdated', getMockReader(true));
+  const fetcher = new LookaheadEventFetcher('GuardianDataUpdated', getMockReader(true));
   for (let blockNumber = 1; blockNumber < mockEventsDataLastBlock; blockNumber++) {
     resFetcher = _.concat(resFetcher, await fetcher.fetchBlock(blockNumber, 999999));
   }

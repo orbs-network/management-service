@@ -8,8 +8,8 @@ export class StateManager {
   applyNewEvents(time: number, events: EventData[]) {
     for (const event of events) {
       switch (event.event) {
-        case 'ValidatorCommitteeChange':
-          this.current.applyNewValidatorCommitteeChange(time, event as EventTypes['ValidatorCommitteeChange']);
+        case 'GuardianCommitteeChange':
+          this.current.applyNewGuardianCommitteeChange(time, event as EventTypes['GuardianCommitteeChange']);
           break;
         case 'SubscriptionChanged':
           this.current.applyNewSubscriptionChanged(time, event as EventTypes['SubscriptionChanged']);
@@ -17,11 +17,11 @@ export class StateManager {
         case 'ProtocolVersionChanged':
           this.current.applyNewProtocolVersionChanged(time, event as EventTypes['ProtocolVersionChanged']);
           break;
-        case 'ValidatorDataUpdated':
-          this.current.applyNewValidatorDataUpdated(time, event as EventTypes['ValidatorDataUpdated']);
+        case 'GuardianDataUpdated':
+          this.current.applyNewGuardianDataUpdated(time, event as EventTypes['GuardianDataUpdated']);
           break;
-        case 'ValidatorStatusUpdated':
-          this.current.applyNewValidatorStatusUpdated(time, event as EventTypes['ValidatorStatusUpdated']);
+        case 'GuardianStatusUpdated':
+          this.current.applyNewGuardianStatusUpdated(time, event as EventTypes['GuardianStatusUpdated']);
           break;
       }
     }
