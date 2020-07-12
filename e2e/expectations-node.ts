@@ -42,6 +42,37 @@ export const expectationNodeManagement = {
         Verbose: true,
         EthereumGenesisContract: isValidEthereumAddress,
         EthereumEndpoint: 'http://ganache:7545',
+        'node-address': '16fcf728f8dc3f687132f2157d8379c021a08c12',
+      },
+    },
+    'ethereum-writer': {
+      DockerConfig: {
+        Image: 'orbsnetwork/ethereum-writer',
+        Tag: isValidImageVersion,
+        Pull: true,
+      },
+      Config: {
+        ManagementServiceEndpoint: 'http://management-service:8080',
+        EthereumEndpoint: 'http://ganache:7545',
+        SignerEndpoint: 'http://signer:7777',
+        EthereumElectionsContract: isValidEthereumAddress,
+        NodeOrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
+      },
+    },
+    'rewards-service': {
+      DockerConfig: {
+        Image: 'orbsnetwork/rewards-service',
+        Tag: isValidImageVersion,
+        Pull: true,
+      },
+      Config: {
+        EthereumEndpoint: 'http://ganache:7545',
+        SignerEndpoint: 'http://signer:7777',
+        EthereumDelegationsContract: isValidEthereumAddress,
+        EthereumRewardsContract: isValidEthereumAddress,
+        GuardianAddress: '29ce860a2247d97160d6dfc087a15f41e2349087',
+        NodeOrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
+        EthereumFirstBlock: 0,
       },
     },
   },

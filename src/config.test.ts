@@ -16,6 +16,7 @@ test('accepts legal config', (t) => {
       DockerNamespace: 'foo',
       DockerRegistry: 'bar',
       Verbose: true,
+      'node-address': '16fcf728f8dc3f687132f2157d8379c021a08c12',
     }),
     undefined
   );
@@ -35,6 +36,7 @@ test('declines illegal config (1)', (t) => {
       DockerNamespace: 'foo',
       DockerRegistry: 'bar',
       Verbose: true,
+      'node-address': '16fcf728f8dc3f687132f2157d8379c021a08c12',
     }),
     ["Finality buffer blocks can't be blank"]
   );
@@ -55,6 +57,7 @@ test('declines illegal config (2)', (t) => {
       DockerNamespace: 'foo',
       DockerRegistry: 'bar',
       Verbose: true,
+      'node-address': '16fcf728f8dc3f687132f2157d8379c021a08c12',
     }),
     ['Ethereum endpoint is not a valid url']
   );

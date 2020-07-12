@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { StateManager } from '../model/manager';
 import { EthereumReader, EthereumConfiguration, getNewEthereumReader } from './ethereum-reader';
 import { SingleEventFetcher, EventFetcher } from './event-fetcher';
-import { EventName, eventNames } from './events-types';
+import { EventName, eventNames } from './types';
 import * as Logger from '../logger';
 
 export type BlockSyncConfiguration = EthereumConfiguration & {
@@ -26,6 +26,22 @@ export class BlockSync {
       ValidatorDataUpdated: new SingleEventFetcher('ValidatorDataUpdated', this.reader),
       ValidatorStatusUpdated: new SingleEventFetcher('ValidatorStatusUpdated', this.reader),
     };
+    // TODO: this mechanism is ugly on purpose and stems from us not tracking ContractAddressUpdatedEvent with an EventFetcher
+    // The fix to the architecture is:
+    // 1. Create an EventFetcher instance that tracks the ContractRegistry and applies the addresses to state
+    // 2. EventFetcher.fetchBlock(contractAddress, ...) should receive contractAddress:string on every call
+    // 3. State initialization should store the ContractRegistry address from config in the state
+    // 4. EventFetcher.fetchBlock calls should rely on addresses from state
+    // 5. Remove all the current Contract initialization/connect code from ethereum-reader.ts
+    // 6. Remove the ugly line of code below
+    this.reader
+      .getContractAddresses()
+      .then((contractAddresses) => {
+        this.state.getCurrentSnapshot().CurrentContractAddress = contractAddresses;
+      })
+      .catch((err) => {
+        Logger.error(`Cannot get contract addresses: ${err.msg}.`);
+      });
     Logger.log(`BlockSync: initialized with first block ${this.lastProcessedBlock}.`);
   }
 

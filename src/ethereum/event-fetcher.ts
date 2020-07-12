@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { EventData } from 'web3-eth-contract';
-import { EventName } from './events-types';
+import { EventName } from './types';
 import { EthereumReader } from './ethereum-reader';
 
 export abstract class EventFetcher {

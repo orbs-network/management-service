@@ -2,7 +2,7 @@ import test from 'ava';
 import _ from 'lodash';
 import { PastEventOptions } from 'web3-eth-contract';
 import { SingleEventFetcher, LookaheadEventFetcher } from './event-fetcher';
-import { EventName } from './events-types';
+import { EventName } from './types';
 import { EthereumReader } from './ethereum-reader';
 
 let pstate = 17;

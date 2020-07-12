@@ -25,6 +25,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConf
       CurrentImageVersionsUpdater: snapshot.CurrentImageVersionsUpdater,
       CurrentVirtualChains: snapshot.CurrentVirtualChains,
       ProtocolVersionEvents: snapshot.ProtocolVersionEvents,
+      CurrentContractAddress: snapshot.CurrentContractAddress,
       Guardians: _.mapValues(snapshot.CurrentOrbsAddress, (OrbsAddress, EthAddress) => {
         return {
           EthAddress,

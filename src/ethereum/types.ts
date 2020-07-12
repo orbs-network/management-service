@@ -1,5 +1,17 @@
 import { EventData } from 'web3-eth-contract';
 
+// from https://github.com/orbs-network/orbs-ethereum-contracts-v2/blob/master/test/driver.ts
+export type ContractName =
+  | 'protocol'
+  | 'committee'
+  | 'elections'
+  | 'delegations'
+  | 'validatorsRegistration'
+  | 'compliance'
+  | 'staking'
+  | 'subscriptions'
+  | 'rewards';
+
 export const eventNames: Readonly<Array<EventName>> = [
   'SubscriptionChanged',
   'ValidatorCommitteeChange',

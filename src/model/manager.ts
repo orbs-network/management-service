@@ -1,6 +1,6 @@
 import { EventData } from 'web3-eth-contract';
 import { State, StateSnapshot, StateConfiguration } from './state';
-import { EventTypes } from '../ethereum/events-types';
+import { EventTypes } from '../ethereum/types';
 
 export class StateManager {
   private current: State;

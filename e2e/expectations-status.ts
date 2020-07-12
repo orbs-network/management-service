@@ -233,6 +233,16 @@ export const expectationStatus = {
         Contact: 'Validator4-contact',
       },
     },
+    CurrentContractAddress: {
+      protocol: isValidEthereumAddress,
+      committee: isValidEthereumAddress,
+      elections: isValidEthereumAddress,
+      delegations: isValidEthereumAddress,
+      compliance: isValidEthereumAddress,
+      staking: isValidEthereumAddress,
+      subscriptions: isValidEthereumAddress,
+      rewards: isValidEthereumAddress,
+    },
     Config: {
       Port: 8080,
       EthereumGenesisContract: isValidEthereumAddress,
@@ -245,6 +255,7 @@ export const expectationStatus = {
       FinalityBufferBlocks: 10,
       EthereumFirstBlock: 0,
       Verbose: true,
+      'node-address': '16fcf728f8dc3f687132f2157d8379c021a08c12',
     },
   },
 };

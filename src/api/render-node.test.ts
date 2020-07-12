@@ -19,12 +19,15 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   const scope = nockDockerHub(
     { user: 'mydockernamespace', name: 'node', tags: ['v0.0.1', 'v1.2.3', 'v1.2.4-canary', 'v1.0.0'] },
     { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v3.9.9'] },
-    { user: 'mydockernamespace', name: 'signer', tags: ['v1.1.0'] }
+    { user: 'mydockernamespace', name: 'signer', tags: ['v1.1.0'] },
+    { user: 'mydockernamespace', name: 'ethereum-writer', tags: ['v1.1.0'] },
+    { user: 'mydockernamespace', name: 'rewards-service', tags: ['v1.1.0'] }
   );
 
   // setup Ethereum state
   const firstBlock = await ethereum.getCurrentBlockPreDeploy(ethereumEndpoint);
   await ethereum.deployContracts();
+  await ethereum.setupInitialCommittee();
   await ethereum.addVchain(30 * day, 'main');
   await ethereum.addVchain(30 * day, 'canary');
   await ethereum.increaseTime(40 * day);
@@ -85,8 +88,33 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     Tag: 'v4.5.6',
     Pull: true,
   });
+  t.deepEqual(res.services['ethereum-writer'].DockerConfig, {
+    Image: 'mydockernamespace/ethereum-writer',
+    Tag: 'v1.1.0',
+    Pull: true,
+  });
+  t.deepEqual(res.services['rewards-service'].DockerConfig, {
+    Image: 'mydockernamespace/rewards-service',
+    Tag: 'v1.1.0',
+    Pull: true,
+  });
   t.deepEqual(res.services['management-service'].Config, config);
-  t.assert(res.services['signer']);
+  t.deepEqual(res.services['ethereum-writer'].Config, {
+    ManagementServiceEndpoint: 'http://management-service:8080',
+    EthereumEndpoint: config.EthereumEndpoint,
+    SignerEndpoint: 'http://signer:7777',
+    EthereumElectionsContract: ethereum.getContractAddress('elections'),
+    NodeOrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
+  });
+  t.deepEqual(res.services['rewards-service'].Config, {
+    EthereumEndpoint: config.EthereumEndpoint,
+    SignerEndpoint: 'http://signer:7777',
+    EthereumDelegationsContract: ethereum.getContractAddress('delegations'),
+    EthereumRewardsContract: ethereum.getContractAddress('rewards'),
+    GuardianAddress: '29ce860a2247d97160d6dfc087a15f41e2349087',
+    NodeOrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
+    EthereumFirstBlock: config.EthereumFirstBlock,
+  });
   t.assert(res.orchestrator);
 
   scope.done();
@@ -95,7 +123,9 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   const scope2 = nockDockerHub(
     { user: 'mydockernamespace', name: 'node', tags: ['v1.2.3', 'v1.2.4-canary', 'v1.2.5', 'v1.2.6-canary+hotfix'] },
     { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v4.5.8'] },
-    { user: 'mydockernamespace', name: 'signer', tags: ['v1.1.0'] }
+    { user: 'mydockernamespace', name: 'signer', tags: ['v1.1.0'] },
+    { user: 'mydockernamespace', name: 'ethereum-writer', tags: ['v1.1.0'] },
+    { user: 'mydockernamespace', name: 'rewards-service', tags: ['v1.1.0'] }
   );
 
   // run poller and process again
@@ -123,6 +153,16 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.deepEqual(res2.services['management-service'].DockerConfig, {
     Image: 'mydockernamespace/management-service',
     Tag: 'v4.5.8', // no gradual rollout so immediate update
+    Pull: true,
+  });
+  t.deepEqual(res.services['ethereum-writer'].DockerConfig, {
+    Image: 'mydockernamespace/ethereum-writer',
+    Tag: 'v1.1.0', // no upgrade
+    Pull: true,
+  });
+  t.deepEqual(res.services['rewards-service'].DockerConfig, {
+    Image: 'mydockernamespace/rewards-service',
+    Tag: 'v1.1.0', // no upgrade
     Pull: true,
   });
 

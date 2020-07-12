@@ -9,6 +9,7 @@ import {
 import { DriverOptions } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/driver';
 import { MonthlySubscriptionPlanContract } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/monthly-subscription-plan-contract';
 import { toNumber } from '../helpers';
+import { ContractName } from './types';
 
 const SCENARIO_MAX_STANDBYS = 1;
 const SCENARIO_MAX_COMMITTEE_SIZE = 2;
@@ -53,6 +54,12 @@ export class EthereumTestDriver {
     const res = d.contractRegistry.address;
     if (this.verbose) console.log(`[posv2] contract registry address is ${res}`);
     return res;
+  }
+
+  getContractAddress(contractName: ContractName): string {
+    if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
+    const d = this.orbsPosV2Driver;
+    return d[contractName].address;
   }
 
   async setupInitialCommittee() {

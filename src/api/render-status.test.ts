@@ -26,6 +26,7 @@ test.serial('[integration] getServiceStatus responds', (t) => {
     CurrentImageVersionsUpdater: { main: {}, canary: {} },
     CurrentVirtualChains: {},
     ProtocolVersionEvents: { main: [], canary: [] },
+    CurrentContractAddress: {},
     Guardians: {},
     Config: exampleConfig,
   });

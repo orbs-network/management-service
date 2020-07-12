@@ -14,6 +14,7 @@ export interface ServiceConfiguration {
   FinalityBufferBlocks: number;
   EthereumFirstBlock: number;
   Verbose: boolean;
+  'node-address': string;
 }
 
 export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
@@ -90,6 +91,10 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
     Verbose: {
       presence: { allowEmpty: false },
       type: 'boolean',
+    },
+    'node-address': {
+      presence: { allowEmpty: false },
+      type: 'string',
     },
   };
   return validate(c, serviceConfigConstraints, { format: 'flat' });

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { EventTypes } from '../ethereum/events-types';
+import { EventTypes, ContractName } from '../ethereum/types';
 import { getIpFromHex, toNumber } from '../helpers';
 import { findAllEventsCoveringRange } from './find';
 
@@ -69,6 +69,7 @@ export interface StateSnapshot {
       };
     };
   };
+  CurrentContractAddress: { [t in ContractName]?: string };
 }
 
 export type StateConfiguration = {
@@ -109,6 +110,7 @@ export class State {
       main: {},
       canary: {},
     },
+    CurrentContractAddress: {},
   };
 
   constructor(private config = defaultStateConfiguration) {}

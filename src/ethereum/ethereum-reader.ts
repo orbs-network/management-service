@@ -5,7 +5,7 @@ import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/rele
 import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
 import { errorString, toNumber } from '../helpers';
-import { EventName, EventTypes } from './events-types';
+import { ContractName, EventName, EventTypes } from './types';
 
 export function getNewEthereumReader(config: EthereumConfiguration) {
   const ethConfig = new EthereumConfigReader(config).readEthereumConfig();
@@ -13,18 +13,6 @@ export function getNewEthereumReader(config: EthereumConfiguration) {
 }
 
 type ContractAddressUpdatedEvent = EventData & { returnValues: ContractAddressUpdatedEventValues };
-
-// from https://github.com/orbs-network/orbs-ethereum-contracts-v2/blob/master/test/driver.ts
-export type ContractName =
-  | 'protocol'
-  | 'committee'
-  | 'elections'
-  | 'delegations'
-  | 'validatorsRegistration'
-  | 'compliance'
-  | 'staking'
-  | 'subscriptions'
-  | 'rewards';
 
 type ContractTypeName = keyof Contracts;
 
@@ -91,7 +79,7 @@ export class EthereumConfigReader {
     return contracts;
   }
 
-  readEthereumConfig() {
+  readEthereumConfig(): EthereumConfig {
     return {
       contracts: this.readContractsConfig(),
       firstBlock: this.config.EthereumFirstBlock, // events[0].blockNumber,
@@ -197,6 +185,15 @@ export class EthereumReader {
 
   getBlockNumber(): Promise<number> {
     return this.web3.eth.getBlockNumber();
+  }
+
+  async getContractAddresses(): Promise<{ [t in ContractName]?: string }> {
+    const res: { [t in ContractName]?: string } = {};
+    const contractsMetadata = await this.config.contracts;
+    for (const [contractName, metadata] of Object.entries(contractsMetadata)) {
+      if (metadata?.address) res[contractName as ContractName] = metadata.address;
+    }
+    return res;
   }
 
   async getRefTime(blockNumber: number | 'latest'): Promise<number> {
