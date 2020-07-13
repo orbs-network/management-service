@@ -122,7 +122,7 @@ function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration
       SignerEndpoint: 'http://signer:7777',
       EthereumDelegationsContract: delegations,
       EthereumRewardsContract: rewards,
-      GuardianAddress: guardian,
+      GuardianAddress: `0x${guardian}`,
       NodeOrbsAddress: config['node-address'],
       EthereumFirstBlock: config.EthereumFirstBlock,
     },
