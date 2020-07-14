@@ -244,6 +244,7 @@ export const expectationStatus = {
       rewards: isValidEthereumAddress,
     },
     Config: {
+      BootstrapMode: false,
       Port: 8080,
       EthereumGenesisContract: isValidEthereumAddress,
       EthereumEndpoint: `http://ganache:7545`,

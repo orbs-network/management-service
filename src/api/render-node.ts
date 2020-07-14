@@ -77,7 +77,7 @@ function getManagementService(snapshot: StateSnapshot, config: ServiceConfigurat
       Tag: version,
       Pull: true,
     },
-    Config: config, // forward my own input config + defaults for what's missing
+    Config: { ...config, BootstrapMode: false }, // forward my own input config + defaults for what's missing
   };
 }
 

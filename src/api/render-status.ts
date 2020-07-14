@@ -42,7 +42,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConf
 
   // include error field if found errors
   const errorText = getErrorText(snapshot);
-  if (errorText) {
+  if (errorText && !config.BootstrapMode) {
     response.Error = errorText;
   }
 

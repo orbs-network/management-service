@@ -4,6 +4,7 @@ import { validateServiceConfiguration } from './config';
 test('accepts legal config', (t) => {
   t.deepEqual(
     validateServiceConfiguration({
+      BootstrapMode: false,
       Port: 2,
       EthereumGenesisContract: 'foo',
       EthereumEndpoint: 'http://localhost:7545',
@@ -25,6 +26,7 @@ test('accepts legal config', (t) => {
 test('declines illegal config (1)', (t) => {
   t.deepEqual(
     validateServiceConfiguration({
+      BootstrapMode: false,
       Port: 2,
       EthereumGenesisContract: 'foo',
       EthereumEndpoint: 'http://localhost:7545',
@@ -45,6 +47,7 @@ test('declines illegal config (1)', (t) => {
 test('declines illegal config (2)', (t) => {
   t.deepEqual(
     validateServiceConfiguration({
+      BootstrapMode: false,
       Port: 2,
       EthereumGenesisContract: 'foo',
       EthereumEndpoint: 'foo-bar:123',

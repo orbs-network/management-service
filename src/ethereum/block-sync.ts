@@ -6,6 +6,7 @@ import { EventName, eventNames } from './types';
 import * as Logger from '../logger';
 
 export type BlockSyncConfiguration = EthereumConfiguration & {
+  BootstrapMode: boolean;
   FinalityBufferBlocks: number;
   EthereumFirstBlock: number;
 };
@@ -47,6 +48,8 @@ export class BlockSync {
 
   // single tick of the run loop
   async run() {
+    if (this.config.BootstrapMode) return; // do nothing in bootstrap mode
+
     const latestAllowedBlock = await this.getLatestBlockUnderFinality();
     Logger.log(`BlockSync: run started at ${this.lastProcessedBlock} allowed to go to ${latestAllowedBlock}.`);
 

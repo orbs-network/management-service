@@ -15,6 +15,7 @@ export const imageNamesToPollForNewVersions = [
 export const imageNamesWithGradualRollout = ['node'];
 
 export type ImagePollConfiguration = DockerHubConfiguration & {
+  BootstrapMode: boolean;
   RegularRolloutWindowSeconds: number;
   HotfixRolloutWindowSeconds: number;
 };
@@ -29,6 +30,11 @@ export class ImagePoll {
   private delayedUpdates: { [RolloutGroup: string]: { [ImageName: string]: PendingUpdate } };
 
   constructor(private state: StateManager, private config: ImagePollConfiguration) {
+    if (config.BootstrapMode) {
+      // only poll management-service in bootstrap mode
+      imageNamesToPollForNewVersions.splice(0);
+      imageNamesToPollForNewVersions.push('management-service');
+    }
     this.reader = new DockerHubReader(config);
     this.delayedUpdates = { main: {}, canary: {} };
     Logger.log(`ImagePoll: initialized.`);

@@ -9,7 +9,7 @@ import { expectationStatus } from './expectations-status';
 
 let stateReadyBlockTime = 0;
 const driver = new TestEnvironment(join(__dirname, 'docker-compose.yml'));
-driver.launchServices();
+driver.launchServices(false);
 
 test.serial.before(async (t) => {
   t.log('[E2E] set up ethereum state');
@@ -26,7 +26,7 @@ test.serial.before(async (t) => {
   await driver.ethereum.increaseTime(10 * day);
   await driver.ethereum.increaseBlocks(1);
   stateReadyBlockTime = await driver.ethereum.getCurrentBlockTime();
-  await driver.ethereum.increaseBlocks(driver.getAppConfig().FinalityBufferBlocks);
+  await driver.ethereum.increaseBlocks(driver.getAppConfig(false).FinalityBufferBlocks);
   t.log('[E2E] set up ethereum state done, block time:', stateReadyBlockTime);
 });
 

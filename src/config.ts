@@ -1,6 +1,7 @@
 import validate from 'validate.js';
 
 export interface ServiceConfiguration {
+  BootstrapMode: boolean;
   Port: number;
   EthereumGenesisContract: string;
   EthereumEndpoint: string;
@@ -18,6 +19,7 @@ export interface ServiceConfiguration {
 }
 
 export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
+  BootstrapMode: false,
   Port: 8080,
   // TODO: add EthereumGenesisContract with default mainnet address
   DockerNamespace: 'orbsnetwork',
@@ -34,6 +36,10 @@ export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
 
 export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): string[] | undefined {
   const serviceConfigConstraints = {
+    BootstrapMode: {
+      presence: { allowEmpty: false },
+      type: 'boolean',
+    },
     EthereumPollIntervalSeconds: {
       presence: { allowEmpty: false },
       type: 'number',

@@ -17,8 +17,9 @@ export class TestEnvironment {
 
   constructor(private pathToDockerCompose: string) {}
 
-  getAppConfig() {
+  getAppConfig(bootstrapMode: boolean) {
     return {
+      BootstrapMode: bootstrapMode,
       Port: 8080,
       EthereumGenesisContract: this.ethereum.getContractRegistryAddress(),
       EthereumEndpoint: `http://ganache:7545`,
@@ -36,7 +37,7 @@ export class TestEnvironment {
   }
 
   // runs all the docker instances with docker-compose
-  launchServices() {
+  launchServices(bootstrapMode: boolean) {
     test.serial.before((t) => t.log('[E2E] driver launchServices() start'));
 
     // step 1 - launch ganache docker
@@ -87,7 +88,7 @@ export class TestEnvironment {
       try {
         unlinkSync(configFilePath);
       } catch (err) {}
-      writeFileSync(configFilePath, JSON.stringify(this.getAppConfig()));
+      writeFileSync(configFilePath, JSON.stringify(this.getAppConfig(bootstrapMode)));
     });
 
     // step 5 - launch app docker

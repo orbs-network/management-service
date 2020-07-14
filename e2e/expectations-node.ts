@@ -35,6 +35,7 @@ export const expectationNodeManagement = {
         Pull: true,
       },
       Config: {
+        BootstrapMode: false,
         Port: 8080,
         DockerNamespace: 'orbsnetwork',
         DockerHubPollIntervalSeconds: 1,
