@@ -52,6 +52,7 @@ function getSigner(snapshot: StateSnapshot, config: ServiceConfiguration) {
 
   return {
     InternalPort: 7777,
+    Disabled: false,
     DockerConfig: {
       Image: `${config.DockerNamespace}/signer`,
       Tag: version,
@@ -70,6 +71,7 @@ function getManagementService(snapshot: StateSnapshot, config: ServiceConfigurat
   return {
     InternalPort: 8080,
     ExternalPort: 7666,
+    Disabled: false,
     DockerConfig: {
       Image: `${config.DockerNamespace}/management-service`,
       Tag: version,
@@ -86,11 +88,13 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
   if (!elections) return undefined;
 
   return {
+    Disabled: false,
     DockerConfig: {
       Image: `${config.DockerNamespace}/ethereum-writer`,
       Tag: version,
       Pull: true,
     },
+    AllowAccessToSigner: true,
     Config: {
       ManagementServiceEndpoint: 'http://management-service:8080',
       EthereumEndpoint: config.EthereumEndpoint,
@@ -112,11 +116,13 @@ function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration
   if (!guardian) return undefined;
 
   return {
+    Disabled: false,
     DockerConfig: {
       Image: `${config.DockerNamespace}/rewards-service`,
       Tag: version,
       Pull: true,
     },
+    AllowAccessToSigner: true,
     Config: {
       EthereumEndpoint: config.EthereumEndpoint,
       SignerEndpoint: 'http://signer:7777',
@@ -145,6 +151,7 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
       Tag: snapshot.CurrentImageVersions[rolloutGroup]?.['node'] ?? mainVersion,
       Pull: true,
     },
+    AllowAccessToSigner: true,
     Config: {
       'management-file-path': `http://management-service:8080/vchains/${vchainId}/management`,
       'management-consensus-grace-timeout': '0s', // TODO: temporary to simplify staging, remove eventually

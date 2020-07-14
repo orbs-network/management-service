@@ -15,6 +15,7 @@ export const expectationNodeManagement = {
   services: {
     signer: {
       InternalPort: 7777,
+      Disabled: false,
       DockerConfig: {
         Image: 'orbsnetwork/signer',
         Tag: isValidImageVersion,
@@ -27,6 +28,7 @@ export const expectationNodeManagement = {
     'management-service': {
       InternalPort: 8080,
       ExternalPort: 7666,
+      Disabled: false,
       DockerConfig: {
         Image: 'orbsnetwork/management-service',
         Tag: isValidImageVersion,
@@ -46,11 +48,13 @@ export const expectationNodeManagement = {
       },
     },
     'ethereum-writer': {
+      Disabled: false,
       DockerConfig: {
         Image: 'orbsnetwork/ethereum-writer',
         Tag: isValidImageVersion,
         Pull: true,
       },
+      AllowAccessToSigner: true,
       Config: {
         ManagementServiceEndpoint: 'http://management-service:8080',
         EthereumEndpoint: 'http://ganache:7545',
@@ -60,11 +64,13 @@ export const expectationNodeManagement = {
       },
     },
     'rewards-service': {
+      Disabled: false,
       DockerConfig: {
         Image: 'orbsnetwork/rewards-service',
         Tag: isValidImageVersion,
         Pull: true,
       },
+      AllowAccessToSigner: true,
       Config: {
         EthereumEndpoint: 'http://ganache:7545',
         SignerEndpoint: 'http://signer:7777',
@@ -88,6 +94,7 @@ export const expectationNodeManagement = {
         Tag: isValidImageVersion,
         Pull: true,
       },
+      AllowAccessToSigner: true,
       Config: {
         'management-file-path': `http://management-service:8080/vchains/${vcId}/management`,
         'management-consensus-grace-timeout': '0s',
