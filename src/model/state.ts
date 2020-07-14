@@ -325,17 +325,18 @@ function calcNewCommitteeEvent(time: number, snapshot: StateSnapshot): CommiteeE
 }
 
 function calcStaleElectionsUpdates(time: number, snapshot: StateSnapshot, config: StateConfiguration) {
-  // all committee members are always up-to-date
-  for (const node of snapshot.CurrentCommittee) {
-    if (snapshot.CurrentElectionsStatus[node.EthAddress]) {
-      snapshot.CurrentElectionsStatus[node.EthAddress].LastUpdateTime = time;
-    }
-  }
   // check who's stale
   for (const status of Object.values(snapshot.CurrentElectionsStatus)) {
     status.TimeToStale = config.ElectionsStaleUpdateSeconds - (time - status.LastUpdateTime);
     if (status.TimeToStale < 0) status.TimeToStale = 0;
     if (status.ReadyToSync != true) status.TimeToStale = 0;
+  }
+
+  // all committee members are always not stale
+  for (const node of snapshot.CurrentCommittee) {
+    if (snapshot.CurrentElectionsStatus[node.EthAddress]) {
+      snapshot.CurrentElectionsStatus[node.EthAddress].TimeToStale = config.ElectionsStaleUpdateSeconds;
+    }
   }
 }
 
