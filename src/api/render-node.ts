@@ -95,6 +95,7 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
       Pull: true,
     },
     AllowAccessToSigner: true,
+    AllowAccessToServices: true,
     Config: {
       ManagementServiceEndpoint: 'http://management-service:8080',
       EthereumEndpoint: config.EthereumEndpoint,
@@ -152,6 +153,7 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
       Pull: true,
     },
     AllowAccessToSigner: true,
+    AllowAccessToServices: true,
     Config: {
       'management-file-path': `http://management-service:8080/vchains/${vchainId}/management`,
       'management-consensus-grace-timeout': '0s', // TODO: temporary to simplify staging, remove eventually

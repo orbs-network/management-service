@@ -55,6 +55,7 @@ export const expectationNodeManagement = {
         Pull: true,
       },
       AllowAccessToSigner: true,
+      AllowAccessToServices: true,
       Config: {
         ManagementServiceEndpoint: 'http://management-service:8080',
         EthereumEndpoint: 'http://ganache:7545',
@@ -95,6 +96,7 @@ export const expectationNodeManagement = {
         Pull: true,
       },
       AllowAccessToSigner: true,
+      AllowAccessToServices: true,
       Config: {
         'management-file-path': `http://management-service:8080/vchains/${vcId}/management`,
         'management-consensus-grace-timeout': '0s',
