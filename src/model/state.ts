@@ -34,6 +34,7 @@ export interface StateSnapshot {
       Name: string;
       Website: string;
       Contact: string;
+      Metadata: { [Key: string]: string };
     };
   };
   CurrentVirtualChains: {
@@ -169,7 +170,14 @@ export class State {
       Name: event.returnValues.name,
       Website: event.returnValues.website,
       Contact: event.returnValues.contact,
+      Metadata: {},
     };
+  }
+
+  applyNewGuardianMetadataChanged(_time: number, event: EventTypes['GuardianMetadataChanged']) {
+    const EthAddress = normalizeAddress(event.returnValues.addr);
+    const metadata = this.snapshot.CurrentRegistrationData[EthAddress]?.Metadata;
+    if (metadata) metadata[event.returnValues.key] = event.returnValues.newValue;
   }
 
   applyNewGuardianStatusUpdated(time: number, event: EventTypes['GuardianStatusUpdated']) {

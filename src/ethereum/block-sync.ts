@@ -26,6 +26,7 @@ export class BlockSync {
       ProtocolVersionChanged: new SingleEventFetcher('ProtocolVersionChanged', this.reader),
       GuardianDataUpdated: new SingleEventFetcher('GuardianDataUpdated', this.reader),
       GuardianStatusUpdated: new SingleEventFetcher('GuardianStatusUpdated', this.reader),
+      GuardianMetadataChanged: new SingleEventFetcher('GuardianMetadataChanged', this.reader),
     };
     // TODO: this mechanism is ugly on purpose and stems from us not tracking ContractAddressUpdatedEvent with an EventFetcher
     // The fix to the architecture is:

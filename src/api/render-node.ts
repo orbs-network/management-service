@@ -115,6 +115,9 @@ function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration
   if (!rewards) return undefined;
   const guardian = _.findKey(snapshot.CurrentOrbsAddress, (orbsAddress) => orbsAddress == config['node-address']);
   if (!guardian) return undefined;
+  const registration = snapshot.CurrentRegistrationData[guardian];
+  if (!registration) return undefined;
+  const frequency = Math.round(parseInt(registration.Metadata['REWARDS_FREQUENCY_SEC']));
 
   return {
     Disabled: false,
@@ -125,6 +128,7 @@ function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration
     },
     AllowAccessToSigner: true,
     Config: {
+      DistributionFrequencySeconds: frequency > 0 ? frequency : undefined,
       EthereumEndpoint: config.EthereumEndpoint,
       SignerEndpoint: 'http://signer:7777',
       EthereumDelegationsContract: delegations,

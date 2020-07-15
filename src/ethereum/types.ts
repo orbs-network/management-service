@@ -19,6 +19,7 @@ export const eventNames: Readonly<Array<EventName>> = [
   'ProtocolVersionChanged',
   'GuardianDataUpdated',
   'GuardianStatusUpdated',
+  'GuardianMetadataChanged',
 ];
 
 export type EventName = keyof EventTypes;
@@ -61,6 +62,13 @@ export type GuardianDataUpdatedPayload = {
   contact: string;
 };
 
+export type GuardianMetadataChangedPayload = {
+  addr: string;
+  key: string;
+  newValue: string;
+  oldValue: string;
+};
+
 export type GuardianStatusUpdatedPayload = {
   addr: string;
   readyToSync: boolean;
@@ -74,4 +82,5 @@ export type EventTypes = {
   ProtocolVersionChanged: EventData & { returnValues: ProtocolChangedPayload };
   GuardianDataUpdated: EventData & { returnValues: GuardianDataUpdatedPayload };
   GuardianStatusUpdated: EventData & { returnValues: GuardianStatusUpdatedPayload };
+  GuardianMetadataChanged: EventData & { returnValues: GuardianMetadataChangedPayload };
 };

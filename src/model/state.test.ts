@@ -432,6 +432,19 @@ test('state applies image version changes', (t) => {
   });
 });
 
+test('state applies meta registration data', (t) => {
+  const s = new State();
+
+  GuardianMetadataChanged(s, 500, '0xA', 'REWARDS_FREQUENCY_SEC', '999');
+
+  GuardianDataUpdated(s, 1000, '0xA', '0xa1', '0x01010101');
+  GuardianMetadataChanged(s, 2000, '0xA', 'REWARDS_FREQUENCY_SEC', '112233');
+  t.is(s.getSnapshot().CurrentRegistrationData['a'].Metadata['REWARDS_FREQUENCY_SEC'], '112233');
+
+  GuardianMetadataChanged(s, 3000, '0xA', 'REWARDS_FREQUENCY_SEC', '445566');
+  t.is(s.getSnapshot().CurrentRegistrationData['a'].Metadata['REWARDS_FREQUENCY_SEC'], '445566');
+});
+
 function GuardianCommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {
   s.applyNewGuardianCommitteeChange(time, {
     ...eventBase,
@@ -480,6 +493,18 @@ function GuardianDataUpdated(s: State, time: number, addr: string, orbsAddr: str
       name: 'name',
       website: 'website',
       contact: 'contact',
+    },
+  });
+}
+
+function GuardianMetadataChanged(s: State, time: number, addr: string, key: string, value: string) {
+  s.applyNewGuardianMetadataChanged(time, {
+    ...eventBase,
+    returnValues: {
+      addr,
+      key,
+      newValue: value,
+      oldValue: 'unknown',
     },
   });
 }

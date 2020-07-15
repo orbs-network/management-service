@@ -15,6 +15,11 @@ test.serial.before(async (t) => {
   t.log('[E2E] set up ethereum state');
   t.timeout(60 * 1000);
   await driver.ethereum.setupInitialCommittee();
+  await driver.ethereum.setGuardianMetadata(
+    '0x29ce860a2247d97160d6dfc087a15f41e2349087',
+    'REWARDS_FREQUENCY_SEC',
+    '112233'
+  );
   await driver.ethereum.addVchain(30 * day, 'main');
   await driver.ethereum.addVchain(30 * day, 'canary');
   await driver.ethereum.upgradeProtocolVersion(17, 60 * day, 'main');

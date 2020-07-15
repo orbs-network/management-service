@@ -162,6 +162,8 @@ export function contractByEventName(eventName: EventName): ContractName {
       return 'guardiansRegistration';
     case 'GuardianStatusUpdated':
       return 'elections';
+    case 'GuardianMetadataChanged':
+      return 'guardiansRegistration';
     default:
       throw new Error(`unknown event name '${eventName}'`);
   }

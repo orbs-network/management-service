@@ -128,6 +128,12 @@ export class EthereumTestDriver {
     return p;
   }
 
+  async setGuardianMetadata(guardianAddress: string, key: string, value: string) {
+    if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
+    const d = this.orbsPosV2Driver;
+    await d.guardiansRegistration.setMetadata(key, value, { from: guardianAddress });
+  }
+
   async increaseTime(seconds: number) {
     if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
     const d = this.orbsPosV2Driver;

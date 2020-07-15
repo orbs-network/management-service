@@ -26,6 +26,9 @@ export class StateManager {
         case 'StakeChanged':
           this.current.applyNewStakeChanged(time, event as EventTypes['StakeChanged']);
           break;
+        case 'GuardianMetadataChanged':
+          this.current.applyNewGuardianMetadataChanged(time, event as EventTypes['GuardianMetadataChanged']);
+          break;
       }
     }
   }

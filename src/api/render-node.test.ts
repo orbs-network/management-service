@@ -54,7 +54,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.log('state snapshot:', JSON.stringify(state.getCurrentSnapshot(), null, 2));
 
   // process
-  const res = renderNodeManagement(state.getCurrentSnapshot(), config);
+  const res = JSON.parse(JSON.stringify(renderNodeManagement(state.getCurrentSnapshot(), config)));
 
   t.log('result:', JSON.stringify(res, null, 2));
 
