@@ -22,42 +22,64 @@ export class SingleEventFetcher extends EventFetcher {
 }
 
 // the simplest fetcher, yet inefficient, good for testing
-export class InfiniteMemoryFetcher extends EventFetcher {
-  private eventsByBlockNumber: { [blockHeight: number]: EventData[] } = {};
-  private latestFetched = -1;
+export class PagedEventFetcher extends EventFetcher {
+
+  // store events before they are read
+  private eventsStore: { [blockHeight: number]: EventData[] } = {};
+
+  // latest block height fetched
+  private latestRead = -1;
+
+  // assuming the caller calls fetchBlock for each consecutive block number exactly once and does not skip or go back
   async fetchBlock(blockNumber: number, latestAllowedBlock: number): Promise<EventData[]> {
-    if (latestAllowedBlock < this.latestFetched) {
+    if (latestAllowedBlock < this.latestRead) {
       throw new Error(
-        `latestAllowedBlock (${latestAllowedBlock}) is behind latestFetchedBlock (${this.latestFetched}).`
+        `latestAllowedBlock (${latestAllowedBlock}) is behind latestFetchedBlock (${this.latestRead}).`
       );
     }
 
-    if (this.latestFetched >= blockNumber) {
-      const prefetchedEvents = this.eventsByBlockNumber[blockNumber];
-      delete this.eventsByBlockNumber[blockNumber];
-      return prefetchedEvents || [];
+    // blockNumber already read
+    if (this.latestRead >= blockNumber) {
+      return this.removeStored(blockNumber);
     }
 
-    const events = await this.reader.getPastEvents(this.eventName, {
-      fromBlock: Math.max(this.latestFetched + 1, blockNumber),
+    // skipping forward (TODO this may leak memory - clear storage!)
+    this.latestRead = Math.max(this.latestRead, blockNumber - 1);
+
+    // read events in pages
+    const events = await this.reader.getPastEventsAutoPaged(this.eventName, {
+      fromBlock: this.latestRead + 1,
       toBlock: latestAllowedBlock,
     });
-    this.latestFetched = latestAllowedBlock;
+
+    // process result
+    const result = this.extractResultAndStorePrefetched(events, blockNumber);
+    this.latestRead = latestAllowedBlock;
+
     Logger.log(
-      `Fetched past events for ${this.eventName} between heights ${this.latestFetched + 1} - ${latestAllowedBlock}`
+        `Fetched ${this.eventName} events for block height ${this.latestRead + 1} - ${latestAllowedBlock}`
     );
 
+    return result;
+  }
+
+  private removeStored(blockNumber: number) {
+    const prefetchedEvents = this.eventsStore[blockNumber];
+    delete this.eventsStore[blockNumber];
+    return prefetchedEvents || [];
+  }
+
+  private extractResultAndStorePrefetched(events: EventData[], blockNumber: number) : EventData[] {
     const result: EventData[] = [];
     events.map((e: EventData) => {
       if (e.blockNumber == blockNumber) {
         result.push(e);
       } else {
-        const events = this.eventsByBlockNumber[e.blockNumber] || [];
-        this.eventsByBlockNumber[e.blockNumber] = events;
-        events.push(e);
+        const storedEvents = this.eventsStore[e.blockNumber] || [];
+        this.eventsStore[e.blockNumber] = storedEvents;
+        storedEvents.push(e);
       }
     });
-
     return result;
   }
 }

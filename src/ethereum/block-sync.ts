@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { StateManager } from '../model/manager';
 import { EthereumReader, EthereumConfiguration, getNewEthereumReader } from './ethereum-reader';
-import { InfiniteMemoryFetcher, EventFetcher } from './event-fetcher';
+import { PagedEventFetcher, EventFetcher } from './event-fetcher';
 import { EventName, eventNames } from './types';
 import * as Logger from '../logger';
 
@@ -20,13 +20,13 @@ export class BlockSync {
     this.reader = getNewEthereumReader(config);
     this.lastProcessedBlock = config.EthereumFirstBlock;
     this.eventFetchers = {
-      GuardianCommitteeChange: new InfiniteMemoryFetcher('GuardianCommitteeChange', this.reader),
-      StakeChanged: new InfiniteMemoryFetcher('StakeChanged', this.reader),
-      SubscriptionChanged: new InfiniteMemoryFetcher('SubscriptionChanged', this.reader),
-      ProtocolVersionChanged: new InfiniteMemoryFetcher('ProtocolVersionChanged', this.reader),
-      GuardianDataUpdated: new InfiniteMemoryFetcher('GuardianDataUpdated', this.reader),
-      GuardianStatusUpdated: new InfiniteMemoryFetcher('GuardianStatusUpdated', this.reader),
-      GuardianMetadataChanged: new InfiniteMemoryFetcher('GuardianMetadataChanged', this.reader),
+      GuardianCommitteeChange: new PagedEventFetcher('GuardianCommitteeChange', this.reader),
+      StakeChanged: new PagedEventFetcher('StakeChanged', this.reader),
+      SubscriptionChanged: new PagedEventFetcher('SubscriptionChanged', this.reader),
+      ProtocolVersionChanged: new PagedEventFetcher('ProtocolVersionChanged', this.reader),
+      GuardianDataUpdated: new PagedEventFetcher('GuardianDataUpdated', this.reader),
+      GuardianStatusUpdated: new PagedEventFetcher('GuardianStatusUpdated', this.reader),
+      GuardianMetadataChanged: new PagedEventFetcher('GuardianMetadataChanged', this.reader),
     };
     // TODO: this mechanism is ugly on purpose and stems from us not tracking ContractAddressUpdatedEvent with an EventFetcher
     // The fix to the architecture is:

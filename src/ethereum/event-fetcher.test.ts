@@ -1,7 +1,7 @@
 import test from 'ava';
 import _ from 'lodash';
 import { PastEventOptions } from 'web3-eth-contract';
-import { InfiniteMemoryFetcher, SingleEventFetcher, LookaheadEventFetcher } from './event-fetcher';
+import { PagedEventFetcher, SingleEventFetcher, LookaheadEventFetcher } from './event-fetcher';
 import { EventName } from './types';
 import { EthereumReader } from './ethereum-reader';
 
@@ -69,8 +69,8 @@ test('LookaheadEventFetcher sanity', async (t) => {
   ] as unknown);
 });
 
-test('InfiniteMemoryFetcher sanity', async (t) => {
-  const fetcher = new InfiniteMemoryFetcher('GuardianDataUpdated', getMockReader(true));
+test('PagedEventFetcher sanity', async (t) => {
+  const fetcher = new PagedEventFetcher('GuardianDataUpdated', getMockReader(true));
   t.deepEqual(await fetcher.fetchBlock(1, 999999), [
     { blockNumber: 1, uniqueId: 0 },
     { blockNumber: 1, uniqueId: 1 },
@@ -96,9 +96,9 @@ test('LookaheadEventFetcher contract test', async (t) => {
   t.deepEqual(resFetcher, resContract);
 });
 
-test('InfiniteMemoryFetcher contract test', async (t) => {
+test('PagedEventFetcher contract test', async (t) => {
   let resFetcher: unknown = [];
-  const fetcher = new InfiniteMemoryFetcher('GuardianDataUpdated', getMockReader(true));
+  const fetcher = new PagedEventFetcher('GuardianDataUpdated', getMockReader(true));
   for (let blockNumber = 1; blockNumber < mockEventsDataLastBlock; blockNumber++) {
     resFetcher = _.concat(resFetcher, await fetcher.fetchBlock(blockNumber, 999999));
   }
