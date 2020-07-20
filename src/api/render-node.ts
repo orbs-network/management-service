@@ -111,7 +111,7 @@ function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration
   if (!version) return undefined;
   const delegations = snapshot.CurrentContractAddress['delegations'];
   if (!delegations) return undefined;
-  const rewards = snapshot.CurrentContractAddress['rewards'];
+  const rewards = snapshot.CurrentContractAddress['guardiansWallet']; // TODO a hack to pass the address of GuardiansWallet to rewards-service
   if (!rewards) return undefined;
   const guardian = _.findKey(snapshot.CurrentOrbsAddress, (orbsAddress) => orbsAddress == config['node-address']);
   if (!guardian) return undefined;

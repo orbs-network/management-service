@@ -10,7 +10,8 @@ export type ContractName =
   | 'certification'
   | 'staking'
   | 'subscriptions'
-  | 'rewards';
+  | 'rewards'
+  | 'guardiansWallet';
 
 export const eventNames: Readonly<Array<EventName>> = [
   'SubscriptionChanged',

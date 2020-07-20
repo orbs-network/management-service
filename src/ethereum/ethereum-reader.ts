@@ -37,6 +37,8 @@ export function getContractTypeName(key: ContractName): ContractTypeName {
       return 'Subscriptions';
     case 'rewards':
       return 'Rewards';
+    case 'guardiansWallet':
+      return 'GuardiansWallet';
     default:
       throw new Error(`unknown contract name '${key}'`);
   }
