@@ -49,7 +49,9 @@ export class PagedEventFetcher extends EventFetcher {
     };
 
     if (options.fromBlock > options.toBlock) {
-      throw new Error(`Unexpected error - trying to read events in an empty block range: ${options.fromBlock} - ${options.toBlock}.`);
+      throw new Error(
+        `Unexpected error - trying to read events in an empty block range: ${options.fromBlock} - ${options.toBlock}.`
+      );
     }
 
     // read events in pages
