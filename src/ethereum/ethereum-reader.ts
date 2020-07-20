@@ -171,6 +171,7 @@ export function contractByEventName(eventName: EventName): ContractName {
 
 export class EthereumReader {
   private web3: Web3;
+  private contractCache: {[contractAddress: string]: Contract} = {};
 
   constructor(private config: EthereumConfig) {
     this.web3 = new Web3(new Web3.providers.HttpProvider(config.httpEndpoint));
@@ -181,8 +182,19 @@ export class EthereumReader {
     if (!contractMetadata) {
       throw new Error(`contract "${contractName}" not in registry`);
     }
+    if (!contractMetadata.address) {
+      throw new Error(`contract "${contractName}" does not have a known address`);
+    }
+
+    if (this.contractCache[contractMetadata.address]) {
+      return this.contractCache[contractMetadata.address]
+    }
+
     const abi = compiledContracts[getContractTypeName(contractName)].abi;
-    return new this.web3.eth.Contract(abi, contractMetadata.address);
+    const result = new this.web3.eth.Contract(abi, contractMetadata.address);
+    this.contractCache[contractMetadata.address] = result;
+
+    return result;
   }
 
   getBlockNumber(): Promise<number> {
