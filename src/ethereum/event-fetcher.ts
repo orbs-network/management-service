@@ -54,7 +54,6 @@ export class PagedEventFetcher extends EventFetcher {
     const result = this.extractResultAndStorePrefetched(events, blockNumber);
     this.latestRead = latestAllowedBlock;
 
-
     return result;
   }
 
