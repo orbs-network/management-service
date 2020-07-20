@@ -43,16 +43,22 @@ export class PagedEventFetcher extends EventFetcher {
     // skipping forward (TODO this may leak memory - clear storage!)
     this.latestRead = Math.max(this.latestRead, blockNumber - 1);
 
-    // read events in pages
-    const events = await this.reader.getPastEventsAutoPaged(this.eventName, {
+    const options = {
       fromBlock: this.latestRead + 1,
       toBlock: latestAllowedBlock,
-    });
-    Logger.log(`Fetched ${this.eventName} events for block height ${this.latestRead + 1} - ${latestAllowedBlock}`);
+    };
+
+    if (options.fromBlock > options.toBlock) {
+      throw new Error(`Unexpected error - trying to read events in an empty block range: ${options.fromBlock} - ${options.toBlock}.`);
+    }
+
+    // read events in pages
+    const events = await this.reader.getPastEventsAutoPaged(this.eventName, options);
+    Logger.log(`Fetched ${this.eventName} events for block height ${options.fromBlock} - ${options.toBlock}`);
 
     // process result
     const result = this.extractResultAndStorePrefetched(events, blockNumber);
-    this.latestRead = latestAllowedBlock;
+    this.latestRead = options.toBlock;
 
     return result;
   }
