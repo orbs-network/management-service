@@ -48,12 +48,12 @@ export class PagedEventFetcher extends EventFetcher {
       fromBlock: this.latestRead + 1,
       toBlock: latestAllowedBlock,
     });
+    Logger.log(`Fetched ${this.eventName} events for block height ${this.latestRead + 1} - ${latestAllowedBlock}`);
 
     // process result
     const result = this.extractResultAndStorePrefetched(events, blockNumber);
     this.latestRead = latestAllowedBlock;
 
-    Logger.log(`Fetched ${this.eventName} events for block height ${this.latestRead + 1} - ${latestAllowedBlock}`);
 
     return result;
   }
