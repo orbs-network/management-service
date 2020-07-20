@@ -171,7 +171,7 @@ export function contractByEventName(eventName: EventName): ContractName {
 
 export class EthereumReader {
   private web3: Web3;
-  private contractCache: {[contractAddress: string]: Contract} = {};
+  private contractCache: { [contractAddress: string]: Contract } = {};
 
   constructor(private config: EthereumConfig) {
     this.web3 = new Web3(new Web3.providers.HttpProvider(config.httpEndpoint));
@@ -187,7 +187,7 @@ export class EthereumReader {
     }
 
     if (this.contractCache[contractMetadata.address]) {
-      return this.contractCache[contractMetadata.address]
+      return this.contractCache[contractMetadata.address];
     }
 
     const abi = compiledContracts[getContractTypeName(contractName)].abi;

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { EventData } from 'web3-eth-contract';
 import { EventName } from './types';
 import { EthereumReader } from './ethereum-reader';
+import * as Logger from '../logger';
 
 export abstract class EventFetcher {
   constructor(protected eventName: EventName, protected reader: EthereumReader) {}
@@ -19,6 +20,45 @@ export class SingleEventFetcher extends EventFetcher {
     });
   }
 }
+
+// the simplest fetcher, yet inefficient, good for testing
+export class InfiniteMemoryFetcher extends EventFetcher {
+  private eventsByBlockNumber: {[blockHeight: number] : EventData[]} = {};
+  private latestFetched = -1;
+  async fetchBlock(blockNumber: number,latestAllowedBlock: number): Promise<EventData[]> {
+
+    if (latestAllowedBlock < this.latestFetched) {
+      throw new Error(`latestAllowedBlock (${latestAllowedBlock}) is behind latestFetchedBlock (${this.latestFetched}).`);
+    }
+
+    if (this.latestFetched >= blockNumber) {
+      const prefetchedEvents = this.eventsByBlockNumber[blockNumber];
+      delete this.eventsByBlockNumber[blockNumber];
+      return prefetchedEvents || [];
+    }
+
+    const events = await this.reader.getPastEvents(this.eventName, {
+      fromBlock: Math.max(this.latestFetched + 1, blockNumber),
+      toBlock: latestAllowedBlock,
+    });
+    this.latestFetched = latestAllowedBlock;
+    Logger.log(`Fetched past events for ${this.eventName} between heights ${this.latestFetched + 1} - ${latestAllowedBlock}`);
+
+    const result: EventData[] = [];
+    events.map((e: EventData) => {
+      if (e.blockNumber == blockNumber) {
+        result.push(e);
+      } else {
+        const events = this.eventsByBlockNumber[e.blockNumber] || [];
+        this.eventsByBlockNumber[e.blockNumber] = events;
+        events.push(e);
+      }
+    });
+
+    return result;
+  }
+}
+
 
 // more efficient fetcher that supports lookahead
 export class LookaheadEventFetcher extends EventFetcher {
