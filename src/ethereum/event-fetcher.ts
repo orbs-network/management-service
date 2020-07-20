@@ -23,7 +23,6 @@ export class SingleEventFetcher extends EventFetcher {
 
 // the simplest fetcher, yet inefficient, good for testing
 export class PagedEventFetcher extends EventFetcher {
-
   // store events before they are read
   private eventsStore: { [blockHeight: number]: EventData[] } = {};
 
@@ -33,9 +32,7 @@ export class PagedEventFetcher extends EventFetcher {
   // assuming the caller calls fetchBlock for each consecutive block number exactly once and does not skip or go back
   async fetchBlock(blockNumber: number, latestAllowedBlock: number): Promise<EventData[]> {
     if (latestAllowedBlock < this.latestRead) {
-      throw new Error(
-        `latestAllowedBlock (${latestAllowedBlock}) is behind latestFetchedBlock (${this.latestRead}).`
-      );
+      throw new Error(`latestAllowedBlock (${latestAllowedBlock}) is behind latestFetchedBlock (${this.latestRead}).`);
     }
 
     // blockNumber already read
@@ -56,9 +53,7 @@ export class PagedEventFetcher extends EventFetcher {
     const result = this.extractResultAndStorePrefetched(events, blockNumber);
     this.latestRead = latestAllowedBlock;
 
-    Logger.log(
-        `Fetched ${this.eventName} events for block height ${this.latestRead + 1} - ${latestAllowedBlock}`
-    );
+    Logger.log(`Fetched ${this.eventName} events for block height ${this.latestRead + 1} - ${latestAllowedBlock}`);
 
     return result;
   }
@@ -69,7 +64,7 @@ export class PagedEventFetcher extends EventFetcher {
     return prefetchedEvents || [];
   }
 
-  private extractResultAndStorePrefetched(events: EventData[], blockNumber: number) : EventData[] {
+  private extractResultAndStorePrefetched(events: EventData[], blockNumber: number): EventData[] {
     const result: EventData[] = [];
     events.map((e: EventData) => {
       if (e.blockNumber == blockNumber) {
