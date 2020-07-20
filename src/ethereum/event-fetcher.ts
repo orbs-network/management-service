@@ -23,12 +23,13 @@ export class SingleEventFetcher extends EventFetcher {
 
 // the simplest fetcher, yet inefficient, good for testing
 export class InfiniteMemoryFetcher extends EventFetcher {
-  private eventsByBlockNumber: {[blockHeight: number] : EventData[]} = {};
+  private eventsByBlockNumber: { [blockHeight: number]: EventData[] } = {};
   private latestFetched = -1;
-  async fetchBlock(blockNumber: number,latestAllowedBlock: number): Promise<EventData[]> {
-
+  async fetchBlock(blockNumber: number, latestAllowedBlock: number): Promise<EventData[]> {
     if (latestAllowedBlock < this.latestFetched) {
-      throw new Error(`latestAllowedBlock (${latestAllowedBlock}) is behind latestFetchedBlock (${this.latestFetched}).`);
+      throw new Error(
+        `latestAllowedBlock (${latestAllowedBlock}) is behind latestFetchedBlock (${this.latestFetched}).`
+      );
     }
 
     if (this.latestFetched >= blockNumber) {
@@ -42,7 +43,9 @@ export class InfiniteMemoryFetcher extends EventFetcher {
       toBlock: latestAllowedBlock,
     });
     this.latestFetched = latestAllowedBlock;
-    Logger.log(`Fetched past events for ${this.eventName} between heights ${this.latestFetched + 1} - ${latestAllowedBlock}`);
+    Logger.log(
+      `Fetched past events for ${this.eventName} between heights ${this.latestFetched + 1} - ${latestAllowedBlock}`
+    );
 
     const result: EventData[] = [];
     events.map((e: EventData) => {
@@ -58,7 +61,6 @@ export class InfiniteMemoryFetcher extends EventFetcher {
     return result;
   }
 }
-
 
 // more efficient fetcher that supports lookahead
 export class LookaheadEventFetcher extends EventFetcher {
