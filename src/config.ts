@@ -21,7 +21,7 @@ export interface ServiceConfiguration {
 export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
   BootstrapMode: false,
   Port: 8080,
-  EthereumGenesisContract: "0x10bFdCc77E998Eb849a18c79b880F8b9BE06Ad83",
+  EthereumGenesisContract: '0x10bFdCc77E998Eb849a18c79b880F8b9BE06Ad83',
   EthereumFirstBlock: 10503000,
   DockerNamespace: 'orbsnetwork',
   DockerRegistry: 'https://registry.hub.docker.com',
