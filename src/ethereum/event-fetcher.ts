@@ -22,7 +22,7 @@ export class SingleEventFetcher extends EventFetcher {
 }
 
 // the simplest fetcher, yet inefficient, good for testing
-export class PagedEventFetcher extends EventFetcher {
+export class BulkEventFetcher extends EventFetcher {
   // store events before they are read
   private eventsStore: { [blockHeight: number]: EventData[] } = {};
 
@@ -54,8 +54,8 @@ export class PagedEventFetcher extends EventFetcher {
       );
     }
 
-    // read events in pages
-    const events = await this.reader.getPastEventsAutoPaged(this.eventName, options);
+    // read events TODO this may break when there are a few thousands
+    const events = await this.reader.getPastEvents(this.eventName, options);
     Logger.log(`Fetched ${this.eventName} events for block height ${options.fromBlock} - ${options.toBlock}`);
 
     // process result
