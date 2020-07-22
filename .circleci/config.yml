@@ -7,7 +7,8 @@ jobs:
     machine: true
     steps:
       - checkout
-      - node/install
+      - node/install:
+          node-version: '1.12.30'
       - docker/install-docker
       - run: node --version
       - run: npm --version
@@ -20,12 +21,9 @@ jobs:
           command: npm run start:eth
           background: true
       - run: mkdir -p _out/unit _out/e2e
-      - node/with-cache:
-          steps:
-            - run: npm test --  --timeout=5m --tap --no-color| npx tap-xunit > _out/unit/test.xml
-            - run: npm run build
-            - run: 
-                command: npm run test:e2e --  --timeout=10m --tap --no-color| npx tap-xunit > _out/e2e/test.xml
+      - run: npm test --  --timeout=5m --tap --no-color| npx tap-xunit > _out/unit/test.xml
+      - run: npm run build
+      - run: npm run test:e2e --  --timeout=10m --tap --no-color| npx tap-xunit > _out/e2e/test.xml
       - store_test_results:
           path: _out
       - store_artifacts:
@@ -35,7 +33,8 @@ jobs:
     machine: true
     steps:
       - checkout
-      - node/install
+      - node/install:
+          node-version: '1.12.30'
       - docker/install-docker
       - run: ./boyar/create-version-file.sh
       - node/install-packages
@@ -46,7 +45,8 @@ jobs:
     machine: true
     steps:
       - checkout
-      - node/install
+      - node/install:
+          node-version: '1.12.30'
       - docker/install-docker
       - run: ./boyar/create-version-file.sh
       - node/install-packages
