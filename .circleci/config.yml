@@ -1,23 +1,20 @@
 version: 2.1
 orbs:
-  node: circleci/node@1.1.6
+  node: circleci/node@3.0.1
   docker: circleci/docker@0.5.19
 jobs:
   build-and-test:
     machine: true
     steps:
       - checkout
-      - node/install:
-          node-version: '12.13.0'
+      - node/install
       - docker/install-docker
       - run: node --version
       - run: npm --version
       - run: docker --version
       - run: env
-      - node/with-cache:
-          steps:
-            - run: npm install
-            - run: npm install --no-save tap-xunit
+      - node/install-packages
+      - run: npm install --no-save tap-xunit
       - run:
           name: spinning up ganache
           command: npm run start:eth
@@ -38,13 +35,10 @@ jobs:
     machine: true
     steps:
       - checkout
-      - node/install:
-        node-version: '12.13.0'
+      - node/install
       - docker/install-docker
       - run: ./boyar/create-version-file.sh
-      - node/with-cache:
-          steps:
-            - run: npm install
+      - node/install-packages
       - run: ./boyar/docker-build.sh
       - run: ./.circleci/release-to-staging.sh
 
@@ -52,13 +46,10 @@ jobs:
     machine: true
     steps:
       - checkout
-      - node/install:
-        node-version: '12.13.0'
+      - node/install
       - docker/install-docker
       - run: ./boyar/create-version-file.sh
-      - node/with-cache:
-          steps:
-            - run: npm install
+      - node/install-packages
       - run: ./boyar/docker-build.sh
       - run: ./.circleci/release.sh
 
