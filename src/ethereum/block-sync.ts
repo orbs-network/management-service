@@ -18,7 +18,7 @@ export class BlockSync {
 
   constructor(private state: StateManager, private config: BlockSyncConfiguration) {
     this.reader = getNewEthereumReader(config);
-    this.lastProcessedBlock = parseInt(config.EthereumFirstBlock) || 0;
+    this.lastProcessedBlock = config.EthereumFirstBlock;
     this.eventFetchers = {
       GuardianCommitteeChange: new BulkEventFetcher('GuardianCommitteeChange', this.reader),
       StakeChanged: new BulkEventFetcher('StakeChanged', this.reader),

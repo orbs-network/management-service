@@ -21,7 +21,8 @@ export interface ServiceConfiguration {
 export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
   BootstrapMode: false,
   Port: 8080,
-  // TODO: add EthereumGenesisContract with default mainnet address
+  EthereumGenesisContract: "0x10bFdCc77E998Eb849a18c79b880F8b9BE06Ad83",
+  EthereumFirstBlock: 10503000,
   DockerNamespace: 'orbsnetwork',
   DockerRegistry: 'https://registry.hub.docker.com',
   DockerHubPollIntervalSeconds: 3 * 60,
@@ -29,7 +30,6 @@ export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
   HotfixRolloutWindowSeconds: 60 * 60,
   EthereumPollIntervalSeconds: 30,
   ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
-  EthereumFirstBlock: 0,
   FinalityBufferBlocks: 40,
   Verbose: false,
 };
