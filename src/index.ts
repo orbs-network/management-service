@@ -44,7 +44,7 @@ export function serve(serviceConfig: ServiceConfiguration) {
 
   app.get('/status', (_request, response) => {
     const snapshot = state.getCurrentSnapshot();
-    const body = renderServiceStatus(snapshot, serviceConfig);
+    const body = renderServiceStatus(snapshot, blockSync.getRequestStats(), serviceConfig);
     response.status(200).json(body);
   });
 

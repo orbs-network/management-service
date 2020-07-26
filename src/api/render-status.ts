@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
 import { ServiceConfiguration } from '../config';
-import { getCurrentClockTime, JsonResponse } from '../helpers';
+import { getCurrentClockTime, JsonResponse, DailyStatsData } from '../helpers';
 import { imageNamesToPollForNewVersions } from '../dockerhub/image-poll';
 
 const ETHEREUM_REF_TIME_ALLOWED_DELAY = 20 * 60; // seconds
@@ -9,7 +9,7 @@ const DOCKER_HUB_POLL_ALLOWED_DELAY = 20 * 60; // seconds
 
 const timeOriginallyLaunched = getCurrentClockTime();
 
-export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConfiguration) {
+export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsData, config: ServiceConfiguration) {
   const response: JsonResponse = {
     Status: getStatusText(snapshot),
     Timestamp: new Date().toISOString(),
@@ -36,6 +36,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, config: ServiceConf
           ...snapshot.CurrentRegistrationData[EthAddress],
         };
       }),
+      EthereumRequestStats: stats,
       Config: config,
     },
   };

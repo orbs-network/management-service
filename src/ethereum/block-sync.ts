@@ -4,6 +4,7 @@ import { EthereumReader, EthereumConfiguration, getNewEthereumReader } from './e
 import { BulkEventFetcher, EventFetcher } from './event-fetcher';
 import { EventName, eventNames } from './types';
 import * as Logger from '../logger';
+import { DailyStatsData } from '../helpers';
 
 export type BlockSyncConfiguration = EthereumConfiguration & {
   BootstrapMode: boolean;
@@ -84,5 +85,9 @@ export class BlockSync {
     this.state.applyNewEvents(blockTime, sorted);
     this.state.applyNewTimeRef(blockTime, blockNumber);
     Logger.log(`BlockSync: processed ${sorted.length} events in block ${blockNumber} with time ${blockTime}.`);
+  }
+
+  getRequestStats(): DailyStatsData {
+    return this.reader.requestStats.getStats();
   }
 }

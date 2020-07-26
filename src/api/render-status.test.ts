@@ -2,12 +2,14 @@ import test from 'ava';
 import { StateManager } from '../model/manager';
 import { renderServiceStatus } from './render-status';
 import { exampleConfig } from '../config.example';
+import { DailyStatsData } from '../helpers';
 
 test.serial('[integration] getServiceStatus responds', (t) => {
   const state = new StateManager(exampleConfig);
+  const stats: DailyStatsData = [];
 
   // process
-  const res = renderServiceStatus(state.getCurrentSnapshot(), exampleConfig);
+  const res = renderServiceStatus(state.getCurrentSnapshot(), stats, exampleConfig);
 
   t.log('result:', JSON.stringify(res, null, 2));
 
@@ -28,6 +30,7 @@ test.serial('[integration] getServiceStatus responds', (t) => {
     ProtocolVersionEvents: { main: [], canary: [] },
     CurrentContractAddress: {},
     Guardians: {},
+    EthereumRequestStats: [],
     Config: exampleConfig,
   });
 });

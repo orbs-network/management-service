@@ -4,7 +4,7 @@ import { EventData, Contract, PastEventOptions } from 'web3-eth-contract';
 import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/compiled-contracts';
 import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
-import { errorString, toNumber } from '../helpers';
+import { errorString, toNumber, DailyStats } from '../helpers';
 import { ContractName, EventName, EventTypes } from './types';
 
 export function getNewEthereumReader(config: EthereumConfiguration) {
@@ -53,7 +53,11 @@ export class EthereumConfigReader {
   private web3: Web3;
 
   constructor(private config: EthereumConfiguration) {
-    this.web3 = new Web3(new Web3.providers.HttpProvider(config.EthereumEndpoint));
+    this.web3 = new Web3(
+      new Web3.providers.HttpProvider(config.EthereumEndpoint, {
+        keepAlive: true,
+      })
+    );
   }
 
   private connect(contractType: ContractTypeName) {
@@ -172,6 +176,7 @@ export function contractByEventName(eventName: EventName): ContractName {
 export class EthereumReader {
   private web3: Web3;
   private contractCache: { [contractAddress: string]: Contract } = {};
+  public requestStats = new DailyStats();
 
   constructor(private config: EthereumConfig) {
     this.web3 = new Web3(new Web3.providers.HttpProvider(config.httpEndpoint));
@@ -198,6 +203,7 @@ export class EthereumReader {
   }
 
   getBlockNumber(): Promise<number> {
+    this.requestStats.add(1);
     return this.web3.eth.getBlockNumber();
   }
 
@@ -211,6 +217,7 @@ export class EthereumReader {
   }
 
   async getRefTime(blockNumber: number | 'latest'): Promise<number> {
+    this.requestStats.add(1);
     const block = await this.web3.eth.getBlock(blockNumber);
     if (!block) {
       throw new Error(`web3.eth.getBlock for ${blockNumber} return empty block`);
@@ -225,7 +232,7 @@ export class EthereumReader {
     { fromBlock, toBlock }: PastEventOptions
   ): Promise<Array<EventTypes[T]>> {
     const web3Contract = await this.connect(contractByEventName(eventName));
-    return await getEventsPaged(web3Contract, eventName, fromBlock, toBlock, toBlock - fromBlock);
+    return await this.getEventsPaged(web3Contract, eventName, fromBlock, toBlock, toBlock - fromBlock);
   }
 
   // throws error if fails, caller needs to decrease page size if needed
@@ -234,43 +241,45 @@ export class EthereumReader {
     { fromBlock, toBlock }: PastEventOptions
   ): Promise<Array<EventTypes[T]>> {
     const web3Contract = await this.connect(contractByEventName(eventName));
+    this.requestStats.add(1);
     return (await web3Contract.getPastEvents(eventName, {
       fromBlock,
       toBlock,
     })) as Array<EventTypes[T]>;
   }
-}
 
-async function getEventsPaged<T extends EventName>(
-  web3Contract: Contract,
-  eventName: string,
-  fromBlock: number,
-  toBlock: number,
-  pageSize: number
-): Promise<Array<EventTypes[T]>> {
-  const result: Array<EventTypes[T]> = [];
-  for (let currBlock = fromBlock; currBlock < toBlock; currBlock += pageSize) {
-    const options = {
-      fromBlock: currBlock,
-      toBlock: Math.min(currBlock + pageSize, toBlock),
-    };
-    try {
-      const events = (await web3Contract.getPastEvents(eventName, options)) as Array<EventTypes[T]>;
-      result.push(...events);
-    } catch (err) {
-      console.info(`soft failure reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(err)}`);
-      if (pageSize > 5) {
-        // assume there are too many events
-        const events = await getEventsPaged<T>(
-          web3Contract,
-          eventName,
-          options.fromBlock,
-          options.toBlock,
-          Math.floor(pageSize / 5)
-        );
+  async getEventsPaged<T extends EventName>(
+    web3Contract: Contract,
+    eventName: string,
+    fromBlock: number,
+    toBlock: number,
+    pageSize: number
+  ): Promise<Array<EventTypes[T]>> {
+    const result: Array<EventTypes[T]> = [];
+    for (let currBlock = fromBlock; currBlock < toBlock; currBlock += pageSize) {
+      const options = {
+        fromBlock: currBlock,
+        toBlock: Math.min(currBlock + pageSize, toBlock),
+      };
+      try {
+        this.requestStats.add(1);
+        const events = (await web3Contract.getPastEvents(eventName, options)) as Array<EventTypes[T]>;
         result.push(...events);
-      } else throw err;
+      } catch (err) {
+        console.info(`soft failure reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(err)}`);
+        if (pageSize > 5) {
+          // assume there are too many events
+          const events = await this.getEventsPaged<T>(
+            web3Contract,
+            eventName,
+            options.fromBlock,
+            options.toBlock,
+            Math.floor(pageSize / 5)
+          );
+          result.push(...events);
+        } else throw err;
+      }
     }
+    return result;
   }
-  return result;
 }
