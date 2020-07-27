@@ -21,7 +21,7 @@ export class SingleEventFetcher extends EventFetcher {
   }
 }
 
-// the simplest fetcher, yet inefficient, good for testing
+// the current fetcher we use in production, implemented by Ron
 export class BulkEventFetcher extends EventFetcher {
   // store events before they are read
   private eventsStore: { [blockHeight: number]: EventData[] } = {};
@@ -56,7 +56,7 @@ export class BulkEventFetcher extends EventFetcher {
 
     // read events TODO this may break when there are a few thousands
     const events = await this.reader.getPastEvents(this.eventName, options);
-    Logger.log(`Fetched ${this.eventName} events for block height ${options.fromBlock} - ${options.toBlock}`);
+    Logger.log(`Fetched ${this.eventName} events for block height ${options.fromBlock} - ${options.toBlock}.`);
 
     // process result
     const result = this.extractResultAndStorePrefetched(events, blockNumber);
@@ -87,6 +87,7 @@ export class BulkEventFetcher extends EventFetcher {
 }
 
 // more efficient fetcher that supports lookahead
+// works with constant page size, which needs to be improved
 export class LookaheadEventFetcher extends EventFetcher {
   private readonly lookAheadSize = 50000;
   private readonly currentPageSize = 10000;

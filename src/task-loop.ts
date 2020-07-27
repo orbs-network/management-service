@@ -7,15 +7,14 @@ export class TaskLoop {
   constructor(private task: () => Promise<unknown>, private pause: number) {}
 
   runTask = () => {
-    // TODO: handle exceptions in task()
     this.task().then(
       () => {
         if (this.started) {
           this.handle = setTimeout(this.runTask, this.pause);
         }
       },
-      (e) => {
-        Logger.error(`Error in runTask: ${errorString(e)}.`);
+      (err) => {
+        Logger.error(`Error in runTask: ${errorString(err)}.`);
         if (this.started) {
           this.handle = setTimeout(this.runTask, this.pause);
         }

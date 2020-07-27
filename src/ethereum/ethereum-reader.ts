@@ -6,6 +6,7 @@ import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typi
 import { ContractAddressUpdatedEvent as ContractAddressUpdatedEventValues } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contract-registry-contract';
 import { errorString, toNumber, DailyStats } from '../helpers';
 import { ContractName, EventName, EventTypes } from './types';
+import * as Logger from '../logger';
 
 export function getNewEthereumReader(config: EthereumConfiguration) {
   const ethConfig = new EthereumConfigReader(config).readEthereumConfig();
@@ -179,16 +180,20 @@ export class EthereumReader {
   public requestStats = new DailyStats();
 
   constructor(private config: EthereumConfig) {
-    this.web3 = new Web3(new Web3.providers.HttpProvider(config.httpEndpoint));
+    this.web3 = new Web3(
+      new Web3.providers.HttpProvider(config.httpEndpoint, {
+        keepAlive: true,
+      })
+    );
   }
 
   private async connect(contractName: ContractName) {
     const contractMetadata = (await this.config.contracts)[contractName];
     if (!contractMetadata) {
-      throw new Error(`contract "${contractName}" not in registry`);
+      throw new Error(`Contract "${contractName}" not in registry.`);
     }
     if (!contractMetadata.address) {
-      throw new Error(`contract "${contractName}" does not have a known address`);
+      throw new Error(`Contract "${contractName}" does not have a known address.`);
     }
 
     if (this.contractCache[contractMetadata.address]) {
@@ -220,13 +225,14 @@ export class EthereumReader {
     this.requestStats.add(1);
     const block = await this.web3.eth.getBlock(blockNumber);
     if (!block) {
-      throw new Error(`web3.eth.getBlock for ${blockNumber} return empty block`);
+      throw new Error(`web3.eth.getBlock for ${blockNumber} return empty block.`);
     }
     return toNumber(block.timestamp);
   }
 
   // if fails tries to decrease page size with multiple requests until it works
   // TODO: retire this function since auto page logic will move to event-fetcher
+  // This function is not tested and has bugs in edge conditions (eg. fromBlock == toBlock)
   async getPastEventsAutoPaged<T extends EventName>(
     eventName: T,
     { fromBlock, toBlock }: PastEventOptions
@@ -266,7 +272,7 @@ export class EthereumReader {
         const events = (await web3Contract.getPastEvents(eventName, options)) as Array<EventTypes[T]>;
         result.push(...events);
       } catch (err) {
-        console.info(`soft failure reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(err)}`);
+        Logger.log(`Soft failure reading blocks [${fromBlock}-${toBlock}] for ${eventName}: ${errorString(err)}.`);
         if (pageSize > 5) {
           // assume there are too many events
           const events = await this.getEventsPaged<T>(

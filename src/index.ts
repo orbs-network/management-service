@@ -50,9 +50,7 @@ export function serve(serviceConfig: ServiceConfiguration) {
 
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (error instanceof Error) {
-      if (serviceConfig.Verbose) {
-        Logger.error(`Error response to ${req.url} : ${errorString(error)}`);
-      }
+      Logger.error(`Error response to ${req.url}: ${errorString(error)}.`);
       return res.status(500).json({
         status: 'error',
         error: errorString(error),
@@ -73,6 +71,5 @@ export function serve(serviceConfig: ServiceConfiguration) {
     blockSyncTask.stop();
     imagePollTask.stop();
   });
-  Logger.log('Management service starting..');
   return server;
 }
