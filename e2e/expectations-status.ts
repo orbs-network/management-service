@@ -162,6 +162,8 @@ export const expectationStatus = {
         OrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
         Ip: '41.206.134.10',
         EffectiveStake: 10000,
+        SelfStake: 10000,
+        DelegatedStake: 10000,
         ElectionsStatus: {
           LastUpdateTime: isValidTimeRef,
           ReadyToSync: true,
@@ -177,6 +179,8 @@ export const expectationStatus = {
         OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
         Ip: '225.110.150.90',
         EffectiveStake: 20000,
+        SelfStake: 20000,
+        DelegatedStake: 20000,
         ElectionsStatus: {
           LastUpdateTime: isValidTimeRef,
           ReadyToSync: true,
@@ -192,6 +196,8 @@ export const expectationStatus = {
         OrbsAddress: '174dc3b45bdbbc32aa0b95e64d0247ce99b08f69',
         Ip: '81.186.160.159',
         EffectiveStake: 30000,
+        SelfStake: 30000,
+        DelegatedStake: 30000,
         ElectionsStatus: {
           LastUpdateTime: isValidTimeRef,
           ReadyToSync: true,
@@ -207,6 +213,8 @@ export const expectationStatus = {
         OrbsAddress: '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
         Ip: '138.103.13.220',
         EffectiveStake: 40000,
+        SelfStake: 40000,
+        DelegatedStake: 40000,
         ElectionsStatus: {
           LastUpdateTime: isValidTimeRef,
           ReadyToSync: true,
@@ -222,6 +230,8 @@ export const expectationStatus = {
         OrbsAddress: '33546759bdcfb5c753a4102b86b3e73e714d5213',
         Ip: '203.102.66.190',
         EffectiveStake: 50000,
+        SelfStake: 50000,
+        DelegatedStake: 50000,
         ElectionsStatus: {
           LastUpdateTime: isValidTimeRef,
           ReadyToSync: true,

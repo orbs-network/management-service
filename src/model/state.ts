@@ -19,6 +19,12 @@ export interface StateSnapshot {
   }[];
   LastCommitteeEvent: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
   CurrentEffectiveStake: { [EthAddress: string]: number }; // in ORBS
+  CurrentDetailedStake: {
+    [EthAddress: string]: {
+      SelfStake: number; // in ORBS
+      DelegatedStake: number; // in ORBS
+    };
+  };
   CurrentIp: { [EthAddress: string]: string };
   CurrentOrbsAddress: { [EthAddress: string]: string };
   CurrentElectionsStatus: {
@@ -93,6 +99,7 @@ export class State {
     CommitteeEvents: [],
     LastCommitteeEvent: [],
     CurrentEffectiveStake: {},
+    CurrentDetailedStake: {},
     CurrentIp: {},
     CurrentOrbsAddress: {},
     CurrentElectionsStatus: {},
@@ -159,6 +166,16 @@ export class State {
     this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.effective_stake);
     if (this.snapshot.CurrentEffectiveStake[EthAddress] == 0) {
       delete this.snapshot.CurrentEffectiveStake[EthAddress];
+    }
+    this.snapshot.CurrentDetailedStake[EthAddress] = {
+      SelfStake: orbitonsToOrbs(event.returnValues.selfStake),
+      DelegatedStake: orbitonsToOrbs(event.returnValues.delegated_stake),
+    };
+    if (
+      this.snapshot.CurrentDetailedStake[EthAddress].SelfStake == 0 &&
+      this.snapshot.CurrentDetailedStake[EthAddress].DelegatedStake == 0
+    ) {
+      delete this.snapshot.CurrentDetailedStake[EthAddress];
     }
   }
 

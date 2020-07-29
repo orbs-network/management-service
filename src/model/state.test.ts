@@ -144,7 +144,7 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   });
 });
 
-test('state calculates committee weights correctly', (t) => {
+test('state calculates committee weights correctly and guardian stake', (t) => {
   const s = new State();
 
   GuardianCommitteeWeight(s, '0xA', '10000000000000000000000', true);
@@ -188,6 +188,24 @@ test('state calculates committee weights correctly', (t) => {
     a: 10000,
     b: 20000,
     c: 10000,
+  });
+
+  StakeChanged(s, 2000, '0xA', '10000000000000000000000');
+  StakeChanged(s, 2000, '0xB', '20000000000000000000000');
+  StakeChanged(s, 2000, '0xC', '10000000000000000000000');
+
+  t.deepEqual(s.getSnapshot().CurrentDetailedStake, {
+    a: { SelfStake: 0, DelegatedStake: 10000 },
+    b: { SelfStake: 0, DelegatedStake: 20000 },
+    c: { SelfStake: 0, DelegatedStake: 10000 },
+  });
+
+  StakeChanged(s, 2000, '0xA', '0');
+  StakeChanged(s, 2000, '0xB', '30000000000000000000000');
+
+  t.deepEqual(s.getSnapshot().CurrentDetailedStake, {
+    b: { SelfStake: 0, DelegatedStake: 30000 },
+    c: { SelfStake: 0, DelegatedStake: 10000 },
   });
 });
 
