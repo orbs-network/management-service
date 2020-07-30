@@ -1,7 +1,9 @@
 import test from 'ava';
 import _ from 'lodash';
 import { PastEventOptions } from 'web3-eth-contract';
-import { BulkEventFetcher, SingleEventFetcher, LookaheadEventFetcher } from './event-fetcher';
+import { SingleEventFetcher } from './event-fetcher';
+import { BulkEventFetcher } from './event-fetcher-bulk';
+import { LookaheadEventFetcher } from './event-fetcher-lookahead';
 import { EventName } from './types';
 import { EthereumReader } from './ethereum-reader';
 
