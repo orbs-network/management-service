@@ -22,7 +22,7 @@ export class LookaheadEventFetcher extends EventFetcher {
         const fromBlock = this.latestBlockInLookahead + 1;
         const toBlock = Math.min(this.latestBlockInLookahead + this.currentPageSize, latestAllowedBlock);
         this.fetchingPromise = this.reader
-          .getPastEventsAutoPaged(this.eventName, { fromBlock, toBlock })
+          .getPastEventsAutoPagedDeprecated(this.eventName, { fromBlock, toBlock }, this.contract)
           .then((results) => {
             this.lookAhead = _.concat(this.lookAhead, results);
             this.latestBlockInLookahead = toBlock;

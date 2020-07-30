@@ -35,8 +35,9 @@ export class BulkEventFetcher extends EventFetcher {
       );
     }
 
-    // read events TODO this may break when there are a few thousands
-    const events = await this.reader.getPastEvents(this.eventName, options);
+    // read events
+    // TODO: this may break when there are a few thousands
+    const events = await this.reader.getPastEvents(this.eventName, options, this.contract);
     Logger.log(`Fetched ${this.eventName} events for block height ${options.fromBlock} - ${options.toBlock}.`);
 
     // process result

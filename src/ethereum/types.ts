@@ -1,7 +1,11 @@
+import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { EventData } from 'web3-eth-contract';
+
+// contracts
 
 // from https://github.com/orbs-network/orbs-ethereum-contracts-v2/blob/master/test/driver.ts
 export type ContractName =
+  | 'contractRegistry' // added although not found in orbs-ethereum-contracts-v2 ContractName
   | 'protocol'
   | 'committee'
   | 'elections'
@@ -12,7 +16,41 @@ export type ContractName =
   | 'subscriptions'
   | 'rewards';
 
+export type ContractTypeName = keyof Contracts;
+
+// TODO: this type is needed just for getting the abi from orbs-ethereum-contracts-v2/compiledContracts[contractType]
+// once we have a nicer mechanism for abi, it should be indexed by ContractName and this type should be retired
+export function getContractTypeName(key: ContractName): ContractTypeName {
+  switch (key) {
+    case 'contractRegistry':
+      return 'ContractRegistry';
+    case 'protocol':
+      return 'Protocol';
+    case 'committee':
+      return 'Committee';
+    case 'elections':
+      return 'Elections';
+    case 'delegations':
+      return 'Delegations';
+    case 'guardiansRegistration':
+      return 'GuardiansRegistration';
+    case 'certification':
+      return 'Certification';
+    case 'staking':
+      return 'StakingContract';
+    case 'subscriptions':
+      return 'Subscriptions';
+    case 'rewards':
+      return 'Rewards';
+    default:
+      throw new Error(`unknown contract name '${key}'`);
+  }
+}
+
+// events
+
 export const eventNames: Readonly<Array<EventName>> = [
+  'ContractAddressUpdated',
   'SubscriptionChanged',
   'GuardianCommitteeChange',
   'StakeChanged',
@@ -23,6 +61,34 @@ export const eventNames: Readonly<Array<EventName>> = [
 ];
 
 export type EventName = keyof EventTypes;
+
+export function contractByEventName(eventName: EventName): ContractName {
+  switch (eventName) {
+    case 'ContractAddressUpdated':
+      return 'contractRegistry';
+    case 'GuardianCommitteeChange':
+      return 'committee';
+    case 'StakeChanged':
+      return 'elections';
+    case 'SubscriptionChanged':
+      return 'subscriptions';
+    case 'ProtocolVersionChanged':
+      return 'protocol';
+    case 'GuardianDataUpdated':
+      return 'guardiansRegistration';
+    case 'GuardianStatusUpdated':
+      return 'elections';
+    case 'GuardianMetadataChanged':
+      return 'guardiansRegistration';
+    default:
+      throw new Error(`unknown event name '${eventName}'`);
+  }
+}
+
+export type ContractAddressUpdatedPayload = {
+  contractName: ContractName;
+  addr: string;
+};
 
 export type SubscriptionChangedPayload = {
   vcid: string;
@@ -76,6 +142,7 @@ export type GuardianStatusUpdatedPayload = {
 };
 
 export type EventTypes = {
+  ContractAddressUpdated: EventData & { returnValues: ContractAddressUpdatedPayload };
   GuardianCommitteeChange: EventData & { returnValues: GuardianCommitteeChangePayload };
   StakeChanged: EventData & { returnValues: StakeChangedPayload };
   SubscriptionChanged: EventData & { returnValues: SubscriptionChangedPayload };

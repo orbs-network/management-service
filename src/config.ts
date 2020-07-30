@@ -18,7 +18,7 @@ export interface ServiceConfiguration {
   'node-address': string;
 }
 
-export const defaultServiceConfiguration: Partial<ServiceConfiguration> = {
+export const defaultServiceConfiguration = {
   BootstrapMode: false,
   Port: 8080,
   EthereumGenesisContract: '0x10bFdCc77E998Eb849a18c79b880F8b9BE06Ad83',

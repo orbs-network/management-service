@@ -37,7 +37,10 @@ interface MockEvent {
 
 class MockEthereumReader {
   constructor(private delays: boolean) {}
-  async getPastEventsAutoPaged(_en: EventName, { fromBlock, toBlock }: PastEventOptions): Promise<Array<MockEvent>> {
+  async getPastEventsAutoPagedDeprecated(
+    _en: EventName,
+    { fromBlock, toBlock }: PastEventOptions
+  ): Promise<Array<MockEvent>> {
     const res = _.filter(mockEventsData, (event) => event.blockNumber >= fromBlock && event.blockNumber <= toBlock);
     if (this.delays) await new Promise((resolve) => setTimeout(resolve, 1)); // sleep 1 ms
     return res;
@@ -80,33 +83,35 @@ test('BulkEventFetcher sanity', async (t) => {
   ] as unknown);
 });
 
-let resContract: unknown = [];
+let resultBaseline: unknown = [];
 test.before(async () => {
   const fetcher = new SingleEventFetcher('GuardianDataUpdated', getMockReader(false));
   for (let blockNumber = 1; blockNumber < mockEventsDataLastBlock; blockNumber++) {
-    resContract = _.concat(resContract, await fetcher.fetchBlock(blockNumber));
+    resultBaseline = _.concat(resultBaseline, await fetcher.fetchBlock(blockNumber));
   }
 });
 
 test('LookaheadEventFetcher contract test', async (t) => {
-  let resFetcher: unknown = [];
+  let resultFetcher: unknown = [];
   const fetcher = new LookaheadEventFetcher('GuardianDataUpdated', getMockReader(true));
   for (let blockNumber = 1; blockNumber < mockEventsDataLastBlock; blockNumber++) {
-    resFetcher = _.concat(resFetcher, await fetcher.fetchBlock(blockNumber, 999999));
+    resultFetcher = _.concat(resultFetcher, await fetcher.fetchBlock(blockNumber, 999999));
   }
 
-  t.deepEqual(resFetcher, resContract);
+  t.deepEqual(resultFetcher, resultBaseline);
 });
 
 test('BulkEventFetcher contract test', async (t) => {
-  let resFetcher: unknown = [];
+  let resultFetcher: unknown = [];
   const fetcher = new BulkEventFetcher('GuardianDataUpdated', getMockReader(true));
   for (let blockNumber = 1; blockNumber < mockEventsDataLastBlock; blockNumber++) {
-    resFetcher = _.concat(resFetcher, await fetcher.fetchBlock(blockNumber, 999999));
+    resultFetcher = _.concat(resultFetcher, await fetcher.fetchBlock(blockNumber, 999999));
   }
 
-  t.deepEqual(resFetcher, resContract);
+  t.deepEqual(resultFetcher, resultBaseline);
 });
+
+// TODO: add test to verify changes of address mid-sync
 
 // TODO: add test to verify fetcher doesn't look beyond latestAllowedBlock
 //  so fetch once, then change the model and fetch again to see the new value is returned

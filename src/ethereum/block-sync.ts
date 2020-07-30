@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { StateManager } from '../model/manager';
-import { EthereumReader, EthereumConfiguration, getNewEthereumReader } from './ethereum-reader';
+import { EthereumReader, EthereumConfiguration } from './ethereum-reader';
 import { EventFetcher, SingleEventFetcher } from './event-fetcher';
-import { EventName, eventNames } from './types';
+import { EventName, eventNames, contractByEventName } from './types';
 import * as Logger from '../logger';
 import { DailyStatsData } from '../helpers';
 
@@ -18,9 +18,10 @@ export class BlockSync {
   private eventFetchers: { [T in EventName]: EventFetcher };
 
   constructor(private state: StateManager, private config: BlockSyncConfiguration) {
-    this.reader = getNewEthereumReader(config);
+    this.reader = new EthereumReader(config);
     this.lastProcessedBlock = config.EthereumFirstBlock;
     this.eventFetchers = {
+      ContractAddressUpdated: new SingleEventFetcher('ContractAddressUpdated', this.reader),
       GuardianCommitteeChange: new SingleEventFetcher('GuardianCommitteeChange', this.reader),
       StakeChanged: new SingleEventFetcher('StakeChanged', this.reader),
       SubscriptionChanged: new SingleEventFetcher('SubscriptionChanged', this.reader),
@@ -29,22 +30,6 @@ export class BlockSync {
       GuardianStatusUpdated: new SingleEventFetcher('GuardianStatusUpdated', this.reader),
       GuardianMetadataChanged: new SingleEventFetcher('GuardianMetadataChanged', this.reader),
     };
-    // TODO: this mechanism is ugly on purpose and stems from us not tracking ContractAddressUpdatedEvent with an EventFetcher
-    // The fix to the architecture is:
-    // 1. Create an EventFetcher instance that tracks the ContractRegistry and applies the addresses to state
-    // 2. EventFetcher.fetchBlock(contractAddress, ...) should receive contractAddress:string on every call
-    // 3. State initialization should store the ContractRegistry address from config in the state
-    // 4. EventFetcher.fetchBlock calls should rely on addresses from state
-    // 5. Remove all the current Contract initialization/connect code from ethereum-reader.ts
-    // 6. Remove the ugly line of code below
-    this.reader
-      .getContractAddresses()
-      .then((contractAddresses) => {
-        this.state.getCurrentSnapshot().CurrentContractAddress = contractAddresses;
-      })
-      .catch((err) => {
-        Logger.error(`Cannot get contract addresses: ${err.msg}.`);
-      });
     Logger.log(`BlockSync: initialized with first block ${this.lastProcessedBlock}.`);
   }
 
@@ -71,7 +56,18 @@ export class BlockSync {
     return (await this.reader.getBlockNumber()) - this.config.FinalityBufferBlocks;
   }
 
+  // Note about tracking changes in contract registry:
+  // If contract address was updated in contract registry in the middle of block 1000,
+  // we read blocks 1-1000 from old address and blocks 1001+ from the new address.
+  // This simplification is ok because contracts will be locked from emitting events during transition.
+
   async processEventsInBlock(blockNumber: number, latestAllowedBlock: number) {
+    // update all contract addresses according to state to track changes in contract registry
+    for (const eventName of eventNames) {
+      const address = this.state.getCurrentSnapshot().CurrentContractAddress[contractByEventName(eventName)];
+      if (address) this.eventFetchers[eventName].setContractAddress(address);
+    }
+
     // fetch from all event fetchers
     const promises = eventNames.map((eventName) =>
       this.eventFetchers[eventName].fetchBlock(blockNumber, latestAllowedBlock)

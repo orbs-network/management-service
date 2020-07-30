@@ -26,6 +26,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
       CurrentVirtualChains: snapshot.CurrentVirtualChains,
       ProtocolVersionEvents: snapshot.ProtocolVersionEvents,
       CurrentContractAddress: snapshot.CurrentContractAddress,
+      ContractAddressChanges: snapshot.ContractAddressChanges,
       Guardians: _.mapValues(snapshot.CurrentOrbsAddress, (OrbsAddress, EthAddress) => {
         return {
           EthAddress,

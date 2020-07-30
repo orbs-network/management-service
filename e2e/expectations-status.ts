@@ -244,6 +244,7 @@ export const expectationStatus = {
       },
     },
     CurrentContractAddress: {
+      contractRegistry: isValidEthereumAddress,
       protocol: isValidEthereumAddress,
       committee: isValidEthereumAddress,
       elections: isValidEthereumAddress,
