@@ -1,6 +1,7 @@
 import test from 'ava';
 import { State } from './state';
 import { day } from '../helpers';
+import { ContractName } from '../ethereum/types';
 
 test('state applies time ref and ref block', (t) => {
   const s = new State();
@@ -462,6 +463,49 @@ test('state applies meta registration data', (t) => {
   GuardianMetadataChanged(s, 3000, '0xA', 'REWARDS_FREQUENCY_SEC', '445566');
   t.is(s.getSnapshot().CurrentRegistrationData['a'].Metadata['REWARDS_FREQUENCY_SEC'], '445566');
 });
+
+test('state applies contract address changes', (t) => {
+  const s = new State();
+
+  ContractAddressUpdated(s, 1000, 'elections', '0xE1');
+  ContractAddressUpdated(s, 1000, 'delegations', '0xD1');
+
+  t.is(s.getSnapshot().CurrentContractAddress.elections, '0xE1');
+  t.is(s.getSnapshot().CurrentContractAddress.delegations, '0xD1');
+
+  ContractAddressUpdated(s, 2000, 'elections', '0xE2');
+
+  t.is(s.getSnapshot().CurrentContractAddress.elections, '0xE2');
+  t.is(s.getSnapshot().CurrentContractAddress.delegations, '0xD1');
+
+  t.deepEqual(s.getSnapshot().ContractAddressChanges, [
+    {
+      RefTime: 1000,
+      ContractName: 'elections',
+      Address: '0xE1',
+    },
+    {
+      RefTime: 1000,
+      ContractName: 'delegations',
+      Address: '0xD1',
+    },
+    {
+      RefTime: 2000,
+      ContractName: 'elections',
+      Address: '0xE2',
+    },
+  ]);
+});
+
+function ContractAddressUpdated(s: State, time: number, contractName: ContractName, addr: string) {
+  s.applyNewContractAddressUpdated(time, {
+    ...eventBase,
+    returnValues: {
+      contractName,
+      addr,
+    },
+  });
+}
 
 function GuardianCommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {
   s.applyNewGuardianCommitteeChange(time, {

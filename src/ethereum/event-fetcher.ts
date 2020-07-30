@@ -22,6 +22,8 @@ export abstract class EventFetcher {
 // the simplest fetcher, yet inefficient, good for testing
 export class SingleEventFetcher extends EventFetcher {
   async fetchBlock(blockNumber: number): Promise<EventData[]> {
-    return this.reader.getPastEvents(this.eventName, { fromBlock: blockNumber, toBlock: blockNumber }, this.contract);
+    const fromBlock = blockNumber;
+    const toBlock = blockNumber;
+    return this.reader.getPastEvents(this.eventName, { fromBlock, toBlock }, this.contract);
   }
 }
