@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { StateManager } from '../model/manager';
 import { EthereumReader, EthereumConfiguration, getNewEthereumReader } from './ethereum-reader';
-import { BulkEventFetcher, EventFetcher } from './event-fetcher';
+import { EventFetcher, SingleEventFetcher } from './event-fetcher';
 import { EventName, eventNames } from './types';
 import * as Logger from '../logger';
 import { DailyStatsData } from '../helpers';
@@ -21,13 +21,13 @@ export class BlockSync {
     this.reader = getNewEthereumReader(config);
     this.lastProcessedBlock = config.EthereumFirstBlock;
     this.eventFetchers = {
-      GuardianCommitteeChange: new BulkEventFetcher('GuardianCommitteeChange', this.reader),
-      StakeChanged: new BulkEventFetcher('StakeChanged', this.reader),
-      SubscriptionChanged: new BulkEventFetcher('SubscriptionChanged', this.reader),
-      ProtocolVersionChanged: new BulkEventFetcher('ProtocolVersionChanged', this.reader),
-      GuardianDataUpdated: new BulkEventFetcher('GuardianDataUpdated', this.reader),
-      GuardianStatusUpdated: new BulkEventFetcher('GuardianStatusUpdated', this.reader),
-      GuardianMetadataChanged: new BulkEventFetcher('GuardianMetadataChanged', this.reader),
+      GuardianCommitteeChange: new SingleEventFetcher('GuardianCommitteeChange', this.reader),
+      StakeChanged: new SingleEventFetcher('StakeChanged', this.reader),
+      SubscriptionChanged: new SingleEventFetcher('SubscriptionChanged', this.reader),
+      ProtocolVersionChanged: new SingleEventFetcher('ProtocolVersionChanged', this.reader),
+      GuardianDataUpdated: new SingleEventFetcher('GuardianDataUpdated', this.reader),
+      GuardianStatusUpdated: new SingleEventFetcher('GuardianStatusUpdated', this.reader),
+      GuardianMetadataChanged: new SingleEventFetcher('GuardianMetadataChanged', this.reader),
     };
     // TODO: this mechanism is ugly on purpose and stems from us not tracking ContractAddressUpdatedEvent with an EventFetcher
     // The fix to the architecture is:
