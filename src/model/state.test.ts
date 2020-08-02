@@ -128,8 +128,8 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'x', Weight: 10000, Name: 'name' },
-    { EthAddress: 'z', Weight: 10000, Name: 'name' },
+    { EthAddress: 'x', Weight: 10000, Name: 'name', EnterTime: day + 3000 },
+    { EthAddress: 'z', Weight: 10000, Name: 'name', EnterTime: 2000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -142,6 +142,13 @@ test('state applies commitee, standby, IPs and topology', (t) => {
     x: 10000,
     z: 10000,
   });
+
+  // leaving and re-entering the committee resets EnterTime
+  GuardianCommitteeChange(s, day + 5000, '0xZ', false);
+  GuardianCommitteeChange(s, day + 6000, '0xZ', true);
+  t.is(s.getSnapshot().CurrentCommittee[1].EnterTime, day + 6000);
+  GuardianCommitteeChange(s, day + 7000, '0xZ', true);
+  t.is(s.getSnapshot().CurrentCommittee[1].EnterTime, day + 6000);
 });
 
 test('state calculates committee weights correctly and guardian stake', (t) => {
@@ -153,8 +160,8 @@ test('state calculates committee weights correctly and guardian stake', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000, Name: '' },
-    { EthAddress: 'a', Weight: 15000, Name: '' },
+    { EthAddress: 'b', Weight: 20000, Name: '', EnterTime: 1000 },
+    { EthAddress: 'a', Weight: 15000, Name: '', EnterTime: 1000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -166,9 +173,9 @@ test('state calculates committee weights correctly and guardian stake', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000, Name: '' },
-    { EthAddress: 'a', Weight: 13333, Name: '' },
-    { EthAddress: 'c', Weight: 13333, Name: '' },
+    { EthAddress: 'b', Weight: 20000, Name: '', EnterTime: 1000 },
+    { EthAddress: 'a', Weight: 13333, Name: '', EnterTime: 1000 },
+    { EthAddress: 'c', Weight: 13333, Name: '', EnterTime: 1000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -181,8 +188,8 @@ test('state calculates committee weights correctly and guardian stake', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'a', Weight: 10000, Name: '' },
-    { EthAddress: 'c', Weight: 10000, Name: '' },
+    { EthAddress: 'a', Weight: 10000, Name: '', EnterTime: 1000 },
+    { EthAddress: 'c', Weight: 10000, Name: '', EnterTime: 1000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -263,7 +270,7 @@ test('state applies elections status updates and sets candidates accordingly', (
   ]);
 
   GuardianStatusUpdated(s, 5 * day, '0xA', true, false);
-  s.getSnapshot().CurrentCommittee = [{ EthAddress: 'b', Weight: 1, Name: 'name' }];
+  s.getSnapshot().CurrentCommittee = [{ EthAddress: 'b', Weight: 1, Name: 'name', EnterTime: 1000 }];
   s.applyNewTimeRef(10 * day, 10000);
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
@@ -459,8 +466,12 @@ test('state applies meta registration data', (t) => {
   GuardianMetadataChanged(s, 2000, '0xA', 'REWARDS_FREQUENCY_SEC', '112233');
   t.is(s.getSnapshot().CurrentRegistrationData['a'].Metadata['REWARDS_FREQUENCY_SEC'], '112233');
 
+  GuardianDataUpdated(s, 2500, '0xA', '0xa1', '0x02020202');
+  t.is(s.getSnapshot().CurrentRegistrationData['a'].Metadata['REWARDS_FREQUENCY_SEC'], '112233');
+
   GuardianMetadataChanged(s, 3000, '0xA', 'REWARDS_FREQUENCY_SEC', '445566');
   t.is(s.getSnapshot().CurrentRegistrationData['a'].Metadata['REWARDS_FREQUENCY_SEC'], '445566');
+  t.is(s.getSnapshot().CurrentRegistrationData['a'].RegistrationTime, 1000);
 });
 
 function GuardianCommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {

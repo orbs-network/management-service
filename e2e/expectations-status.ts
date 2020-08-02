@@ -22,11 +22,13 @@ export const expectationStatus = {
         EthAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
         Weight: 40000,
         Name: 'Guardian3',
+        EnterTime: isValidTimeRef,
       },
       {
         EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
         Weight: 30000,
         Name: 'Guardian1',
+        EnterTime: isValidTimeRef,
       },
     ],
     CurrentCandidates: [
@@ -173,6 +175,7 @@ export const expectationStatus = {
         Name: 'Guardian0',
         Website: 'Guardian0-website',
         Contact: 'Guardian0-contact',
+        RegistrationTime: isValidTimeRef,
       },
       e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9: {
         EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
@@ -190,6 +193,7 @@ export const expectationStatus = {
         Name: 'Guardian1',
         Website: 'Guardian1-website',
         Contact: 'Guardian1-contact',
+        RegistrationTime: isValidTimeRef,
       },
       '51baa09f2f7dfc7a0f65886b68720958d389cac7': {
         EthAddress: '51baa09f2f7dfc7a0f65886b68720958d389cac7',
@@ -207,6 +211,7 @@ export const expectationStatus = {
         Name: 'Guardian2',
         Website: 'Guardian2-website',
         Contact: 'Guardian2-contact',
+        RegistrationTime: isValidTimeRef,
       },
       '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5': {
         EthAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
@@ -224,6 +229,7 @@ export const expectationStatus = {
         Name: 'Guardian3',
         Website: 'Guardian3-website',
         Contact: 'Guardian3-contact',
+        RegistrationTime: isValidTimeRef,
       },
       cb6642be414696f77336dae06fed3775f08de0ea: {
         EthAddress: 'cb6642be414696f77336dae06fed3775f08de0ea',
@@ -241,6 +247,7 @@ export const expectationStatus = {
         Name: 'Guardian4',
         Website: 'Guardian4-website',
         Contact: 'Guardian4-contact',
+        RegistrationTime: isValidTimeRef,
       },
     },
     CurrentContractAddress: {

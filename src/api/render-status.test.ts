@@ -17,7 +17,7 @@ test.serial('[integration] getServiceStatus responds', (t) => {
   t.assert(res.Status.length > 0);
   t.assert(new Date(res.Timestamp).getTime() > 1400000000);
   t.deepEqual(res.Payload, {
-    Uptime: 0,
+    Uptime: res.Payload.Uptime,
     MemoryBytesUsed: res.Payload.MemoryBytesUsed,
     CurrentRefTime: 0,
     CurrentRefBlock: 0,
@@ -31,6 +31,7 @@ test.serial('[integration] getServiceStatus responds', (t) => {
     CurrentContractAddress: {},
     Guardians: {},
     EthereumRequestStats: [],
+    CommitteeEvents: [],
     Config: exampleConfig,
   });
 });

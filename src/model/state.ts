@@ -10,7 +10,7 @@ export interface StateSnapshot {
   CurrentRefBlock: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
-  CurrentCommittee: { EthAddress: string; Weight: number; Name: string }[];
+  CurrentCommittee: { EthAddress: string; Weight: number; Name: string; EnterTime: number }[];
   CurrentCandidates: { EthAddress: string; IsStandby: boolean; Name: string }[];
   CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number; Name: string }[]; // Port overridden by processor
   CommitteeEvents: {
@@ -41,6 +41,7 @@ export interface StateSnapshot {
       Website: string;
       Contact: string;
       Metadata: { [Key: string]: string };
+      RegistrationTime: number;
     };
   };
   CurrentVirtualChains: {
@@ -143,17 +144,18 @@ export class State {
     this.snapshot.CurrentTopology = calcTopology(time, this.snapshot);
   }
 
-  applyNewGuardianCommitteeChange(_time: number, event: EventTypes['GuardianCommitteeChange']) {
+  applyNewGuardianCommitteeChange(time: number, event: EventTypes['GuardianCommitteeChange']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.weight);
 
     // current committee
-    _.remove(this.snapshot.CurrentCommittee, (node) => node.EthAddress == EthAddress);
+    const previous = _.remove(this.snapshot.CurrentCommittee, (node) => node.EthAddress == EthAddress);
     if (event.returnValues.inCommittee) {
       this.snapshot.CurrentCommittee.push({
         EthAddress,
         Weight: 0,
         Name: this.snapshot.CurrentRegistrationData[EthAddress]?.Name ?? '',
+        EnterTime: previous[0]?.EnterTime ?? time,
       });
     }
     fixCommitteeWeights(this.snapshot.CurrentCommittee, this.snapshot.CurrentEffectiveStake);
@@ -179,7 +181,7 @@ export class State {
     }
   }
 
-  applyNewGuardianDataUpdated(_time: number, event: EventTypes['GuardianDataUpdated']) {
+  applyNewGuardianDataUpdated(time: number, event: EventTypes['GuardianDataUpdated']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentOrbsAddress[EthAddress] = normalizeAddress(event.returnValues.orbsAddr);
     this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
@@ -187,7 +189,8 @@ export class State {
       Name: event.returnValues.name,
       Website: event.returnValues.website,
       Contact: event.returnValues.contact,
-      Metadata: {},
+      Metadata: this.snapshot.CurrentRegistrationData[EthAddress]?.Metadata ?? {},
+      RegistrationTime: this.snapshot.CurrentRegistrationData[EthAddress]?.RegistrationTime ?? time,
     };
   }
 

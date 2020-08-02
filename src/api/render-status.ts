@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
 import { ServiceConfiguration } from '../config';
-import { getCurrentClockTime, JsonResponse, DailyStatsData } from '../helpers';
+import { getCurrentClockTime, JsonResponse, DailyStatsData, day } from '../helpers';
 import { imageNamesToPollForNewVersions } from '../dockerhub/image-poll';
+import { findAllEventsCoveringRange } from '../model/find';
 
 const ETHEREUM_REF_TIME_ALLOWED_DELAY = 20 * 60; // seconds
 const DOCKER_HUB_POLL_ALLOWED_DELAY = 20 * 60; // seconds
@@ -39,6 +40,11 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
         };
       }),
       EthereumRequestStats: stats,
+      CommitteeEvents: findAllEventsCoveringRange(
+        snapshot.CommitteeEvents,
+        snapshot.CurrentRefTime - 30 * day,
+        snapshot.CurrentRefTime
+      ),
       Config: config,
     },
   };
