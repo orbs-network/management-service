@@ -54,6 +54,17 @@ function getMockReader(eventStream = getRandomEvents()): MockEthereumReader & Et
   return (new MockEthereumReader(eventStream) as unknown) as MockEthereumReader & EthereumReader;
 }
 
+// fetcher defaults overrides for tests
+
+LookaheadEventFetcher.DefaultAutoscaleOptions = {
+  initialPageSize: 1000,
+  maxPageSize: 100000,
+  minPageSize: 10,
+  pageGrowFactor: 2,
+  pageGrowAfter: 5,
+  pageShrinkFactor: 2,
+};
+
 // sanity tests for all fetchers
 
 for (const fetcherType of [SingleEventFetcher, LookaheadEventFetcher, BulkEventFetcher]) {
@@ -71,7 +82,7 @@ for (const fetcherType of [SingleEventFetcher, LookaheadEventFetcher, BulkEventF
 
 // test changing addresses in the middle for all fetchers
 
-for (const fetcherType of [SingleEventFetcher, LookaheadEventFetcher, /*BulkEventFetcher*/]) {
+for (const fetcherType of [SingleEventFetcher, LookaheadEventFetcher /*BulkEventFetcher*/]) {
   test(`${fetcherType.name} changes address mid-sync`, async (t) => {
     const reader = getMockReader();
     const fetcher = new fetcherType('GuardianDataUpdated', reader);

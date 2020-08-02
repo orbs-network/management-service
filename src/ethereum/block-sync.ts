@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import { StateManager } from '../model/manager';
 import { EthereumReader, EthereumConfiguration } from './ethereum-reader';
-import { EventFetcher, SingleEventFetcher } from './event-fetcher';
+import { EventFetcher } from './event-fetcher';
 import { EventName, eventNames, contractByEventName } from './types';
 import * as Logger from '../logger';
 import { DailyStatsData } from '../helpers';
+import { LookaheadEventFetcher } from './event-fetcher-lookahead';
 
 export type BlockSyncConfiguration = EthereumConfiguration & {
   BootstrapMode: boolean;
@@ -21,14 +22,14 @@ export class BlockSync {
     this.reader = new EthereumReader(config);
     this.lastProcessedBlock = config.EthereumFirstBlock;
     this.eventFetchers = {
-      ContractAddressUpdated: new SingleEventFetcher('ContractAddressUpdated', this.reader),
-      GuardianCommitteeChange: new SingleEventFetcher('GuardianCommitteeChange', this.reader),
-      StakeChanged: new SingleEventFetcher('StakeChanged', this.reader),
-      SubscriptionChanged: new SingleEventFetcher('SubscriptionChanged', this.reader),
-      ProtocolVersionChanged: new SingleEventFetcher('ProtocolVersionChanged', this.reader),
-      GuardianDataUpdated: new SingleEventFetcher('GuardianDataUpdated', this.reader),
-      GuardianStatusUpdated: new SingleEventFetcher('GuardianStatusUpdated', this.reader),
-      GuardianMetadataChanged: new SingleEventFetcher('GuardianMetadataChanged', this.reader),
+      ContractAddressUpdated: new LookaheadEventFetcher('ContractAddressUpdated', this.reader),
+      GuardianCommitteeChange: new LookaheadEventFetcher('GuardianCommitteeChange', this.reader),
+      StakeChanged: new LookaheadEventFetcher('StakeChanged', this.reader),
+      SubscriptionChanged: new LookaheadEventFetcher('SubscriptionChanged', this.reader),
+      ProtocolVersionChanged: new LookaheadEventFetcher('ProtocolVersionChanged', this.reader),
+      GuardianDataUpdated: new LookaheadEventFetcher('GuardianDataUpdated', this.reader),
+      GuardianStatusUpdated: new LookaheadEventFetcher('GuardianStatusUpdated', this.reader),
+      GuardianMetadataChanged: new LookaheadEventFetcher('GuardianMetadataChanged', this.reader),
     };
     Logger.log(`BlockSync: initialized with first block ${this.lastProcessedBlock}.`);
   }
