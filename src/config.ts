@@ -11,6 +11,7 @@ export interface ServiceConfiguration {
   RegularRolloutWindowSeconds: number;
   HotfixRolloutWindowSeconds: number;
   EthereumPollIntervalSeconds: number;
+  EthereumRequestsPerSecondLimit: number;
   ElectionsStaleUpdateSeconds: number;
   FinalityBufferBlocks: number;
   EthereumFirstBlock: number;
@@ -29,6 +30,7 @@ export const defaultServiceConfiguration = {
   RegularRolloutWindowSeconds: 24 * 60 * 60,
   HotfixRolloutWindowSeconds: 60 * 60,
   EthereumPollIntervalSeconds: 30,
+  EthereumRequestsPerSecondLimit: 0,
   ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
   FinalityBufferBlocks: 40,
   Verbose: false,
@@ -41,6 +43,11 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       type: 'boolean',
     },
     EthereumPollIntervalSeconds: {
+      presence: { allowEmpty: false },
+      type: 'number',
+      numericality: { noStrings: true },
+    },
+    EthereumRequestsPerSecondLimit: {
       presence: { allowEmpty: false },
       type: 'number',
       numericality: { noStrings: true },

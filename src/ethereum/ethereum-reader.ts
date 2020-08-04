@@ -3,13 +3,16 @@ import { Contract, PastEventOptions } from 'web3-eth-contract';
 import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/compiled-contracts';
 import { toNumber, DailyStats } from '../helpers';
 import { EventName, getContractTypeName, contractByEventName } from './types';
+import pThrottle from 'p-throttle';
 
 export type EthereumConfiguration = {
   EthereumEndpoint: string;
+  EthereumRequestsPerSecondLimit: number;
 };
 
 export class EthereumReader {
   private web3: Web3;
+  private throttled?: pThrottle.ThrottledFunction<[], void>;
   public requestStats = new DailyStats();
 
   constructor(config: EthereumConfiguration) {
@@ -18,14 +21,19 @@ export class EthereumReader {
         keepAlive: true,
       })
     );
+    if (config.EthereumRequestsPerSecondLimit > 0) {
+      this.throttled = pThrottle(() => Promise.resolve(), config.EthereumRequestsPerSecondLimit, 1000);
+    }
   }
 
-  getBlockNumber(): Promise<number> {
+  async getBlockNumber(): Promise<number> {
+    if (this.throttled) await this.throttled();
     this.requestStats.add(1);
     return this.web3.eth.getBlockNumber();
   }
 
   async getRefTime(blockNumber: number | 'latest'): Promise<number> {
+    if (this.throttled) await this.throttled();
     this.requestStats.add(1);
     const block = await this.web3.eth.getBlock(blockNumber);
     if (!block) {
@@ -43,6 +51,7 @@ export class EthereumReader {
   // throws error if fails, caller needs to decrease page size if needed
   async getPastEvents(eventName: EventName, { fromBlock, toBlock }: PastEventOptions, contract?: Contract) {
     if (!contract) return [];
+    if (this.throttled) await this.throttled();
     this.requestStats.add(1);
     return contract.getPastEvents(eventName, {
       fromBlock,

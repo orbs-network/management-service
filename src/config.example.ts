@@ -11,6 +11,7 @@ export const exampleConfig: ServiceConfiguration = {
   RegularRolloutWindowSeconds: 5,
   HotfixRolloutWindowSeconds: 1,
   EthereumPollIntervalSeconds: 1,
+  EthereumRequestsPerSecondLimit: 0,
   ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
   FinalityBufferBlocks: 10,
   EthereumFirstBlock: 0,
