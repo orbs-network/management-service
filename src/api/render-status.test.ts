@@ -28,7 +28,10 @@ test.serial('[integration] getServiceStatus responds', (t) => {
     CurrentImageVersionsUpdater: { main: {}, canary: {} },
     CurrentVirtualChains: {},
     ProtocolVersionEvents: { main: [], canary: [] },
-    CurrentContractAddress: {},
+    CurrentContractAddress: {
+      contractRegistry: exampleConfig.EthereumGenesisContract,
+    },
+    ContractAddressChanges: [],
     Guardians: {},
     EthereumRequestStats: [],
     CommitteeEvents: [],

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { EventTypes, ContractName } from '../ethereum/types';
 import { getIpFromHex, toNumber } from '../helpers';
 import { findAllEventsCoveringRange } from './find';
+import { defaultServiceConfiguration } from '../config';
 
 const NUM_STANDBYS = 5;
 
@@ -78,13 +79,20 @@ export interface StateSnapshot {
     };
   };
   CurrentContractAddress: { [t in ContractName]?: string };
+  ContractAddressChanges: {
+    RefTime: number;
+    ContractName: ContractName;
+    Address: string;
+  }[];
 }
 
 export type StateConfiguration = {
+  EthereumGenesisContract: string;
   ElectionsStaleUpdateSeconds: number;
 };
 
 export const defaultStateConfiguration: StateConfiguration = {
+  EthereumGenesisContract: defaultServiceConfiguration.EthereumGenesisContract,
   ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
 };
 
@@ -120,9 +128,12 @@ export class State {
       canary: {},
     },
     CurrentContractAddress: {},
+    ContractAddressChanges: [],
   };
 
-  constructor(private config = defaultStateConfiguration) {}
+  constructor(private config = defaultStateConfiguration) {
+    this.snapshot.CurrentContractAddress['contractRegistry'] = config.EthereumGenesisContract;
+  }
 
   getSnapshot(): StateSnapshot {
     return this.snapshot;
@@ -142,6 +153,15 @@ export class State {
     calcStaleElectionsUpdates(time, this.snapshot, this.config);
     this.snapshot.CurrentCandidates = calcCandidates(this.snapshot);
     this.snapshot.CurrentTopology = calcTopology(time, this.snapshot);
+  }
+
+  applyNewContractAddressUpdated(time: number, event: EventTypes['ContractAddressUpdated']) {
+    this.snapshot.CurrentContractAddress[event.returnValues.contractName] = event.returnValues.addr;
+    this.snapshot.ContractAddressChanges.push({
+      RefTime: time,
+      ContractName: event.returnValues.contractName,
+      Address: event.returnValues.addr,
+    });
   }
 
   applyNewGuardianCommitteeChange(time: number, event: EventTypes['GuardianCommitteeChange']) {

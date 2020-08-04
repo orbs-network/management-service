@@ -20,6 +20,7 @@ const configValue: ServiceConfiguration = {
   Port: -1,
   EthereumFirstBlock: 0,
   EthereumPollIntervalSeconds: 0.5,
+  EthereumRequestsPerSecondLimit: 0,
   ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
   RegularRolloutWindowSeconds: 1,
   HotfixRolloutWindowSeconds: 1,

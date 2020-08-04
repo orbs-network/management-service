@@ -28,6 +28,7 @@ export class TestEnvironment {
       RegularRolloutWindowSeconds: 2,
       HotfixRolloutWindowSeconds: 2,
       EthereumPollIntervalSeconds: 1,
+      EthereumRequestsPerSecondLimit: 20,
       ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
       FinalityBufferBlocks: 10,
       EthereumFirstBlock: 0,
