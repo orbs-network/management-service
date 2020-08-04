@@ -23,7 +23,6 @@ export class LookaheadEventFetcher extends EventFetcher {
   protected currentPageSize = 0;
   protected autoscale: AutoscaleOptions;
   protected autoscaleStreak = 0;
-  public autoscaleConsecutiveFailures = 0;
 
   static DefaultAutoscaleOptions: AutoscaleOptions = {
     initialPageSize: 100000,
@@ -64,29 +63,36 @@ export class LookaheadEventFetcher extends EventFetcher {
   // replace lookAhead entirely with a new page
   protected async downloadNewPage(blockNumber: number, latestAllowedBlock: number) {
     if (this.currentPageSize == 0) this.currentPageSize = this.autoscale.initialPageSize;
-    try {
-      const fromBlock = blockNumber;
-      const toBlock = Math.min(blockNumber + this.currentPageSize, latestAllowedBlock);
-      this.lookAhead = await this.reader.getPastEvents(this.eventName, { fromBlock, toBlock }, this.contract);
-      this.lookAheadFromBlock = fromBlock;
-      this.lookAheadToBlock = toBlock;
-      // autoscale up
-      this.autoscaleStreak++;
-      this.autoscaleConsecutiveFailures = 0;
-      if (this.autoscaleStreak >= this.autoscale.pageGrowAfter) {
-        this.currentPageSize = Math.round(this.currentPageSize * this.autoscale.pageGrowFactor);
-        if (this.currentPageSize > this.autoscale.maxPageSize) this.currentPageSize = this.autoscale.maxPageSize;
-        Logger.log(`LookaheadEventFetcher for ${this.eventName}: page size is now ${this.currentPageSize}.`);
+    let successful = false;
+    let consecutiveFailures = 0;
+    while (!successful) {
+      try {
+        const fromBlock = blockNumber;
+        const toBlock = Math.min(blockNumber + this.currentPageSize, latestAllowedBlock);
+        this.lookAhead = await this.reader.getPastEvents(this.eventName, { fromBlock, toBlock }, this.contract);
+        this.lookAheadFromBlock = fromBlock;
+        this.lookAheadToBlock = toBlock;
+        // success
+        successful = true;
+        // autoscale up
+        this.autoscaleStreak++;
+        if (this.autoscaleStreak >= this.autoscale.pageGrowAfter) {
+          this.currentPageSize = Math.round(this.currentPageSize * this.autoscale.pageGrowFactor);
+          if (this.currentPageSize > this.autoscale.maxPageSize) this.currentPageSize = this.autoscale.maxPageSize;
+          Logger.log(`LookaheadEventFetcher for ${this.eventName}: success, page size is now ${this.currentPageSize}.`);
+          this.autoscaleStreak = 0;
+        }
+      } catch (err) {
+        // autoscale down
+        this.currentPageSize = Math.round(this.currentPageSize / this.autoscale.pageShrinkFactor);
+        if (this.currentPageSize < this.autoscale.minPageSize) this.currentPageSize = this.autoscale.minPageSize;
+        Logger.log(`LookaheadEventFetcher for ${this.eventName}: failure, page size is now ${this.currentPageSize}.`);
         this.autoscaleStreak = 0;
+        // failure
+        consecutiveFailures++;
+        // handle optimal page steady-state (it will try to grow and shrink back down)
+        if (consecutiveFailures >= 2) throw err;
       }
-    } catch (err) {
-      // autoscale down
-      this.autoscaleConsecutiveFailures++;
-      this.currentPageSize = Math.round(this.currentPageSize / this.autoscale.pageShrinkFactor);
-      if (this.currentPageSize < this.autoscale.minPageSize) this.currentPageSize = this.autoscale.minPageSize;
-      Logger.log(`LookaheadEventFetcher for ${this.eventName}: page size is now ${this.currentPageSize}.`);
-      this.autoscaleStreak = 0;
-      throw err;
     }
   }
 }
