@@ -109,10 +109,6 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
 function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const version = snapshot.CurrentImageVersions['main']['rewards-service'];
   if (!version) return undefined;
-  const delegations = snapshot.CurrentContractAddress['delegations'];
-  if (!delegations) return undefined;
-  const rewards = snapshot.CurrentContractAddress['rewards'];
-  if (!rewards) return undefined;
   const guardian = _.findKey(snapshot.CurrentOrbsAddress, (orbsAddress) => orbsAddress == config['node-address']);
   if (!guardian) return undefined;
   const registration = snapshot.CurrentRegistrationData[guardian];
@@ -131,8 +127,7 @@ function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration
       DistributionFrequencySeconds: frequency > 0 ? frequency : undefined,
       EthereumEndpoint: config.EthereumEndpoint,
       SignerEndpoint: 'http://signer:7777',
-      EthereumDelegationsContract: delegations,
-      EthereumRewardsContract: rewards,
+      EthereumGenesisContract: config.EthereumGenesisContract,
       GuardianAddress: `0x${guardian}`,
       NodeOrbsAddress: config['node-address'],
       EthereumFirstBlock: config.EthereumFirstBlock,

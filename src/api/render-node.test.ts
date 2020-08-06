@@ -109,8 +109,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.deepEqual(res.services['rewards-service'].Config, {
     EthereumEndpoint: config.EthereumEndpoint,
     SignerEndpoint: 'http://signer:7777',
-    EthereumDelegationsContract: ethereum.getContractAddress('delegations'),
-    EthereumRewardsContract: ethereum.getContractAddress('rewards'),
+    EthereumGenesisContract: config.EthereumGenesisContract,
     GuardianAddress: '0x29ce860a2247d97160d6dfc087a15f41e2349087',
     NodeOrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
     EthereumFirstBlock: config.EthereumFirstBlock,
