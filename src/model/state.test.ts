@@ -152,6 +152,18 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   t.is(s.getSnapshot().CurrentCommittee[1].EnterTime, day + 6000);
 });
 
+test('state handles duplicate orbs addresses and ip addresses', (t) => {
+  const s = new State();
+
+  GuardianDataUpdated(s, 1000, '0x1', '0xaa', '0x01010101');
+  GuardianDataUpdated(s, 2000, '0x2', '0xaa', '0x01010101');
+
+  t.is(Object.keys(s.getSnapshot().CurrentOrbsAddress).length, 1);
+  t.is(Object.keys(s.getSnapshot().CurrentIp).length, 1);
+  t.is(s.getSnapshot().CurrentOrbsAddress['2'], 'aa');
+  t.is(s.getSnapshot().CurrentIp['2'], '1.1.1.1');
+});
+
 test('state calculates committee weights correctly and guardian stake', (t) => {
   const s = new State();
 

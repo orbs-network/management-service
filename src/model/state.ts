@@ -203,8 +203,12 @@ export class State {
 
   applyNewGuardianDataUpdated(time: number, event: EventTypes['GuardianDataUpdated']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
-    this.snapshot.CurrentOrbsAddress[EthAddress] = normalizeAddress(event.returnValues.orbsAddr);
-    this.snapshot.CurrentIp[EthAddress] = getIpFromHex(event.returnValues.ip);
+    const OrbsAddress = normalizeAddress(event.returnValues.orbsAddr);
+    const IpAddress = getIpFromHex(event.returnValues.ip);
+    removeAllKeysWithValue(OrbsAddress, this.snapshot.CurrentOrbsAddress); // must be unique
+    this.snapshot.CurrentOrbsAddress[EthAddress] = OrbsAddress;
+    removeAllKeysWithValue(IpAddress, this.snapshot.CurrentIp); // must be unique
+    this.snapshot.CurrentIp[EthAddress] = IpAddress;
     this.snapshot.CurrentRegistrationData[EthAddress] = {
       Name: event.returnValues.name,
       Website: event.returnValues.website,
@@ -392,4 +396,10 @@ function normalizeAddress(address: string): string {
   if (!address) return address;
   if (address.startsWith('0x')) return address.substr(2).toLowerCase();
   return address.toLowerCase();
+}
+
+function removeAllKeysWithValue(value: string, obj: { [key: string]: string }) {
+  for (const [k, v] of Object.entries(obj)) {
+    if (v == value) delete obj[k];
+  }
 }
