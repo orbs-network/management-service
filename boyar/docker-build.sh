@@ -1,4 +1,4 @@
 #!/bin/bash
 
 npm run build
-docker build -t orbsnetwork/management-service:$(cat .version) ./boyar
+docker build -t orbsnetworkstaging/management-service:$(cat .version) ./boyar
