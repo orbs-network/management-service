@@ -1,5 +1,6 @@
 import { ServiceConfiguration } from './config';
 import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
 import { errorString } from './helpers';
 import { TaskLoop } from './task-loop';
 import { StateManager } from './model/manager';
@@ -20,6 +21,8 @@ export function serve(serviceConfig: ServiceConfiguration) {
   const imagePoll = new ImagePoll(state, serviceConfig);
 
   const app = express();
+  // DEV_NOTE : O.L : Allows access from any domain.
+  app.use(cors());
   app.set('json spaces', 2);
 
   app.get('/node/management', (_request, response) => {
