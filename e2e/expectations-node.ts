@@ -99,6 +99,8 @@ export const expectationNodeManagement = {
       AllowAccessToSigner: true,
       AllowAccessToServices: true,
       Config: {
+        'gossip-listen-port': 4400,
+        'http-address': ':8080',
         'management-file-path': `http://management-service:8080/vchains/${vcId}/management`,
         'management-consensus-grace-timeout': '0s',
         'signer-endpoint': 'http://signer:7777',

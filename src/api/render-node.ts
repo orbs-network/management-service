@@ -157,6 +157,8 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
     AllowAccessToSigner: true,
     AllowAccessToServices: true,
     Config: {
+      'gossip-listen-port': 4400,
+      'http-address': ':8080',
       'management-file-path': `http://management-service:8080/vchains/${vchainId}/management`,
       'management-consensus-grace-timeout': '0s', // TODO: temporary to simplify staging, remove eventually
       'signer-endpoint': 'http://signer:7777',
