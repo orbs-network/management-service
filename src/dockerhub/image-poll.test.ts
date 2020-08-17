@@ -27,7 +27,7 @@ test('getGradualRolloutDelay returns random values in window', (t) => {
 
   let sumHotfix = 0;
   for (let i = 0; i < iterations; i++) {
-    const delay = p.getGradualRolloutDelay('v1.2.3+hotfix');
+    const delay = p.getGradualRolloutDelay('v1.2.3-hotfix');
     t.assert(delay >= 0);
     t.assert(delay <= 2000);
     sumHotfix += delay;
@@ -96,13 +96,13 @@ test('performGradualRollout works as expected', async (t) => {
   t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, 'v1.3.0');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime > 1400000000);
 
-  p.performGradualRollout('main', 'node', 'v1.4.0+hotfix');
-  p.performGradualRollout('canary', 'node', 'v1.4.0-canary+hotfix');
+  p.performGradualRollout('main', 'node', 'v1.4.0-hotfix');
+  p.performGradualRollout('canary', 'node', 'v1.4.0-canary-hotfix');
   await sleep(3000);
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.4.0+hotfix');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.4.0-hotfix');
   t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, '');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime == 0);
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['canary']['node'], 'v1.4.0-canary+hotfix');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['canary']['node'], 'v1.4.0-canary-hotfix');
   t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['canary']['node'].PendingVersion, '');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['canary']['node'].PendingVersionTime == 0);
 });

@@ -442,7 +442,7 @@ test('state applies image version changes', (t) => {
   s.applyNewImageVersionPendingUpdate('canary', 'node', 'v9.9.1', 8000);
   s.applyNewImageVersion('main', 'management-service', 'v1.0.1');
   s.applyNewImageVersionPollTime(3000, 'main', 'node');
-  s.applyNewImageVersion('main', 'node', 'v1.5.3+hotfix');
+  s.applyNewImageVersion('main', 'node', 'v1.5.3-hotfix');
   s.applyNewImageVersionPendingUpdate('canary', 'node', 'v9.9.2', 9000);
   s.applyNewImageVersionPollTime(4000, 'canary', 'node');
   s.applyNewImageVersion('canary', 'node', 'v1.5.5-canary');
@@ -450,7 +450,7 @@ test('state applies image version changes', (t) => {
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
   t.is(Object.keys(s.getSnapshot().CurrentImageVersions['main']).length, 2);
-  t.is(s.getSnapshot().CurrentImageVersions['main']['node'], 'v1.5.3+hotfix');
+  t.is(s.getSnapshot().CurrentImageVersions['main']['node'], 'v1.5.3-hotfix');
   t.is(s.getSnapshot().CurrentImageVersions['main']['management-service'], 'v1.0.1');
   t.is(s.getSnapshot().CurrentImageVersions['canary']['node'], 'v1.5.5-canary');
   t.deepEqual(s.getSnapshot().CurrentImageVersionsUpdater['main']['node'], {

@@ -6,9 +6,9 @@ test('isValid returns true on valid versions', (t) => {
     'v0.0.0',
     'v1.22.333',
     'v0.0.0-canary',
-    'v0.0.0+hotfix',
-    'v1.22.333+hotfix',
-    'v0.0.0-canary+hotfix',
+    'v0.0.0-hotfix',
+    'v1.22.333-hotfix',
+    'v0.0.0-canary-hotfix',
   ];
   for (const tag of validTags) {
     t.true(isValid(tag), tag);
@@ -16,21 +16,21 @@ test('isValid returns true on valid versions', (t) => {
 });
 
 test('isMain returns true on valid versions', (t) => {
-  const validTags = ['v0.0.0', 'v1.22.333', 'v0.0.0+hotfix', 'v1.22.333+hotfix'];
+  const validTags = ['v0.0.0', 'v1.22.333', 'v0.0.0-hotfix', 'v1.22.333-hotfix'];
   for (const tag of validTags) {
     t.true(isMain(tag), tag);
   }
 });
 
 test('isCanary returns true on valid versions', (t) => {
-  const validTags = ['v0.0.0-canary', 'v0.0.0-canary+hotfix'];
+  const validTags = ['v0.0.0-canary', 'v0.0.0-canary-hotfix'];
   for (const tag of validTags) {
     t.true(isCanary(tag), tag);
   }
 });
 
 test('isHotfix returns true on valid versions', (t) => {
-  const validTags = ['v0.0.0+hotfix', 'v1.22.333+hotfix', 'v0.0.0-canary+hotfix'];
+  const validTags = ['v0.0.0-hotfix', 'v1.22.333-hotfix', 'v0.0.0-canary-hotfix'];
   for (const tag of validTags) {
     t.true(isHotfix(tag), tag);
   }
@@ -60,7 +60,7 @@ test('isValid returns false on invalid versions', (t) => {
 test('isMain returns false on invalid versions', (t) => {
   const invalidTags = [
     'v0.0.0-canary',
-    'v0.0.0-canary+hotfix',
+    'v0.0.0-canary-hotfix',
     'G-0-H',
     'C-0-N',
     '0.0.0',
@@ -84,8 +84,8 @@ test('isCanary returns false on invalid versions', (t) => {
   const invalidTags = [
     'v0.0.0',
     'v1.22.333',
-    'v0.0.0+hotfix',
-    'v1.22.333+hotfix',
+    'v0.0.0-hotfix',
+    'v1.22.333-hotfix',
     'G-0-H',
     'C-0-N',
     '0.0.0',
@@ -113,14 +113,15 @@ test('isHotfix returns false on invalid versions', (t) => {
     'G-0-H',
     'C-0-N',
     '0.0.0',
-    '0.0.0-hotfix',
-    '0.0.0+hot',
+    '0.0.0+hotfix',
+    '0.0.0-hot',
     'v0.0.0 foo',
     'foo v0.0.0',
     'v0.0',
     'v0.0.',
-    'v0.0.0 +hotfix',
-    'v0.0.0+hotfi x',
+    'v0.0.0 -hotfix',
+    'v0.0.0--hotfix',
+    'v0.0.0-hotfi x',
     'v01.22.333',
     'v0.0.0+ferrary',
     'v0.0.0-ferrary+slow',
@@ -134,16 +135,16 @@ test('isHotfix returns false on invalid versions', (t) => {
 test('compare sorts the latest version at the smallest index', (t) => {
   const validTags = [
     'v1.1.4-canary',
-    'v1.0.6-canary+hotfix',
+    'v1.0.6-canary-hotfix',
     'v0.0.8',
     'v0.0.11',
-    'v0.0.1+hotfix',
+    'v0.0.1-hotfix',
     'v0.0.0',
     '',
     'v0.2.5',
     'v1.0.0',
     'v1.1.3',
-    'v0.20.0+hotfix',
+    'v0.20.0-hotfix',
     '',
     'v0.2.0-canary',
     'v1.11.0',
@@ -154,14 +155,14 @@ test('compare sorts the latest version at the smallest index', (t) => {
     '',
     '',
     'v0.0.0',
-    'v0.0.1+hotfix',
+    'v0.0.1-hotfix',
     'v0.0.8',
     'v0.0.11',
     'v0.2.0-canary',
     'v0.2.5',
-    'v0.20.0+hotfix',
+    'v0.20.0-hotfix',
     'v1.0.0',
-    'v1.0.6-canary+hotfix',
+    'v1.0.6-canary-hotfix',
     'v1.1.0',
     'v1.1.3',
     'v1.1.4-canary',
