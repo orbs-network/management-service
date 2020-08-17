@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
 import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './ports';
-import { JsonResponse } from '../helpers';
+import { JsonResponse, normalizeAddress } from '../helpers';
 
 export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const response: JsonResponse = {
@@ -101,7 +101,7 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
       EthereumEndpoint: config.EthereumEndpoint,
       SignerEndpoint: 'http://signer:7777',
       EthereumElectionsContract: elections,
-      NodeOrbsAddress: config['node-address'],
+      NodeOrbsAddress: normalizeAddress(config['node-address']),
     },
   };
 }
@@ -109,7 +109,10 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
 function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const version = snapshot.CurrentImageVersions['main']['rewards-service'];
   if (!version) return undefined;
-  const guardian = _.findKey(snapshot.CurrentOrbsAddress, (orbsAddress) => orbsAddress == config['node-address']);
+  const guardian = _.findKey(
+    snapshot.CurrentOrbsAddress,
+    (orbsAddress) => orbsAddress == normalizeAddress(config['node-address'])
+  );
   if (!guardian) return undefined;
   const registration = snapshot.CurrentRegistrationData[guardian];
   if (!registration) return undefined;
@@ -129,7 +132,7 @@ function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration
       SignerEndpoint: 'http://signer:7777',
       EthereumGenesisContract: config.EthereumGenesisContract,
       GuardianAddress: `0x${guardian}`,
-      NodeOrbsAddress: config['node-address'],
+      NodeOrbsAddress: normalizeAddress(config['node-address']),
       EthereumFirstBlock: config.EthereumFirstBlock,
     },
   };

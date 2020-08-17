@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { EventTypes, ContractName } from '../ethereum/types';
-import { getIpFromHex, toNumber } from '../helpers';
+import { getIpFromHex, toNumber, normalizeAddress } from '../helpers';
 import { findAllEventsCoveringRange } from './find';
 import { defaultServiceConfiguration } from '../config';
 
@@ -390,12 +390,6 @@ function calcStaleElectionsUpdates(time: number, snapshot: StateSnapshot, config
       snapshot.CurrentElectionsStatus[node.EthAddress].TimeToStale = config.ElectionsStaleUpdateSeconds;
     }
   }
-}
-
-function normalizeAddress(address: string): string {
-  if (!address) return address;
-  if (address.startsWith('0x')) return address.substr(2).toLowerCase();
-  return address.toLowerCase();
 }
 
 function removeAllKeysWithValue(value: string, obj: { [key: string]: string }) {

@@ -274,7 +274,7 @@ export const expectationStatus = {
       FinalityBufferBlocks: 10,
       EthereumFirstBlock: 0,
       Verbose: true,
-      'node-address': '16fcf728f8dc3f687132f2157d8379c021a08c12',
+      'node-address': '16fCf728f8Dc3f687132F2157d8379c021a08c12',
     },
   },
 };

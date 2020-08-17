@@ -70,3 +70,9 @@ export class DailyStats {
     return this.data;
   }
 }
+
+export function normalizeAddress(address: string): string {
+  if (!address) return address;
+  if (address.startsWith('0x')) return address.substr(2).toLowerCase();
+  return address.toLowerCase();
+}
