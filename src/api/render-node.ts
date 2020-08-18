@@ -160,18 +160,7 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
       'gossip-listen-port': 4400,
       'http-address': ':8080',
       'management-file-path': `http://management-service:8080/vchains/${vchainId}/management`,
-      'management-consensus-grace-timeout': '0s', // TODO: temporary to simplify staging, remove eventually
       'signer-endpoint': 'http://signer:7777',
-      'ethereum-endpoint': config.EthereumEndpoint,
-      'active-consensus-algo': 2,
-      'lean-helix-show-debug': true,
-      'consensus-context-triggers-enabled': true,
-      'transaction-pool-time-between-empty-blocks': '9s',
-      'lean-helix-consensus-round-timeout-interval': '14s',
-      'block-sync-no-commit-interval': '18s',
-      'consensus-context-system-timestamp-allowed-jitter': '1m',
-      'logger-file-truncation-interval': '4h',
-      profiling: true,
     },
   };
 }
