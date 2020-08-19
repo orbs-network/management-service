@@ -75,9 +75,6 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     Tag: 'v1.2.4-canary',
     Pull: true,
   });
-  for (const chain of res.chains) {
-    t.is(chain.Config['ethereum-endpoint'], config.EthereumEndpoint);
-  }
   t.deepEqual(res.services['signer'].DockerConfig, {
     Image: 'mydockernamespace/signer',
     Tag: 'v1.1.0',
