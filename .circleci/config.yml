@@ -57,4 +57,9 @@ workflows:
   build-and-test:
     jobs:
       - build-and-test
-      - build-and-release-to-staging
+      - build-and-release-to-staging:
+          filters:
+            branches:
+              only: /.*/
+            tags:
+              only: /v.*/
