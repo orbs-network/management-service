@@ -1,4 +1,4 @@
-FROM node:12-alpine
+FROM node:14-alpine
 # Env
 ENV NODE_ENV production
 # Set the timezone in docker
