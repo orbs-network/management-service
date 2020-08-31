@@ -8,6 +8,7 @@ WORKDIR /opt/orbs
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 # where available (npm@5+)
 COPY package*.json ./
+COPY .version ./version
 
 RUN apk add --no-cache git
 RUN npm install
