@@ -20,7 +20,7 @@
     "pretest": "npm run typecheck && npm run lint",
     "clean": "rimraf ./dist/",
     "prebuild": "npm run clean",
-    "build": "tsc --skipLibCheck -p ./tsconfig.prod.json && docker build -t local/management-service .",
+    "build": "tsc --skipLibCheck -p ./tsconfig.prod.json && ./boyar/create-version-file.sh && docker build -t local/management-service .",
     "test": "ava --verbose --timeout=10m --serial",
     "test:quick": "echo '-- TEST --' && ava --verbose --timeout=10m --serial",
     "test:e2e": "ava --verbose --timeout=10m --serial --config ./ava.config.e2e.js",
