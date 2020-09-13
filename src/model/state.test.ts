@@ -299,6 +299,19 @@ test('state applies elections status updates and sets candidates accordingly', (
     { EthAddress: 'y', IsStandby: true, Name: 'name' },
     { EthAddress: 'z', IsStandby: false, Name: 'name' },
   ]);
+
+  GuardianStatusUpdated(s, 11 * day, '0xA', false, false);
+  GuardianStatusUpdated(s, 11 * day, '0xC', false, false);
+  s.applyNewTimeRef(11 * day, 20000);
+
+  t.log(JSON.stringify(s.getSnapshot(), null, 2));
+
+  t.deepEqual(s.getSnapshot().CurrentCandidates, [
+    { EthAddress: 'd', IsStandby: true, Name: 'name' },
+    { EthAddress: 'x', IsStandby: true, Name: 'name' },
+    { EthAddress: 'y', IsStandby: true, Name: 'name' },
+    { EthAddress: 'z', IsStandby: true, Name: 'name' }
+  ]);
 });
 
 test('state applies virtual chain subscriptions', (t) => {
