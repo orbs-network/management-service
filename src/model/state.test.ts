@@ -21,6 +21,12 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   GuardianDataUpdated(s, 1000, '0xM', '0xm1', '0x04040404');
   GuardianDataUpdated(s, 1000, '0xN', '0xn1', '0x05050505');
 
+  GuardianStatusUpdated(s, 1000, '0xA', true, false);
+  GuardianStatusUpdated(s, 1000, '0xB', true, false);
+  GuardianStatusUpdated(s, 1000, '0xC', true, false);
+  GuardianStatusUpdated(s, 1000, '0xM', true, false);
+  GuardianStatusUpdated(s, 1000, '0xN', true, false);
+
   // change committee to [A, B, C]
   GuardianCommitteeChange(s, 1000, '0xA', true);
   GuardianCommitteeChange(s, 1000, '0xB', true);
@@ -39,6 +45,9 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   GuardianDataUpdated(s, 2000, '0xC', '0xc2', '0x03030303');
   GuardianDataUpdated(s, 2000, '0xN', '0xn2', '0x05050505');
 
+  GuardianStatusUpdated(s, 2000, '0xZ', true, false);
+  GuardianStatusUpdated(s, 2000, '0xO', true, false);
+
   // change committee to [Z, B, C]
   GuardianCommitteeChange(s, 2000, '0xA', false);
   GuardianCommitteeChange(s, 2000, '0xZ', true);
@@ -54,6 +63,9 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   GuardianDataUpdated(s, day + 3000, '0xZ', '0xz3', '0x0b0b0b0b');
   GuardianDataUpdated(s, day + 3000, '0xP', '0xp3', '0x0c0c0c0c');
   GuardianDataUpdated(s, day + 3000, '0xO', '0xo3', '0x08080808');
+
+  GuardianStatusUpdated(s, day + 3000, '0xX', true, false);
+  GuardianStatusUpdated(s, day + 3000, '0xP', true, false);
 
   // change committee to [X, Z]
   GuardianCommitteeChange(s, day + 3000, '0xB', false);
@@ -276,12 +288,12 @@ test('state applies elections status updates and sets candidates accordingly', (
     { EthAddress: 'c', IsStandby: true, Name: 'name' },
     { EthAddress: 'b', IsStandby: true, Name: 'name' },
     { EthAddress: 'a', IsStandby: true, Name: 'name' },
-    { EthAddress: 'd', IsStandby: true, Name: 'name' },
-    { EthAddress: 'x', IsStandby: true, Name: 'name' },
-    { EthAddress: 'y', IsStandby: false, Name: 'name' },
-    { EthAddress: 'z', IsStandby: false, Name: 'name' },
   ]);
 
+  GuardianStatusUpdated(s, 1 * day, '0xD', true, false);
+  GuardianStatusUpdated(s, 1 * day, '0xX', true, false);
+  GuardianStatusUpdated(s, 1 * day, '0xY', true, false);
+  GuardianStatusUpdated(s, 1 * day, '0xZ', true, false);
   GuardianStatusUpdated(s, 5 * day, '0xA', true, false);
   s.getSnapshot().CurrentCommittee = [{ EthAddress: 'b', Weight: 1, Name: 'name', EnterTime: 1000 }];
   s.applyNewTimeRef(10 * day, 10000);
@@ -298,6 +310,19 @@ test('state applies elections status updates and sets candidates accordingly', (
     { EthAddress: 'x', IsStandby: true, Name: 'name' },
     { EthAddress: 'y', IsStandby: true, Name: 'name' },
     { EthAddress: 'z', IsStandby: false, Name: 'name' },
+  ]);
+
+  GuardianStatusUpdated(s, 11 * day, '0xA', false, false);
+  GuardianStatusUpdated(s, 11 * day, '0xC', false, false);
+  s.applyNewTimeRef(11 * day, 20000);
+
+  t.log(JSON.stringify(s.getSnapshot(), null, 2));
+
+  t.deepEqual(s.getSnapshot().CurrentCandidates, [
+    { EthAddress: 'd', IsStandby: true, Name: 'name' },
+    { EthAddress: 'x', IsStandby: true, Name: 'name' },
+    { EthAddress: 'y', IsStandby: true, Name: 'name' },
+    { EthAddress: 'z', IsStandby: true, Name: 'name' }
   ]);
 });
 

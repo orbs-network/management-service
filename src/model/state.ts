@@ -310,6 +310,9 @@ type CommiteeEvent = {
 
 function calcCandidates(snapshot: StateSnapshot): CandidateNodes {
   const allRegistered = _.clone(snapshot.CurrentOrbsAddress);
+  for (const EthAddress of Object.keys(allRegistered)) {
+    if (!snapshot.CurrentElectionsStatus[EthAddress]?.ReadyToSync) delete allRegistered[EthAddress];
+  }
   for (const node of snapshot.CurrentCommittee) delete allRegistered[node.EthAddress];
   let res = Object.keys(allRegistered).map((EthAddress) => {
     return {
