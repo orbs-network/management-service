@@ -162,6 +162,28 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   t.is(s.getSnapshot().CurrentCommittee[1].EnterTime, day + 6000);
   GuardianCommitteeChange(s, day + 7000, '0xZ', true);
   t.is(s.getSnapshot().CurrentCommittee[1].EnterTime, day + 6000);
+
+  // no available Ip or OrbsAddress removes from topology (not supposed to happen)
+  t.deepEqual(s.getSnapshot().CurrentTopology, [
+    { EthAddress: 'a', OrbsAddress: 'a2', Ip: '7.7.7.7', Port: 0, Name: 'name' },
+    { EthAddress: 'b', OrbsAddress: 'b2', Ip: '2.2.2.2', Port: 0, Name: 'name' },
+    { EthAddress: 'c', OrbsAddress: 'c2', Ip: '3.3.3.3', Port: 0, Name: 'name' },
+    { EthAddress: 'm', OrbsAddress: 'm1', Ip: '4.4.4.4', Port: 0, Name: 'name' },
+    { EthAddress: 'o', OrbsAddress: 'o3', Ip: '8.8.8.8', Port: 0, Name: 'name' },
+    { EthAddress: 'x', OrbsAddress: 'x3', Ip: '9.9.9.9', Port: 0, Name: 'name' },
+    { EthAddress: 'z', OrbsAddress: 'z3', Ip: '11.11.11.11', Port: 0, Name: 'name' },
+  ]);
+  GuardianDataUpdated(s, day + 8000, '0xP', '0xp3', '0x02020202'); // manually remove 0xB Ip (steal it to 0xP)
+  GuardianDataUpdated(s, day + 8000, '0xM', '', '0x04040404'); // manually remove 0xM OrbsAddress (set to empty)
+  s.applyNewTimeRef(day + 8000, 800);
+  t.log(s.getSnapshot().CurrentTopology);
+  t.deepEqual(s.getSnapshot().CurrentTopology, [
+    { EthAddress: 'a', OrbsAddress: 'a2', Ip: '7.7.7.7', Port: 0, Name: 'name' },
+    { EthAddress: 'c', OrbsAddress: 'c2', Ip: '3.3.3.3', Port: 0, Name: 'name' },
+    { EthAddress: 'o', OrbsAddress: 'o3', Ip: '8.8.8.8', Port: 0, Name: 'name' },
+    { EthAddress: 'x', OrbsAddress: 'x3', Ip: '9.9.9.9', Port: 0, Name: 'name' },
+    { EthAddress: 'z', OrbsAddress: 'z3', Ip: '11.11.11.11', Port: 0, Name: 'name' },
+  ]);
 });
 
 test('state handles duplicate orbs addresses and ip addresses', (t) => {
@@ -322,7 +344,7 @@ test('state applies elections status updates and sets candidates accordingly', (
     { EthAddress: 'd', IsStandby: true, Name: 'name' },
     { EthAddress: 'x', IsStandby: true, Name: 'name' },
     { EthAddress: 'y', IsStandby: true, Name: 'name' },
-    { EthAddress: 'z', IsStandby: true, Name: 'name' }
+    { EthAddress: 'z', IsStandby: true, Name: 'name' },
   ]);
 });
 

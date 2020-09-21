@@ -353,6 +353,11 @@ function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
     Port: 0,
     Name: snapshot.CurrentRegistrationData[EthAddress]?.Name ?? '',
   }));
+
+  // remove nodes with missing OrbsAddress or Ip (not supposed to happen)
+  //  we added this case since Unregister was not yet implemented and Ips could be transferred
+  _.remove(res, ({ OrbsAddress, Ip }) => !OrbsAddress || !Ip);
+
   return _.sortBy(res, (node) => node.EthAddress);
 }
 
