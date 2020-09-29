@@ -65,8 +65,26 @@ export const expectationNodeManagement = {
         NodeOrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
       },
     },
-    'rewards-service': {
+    'logs-service': {
+      InternalPort: 8080,
+      ExternalPort: 8666,
       Disabled: false,
+      DockerConfig: {
+        Image: 'orbsnetwork/logs-service',
+        Tag: isValidImageVersion,
+        Pull: true,
+      },
+      MountNodeLogs: true,
+      Config: {
+        Port: 8080,
+        SkipBatchesOnMismatch: 3,
+        LogsPath: '/opt/orbs/logs',
+        StatusJsonPath: './status/status.json',
+        StatusUpdateLoopIntervalSeconds: 20,
+      },
+    },
+    'rewards-service': {
+      Disabled: true,
       DockerConfig: {
         Image: 'orbsnetwork/rewards-service',
         Tag: isValidImageVersion,
