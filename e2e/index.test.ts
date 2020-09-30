@@ -48,6 +48,7 @@ test.serial('[E2E] serves /node/management as expected', async (t) => {
     !res.chains ||
     res.chains.length < 3 ||
     !res.services?.['ethereum-writer'] ||
+    !res.services?.['logs-service'] ||
     !res.services?.['rewards-service']
   ) {
     await sleep(1000);

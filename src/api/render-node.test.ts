@@ -21,6 +21,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v3.9.9'] },
     { user: 'mydockernamespace', name: 'signer', tags: ['v1.1.0'] },
     { user: 'mydockernamespace', name: 'ethereum-writer', tags: ['v1.1.0'] },
+    { user: 'mydockernamespace', name: 'logs-service', tags: ['v1.1.0'] },
     { user: 'mydockernamespace', name: 'rewards-service', tags: ['v1.1.0'] }
   );
 
@@ -90,6 +91,11 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     Tag: 'v1.1.0',
     Pull: true,
   });
+  t.deepEqual(res.services['logs-service'].DockerConfig, {
+    Image: 'mydockernamespace/logs-service',
+    Tag: 'v1.1.0',
+    Pull: true,
+  });
   t.deepEqual(res.services['rewards-service'].DockerConfig, {
     Image: 'mydockernamespace/rewards-service',
     Tag: 'v1.1.0',
@@ -102,6 +108,13 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     SignerEndpoint: 'http://signer:7777',
     EthereumElectionsContract: ethereum.getContractAddress('elections'),
     NodeOrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
+  });
+  t.deepEqual(res.services['logs-service'].Config, {
+    Port: 8080,
+    SkipBatchesOnMismatch: 3,
+    LogsPath: '/opt/orbs/logs',
+    StatusJsonPath: './status/status.json',
+    StatusUpdateLoopIntervalSeconds: 20,
   });
   t.deepEqual(res.services['rewards-service'].Config, {
     EthereumEndpoint: config.EthereumEndpoint,
@@ -121,6 +134,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v4.5.8'] },
     { user: 'mydockernamespace', name: 'signer', tags: ['v1.1.0'] },
     { user: 'mydockernamespace', name: 'ethereum-writer', tags: ['v1.1.0'] },
+    { user: 'mydockernamespace', name: 'logs-service', tags: ['v1.1.0'] },
     { user: 'mydockernamespace', name: 'rewards-service', tags: ['v1.1.0'] }
   );
 
@@ -153,6 +167,11 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   });
   t.deepEqual(res.services['ethereum-writer'].DockerConfig, {
     Image: 'mydockernamespace/ethereum-writer',
+    Tag: 'v1.1.0', // no upgrade
+    Pull: true,
+  });
+  t.deepEqual(res.services['logs-service'].DockerConfig, {
+    Image: 'mydockernamespace/logs-service',
     Tag: 'v1.1.0', // no upgrade
     Pull: true,
   });

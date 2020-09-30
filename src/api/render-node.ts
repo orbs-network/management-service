@@ -31,6 +31,10 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
   response.services['ethereum-writer'] = getEthereumWriter(snapshot, config);
   if (!response.services['ethereum-writer']) delete response.services['ethereum-writer'];
 
+  // include logs-service if found a viable image for it
+  response.services['logs-service'] = getLogsService(snapshot, config);
+  if (!response.services['logs-service']) delete response.services['logs-service'];
+
   // include rewards-service if found a viable image for it and its contract addresses are known
   response.services['rewards-service'] = getRewardsService(snapshot, config);
   if (!response.services['rewards-service']) delete response.services['rewards-service'];
@@ -119,7 +123,7 @@ function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration
   const frequency = Math.round(parseInt(registration.Metadata['REWARDS_FREQUENCY_SEC']));
 
   return {
-    Disabled: false,
+    Disabled: true,
     DockerConfig: {
       Image: `${config.DockerNamespace}/rewards-service`,
       Tag: version,
@@ -134,6 +138,30 @@ function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration
       GuardianAddress: `0x${guardian}`,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       EthereumFirstBlock: config.EthereumFirstBlock,
+    },
+  };
+}
+
+function getLogsService(snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const version = snapshot.CurrentImageVersions['main']['logs-service'];
+  if (!version) return undefined;
+
+  return {
+    InternalPort: 8080,
+    ExternalPort: 8666,
+    Disabled: false,
+    DockerConfig: {
+      Image: `${config.DockerNamespace}/logs-service`,
+      Tag: version,
+      Pull: true,
+    },
+    MountNodeLogs: true,
+    Config: {
+      Port: 8080,
+      SkipBatchesOnMismatch: 3,
+      LogsPath: '/opt/orbs/logs',
+      StatusJsonPath: './status/status.json',
+      StatusUpdateLoopIntervalSeconds: 20,
     },
   };
 }
