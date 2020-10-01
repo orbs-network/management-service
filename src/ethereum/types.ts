@@ -88,13 +88,18 @@ export function contractByEventName(eventName: EventName): ContractName {
 export type ContractAddressUpdatedPayload = {
   contractName: ContractName;
   addr: string;
+  managedContract: boolean;
 };
 
 export type SubscriptionChangedPayload = {
   vcid: string;
+  owner: string;
+  name: string;
   genRefTime: string;
-  expiresAt: string;
   tier: 'defaultTier';
+  rate: string;
+  expiresAt: string;
+  isCertified: boolean;
   deploymentSubset: 'main' | 'canary';
 };
 
@@ -121,11 +126,11 @@ export type ProtocolChangedPayload = {
 
 export type GuardianDataUpdatedPayload = {
   addr: string;
+  isRegistered: boolean;
   ip: string;
   orbsAddr: string;
   name: string;
   website: string;
-  contact: string;
 };
 
 export type GuardianMetadataChangedPayload = {

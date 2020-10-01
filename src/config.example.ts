@@ -16,5 +16,5 @@ export const exampleConfig: ServiceConfiguration = {
   FinalityBufferBlocks: 10,
   EthereumFirstBlock: 0,
   Verbose: false,
-  'node-address': '16fcf728f8dc3f687132f2157d8379c021a08c12',
+  'node-address': 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
 };

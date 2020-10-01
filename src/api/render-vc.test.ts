@@ -53,37 +53,37 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   t.assert(res.VirtualChains['1000000'].GenesisRefTime > 1400000000);
   t.deepEqual(res.VirtualChains['1000000'].CurrentTopology, [
     {
-      EthAddress: '29ce860a2247d97160d6dfc087a15f41e2349087',
-      OrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
-      Ip: '41.206.134.10',
-      Port: 10000,
-      Name: 'Guardian0',
-    },
-    {
-      EthAddress: '51baa09f2f7dfc7a0f65886b68720958d389cac7',
-      OrbsAddress: '174dc3b45bdbbc32aa0b95e64d0247ce99b08f69',
-      Ip: '81.186.160.159',
-      Port: 10000,
-      Name: 'Guardian2',
-    },
-    {
-      EthAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
-      OrbsAddress: '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
-      Ip: '138.103.13.220',
+      EthAddress: '02ebe4663d6110aec8f816f9772a4087cc1a5ec7',
+      OrbsAddress: 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
+      Ip: '2.235.228.102',
       Port: 10000,
       Name: 'Guardian3',
     },
     {
-      EthAddress: 'cb6642be414696f77336dae06fed3775f08de0ea',
-      OrbsAddress: '33546759bdcfb5c753a4102b86b3e73e714d5213',
-      Ip: '203.102.66.190',
+      EthAddress: '44ea9fbfebb3162a5778b30fb2ba2a66cc5291a8',
+      OrbsAddress: '33a8534adfddd5a774fb4b245f25b9a54c931346',
+      Ip: '68.234.159.191',
       Port: 10000,
       Name: 'Guardian4',
     },
     {
-      EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
-      OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
-      Ip: '225.110.150.90',
+      EthAddress: '7d5b6545e3427374adeb96f4198c05812f7625b1',
+      OrbsAddress: '605b47645c2ff7ffb9756a051048d006d2b1ef4a',
+      Ip: '125.91.101.69',
+      Port: 10000,
+      Name: 'Guardian5',
+    },
+    {
+      EthAddress: '94fda04016784d0348ec2ece7a9b24e3313885f0',
+      OrbsAddress: '945dc264e11c09f8a518da6ce1bea493e0055b16',
+      Ip: '148.253.160.64',
+      Port: 10000,
+      Name: 'Guardian2',
+    },
+    {
+      EthAddress: '98b4d71c78789637364a70f696227ec89e35626c',
+      OrbsAddress: 'b1985d8a332bfc903fd437489ea933792fbfa500',
+      Ip: '152.180.215.28',
       Port: 10000,
       Name: 'Guardian1',
     },
@@ -91,36 +91,36 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
   t.is(res.VirtualChains['1000000'].CommitteeEvents.length, 3);
   t.deepEqual(res.VirtualChains['1000000'].CommitteeEvents[0].Committee, [
     {
-      OrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
-      EthAddress: '29ce860a2247d97160d6dfc087a15f41e2349087',
+      OrbsAddress: 'b1985d8a332bfc903fd437489ea933792fbfa500',
+      EthAddress: '98b4d71c78789637364a70f696227ec89e35626c',
       Weight: 10000,
       IdentityType: 0,
     },
   ]);
   t.deepEqual(res.VirtualChains['1000000'].CommitteeEvents[1].Committee, [
     {
-      OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
-      EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
+      OrbsAddress: '945dc264e11c09f8a518da6ce1bea493e0055b16',
+      EthAddress: '94fda04016784d0348ec2ece7a9b24e3313885f0',
       Weight: 20000,
       IdentityType: 0,
     },
     {
-      OrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
-      EthAddress: '29ce860a2247d97160d6dfc087a15f41e2349087',
+      OrbsAddress: 'b1985d8a332bfc903fd437489ea933792fbfa500',
+      EthAddress: '98b4d71c78789637364a70f696227ec89e35626c',
       Weight: 15000,
       IdentityType: 0,
     },
   ]);
   t.deepEqual(res.VirtualChains['1000000'].CommitteeEvents[2].Committee, [
     {
-      OrbsAddress: '7c2300d32ebf4a6ae9edf95f4f57ab5a07488c2e',
-      EthAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
+      OrbsAddress: '33a8534adfddd5a774fb4b245f25b9a54c931346',
+      EthAddress: '44ea9fbfebb3162a5778b30fb2ba2a66cc5291a8',
       Weight: 40000,
       IdentityType: 0,
     },
     {
-      OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
-      EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
+      OrbsAddress: '945dc264e11c09f8a518da6ce1bea493e0055b16',
+      EthAddress: '94fda04016784d0348ec2ece7a9b24e3313885f0',
       Weight: 30000,
       IdentityType: 0,
     },

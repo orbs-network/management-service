@@ -33,7 +33,7 @@ export class TestEnvironment {
       FinalityBufferBlocks: 10,
       EthereumFirstBlock: 0,
       Verbose: true,
-      'node-address': '16fCf728f8Dc3f687132F2157d8379c021a08c12', // Guardian0 (mixed case!)
+      'node-address': 'ecfcCcbc1E54852337298c7E90f5eceE79439e67', // Guardian3 (mixed case!)
     };
   }
 
