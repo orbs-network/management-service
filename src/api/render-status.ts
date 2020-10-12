@@ -33,9 +33,9 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
           EthAddress,
           OrbsAddress,
           Ip: snapshot.CurrentIp[EthAddress],
-          EffectiveStake: snapshot.CurrentEffectiveStake[EthAddress],
-          SelfStake: snapshot.CurrentDetailedStake[EthAddress]?.SelfStake,
-          DelegatedStake: snapshot.CurrentDetailedStake[EthAddress]?.DelegatedStake,
+          EffectiveStake: snapshot.CurrentEffectiveStake[EthAddress] ?? 0,
+          SelfStake: snapshot.CurrentDetailedStake[EthAddress]?.SelfStake ?? 0,
+          DelegatedStake: snapshot.CurrentDetailedStake[EthAddress]?.DelegatedStake ?? 0,
           ElectionsStatus: snapshot.CurrentElectionsStatus[EthAddress],
           ...snapshot.CurrentRegistrationData[EthAddress],
         };
