@@ -17,6 +17,9 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
     Payload: {
       Uptime: getCurrentClockTime() - timeOriginallyLaunched,
       MemoryBytesUsed: process.memoryUsage().heapUsed,
+      Version: {
+        Semantic: snapshot.CurrentVersion,
+      },
       CurrentRefTime: snapshot.CurrentRefTime,
       CurrentRefBlock: snapshot.CurrentRefBlock,
       CurrentCommittee: snapshot.CurrentCommittee,

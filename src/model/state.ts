@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import fs from 'fs';
 import { EventTypes, ContractName } from '../ethereum/types';
 import { getIpFromHex, toNumber, normalizeAddress } from '../helpers';
 import { findAllEventsCoveringRange } from './find';
 import { defaultServiceConfiguration } from '../config';
+import * as Logger from '../logger';
 
 const NUM_STANDBYS = 5;
 
@@ -84,6 +86,7 @@ export interface StateSnapshot {
     ContractName: ContractName;
     Address: string;
   }[];
+  CurrentVersion: string;
 }
 
 export type StateConfiguration = {
@@ -129,10 +132,16 @@ export class State {
     },
     CurrentContractAddress: {},
     ContractAddressChanges: [],
+    CurrentVersion: '',
   };
 
   constructor(private config = defaultStateConfiguration) {
     this.snapshot.CurrentContractAddress['contractRegistry'] = config.EthereumGenesisContract;
+    try {
+      this.snapshot.CurrentVersion = fs.readFileSync('./version').toString().trim();
+    } catch (err) {
+      Logger.log(`Cound not find version: ${err.message}`);
+    }
   }
 
   getSnapshot(): StateSnapshot {
