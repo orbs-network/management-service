@@ -13,14 +13,26 @@ export interface StateSnapshot {
   CurrentRefBlock: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
-  CurrentCommittee: { EthAddress: string; Weight: number; Name: string; EnterTime: number }[];
+  CurrentCommittee: { EthAddress: string; Weight: number; Name: string; EnterTime: number; EffectiveStake: number }[];
   CurrentCandidates: { EthAddress: string; IsStandby: boolean; Name: string }[];
   CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number; Name: string }[]; // Port overridden by processor
   CommitteeEvents: {
     RefTime: number;
-    Committee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
+    Committee: {
+      EthAddress: string;
+      OrbsAddress: string;
+      Weight: number;
+      IdentityType: number;
+      EffectiveStake: number;
+    }[];
   }[];
-  LastCommitteeEvent: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
+  LastCommitteeEvent: {
+    EthAddress: string;
+    OrbsAddress: string;
+    Weight: number;
+    IdentityType: number;
+    EffectiveStake: number;
+  }[];
   CurrentEffectiveStake: { [EthAddress: string]: number }; // in ORBS
   CurrentDetailedStake: {
     [EthAddress: string]: {
@@ -185,6 +197,7 @@ export class State {
         Weight: 0,
         Name: this.snapshot.CurrentRegistrationData[EthAddress]?.Name ?? '',
         EnterTime: previous[0]?.EnterTime ?? time,
+        EffectiveStake: this.snapshot.CurrentEffectiveStake[EthAddress],
       });
     }
     fixCommitteeWeights(this.snapshot.CurrentCommittee, this.snapshot.CurrentEffectiveStake);
@@ -314,7 +327,13 @@ type CandidateNodes = { EthAddress: string; IsStandby: boolean; Name: string }[]
 type TopologyNodes = { EthAddress: string; OrbsAddress: string; Ip: string; Port: number; Name: string }[];
 type CommiteeEvent = {
   RefTime: number;
-  Committee: { EthAddress: string; OrbsAddress: string; Weight: number; IdentityType: number }[];
+  Committee: {
+    EthAddress: string;
+    OrbsAddress: string;
+    Weight: number;
+    IdentityType: number;
+    EffectiveStake: number;
+  }[];
 };
 
 function calcCandidates(snapshot: StateSnapshot): CandidateNodes {
@@ -384,11 +403,12 @@ function orbitonsToOrbs(stake: string): number {
 function calcNewCommitteeEvent(time: number, snapshot: StateSnapshot): CommiteeEvent {
   return {
     RefTime: time,
-    Committee: snapshot.CurrentCommittee.map(({ EthAddress, Weight }) => ({
+    Committee: snapshot.CurrentCommittee.map(({ EthAddress, Weight, EffectiveStake }) => ({
       EthAddress,
       OrbsAddress: snapshot.CurrentOrbsAddress[EthAddress],
       Weight,
       IdentityType: 0,
+      EffectiveStake,
     })),
   };
 }

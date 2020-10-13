@@ -95,6 +95,7 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
       EthAddress: '29ce860a2247d97160d6dfc087a15f41e2349087',
       Weight: 10000,
       IdentityType: 0,
+      EffectiveStake: 10000,
     },
   ]);
   t.deepEqual(res.VirtualChains['1000000'].CommitteeEvents[1].Committee, [
@@ -103,12 +104,14 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
       EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
       Weight: 20000,
       IdentityType: 0,
+      EffectiveStake: 20000,
     },
     {
       OrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
       EthAddress: '29ce860a2247d97160d6dfc087a15f41e2349087',
       Weight: 15000,
       IdentityType: 0,
+      EffectiveStake: 10000,
     },
   ]);
   t.deepEqual(res.VirtualChains['1000000'].CommitteeEvents[2].Committee, [
@@ -117,12 +120,14 @@ test.serial('[integration] getVirtualChainManagement responds according to Ether
       EthAddress: '8a670ddc1910c27278ab7db2a148a0dccc6bf0f5',
       Weight: 40000,
       IdentityType: 0,
+      EffectiveStake: 40000,
     },
     {
       OrbsAddress: '86544bdd6c8b957cd198252c45fa215fc3892126',
       EthAddress: 'e16e965a4cc3fcd597ecdb9cd9ab8f3e6a750ac9',
       Weight: 30000,
       IdentityType: 0,
+      EffectiveStake: 20000,
     },
   ]);
   t.is(res.VirtualChains['1000000'].SubscriptionEvents.length, 3);

@@ -46,7 +46,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
       EthereumRequestStats: stats,
       CommitteeEvents: findAllEventsCoveringRange(
         snapshot.CommitteeEvents,
-        snapshot.CurrentRefTime - 30 * day,
+        snapshot.CurrentRefTime - 60 * day,
         snapshot.CurrentRefTime
       ),
       Config: config,
