@@ -28,13 +28,13 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   GuardianStatusUpdated(s, 1000, '0xN', true, false);
 
   // change committee to [A, B, C]
-  GuardianCommitteeChange(s, 1000, '0xA', true);
-  GuardianCommitteeChange(s, 1000, '0xB', true);
-  GuardianCommitteeChange(s, 1000, '0xC', true);
+  CommitteeChange(s, 1000, '0xA', true);
+  CommitteeChange(s, 1000, '0xB', true);
+  CommitteeChange(s, 1000, '0xC', true);
 
   // change standbys to [M, N]
-  GuardianCommitteeChange(s, 1000, '0xM', false);
-  GuardianCommitteeChange(s, 1000, '0xN', false);
+  CommitteeChange(s, 1000, '0xM', false);
+  CommitteeChange(s, 1000, '0xN', false);
 
   s.applyNewTimeRef(1000, 100);
 
@@ -49,12 +49,12 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   GuardianStatusUpdated(s, 2000, '0xO', true, false);
 
   // change committee to [Z, B, C]
-  GuardianCommitteeChange(s, 2000, '0xA', false);
-  GuardianCommitteeChange(s, 2000, '0xZ', true);
+  CommitteeChange(s, 2000, '0xA', false);
+  CommitteeChange(s, 2000, '0xZ', true);
 
   // change standbys to [A, M, N, O]
-  GuardianCommitteeChange(s, 2000, '0xM', false);
-  GuardianCommitteeChange(s, 2000, '0xO', false);
+  CommitteeChange(s, 2000, '0xM', false);
+  CommitteeChange(s, 2000, '0xO', false);
 
   s.applyNewTimeRef(2000, 200);
 
@@ -68,13 +68,13 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   GuardianStatusUpdated(s, day + 3000, '0xP', true, false);
 
   // change committee to [X, Z]
-  GuardianCommitteeChange(s, day + 3000, '0xB', false);
-  GuardianCommitteeChange(s, day + 3000, '0xC', false);
-  GuardianCommitteeChange(s, day + 3000, '0xX', true);
+  CommitteeChange(s, day + 3000, '0xB', false);
+  CommitteeChange(s, day + 3000, '0xC', false);
+  CommitteeChange(s, day + 3000, '0xX', true);
 
   // change standbys to [A, B, C, M, N]
-  GuardianCommitteeChange(s, day + 3000, '0xN', false);
-  GuardianCommitteeChange(s, day + 3000, '0xP', false);
+  CommitteeChange(s, day + 3000, '0xN', false);
+  CommitteeChange(s, day + 3000, '0xP', false);
   StakeChanged(s, day + 3000, '0xO', '20000000000000000000000');
 
   s.applyNewTimeRef(day + 3000, 300);
@@ -157,10 +157,10 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   });
 
   // leaving and re-entering the committee resets EnterTime
-  GuardianCommitteeChange(s, day + 5000, '0xZ', false);
-  GuardianCommitteeChange(s, day + 6000, '0xZ', true);
+  CommitteeChange(s, day + 5000, '0xZ', false);
+  CommitteeChange(s, day + 6000, '0xZ', true);
   t.is(s.getSnapshot().CurrentCommittee[1].EnterTime, day + 6000);
-  GuardianCommitteeChange(s, day + 7000, '0xZ', true);
+  CommitteeChange(s, day + 7000, '0xZ', true);
   t.is(s.getSnapshot().CurrentCommittee[1].EnterTime, day + 6000);
 
   // unregister removes from topology (and replaces with different standbys)
@@ -596,8 +596,8 @@ function ContractAddressUpdated(s: State, time: number, contractName: ContractNa
   });
 }
 
-function GuardianCommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {
-  s.applyNewGuardianCommitteeChange(time, {
+function CommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {
+  s.applyNewCommitteeChange(time, {
     ...eventBase,
     returnValues: {
       addr,
@@ -609,7 +609,7 @@ function GuardianCommitteeChange(s: State, time: number, addr: string, inCommitt
 }
 
 function GuardianCommitteeWeight(s: State, addr: string, weight: string, inCommittee: boolean) {
-  s.applyNewGuardianCommitteeChange(1000, {
+  s.applyNewCommitteeChange(1000, {
     ...eventBase,
     returnValues: {
       addr,
@@ -627,19 +627,26 @@ function StakeChanged(s: State, time: number, addr: string, effectiveStake: stri
       addr,
       selfStake: '0',
       // eslint-disable-next-line @typescript-eslint/camelcase
-      delegated_stake: effectiveStake,
+      delegatedStake: effectiveStake,
       // eslint-disable-next-line @typescript-eslint/camelcase
-      effective_stake: effectiveStake,
+      effectiveStake: effectiveStake,
     },
   });
 }
 
-function GuardianDataUpdated(s: State, time: number, addr: string, orbsAddr: string, ip: string, isRegistered = true) {
+function GuardianDataUpdated(
+  s: State,
+  time: number,
+  guardian: string,
+  orbsAddr: string,
+  ip: string,
+  isRegistered = true
+) {
   s.applyNewGuardianDataUpdated(time, {
     ...eventBase,
     returnValues: {
       ip,
-      addr,
+      guardian,
       orbsAddr,
       name: 'name',
       website: 'website',
@@ -648,11 +655,11 @@ function GuardianDataUpdated(s: State, time: number, addr: string, orbsAddr: str
   });
 }
 
-function GuardianMetadataChanged(s: State, time: number, addr: string, key: string, value: string) {
+function GuardianMetadataChanged(s: State, time: number, guardian: string, key: string, value: string) {
   s.applyNewGuardianMetadataChanged(time, {
     ...eventBase,
     returnValues: {
-      addr,
+      guardian,
       key,
       newValue: value,
       oldValue: 'unknown',
@@ -660,13 +667,13 @@ function GuardianMetadataChanged(s: State, time: number, addr: string, key: stri
   });
 }
 
-function SubscriptionChanged(s: State, time: number, vcid: string, expiresAt: number) {
+function SubscriptionChanged(s: State, time: number, vcId: string, expiresAt: number) {
   s.applyNewSubscriptionChanged(time, {
     ...eventBase,
     returnValues: {
       name: 'name',
       owner: 'owner',
-      vcid,
+      vcId,
       genRefTime: '9999',
       expiresAt: expiresAt.toString(),
       tier: 'defaultTier',
@@ -689,11 +696,17 @@ function ProtocolVersionChanged(s: State, time: number, nextVersion: number, fro
   });
 }
 
-function GuardianStatusUpdated(s: State, time: number, addr: string, readyToSync: boolean, readyForCommittee: boolean) {
+function GuardianStatusUpdated(
+  s: State,
+  time: number,
+  guardian: string,
+  readyToSync: boolean,
+  readyForCommittee: boolean
+) {
   s.applyNewGuardianStatusUpdated(time, {
     ...eventBase,
     returnValues: {
-      addr,
+      guardian,
       readyToSync,
       readyForCommittee,
     },

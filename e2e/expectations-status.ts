@@ -254,7 +254,6 @@ export const expectationStatus = {
       certification: isValidEthereumAddress,
       staking: isValidEthereumAddress,
       subscriptions: isValidEthereumAddress,
-      rewards: isValidEthereumAddress,
     },
     Config: {
       BootstrapMode: false,

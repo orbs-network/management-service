@@ -11,8 +11,8 @@ export class StateManager {
         case 'ContractAddressUpdated':
           this.current.applyNewContractAddressUpdated(time, event as EventTypes['ContractAddressUpdated']);
           break;
-        case 'GuardianCommitteeChange':
-          this.current.applyNewGuardianCommitteeChange(time, event as EventTypes['GuardianCommitteeChange']);
+        case 'CommitteeChange':
+          this.current.applyNewCommitteeChange(time, event as EventTypes['CommitteeChange']);
           break;
         case 'SubscriptionChanged':
           this.current.applyNewSubscriptionChanged(time, event as EventTypes['SubscriptionChanged']);

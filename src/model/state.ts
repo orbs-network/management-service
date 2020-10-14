@@ -166,7 +166,7 @@ export class State {
     });
   }
 
-  applyNewGuardianCommitteeChange(time: number, event: EventTypes['GuardianCommitteeChange']) {
+  applyNewCommitteeChange(time: number, event: EventTypes['CommitteeChange']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.weight);
 
@@ -188,13 +188,13 @@ export class State {
 
   applyNewStakeChanged(_time: number, event: EventTypes['StakeChanged']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
-    this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.effective_stake);
+    this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.effectiveStake);
     if (this.snapshot.CurrentEffectiveStake[EthAddress] == 0) {
       delete this.snapshot.CurrentEffectiveStake[EthAddress];
     }
     this.snapshot.CurrentDetailedStake[EthAddress] = {
       SelfStake: orbitonsToOrbs(event.returnValues.selfStake),
-      DelegatedStake: orbitonsToOrbs(event.returnValues.delegated_stake),
+      DelegatedStake: orbitonsToOrbs(event.returnValues.delegatedStake),
     };
     if (
       this.snapshot.CurrentDetailedStake[EthAddress].SelfStake == 0 &&
@@ -205,7 +205,7 @@ export class State {
   }
 
   applyNewGuardianDataUpdated(time: number, event: EventTypes['GuardianDataUpdated']) {
-    const EthAddress = normalizeAddress(event.returnValues.addr);
+    const EthAddress = normalizeAddress(event.returnValues.guardian);
     const OrbsAddress = normalizeAddress(event.returnValues.orbsAddr);
     const IpAddress = getIpFromHex(event.returnValues.ip);
     if (event.returnValues.isRegistered) {
@@ -225,13 +225,13 @@ export class State {
   }
 
   applyNewGuardianMetadataChanged(_time: number, event: EventTypes['GuardianMetadataChanged']) {
-    const EthAddress = normalizeAddress(event.returnValues.addr);
+    const EthAddress = normalizeAddress(event.returnValues.guardian);
     const metadata = this.snapshot.CurrentRegistrationData[EthAddress]?.Metadata;
     if (metadata) metadata[event.returnValues.key] = event.returnValues.newValue;
   }
 
   applyNewGuardianStatusUpdated(time: number, event: EventTypes['GuardianStatusUpdated']) {
-    const EthAddress = normalizeAddress(event.returnValues.addr);
+    const EthAddress = normalizeAddress(event.returnValues.guardian);
     this.snapshot.CurrentElectionsStatus[EthAddress] = {
       LastUpdateTime: time,
       ReadyToSync: event.returnValues.readyToSync,
@@ -250,11 +250,11 @@ export class State {
       Name: event.returnValues.name,
       Rate: event.returnValues.rate,
     };
-    this.snapshot.CurrentVirtualChains[event.returnValues.vcid] = {
+    this.snapshot.CurrentVirtualChains[event.returnValues.vcId] = {
       Expiration: toNumber(event.returnValues.expiresAt),
       ...eventBody,
     };
-    const existingEvents = this.snapshot.SubscriptionEvents[event.returnValues.vcid] ?? [];
+    const existingEvents = this.snapshot.SubscriptionEvents[event.returnValues.vcId] ?? [];
     const noFutureEvents = _.filter(existingEvents, (event) => event.RefTime <= time);
     noFutureEvents.push({
       RefTime: time,
@@ -264,7 +264,7 @@ export class State {
       RefTime: toNumber(event.returnValues.expiresAt),
       Data: { Status: 'expired', ...eventBody },
     });
-    this.snapshot.SubscriptionEvents[event.returnValues.vcid] = noFutureEvents;
+    this.snapshot.SubscriptionEvents[event.returnValues.vcId] = noFutureEvents;
   }
 
   applyNewProtocolVersionChanged(time: number, event: EventTypes['ProtocolVersionChanged']) {

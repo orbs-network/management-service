@@ -44,7 +44,6 @@ test.serial('[integration] BlockSync reads registry for contract addresses', asy
       certification: ethereum.getContractAddress('certification'),
       staking: ethereum.getContractAddress('staking'),
       subscriptions: ethereum.getContractAddress('subscriptions'),
-      rewards: ethereum.getContractAddress('rewards'),
     })
   );
 });
