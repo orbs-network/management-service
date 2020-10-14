@@ -59,8 +59,7 @@
     "typescript": "~3.7.5"
   },
   "dependencies": {
-    "ganache-core": "2.12.1",
-    "@orbs-network/orbs-ethereum-contracts-v2": "0.0.30",
+    "@orbs-network/orbs-ethereum-contracts-v2": "0.0.31",
     "cors": "^2.8.5",
     "deepmerge": "^4.2.2",
     "docker-hub-utils": "^1.10.29",
