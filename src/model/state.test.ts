@@ -114,20 +114,20 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   t.is(s.getSnapshot().CommitteeEvents.length, 3);
   t.is(s.getSnapshot().CommitteeEvents[0].RefTime, 1000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[0].Committee, [
-    { EthAddress: 'a', OrbsAddress: 'a1', Weight: 10000, IdentityType: 0 },
-    { EthAddress: 'b', OrbsAddress: 'b1', Weight: 10000, IdentityType: 0 },
-    { EthAddress: 'c', OrbsAddress: 'c1', Weight: 10000, IdentityType: 0 },
+    { EthAddress: 'a', OrbsAddress: 'a1', Weight: 10000, IdentityType: 0, EffectiveStake: 10000 },
+    { EthAddress: 'b', OrbsAddress: 'b1', Weight: 10000, IdentityType: 0, EffectiveStake: 10000 },
+    { EthAddress: 'c', OrbsAddress: 'c1', Weight: 10000, IdentityType: 0, EffectiveStake: 10000 },
   ]);
   t.is(s.getSnapshot().CommitteeEvents[1].RefTime, 2000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[1].Committee, [
-    { EthAddress: 'b', OrbsAddress: 'b2', Weight: 10000, IdentityType: 0 },
-    { EthAddress: 'c', OrbsAddress: 'c2', Weight: 10000, IdentityType: 0 },
-    { EthAddress: 'z', OrbsAddress: 'z2', Weight: 10000, IdentityType: 0 },
+    { EthAddress: 'b', OrbsAddress: 'b2', Weight: 10000, IdentityType: 0, EffectiveStake: 10000 },
+    { EthAddress: 'c', OrbsAddress: 'c2', Weight: 10000, IdentityType: 0, EffectiveStake: 10000 },
+    { EthAddress: 'z', OrbsAddress: 'z2', Weight: 10000, IdentityType: 0, EffectiveStake: 10000 },
   ]);
   t.is(s.getSnapshot().CommitteeEvents[2].RefTime, day + 3000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[2].Committee, [
-    { EthAddress: 'x', OrbsAddress: 'x3', Weight: 10000, IdentityType: 0 },
-    { EthAddress: 'z', OrbsAddress: 'z3', Weight: 10000, IdentityType: 0 },
+    { EthAddress: 'x', OrbsAddress: 'x3', Weight: 10000, IdentityType: 0, EffectiveStake: 10000 },
+    { EthAddress: 'z', OrbsAddress: 'z3', Weight: 10000, IdentityType: 0, EffectiveStake: 10000 },
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentTopology, [
@@ -141,8 +141,8 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'x', Weight: 10000, IdentityType: 0, Name: 'name', EnterTime: day + 3000 },
-    { EthAddress: 'z', Weight: 10000, IdentityType: 0, Name: 'name', EnterTime: 2000 },
+    { EthAddress: 'x', Weight: 10000, IdentityType: 0, Name: 'name', EnterTime: day + 3000, EffectiveStake: 10000 },
+    { EthAddress: 'z', Weight: 10000, IdentityType: 0, Name: 'name', EnterTime: 2000, EffectiveStake: 10000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -210,8 +210,8 @@ test('state calculates committee weights correctly and guardian stake', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000, IdentityType: 0, Name: '', EnterTime: 1000 },
-    { EthAddress: 'a', Weight: 15000, IdentityType: 0, Name: '', EnterTime: 1000 },
+    { EthAddress: 'b', Weight: 20000, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 20000 },
+    { EthAddress: 'a', Weight: 15000, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -223,9 +223,9 @@ test('state calculates committee weights correctly and guardian stake', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000, IdentityType: 0, Name: '', EnterTime: 1000 },
-    { EthAddress: 'a', Weight: 13333, IdentityType: 0, Name: '', EnterTime: 1000 },
-    { EthAddress: 'c', Weight: 13333, IdentityType: 0, Name: '', EnterTime: 1000 },
+    { EthAddress: 'b', Weight: 20000, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 20000 },
+    { EthAddress: 'a', Weight: 13333, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
+    { EthAddress: 'c', Weight: 13333, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -238,8 +238,8 @@ test('state calculates committee weights correctly and guardian stake', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'a', Weight: 10000, IdentityType: 0, Name: '', EnterTime: 1000 },
-    { EthAddress: 'c', Weight: 10000, IdentityType: 0, Name: '', EnterTime: 1000 },
+    { EthAddress: 'a', Weight: 10000, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
+    { EthAddress: 'c', Weight: 10000, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -320,7 +320,9 @@ test('state applies elections status updates and sets candidates accordingly', (
   GuardianStatusUpdated(s, 1 * day, '0xY', true, false);
   GuardianStatusUpdated(s, 1 * day, '0xZ', true, false);
   GuardianStatusUpdated(s, 5 * day, '0xA', true, false);
-  s.getSnapshot().CurrentCommittee = [{ EthAddress: 'b', Weight: 1, IdentityType: 0, Name: 'name', EnterTime: 1000 }];
+  s.getSnapshot().CurrentCommittee = [
+    { EthAddress: 'b', Weight: 1, IdentityType: 0, Name: 'name', EnterTime: 1000, EffectiveStake: 10000 },
+  ];
   s.applyNewTimeRef(10 * day, 10000);
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));

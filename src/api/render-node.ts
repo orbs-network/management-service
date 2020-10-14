@@ -189,8 +189,6 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
       'http-address': ':8080',
       'management-file-path': `http://management-service:8080/vchains/${vchainId}/management`,
       'signer-endpoint': 'http://signer:7777',
-      'logger-http-endpoint': 'http://elk.v2beta.orbs.com:5000',
-      'committee-grace-period': '1000h',
     },
   };
 }

@@ -5,6 +5,8 @@ import { toNumber, DailyStats } from '../helpers';
 import { EventName, getContractTypeName, contractByEventName } from './types';
 import pThrottle from 'p-throttle';
 
+const HTTP_TIMEOUT_SEC = 20;
+
 export type EthereumConfiguration = {
   EthereumEndpoint: string;
   EthereumRequestsPerSecondLimit: number;
@@ -19,6 +21,7 @@ export class EthereumReader {
     this.web3 = new Web3(
       new Web3.providers.HttpProvider(config.EthereumEndpoint, {
         keepAlive: true,
+        timeout: HTTP_TIMEOUT_SEC * 1000,
       })
     );
     if (config.EthereumRequestsPerSecondLimit > 0) {

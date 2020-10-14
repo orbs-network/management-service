@@ -15,6 +15,9 @@ export const expectationStatus = {
   Payload: {
     Uptime: isPositiveNumber,
     MemoryBytesUsed: isPositiveNumber,
+    Version: {
+      Semantic: isValidImageVersion,
+    },
     CurrentRefTime: isValidTimeRef,
     CurrentRefBlock: isValidBlock,
     CurrentCommittee: [

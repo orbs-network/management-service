@@ -17,6 +17,9 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
     Payload: {
       Uptime: getCurrentClockTime() - timeOriginallyLaunched,
       MemoryBytesUsed: process.memoryUsage().heapUsed,
+      Version: {
+        Semantic: snapshot.CurrentVersion,
+      },
       CurrentRefTime: snapshot.CurrentRefTime,
       CurrentRefBlock: snapshot.CurrentRefBlock,
       CurrentCommittee: snapshot.CurrentCommittee,
@@ -33,9 +36,9 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
           EthAddress,
           OrbsAddress,
           Ip: snapshot.CurrentIp[EthAddress],
-          EffectiveStake: snapshot.CurrentEffectiveStake[EthAddress],
-          SelfStake: snapshot.CurrentDetailedStake[EthAddress]?.SelfStake,
-          DelegatedStake: snapshot.CurrentDetailedStake[EthAddress]?.DelegatedStake,
+          EffectiveStake: snapshot.CurrentEffectiveStake[EthAddress] ?? 0,
+          SelfStake: snapshot.CurrentDetailedStake[EthAddress]?.SelfStake ?? 0,
+          DelegatedStake: snapshot.CurrentDetailedStake[EthAddress]?.DelegatedStake ?? 0,
           ElectionsStatus: snapshot.CurrentElectionsStatus[EthAddress],
           ...snapshot.CurrentRegistrationData[EthAddress],
         };
@@ -43,7 +46,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
       EthereumRequestStats: stats,
       CommitteeEvents: findAllEventsCoveringRange(
         snapshot.CommitteeEvents,
-        snapshot.CurrentRefTime - 30 * day,
+        snapshot.CurrentRefTime - 60 * day,
         snapshot.CurrentRefTime
       ),
       Config: config,

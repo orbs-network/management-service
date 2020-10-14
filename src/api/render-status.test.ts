@@ -19,6 +19,9 @@ test.serial('[integration] getServiceStatus responds', (t) => {
   t.deepEqual(res.Payload, {
     Uptime: res.Payload.Uptime,
     MemoryBytesUsed: res.Payload.MemoryBytesUsed,
+    Version: {
+      Semantic: '',
+    },
     CurrentRefTime: 0,
     CurrentRefBlock: 0,
     CurrentCommittee: [],
