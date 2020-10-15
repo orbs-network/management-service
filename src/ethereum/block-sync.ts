@@ -23,7 +23,7 @@ export class BlockSync {
     this.lastProcessedBlock = config.EthereumFirstBlock;
     this.eventFetchers = {
       ContractAddressUpdated: new LookaheadEventFetcher('ContractAddressUpdated', this.reader),
-      GuardianCommitteeChange: new LookaheadEventFetcher('GuardianCommitteeChange', this.reader),
+      CommitteeChange: new LookaheadEventFetcher('CommitteeChange', this.reader),
       StakeChanged: new LookaheadEventFetcher('StakeChanged', this.reader),
       SubscriptionChanged: new LookaheadEventFetcher('SubscriptionChanged', this.reader),
       ProtocolVersionChanged: new LookaheadEventFetcher('ProtocolVersionChanged', this.reader),

@@ -107,7 +107,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     EthereumEndpoint: config.EthereumEndpoint,
     SignerEndpoint: 'http://signer:7777',
     EthereumElectionsContract: ethereum.getContractAddress('elections'),
-    NodeOrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
+    NodeOrbsAddress: 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
   });
   t.deepEqual(res.services['logs-service'].Config, {
     Port: 8080,
@@ -120,8 +120,8 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     EthereumEndpoint: config.EthereumEndpoint,
     SignerEndpoint: 'http://signer:7777',
     EthereumGenesisContract: config.EthereumGenesisContract,
-    GuardianAddress: '0x29ce860a2247d97160d6dfc087a15f41e2349087',
-    NodeOrbsAddress: '16fcf728f8dc3f687132f2157d8379c021a08c12',
+    GuardianAddress: '0x02ebe4663d6110aec8f816f9772a4087cc1a5ec7',
+    NodeOrbsAddress: 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
     EthereumFirstBlock: config.EthereumFirstBlock,
   });
   t.assert(res.orchestrator);

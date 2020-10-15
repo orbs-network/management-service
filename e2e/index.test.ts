@@ -16,7 +16,7 @@ test.serial.before(async (t) => {
   t.timeout(60 * 1000);
   await driver.ethereum.setupInitialCommittee();
   await driver.ethereum.setGuardianMetadata(
-    '0x29ce860a2247d97160d6dfc087a15f41e2349087',
+    '0x02ebe4663d6110aec8f816f9772a4087cc1a5ec7',
     'REWARDS_FREQUENCY_SEC',
     '112233'
   );

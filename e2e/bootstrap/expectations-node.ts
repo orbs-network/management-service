@@ -32,7 +32,7 @@ export const expectationNodeManagement = {
         Verbose: true,
         EthereumGenesisContract: isValidEthereumAddress,
         EthereumEndpoint: 'http://ganache:7545',
-        'node-address': '16fCf728f8Dc3f687132F2157d8379c021a08c12',
+        'node-address': 'ecfcCcbc1E54852337298c7E90f5eceE79439e67',
       },
     },
   },

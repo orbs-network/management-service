@@ -28,13 +28,13 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   GuardianStatusUpdated(s, 1000, '0xN', true, false);
 
   // change committee to [A, B, C]
-  GuardianCommitteeChange(s, 1000, '0xA', true);
-  GuardianCommitteeChange(s, 1000, '0xB', true);
-  GuardianCommitteeChange(s, 1000, '0xC', true);
+  CommitteeChange(s, 1000, '0xA', true);
+  CommitteeChange(s, 1000, '0xB', true);
+  CommitteeChange(s, 1000, '0xC', true);
 
   // change standbys to [M, N]
-  GuardianCommitteeChange(s, 1000, '0xM', false);
-  GuardianCommitteeChange(s, 1000, '0xN', false);
+  CommitteeChange(s, 1000, '0xM', false);
+  CommitteeChange(s, 1000, '0xN', false);
 
   s.applyNewTimeRef(1000, 100);
 
@@ -49,12 +49,12 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   GuardianStatusUpdated(s, 2000, '0xO', true, false);
 
   // change committee to [Z, B, C]
-  GuardianCommitteeChange(s, 2000, '0xA', false);
-  GuardianCommitteeChange(s, 2000, '0xZ', true);
+  CommitteeChange(s, 2000, '0xA', false);
+  CommitteeChange(s, 2000, '0xZ', true);
 
   // change standbys to [A, M, N, O]
-  GuardianCommitteeChange(s, 2000, '0xM', false);
-  GuardianCommitteeChange(s, 2000, '0xO', false);
+  CommitteeChange(s, 2000, '0xM', false);
+  CommitteeChange(s, 2000, '0xO', false);
 
   s.applyNewTimeRef(2000, 200);
 
@@ -68,13 +68,13 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   GuardianStatusUpdated(s, day + 3000, '0xP', true, false);
 
   // change committee to [X, Z]
-  GuardianCommitteeChange(s, day + 3000, '0xB', false);
-  GuardianCommitteeChange(s, day + 3000, '0xC', false);
-  GuardianCommitteeChange(s, day + 3000, '0xX', true);
+  CommitteeChange(s, day + 3000, '0xB', false);
+  CommitteeChange(s, day + 3000, '0xC', false);
+  CommitteeChange(s, day + 3000, '0xX', true);
 
   // change standbys to [A, B, C, M, N]
-  GuardianCommitteeChange(s, day + 3000, '0xN', false);
-  GuardianCommitteeChange(s, day + 3000, '0xP', false);
+  CommitteeChange(s, day + 3000, '0xN', false);
+  CommitteeChange(s, day + 3000, '0xP', false);
   StakeChanged(s, day + 3000, '0xO', '20000000000000000000000');
 
   s.applyNewTimeRef(day + 3000, 300);
@@ -141,8 +141,8 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   ]);
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'x', Weight: 10000, Name: 'name', EnterTime: day + 3000, EffectiveStake: 10000 },
-    { EthAddress: 'z', Weight: 10000, Name: 'name', EnterTime: 2000, EffectiveStake: 10000 },
+    { EthAddress: 'x', Weight: 10000, IdentityType: 0, Name: 'name', EnterTime: day + 3000, EffectiveStake: 10000 },
+    { EthAddress: 'z', Weight: 10000, IdentityType: 0, Name: 'name', EnterTime: 2000, EffectiveStake: 10000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -157,13 +157,13 @@ test('state applies commitee, standby, IPs and topology', (t) => {
   });
 
   // leaving and re-entering the committee resets EnterTime
-  GuardianCommitteeChange(s, day + 5000, '0xZ', false);
-  GuardianCommitteeChange(s, day + 6000, '0xZ', true);
+  CommitteeChange(s, day + 5000, '0xZ', false);
+  CommitteeChange(s, day + 6000, '0xZ', true);
   t.is(s.getSnapshot().CurrentCommittee[1].EnterTime, day + 6000);
-  GuardianCommitteeChange(s, day + 7000, '0xZ', true);
+  CommitteeChange(s, day + 7000, '0xZ', true);
   t.is(s.getSnapshot().CurrentCommittee[1].EnterTime, day + 6000);
 
-  // no available Ip or OrbsAddress removes from topology (not supposed to happen)
+  // unregister removes from topology (and replaces with different standbys)
   t.deepEqual(s.getSnapshot().CurrentTopology, [
     { EthAddress: 'a', OrbsAddress: 'a2', Ip: '7.7.7.7', Port: 0, Name: 'name' },
     { EthAddress: 'b', OrbsAddress: 'b2', Ip: '2.2.2.2', Port: 0, Name: 'name' },
@@ -173,23 +173,26 @@ test('state applies commitee, standby, IPs and topology', (t) => {
     { EthAddress: 'x', OrbsAddress: 'x3', Ip: '9.9.9.9', Port: 0, Name: 'name' },
     { EthAddress: 'z', OrbsAddress: 'z3', Ip: '11.11.11.11', Port: 0, Name: 'name' },
   ]);
-  GuardianDataUpdated(s, day + 8000, '0xP', '0xp3', '0x02020202'); // manually remove 0xB Ip (steal it to 0xP)
-  GuardianDataUpdated(s, day + 8000, '0xM', '', '0x04040404'); // manually remove 0xM OrbsAddress (set to empty)
+  GuardianDataUpdated(s, day + 8000, '0xB', '0xb2', '0x02020202', false);
+  GuardianDataUpdated(s, day + 8000, '0xM', '0xm1', '0x04040404', false);
   s.applyNewTimeRef(day + 8000, 800);
-  t.log(s.getSnapshot().CurrentTopology);
+  t.log(JSON.stringify(s.getSnapshot().CurrentTopology));
   t.deepEqual(s.getSnapshot().CurrentTopology, [
     { EthAddress: 'a', OrbsAddress: 'a2', Ip: '7.7.7.7', Port: 0, Name: 'name' },
     { EthAddress: 'c', OrbsAddress: 'c2', Ip: '3.3.3.3', Port: 0, Name: 'name' },
+    { EthAddress: 'n', OrbsAddress: 'n2', Ip: '5.5.5.5', Port: 0, Name: 'name' },
     { EthAddress: 'o', OrbsAddress: 'o3', Ip: '8.8.8.8', Port: 0, Name: 'name' },
+    { EthAddress: 'p', OrbsAddress: 'p3', Ip: '12.12.12.12', Port: 0, Name: 'name' },
     { EthAddress: 'x', OrbsAddress: 'x3', Ip: '9.9.9.9', Port: 0, Name: 'name' },
     { EthAddress: 'z', OrbsAddress: 'z3', Ip: '11.11.11.11', Port: 0, Name: 'name' },
   ]);
 });
 
-test('state handles duplicate orbs addresses and ip addresses', (t) => {
+test('state handles guardian unregister', (t) => {
   const s = new State();
 
   GuardianDataUpdated(s, 1000, '0x1', '0xaa', '0x01010101');
+  GuardianDataUpdated(s, 1000, '0x1', '0xaa', '0x01010101', false);
   GuardianDataUpdated(s, 2000, '0x2', '0xaa', '0x01010101');
 
   t.is(Object.keys(s.getSnapshot().CurrentOrbsAddress).length, 1);
@@ -207,8 +210,8 @@ test('state calculates committee weights correctly and guardian stake', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000, Name: '', EnterTime: 1000, EffectiveStake: 20000 },
-    { EthAddress: 'a', Weight: 15000, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
+    { EthAddress: 'b', Weight: 20000, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 20000 },
+    { EthAddress: 'a', Weight: 15000, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -220,9 +223,9 @@ test('state calculates committee weights correctly and guardian stake', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'b', Weight: 20000, Name: '', EnterTime: 1000, EffectiveStake: 20000 },
-    { EthAddress: 'a', Weight: 13333, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
-    { EthAddress: 'c', Weight: 13333, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
+    { EthAddress: 'b', Weight: 20000, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 20000 },
+    { EthAddress: 'a', Weight: 13333, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
+    { EthAddress: 'c', Weight: 13333, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -235,8 +238,8 @@ test('state calculates committee weights correctly and guardian stake', (t) => {
   t.log(JSON.stringify(s.getSnapshot().CurrentCommittee, null, 2));
 
   t.deepEqual(s.getSnapshot().CurrentCommittee, [
-    { EthAddress: 'a', Weight: 10000, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
-    { EthAddress: 'c', Weight: 10000, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
+    { EthAddress: 'a', Weight: 10000, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
+    { EthAddress: 'c', Weight: 10000, IdentityType: 0, Name: '', EnterTime: 1000, EffectiveStake: 10000 },
   ]);
   t.deepEqual(s.getSnapshot().CurrentEffectiveStake, {
     a: 10000,
@@ -318,7 +321,7 @@ test('state applies elections status updates and sets candidates accordingly', (
   GuardianStatusUpdated(s, 1 * day, '0xZ', true, false);
   GuardianStatusUpdated(s, 5 * day, '0xA', true, false);
   s.getSnapshot().CurrentCommittee = [
-    { EthAddress: 'b', Weight: 1, Name: 'name', EnterTime: 1000, EffectiveStake: 10000 },
+    { EthAddress: 'b', Weight: 1, IdentityType: 0, Name: 'name', EnterTime: 1000, EffectiveStake: 10000 },
   ];
   s.applyNewTimeRef(10 * day, 10000);
 
@@ -423,6 +426,9 @@ test('state applies virtual chain subscriptions', (t) => {
     IdentityType: 0,
     GenesisRefTime: 9999,
     Tier: 'defaultTier',
+    Name: 'name',
+    Owner: 'owner',
+    Rate: '1111',
   });
   t.deepEqual(s.getSnapshot().CurrentVirtualChains['V2'], {
     Expiration: 3500,
@@ -430,6 +436,9 @@ test('state applies virtual chain subscriptions', (t) => {
     RolloutGroup: 'main',
     IdentityType: 0,
     GenesisRefTime: 9999,
+    Name: 'name',
+    Owner: 'owner',
+    Rate: '1111',
   });
   t.deepEqual(s.getSnapshot().CurrentVirtualChains['V3'], {
     Expiration: 9020,
@@ -437,6 +446,9 @@ test('state applies virtual chain subscriptions', (t) => {
     RolloutGroup: 'main',
     IdentityType: 0,
     GenesisRefTime: 9999,
+    Name: 'name',
+    Owner: 'owner',
+    Rate: '1111',
   });
   t.deepEqual(s.getSnapshot().CurrentVirtualChains['V4'], {
     Expiration: 4700,
@@ -444,6 +456,9 @@ test('state applies virtual chain subscriptions', (t) => {
     RolloutGroup: 'main',
     IdentityType: 0,
     GenesisRefTime: 9999,
+    Name: 'name',
+    Owner: 'owner',
+    Rate: '1111',
   });
   t.deepEqual(s.getSnapshot().CurrentVirtualChains['V5'], {
     Expiration: 9030,
@@ -451,6 +466,9 @@ test('state applies virtual chain subscriptions', (t) => {
     RolloutGroup: 'main',
     IdentityType: 0,
     GenesisRefTime: 9999,
+    Name: 'name',
+    Owner: 'owner',
+    Rate: '1111',
   });
 });
 
@@ -575,12 +593,13 @@ function ContractAddressUpdated(s: State, time: number, contractName: ContractNa
     returnValues: {
       contractName,
       addr,
+      managedContract: false,
     },
   });
 }
 
-function GuardianCommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {
-  s.applyNewGuardianCommitteeChange(time, {
+function CommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {
+  s.applyNewCommitteeChange(time, {
     ...eventBase,
     returnValues: {
       addr,
@@ -592,7 +611,7 @@ function GuardianCommitteeChange(s: State, time: number, addr: string, inCommitt
 }
 
 function GuardianCommitteeWeight(s: State, addr: string, weight: string, inCommittee: boolean) {
-  s.applyNewGuardianCommitteeChange(1000, {
+  s.applyNewCommitteeChange(1000, {
     ...eventBase,
     returnValues: {
       addr,
@@ -610,32 +629,39 @@ function StakeChanged(s: State, time: number, addr: string, effectiveStake: stri
       addr,
       selfStake: '0',
       // eslint-disable-next-line @typescript-eslint/camelcase
-      delegated_stake: effectiveStake,
+      delegatedStake: effectiveStake,
       // eslint-disable-next-line @typescript-eslint/camelcase
-      effective_stake: effectiveStake,
+      effectiveStake: effectiveStake,
     },
   });
 }
 
-function GuardianDataUpdated(s: State, time: number, addr: string, orbsAddr: string, ip: string) {
+function GuardianDataUpdated(
+  s: State,
+  time: number,
+  guardian: string,
+  orbsAddr: string,
+  ip: string,
+  isRegistered = true
+) {
   s.applyNewGuardianDataUpdated(time, {
     ...eventBase,
     returnValues: {
       ip,
-      addr,
+      guardian,
       orbsAddr,
       name: 'name',
       website: 'website',
-      contact: 'contact',
+      isRegistered,
     },
   });
 }
 
-function GuardianMetadataChanged(s: State, time: number, addr: string, key: string, value: string) {
+function GuardianMetadataChanged(s: State, time: number, guardian: string, key: string, value: string) {
   s.applyNewGuardianMetadataChanged(time, {
     ...eventBase,
     returnValues: {
-      addr,
+      guardian,
       key,
       newValue: value,
       oldValue: 'unknown',
@@ -643,15 +669,19 @@ function GuardianMetadataChanged(s: State, time: number, addr: string, key: stri
   });
 }
 
-function SubscriptionChanged(s: State, time: number, vcid: string, expiresAt: number) {
+function SubscriptionChanged(s: State, time: number, vcId: string, expiresAt: number) {
   s.applyNewSubscriptionChanged(time, {
     ...eventBase,
     returnValues: {
-      vcid,
+      name: 'name',
+      owner: 'owner',
+      vcId,
       genRefTime: '9999',
       expiresAt: expiresAt.toString(),
       tier: 'defaultTier',
       deploymentSubset: 'main',
+      rate: '1111',
+      isCertified: false,
     },
   });
 }
@@ -668,11 +698,17 @@ function ProtocolVersionChanged(s: State, time: number, nextVersion: number, fro
   });
 }
 
-function GuardianStatusUpdated(s: State, time: number, addr: string, readyToSync: boolean, readyForCommittee: boolean) {
+function GuardianStatusUpdated(
+  s: State,
+  time: number,
+  guardian: string,
+  readyToSync: boolean,
+  readyForCommittee: boolean
+) {
   s.applyNewGuardianStatusUpdated(time, {
     ...eventBase,
     returnValues: {
-      addr,
+      guardian,
       readyToSync,
       readyForCommittee,
     },

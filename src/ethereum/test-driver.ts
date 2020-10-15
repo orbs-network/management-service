@@ -32,7 +32,7 @@ export class EthereumTestDriver {
 
     if (this.verbose) console.log(`[posv2] about to deploy subscriber and deployment subset`);
     this.subscriber = await d.newSubscriber('defaultTier', SUBSCRIPTION_MONTHLY_RATE);
-    await d.protocol.createDeploymentSubset('canary', 1, { from: d.functionalOwner.address });
+    await d.protocol.createDeploymentSubset('canary', 1, { from: d.functionalManager.address });
   }
 
   async closeConnections() {
@@ -84,7 +84,7 @@ export class EthereumTestDriver {
     const payerAddress = d.contractsOwnerAddress;
     await d.erc20.assign(payerAddress, payment);
     await d.erc20.approve(this.subscriber.address, payment, { from: payerAddress });
-    await this.subscriber.createVC(payment, false, rolloutGroup, { from: payerAddress });
+    await this.subscriber.createVC('vc1', payment, false, rolloutGroup, { from: payerAddress });
     await this.increaseTime(1000);
   }
 
@@ -109,7 +109,7 @@ export class EthereumTestDriver {
     if (this.verbose) console.log(`[posv2] about to upgrade protocol version`);
     const currTime: number = await getTopBlockTimestamp(d);
     await d.protocol.setProtocolVersion(rolloutGroup, newVersion, currTime + timeUntilUpgrade, {
-      from: d.functionalOwner.address,
+      from: d.functionalManager.address,
     });
   }
 

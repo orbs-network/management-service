@@ -13,8 +13,7 @@ export type ContractName =
   | 'guardiansRegistration'
   | 'certification'
   | 'staking'
-  | 'subscriptions'
-  | 'rewards';
+  | 'subscriptions';
 
 export type ContractTypeName = keyof Contracts;
 
@@ -40,8 +39,6 @@ export function getContractTypeName(key: ContractName): ContractTypeName {
       return 'StakingContract';
     case 'subscriptions':
       return 'Subscriptions';
-    case 'rewards':
-      return 'Rewards';
     default:
       throw new Error(`unknown contract name '${key}'`);
   }
@@ -52,7 +49,7 @@ export function getContractTypeName(key: ContractName): ContractTypeName {
 export const eventNames: Readonly<Array<EventName>> = [
   'ContractAddressUpdated',
   'SubscriptionChanged',
-  'GuardianCommitteeChange',
+  'CommitteeChange',
   'StakeChanged',
   'ProtocolVersionChanged',
   'GuardianDataUpdated',
@@ -66,7 +63,7 @@ export function contractByEventName(eventName: EventName): ContractName {
   switch (eventName) {
     case 'ContractAddressUpdated':
       return 'contractRegistry';
-    case 'GuardianCommitteeChange':
+    case 'CommitteeChange':
       return 'committee';
     case 'StakeChanged':
       return 'elections';
@@ -88,17 +85,22 @@ export function contractByEventName(eventName: EventName): ContractName {
 export type ContractAddressUpdatedPayload = {
   contractName: ContractName;
   addr: string;
+  managedContract: boolean;
 };
 
 export type SubscriptionChangedPayload = {
-  vcid: string;
+  vcId: string;
+  owner: string;
+  name: string;
   genRefTime: string;
-  expiresAt: string;
   tier: 'defaultTier';
+  rate: string;
+  expiresAt: string;
+  isCertified: boolean;
   deploymentSubset: 'main' | 'canary';
 };
 
-export type GuardianCommitteeChangePayload = {
+export type CommitteeChangePayload = {
   addr: string;
   weight: string;
   certification: boolean;
@@ -108,11 +110,11 @@ export type GuardianCommitteeChangePayload = {
 export type StakeChangedPayload = {
   addr: string;
   selfStake: string;
-  delegated_stake: string;
-  effective_stake: string;
+  delegatedStake: string;
+  effectiveStake: string;
 };
 
-export type ProtocolChangedPayload = {
+export type ProtocolVersionChangedPayload = {
   deploymentSubset: string;
   currentVersion: string;
   nextVersion: string;
@@ -120,33 +122,33 @@ export type ProtocolChangedPayload = {
 };
 
 export type GuardianDataUpdatedPayload = {
-  addr: string;
+  guardian: string;
+  isRegistered: boolean;
   ip: string;
   orbsAddr: string;
   name: string;
   website: string;
-  contact: string;
 };
 
 export type GuardianMetadataChangedPayload = {
-  addr: string;
+  guardian: string;
   key: string;
   newValue: string;
   oldValue: string;
 };
 
 export type GuardianStatusUpdatedPayload = {
-  addr: string;
+  guardian: string;
   readyToSync: boolean;
   readyForCommittee: boolean;
 };
 
 export type EventTypes = {
   ContractAddressUpdated: EventData & { returnValues: ContractAddressUpdatedPayload };
-  GuardianCommitteeChange: EventData & { returnValues: GuardianCommitteeChangePayload };
+  CommitteeChange: EventData & { returnValues: CommitteeChangePayload };
   StakeChanged: EventData & { returnValues: StakeChangedPayload };
   SubscriptionChanged: EventData & { returnValues: SubscriptionChangedPayload };
-  ProtocolVersionChanged: EventData & { returnValues: ProtocolChangedPayload };
+  ProtocolVersionChanged: EventData & { returnValues: ProtocolVersionChangedPayload };
   GuardianDataUpdated: EventData & { returnValues: GuardianDataUpdatedPayload };
   GuardianStatusUpdated: EventData & { returnValues: GuardianStatusUpdatedPayload };
   GuardianMetadataChanged: EventData & { returnValues: GuardianMetadataChangedPayload };

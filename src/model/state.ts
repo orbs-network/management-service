@@ -13,7 +13,14 @@ export interface StateSnapshot {
   CurrentRefBlock: number;
   PageStartRefTime: number;
   PageEndRefTime: number;
-  CurrentCommittee: { EthAddress: string; Weight: number; Name: string; EnterTime: number; EffectiveStake: number }[];
+  CurrentCommittee: {
+    EthAddress: string;
+    Weight: number;
+    IdentityType: number;
+    Name: string;
+    EnterTime: number;
+    EffectiveStake: number;
+  }[];
   CurrentCandidates: { EthAddress: string; IsStandby: boolean; Name: string }[];
   CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number; Name: string }[]; // Port overridden by processor
   CommitteeEvents: {
@@ -54,7 +61,6 @@ export interface StateSnapshot {
     [EthAddress: string]: {
       Name: string;
       Website: string;
-      Contact: string;
       Metadata: { [Key: string]: string };
       RegistrationTime: number;
     };
@@ -66,6 +72,9 @@ export interface StateSnapshot {
       IdentityType: number;
       Tier: string;
       GenesisRefTime: number;
+      Owner: string;
+      Name: string;
+      Rate: string;
     };
   };
   SubscriptionEvents: {
@@ -185,7 +194,7 @@ export class State {
     });
   }
 
-  applyNewGuardianCommitteeChange(time: number, event: EventTypes['GuardianCommitteeChange']) {
+  applyNewCommitteeChange(time: number, event: EventTypes['CommitteeChange']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
     this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.weight);
 
@@ -195,6 +204,7 @@ export class State {
       this.snapshot.CurrentCommittee.push({
         EthAddress,
         Weight: 0,
+        IdentityType: event.returnValues.certification ? 1 : 0,
         Name: this.snapshot.CurrentRegistrationData[EthAddress]?.Name ?? '',
         EnterTime: previous[0]?.EnterTime ?? time,
         EffectiveStake: this.snapshot.CurrentEffectiveStake[EthAddress],
@@ -207,13 +217,13 @@ export class State {
 
   applyNewStakeChanged(_time: number, event: EventTypes['StakeChanged']) {
     const EthAddress = normalizeAddress(event.returnValues.addr);
-    this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.effective_stake);
+    this.snapshot.CurrentEffectiveStake[EthAddress] = orbitonsToOrbs(event.returnValues.effectiveStake);
     if (this.snapshot.CurrentEffectiveStake[EthAddress] == 0) {
       delete this.snapshot.CurrentEffectiveStake[EthAddress];
     }
     this.snapshot.CurrentDetailedStake[EthAddress] = {
       SelfStake: orbitonsToOrbs(event.returnValues.selfStake),
-      DelegatedStake: orbitonsToOrbs(event.returnValues.delegated_stake),
+      DelegatedStake: orbitonsToOrbs(event.returnValues.delegatedStake),
     };
     if (
       this.snapshot.CurrentDetailedStake[EthAddress].SelfStake == 0 &&
@@ -224,30 +234,33 @@ export class State {
   }
 
   applyNewGuardianDataUpdated(time: number, event: EventTypes['GuardianDataUpdated']) {
-    const EthAddress = normalizeAddress(event.returnValues.addr);
+    const EthAddress = normalizeAddress(event.returnValues.guardian);
     const OrbsAddress = normalizeAddress(event.returnValues.orbsAddr);
     const IpAddress = getIpFromHex(event.returnValues.ip);
-    removeAllKeysWithValue(OrbsAddress, this.snapshot.CurrentOrbsAddress); // must be unique
-    this.snapshot.CurrentOrbsAddress[EthAddress] = OrbsAddress;
-    removeAllKeysWithValue(IpAddress, this.snapshot.CurrentIp); // must be unique
-    this.snapshot.CurrentIp[EthAddress] = IpAddress;
-    this.snapshot.CurrentRegistrationData[EthAddress] = {
-      Name: event.returnValues.name,
-      Website: event.returnValues.website,
-      Contact: event.returnValues.contact,
-      Metadata: this.snapshot.CurrentRegistrationData[EthAddress]?.Metadata ?? {},
-      RegistrationTime: this.snapshot.CurrentRegistrationData[EthAddress]?.RegistrationTime ?? time,
-    };
+    if (event.returnValues.isRegistered) {
+      this.snapshot.CurrentOrbsAddress[EthAddress] = OrbsAddress;
+      this.snapshot.CurrentIp[EthAddress] = IpAddress;
+      this.snapshot.CurrentRegistrationData[EthAddress] = {
+        Name: event.returnValues.name,
+        Website: event.returnValues.website,
+        Metadata: this.snapshot.CurrentRegistrationData[EthAddress]?.Metadata ?? {},
+        RegistrationTime: this.snapshot.CurrentRegistrationData[EthAddress]?.RegistrationTime ?? time,
+      };
+    } else {
+      delete this.snapshot.CurrentOrbsAddress[EthAddress];
+      delete this.snapshot.CurrentIp[EthAddress];
+      delete this.snapshot.CurrentRegistrationData[EthAddress];
+    }
   }
 
   applyNewGuardianMetadataChanged(_time: number, event: EventTypes['GuardianMetadataChanged']) {
-    const EthAddress = normalizeAddress(event.returnValues.addr);
+    const EthAddress = normalizeAddress(event.returnValues.guardian);
     const metadata = this.snapshot.CurrentRegistrationData[EthAddress]?.Metadata;
     if (metadata) metadata[event.returnValues.key] = event.returnValues.newValue;
   }
 
   applyNewGuardianStatusUpdated(time: number, event: EventTypes['GuardianStatusUpdated']) {
-    const EthAddress = normalizeAddress(event.returnValues.addr);
+    const EthAddress = normalizeAddress(event.returnValues.guardian);
     this.snapshot.CurrentElectionsStatus[EthAddress] = {
       LastUpdateTime: time,
       ReadyToSync: event.returnValues.readyToSync,
@@ -260,14 +273,17 @@ export class State {
     const eventBody = {
       Tier: event.returnValues.tier,
       RolloutGroup: event.returnValues.deploymentSubset,
-      IdentityType: 0,
+      IdentityType: event.returnValues.isCertified ? 1 : 0,
       GenesisRefTime: toNumber(event.returnValues.genRefTime),
+      Owner: event.returnValues.owner,
+      Name: event.returnValues.name,
+      Rate: event.returnValues.rate,
     };
-    this.snapshot.CurrentVirtualChains[event.returnValues.vcid] = {
+    this.snapshot.CurrentVirtualChains[event.returnValues.vcId] = {
       Expiration: toNumber(event.returnValues.expiresAt),
       ...eventBody,
     };
-    const existingEvents = this.snapshot.SubscriptionEvents[event.returnValues.vcid] ?? [];
+    const existingEvents = this.snapshot.SubscriptionEvents[event.returnValues.vcId] ?? [];
     const noFutureEvents = _.filter(existingEvents, (event) => event.RefTime <= time);
     noFutureEvents.push({
       RefTime: time,
@@ -277,7 +293,7 @@ export class State {
       RefTime: toNumber(event.returnValues.expiresAt),
       Data: { Status: 'expired', ...eventBody },
     });
-    this.snapshot.SubscriptionEvents[event.returnValues.vcid] = noFutureEvents;
+    this.snapshot.SubscriptionEvents[event.returnValues.vcId] = noFutureEvents;
   }
 
   applyNewProtocolVersionChanged(time: number, event: EventTypes['ProtocolVersionChanged']) {
@@ -383,7 +399,6 @@ function calcTopology(time: number, snapshot: StateSnapshot): TopologyNodes {
   }));
 
   // remove nodes with missing OrbsAddress or Ip (not supposed to happen)
-  //  we added this case since Unregister was not yet implemented and Ips could be transferred
   _.remove(res, ({ OrbsAddress, Ip }) => !OrbsAddress || !Ip);
 
   return _.sortBy(res, (node) => node.EthAddress);
@@ -403,11 +418,11 @@ function orbitonsToOrbs(stake: string): number {
 function calcNewCommitteeEvent(time: number, snapshot: StateSnapshot): CommiteeEvent {
   return {
     RefTime: time,
-    Committee: snapshot.CurrentCommittee.map(({ EthAddress, Weight, EffectiveStake }) => ({
+    Committee: snapshot.CurrentCommittee.map(({ EthAddress, Weight, IdentityType, EffectiveStake }) => ({
       EthAddress,
       OrbsAddress: snapshot.CurrentOrbsAddress[EthAddress],
       Weight,
-      IdentityType: 0,
+      IdentityType,
       EffectiveStake,
     })),
   };
@@ -426,11 +441,5 @@ function calcStaleElectionsUpdates(time: number, snapshot: StateSnapshot, config
     if (snapshot.CurrentElectionsStatus[node.EthAddress]) {
       snapshot.CurrentElectionsStatus[node.EthAddress].TimeToStale = config.ElectionsStaleUpdateSeconds;
     }
-  }
-}
-
-function removeAllKeysWithValue(value: string, obj: { [key: string]: string }) {
-  for (const [k, v] of Object.entries(obj)) {
-    if (v == value) delete obj[k];
   }
 }
