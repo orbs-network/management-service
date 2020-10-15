@@ -81,7 +81,10 @@ function getManagementService(snapshot: StateSnapshot, config: ServiceConfigurat
       Tag: version,
       Pull: true,
     },
-    Config: { ...config, BootstrapMode: false }, // forward my own input config + defaults for what's missing
+    Config: { ...config,
+      BootstrapMode: false,
+      EthereumGenesisContract: '0x5454223e3078Db87e55a15bE541cc925f3702eB0'
+    }, // forward my own input config + defaults for what's missing
   };
 }
 
