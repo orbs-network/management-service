@@ -3,7 +3,7 @@ import { ServiceConfiguration } from './config';
 export const GOVERNANCE_MAINNET_GENESIS_CONTRACT = '0x5454223e3078Db87e55a15bE541cc925f3702eB0';
 export const GOVERNANCE_GANACHE_GENESIS_CONTRACT = '0x5cd0D270C30EDa5ADa6b45a5289AFF1D425759b3';
 
-export const GOVERNANCE_MAINNET_FIRST_BLOCK = 11067858;
+export const GOVERNANCE_MAINNET_FIRST_BLOCK = 11050000;
 export const GOVERNANCE_GANACHE_FIRST_BLOCK = 0;
 
 export function getGenesisContractAddress(): string {
