@@ -1,5 +1,5 @@
 import { ServiceConfiguration } from './config';
-import {GOVERNANCE_GANACHE_FIRST_BLOCK, GOVERNANCE_GANACHE_GENESIS_CONTRACT} from "./governance";
+import { GOVERNANCE_GANACHE_FIRST_BLOCK, GOVERNANCE_GANACHE_GENESIS_CONTRACT } from './governance';
 
 export const exampleConfig: ServiceConfiguration = {
   BootstrapMode: false,

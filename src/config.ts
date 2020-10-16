@@ -1,5 +1,5 @@
 import validate from 'validate.js';
-import {getEthereumFirstBlock, getGenesisContractAddress} from "./governance";
+import { getEthereumFirstBlock, getGenesisContractAddress } from './governance';
 
 export interface ServiceConfiguration {
   BootstrapMode: boolean;

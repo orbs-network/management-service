@@ -4,13 +4,13 @@ import {
   GOVERNANCE_GANACHE_FIRST_BLOCK,
   GOVERNANCE_GANACHE_GENESIS_CONTRACT,
   GOVERNANCE_MAINNET_FIRST_BLOCK,
-  GOVERNANCE_MAINNET_GENESIS_CONTRACT
-} from "./governance";
-import {exampleConfig} from "./config.example";
+  GOVERNANCE_MAINNET_GENESIS_CONTRACT,
+} from './governance';
+import { exampleConfig } from './config.example';
 
 test('sets governance params', (t) => {
-  const config = {...exampleConfig};
-  config.EthereumGenesisContract = "";
+  const config = { ...exampleConfig };
+  config.EthereumGenesisContract = '';
   config.EthereumFirstBlock = -999;
 
   const originalNodeEnv = process.env.NODE_ENV;
@@ -27,5 +27,4 @@ test('sets governance params', (t) => {
 
   t.deepEqual(config.EthereumFirstBlock, GOVERNANCE_GANACHE_FIRST_BLOCK);
   t.deepEqual(config.EthereumGenesisContract, GOVERNANCE_GANACHE_GENESIS_CONTRACT);
-
 });

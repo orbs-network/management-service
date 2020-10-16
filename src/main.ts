@@ -1,7 +1,7 @@
 import { serve } from '.';
 import { parseArgs } from './cli-args';
 import * as Logger from './logger';
-import { applyGovernance } from "./governance";
+import { applyGovernance } from './governance';
 
 process.on('uncaughtException', function (err) {
   Logger.log('Uncaught exception on process, shutting down:');
