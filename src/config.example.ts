@@ -1,9 +1,11 @@
 import { ServiceConfiguration } from './config';
+import {GOVERNANCE_GANACHE_FIRST_BLOCK, GOVERNANCE_GANACHE_GENESIS_CONTRACT} from "./governance";
 
 export const exampleConfig: ServiceConfiguration = {
   BootstrapMode: false,
   Port: 8080,
-  EthereumGenesisContract: '0x5cd0D270C30EDa5ADa6b45a5289AFF1D425759b3',
+  EthereumGenesisContract: GOVERNANCE_GANACHE_GENESIS_CONTRACT,
+  EthereumFirstBlock: GOVERNANCE_GANACHE_FIRST_BLOCK,
   EthereumEndpoint: 'http://ganache:7545',
   DockerNamespace: 'orbsnetwork',
   DockerRegistry: 'https://registry.hub.docker.com',
@@ -14,7 +16,6 @@ export const exampleConfig: ServiceConfiguration = {
   EthereumRequestsPerSecondLimit: 0,
   ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
   FinalityBufferBlocks: 10,
-  EthereumFirstBlock: 0,
   Verbose: false,
   'node-address': 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
 };

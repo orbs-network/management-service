@@ -1,6 +1,7 @@
 import { serve } from '.';
 import { parseArgs } from './cli-args';
 import * as Logger from './logger';
+import { applyGovernance } from "./governance";
 
 process.on('uncaughtException', function (err) {
   Logger.log('Uncaught exception on process, shutting down:');
@@ -11,6 +12,9 @@ process.on('uncaughtException', function (err) {
 try {
   Logger.log('Management service started.');
   const config = parseArgs(process.argv);
+
+  applyGovernance(config);
+
   Logger.log(`Input config: '${JSON.stringify(config)}'.`);
   const server = serve(config);
 

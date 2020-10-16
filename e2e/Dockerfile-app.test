@@ -1,4 +1,7 @@
 FROM local/management-service
 
+# Env
+ENV NODE_ENV e2e
+
 COPY ./app-config.json ./
 CMD npm start -- --config /opt/orbs/app-config.json
