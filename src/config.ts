@@ -17,6 +17,7 @@ export interface ServiceConfiguration {
   EthereumFirstBlock: number;
   Verbose: boolean;
   'node-address': string;
+  ExternalLaunchConfig: { [key: string]: unknown };
 }
 
 export const defaultServiceConfiguration = {

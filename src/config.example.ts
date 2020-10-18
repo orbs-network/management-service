@@ -17,4 +17,5 @@ export const exampleConfig: ServiceConfiguration = {
   FinalityBufferBlocks: 10,
   Verbose: false,
   'node-address': 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
+  ExternalLaunchConfig: {},
 };

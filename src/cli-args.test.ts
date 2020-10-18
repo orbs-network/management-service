@@ -14,7 +14,7 @@ const minimalConfigValue = {
   EthereumEndpoint: 'http://localhost:7545',
   'node-address': 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
 };
-const configValue: ServiceConfiguration = {
+const inputConfigValue = {
   ...minimalConfigValue,
   BootstrapMode: false,
   Port: -1,
@@ -31,12 +31,17 @@ const configValue: ServiceConfiguration = {
   Verbose: true,
 };
 
+const expectedConfigValue: ServiceConfiguration = {
+  ...inputConfigValue,
+  ExternalLaunchConfig: inputConfigValue
+};
+  
 test.serial('parseOptions with file', (t) => {
   mock({
-    [configPath]: JSON.stringify(configValue),
+    [configPath]: JSON.stringify(inputConfigValue),
   });
 
-  t.deepEqual(parseArgs(['--config', configPath]), configValue);
+  t.deepEqual(parseArgs(['--config', configPath]), expectedConfigValue);
 });
 
 test.serial('parseOptions with partial file (complete default values)', (t) => {
