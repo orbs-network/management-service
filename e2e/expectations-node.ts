@@ -92,7 +92,6 @@ export const expectationNodeManagement = {
       },
       AllowAccessToSigner: true,
       Config: {
-        DistributionFrequencySeconds: 112233,
         EthereumEndpoint: 'http://ganache:7545',
         SignerEndpoint: 'http://signer:7777',
         EthereumGenesisContract: isValidEthereumAddress,
