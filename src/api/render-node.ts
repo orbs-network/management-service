@@ -45,6 +45,17 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
   );
   _.remove(response.chains, (vc) => _.isUndefined(vc));
 
+  // TEMP HACK - start
+  if (response.chains.length == 0) {
+    response.chains = [
+      getDisabledChain(1000000, snapshot, config),
+      getDisabledChain(1000001, snapshot, config),
+      getDisabledChain(1000002, snapshot, config),
+    ];
+  }
+  _.remove(response.chains, (vc) => _.isUndefined(vc));
+  // TEMP HACK - end
+
   return response;
 }
 
@@ -195,3 +206,31 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
     },
   };
 }
+
+// TEMP HACK - start
+function getDisabledChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const mainVersion = snapshot.CurrentImageVersions['main']['node'];
+  if (!mainVersion) return undefined;
+
+  return {
+    Id: vchainId,
+    InternalPort: 4400,
+    ExternalPort: getVirtualChainPort(vchainId),
+    InternalHttpPort: 8080,
+    Disabled: true,
+    DockerConfig: {
+      Image: `${config.DockerNamespace}/node`,
+      Tag: mainVersion,
+      Pull: true,
+    },
+    AllowAccessToSigner: true,
+    AllowAccessToServices: true,
+    Config: {
+      'gossip-listen-port': 4400,
+      'http-address': ':8080',
+      'management-file-path': `http://management-service:8080/vchains/${vchainId}/management`,
+      'signer-endpoint': 'http://signer:7777',
+    },
+  };
+}
+// TEMP HACK - end
