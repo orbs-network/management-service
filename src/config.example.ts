@@ -1,11 +1,10 @@
 import { ServiceConfiguration } from './config';
-import { GOVERNANCE_GANACHE_FIRST_BLOCK, GOVERNANCE_GANACHE_GENESIS_CONTRACT } from './governance';
 
 export const exampleConfig: ServiceConfiguration = {
   BootstrapMode: false,
   Port: 8080,
-  EthereumGenesisContract: GOVERNANCE_GANACHE_GENESIS_CONTRACT,
-  EthereumFirstBlock: GOVERNANCE_GANACHE_FIRST_BLOCK,
+  EthereumGenesisContract: '0x5454223e3078Db87e55a15bE541cc925f3702eB0',
+  EthereumFirstBlock: 11050000,
   EthereumEndpoint: 'http://ganache:7545',
   DockerNamespace: 'orbsnetwork',
   DockerRegistry: 'https://registry.hub.docker.com',
