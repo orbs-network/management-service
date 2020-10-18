@@ -107,7 +107,6 @@ export const expectationNodeManagement = {
       InternalPort: 4400,
       ExternalPort: getVirtualChainPort(vcId),
       InternalHttpPort: 8080,
-      Disabled: false,
       DockerConfig: {
         Image: 'orbsnetwork/node',
         Tag: isValidImageVersion,
