@@ -1,5 +1,4 @@
 import validate from 'validate.js';
-import { getEthereumFirstBlock, getGenesisContractAddress } from './governance';
 
 export interface ServiceConfiguration {
   BootstrapMode: boolean;
@@ -18,13 +17,14 @@ export interface ServiceConfiguration {
   EthereumFirstBlock: number;
   Verbose: boolean;
   'node-address': string;
+  ExternalLaunchConfig: { [key: string]: unknown };
 }
 
 export const defaultServiceConfiguration = {
   BootstrapMode: false,
   Port: 8080,
-  EthereumGenesisContract: getGenesisContractAddress(),
-  EthereumFirstBlock: getEthereumFirstBlock(),
+  EthereumGenesisContract: '0x5454223e3078Db87e55a15bE541cc925f3702eB0',
+  EthereumFirstBlock: 11050000,
   DockerNamespace: 'orbsnetwork',
   DockerRegistry: 'https://registry.hub.docker.com',
   DockerHubPollIntervalSeconds: 3 * 60,

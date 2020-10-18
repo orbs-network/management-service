@@ -14,10 +14,14 @@ export function parseArgs(argv: string[]): ServiceConfiguration {
     .exitProcess(false)
     .parse();
 
-  const config = Object.assign(
-    defaultServiceConfiguration,
+  const externalLaunchConfig = Object.assign(
+    {},
     ...options.config.map((configFile) => JSON.parse(readFileSync(configFile).toString()))
   );
+
+  const config = Object.assign(defaultServiceConfiguration, externalLaunchConfig);
+
+  config.ExternalLaunchConfig = externalLaunchConfig;
 
   const validationErrors = validateServiceConfiguration(config);
   if (validationErrors) {

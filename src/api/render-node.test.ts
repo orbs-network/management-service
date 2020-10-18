@@ -45,6 +45,10 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     EthereumFirstBlock: firstBlock,
     RegularRolloutWindowSeconds: 1000000,
     HotfixRolloutWindowSeconds: 2,
+    ExternalLaunchConfig: {
+      BootstrapMode: true,
+      SomeExternalField: 'someExternalFieldValue',
+    },
   };
   const state = new StateManager(config);
   const blockSync = new BlockSync(state, config);
@@ -101,7 +105,10 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     Tag: 'v1.1.0',
     Pull: true,
   });
-  t.deepEqual(res.services['management-service'].Config, config);
+  t.deepEqual(res.services['management-service'].Config, {
+    BootstrapMode: false,
+    SomeExternalField: 'someExternalFieldValue',
+  });
   t.deepEqual(res.services['ethereum-writer'].Config, {
     ManagementServiceEndpoint: 'http://management-service:8080',
     EthereumEndpoint: config.EthereumEndpoint,

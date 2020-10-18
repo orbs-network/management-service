@@ -81,7 +81,10 @@ function getManagementService(snapshot: StateSnapshot, config: ServiceConfigurat
       Tag: version,
       Pull: true,
     },
-    Config: { ...config, BootstrapMode: false }, // forward my own input config + defaults for what's missing
+    Config: {
+      ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
+      BootstrapMode: false,
+    },
   };
 }
 
