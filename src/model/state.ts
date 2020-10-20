@@ -24,7 +24,8 @@ export interface StateSnapshot {
   CurrentCandidates: { EthAddress: string; IsStandby: boolean; Name: string }[];
   CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number; Name: string }[]; // Port overridden by processor
   CommitteeEvents: {
-    RefTime: number;
+    RefTime: number; // primary
+    RefBlock: number;
     Committee: {
       EthAddress: string;
       OrbsAddress: string;
@@ -174,7 +175,7 @@ export class State {
     this.snapshot.CurrentRefBlock = block;
     this.snapshot.PageEndRefTime = time;
     // see if we need to generate a new CommitteeEvent
-    const committeeEvent = calcNewCommitteeEvent(time, this.snapshot);
+    const committeeEvent = calcNewCommitteeEvent(time, block, this.snapshot);
     if (!_.isEqual(committeeEvent.Committee, this.snapshot.LastCommitteeEvent)) {
       this.snapshot.CommitteeEvents.push(committeeEvent);
       this.snapshot.LastCommitteeEvent = _.cloneDeep(committeeEvent.Committee);
@@ -343,6 +344,7 @@ type CandidateNodes = { EthAddress: string; IsStandby: boolean; Name: string }[]
 type TopologyNodes = { EthAddress: string; OrbsAddress: string; Ip: string; Port: number; Name: string }[];
 type CommiteeEvent = {
   RefTime: number;
+  RefBlock: number;
   Committee: {
     EthAddress: string;
     OrbsAddress: string;
@@ -415,9 +417,10 @@ function orbitonsToOrbs(stake: string): number {
   return Number(BigInt(stake) / BigInt(1e18));
 }
 
-function calcNewCommitteeEvent(time: number, snapshot: StateSnapshot): CommiteeEvent {
+function calcNewCommitteeEvent(time: number, block: number, snapshot: StateSnapshot): CommiteeEvent {
   return {
     RefTime: time,
+    RefBlock: block,
     Committee: snapshot.CurrentCommittee.map(({ EthAddress, Weight, IdentityType, EffectiveStake }) => ({
       EthAddress,
       OrbsAddress: snapshot.CurrentOrbsAddress[EthAddress],
