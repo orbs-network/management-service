@@ -37,6 +37,11 @@ export const defaultServiceConfiguration = {
   Verbose: false,
 };
 
+export const BoyarVersion = {
+  Url: "https://github.com/orbs-network/boyarin/releases/download/v1.8.1/boyar-v1.8.1.bin",
+  Sha256: "1125ea401149574ba5161f9bd63615d8feb11410fe5d5f009b67f08808f92731",
+}
+
 export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): string[] | undefined {
   const serviceConfigConstraints = {
     BootstrapMode: {
