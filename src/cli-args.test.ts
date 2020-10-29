@@ -33,9 +33,9 @@ const inputConfigValue = {
 
 const expectedConfigValue: ServiceConfiguration = {
   ...inputConfigValue,
-  ExternalLaunchConfig: inputConfigValue
+  ExternalLaunchConfig: inputConfigValue,
 };
-  
+
 test.serial('parseOptions with file', (t) => {
   mock({
     [configPath]: JSON.stringify(inputConfigValue),
