@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
-import { ServiceConfiguration, BoyarVersion } from '../config';
+import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './ports';
 import { JsonResponse, normalizeAddress } from '../helpers';
 
@@ -13,8 +13,10 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
         ReadInterval: '30s',
         ResetTimeout: '30m',
       },
-      // Note: uncomment this section to enforce Boyar upgrade to a specific version
-      ExecutableImage: BoyarVersion,
+      ExecutableImage: {
+        Url: 'https://github.com/orbs-network/boyarin/releases/download/v1.8.1/boyar-v1.8.1.bin',
+        Sha256: '1125ea401149574ba5161f9bd63615d8feb11410fe5d5f009b67f08808f92731',
+      },
       'storage-driver': 'local',
       'storage-mount-type': 'bind',
     },
