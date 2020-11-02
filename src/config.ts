@@ -7,6 +7,8 @@ export interface ServiceConfiguration {
   EthereumEndpoint: string;
   DockerNamespace: string;
   DockerRegistry: string;
+  StatusJsonPath: string;
+  StatusWriteIntervalSeconds: number;
   DockerHubPollIntervalSeconds: number;
   RegularRolloutWindowSeconds: number;
   HotfixRolloutWindowSeconds: number;
@@ -27,6 +29,8 @@ export const defaultServiceConfiguration = {
   EthereumFirstBlock: 11050000,
   DockerNamespace: 'orbsnetwork',
   DockerRegistry: 'https://registry.hub.docker.com',
+  StatusJsonPath: './status/status.json',
+  StatusWriteIntervalSeconds: 25,
   DockerHubPollIntervalSeconds: 3 * 60,
   RegularRolloutWindowSeconds: 24 * 60 * 60,
   HotfixRolloutWindowSeconds: 60 * 60,
@@ -54,6 +58,11 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       numericality: { noStrings: true },
     },
     ElectionsStaleUpdateSeconds: {
+      presence: { allowEmpty: false },
+      type: 'number',
+      numericality: { noStrings: true },
+    },
+    StatusWriteIntervalSeconds: {
       presence: { allowEmpty: false },
       type: 'number',
       numericality: { noStrings: true },
@@ -99,6 +108,10 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       type: 'string',
     },
     DockerRegistry: {
+      presence: { allowEmpty: false },
+      type: 'string',
+    },
+    StatusJsonPath: {
       presence: { allowEmpty: false },
       type: 'string',
     },

@@ -24,10 +24,12 @@ const inputConfigValue = {
   ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
   RegularRolloutWindowSeconds: 1,
   HotfixRolloutWindowSeconds: 1,
+  StatusWriteIntervalSeconds: 1,
   DockerHubPollIntervalSeconds: 1,
   FinalityBufferBlocks: 0,
   DockerNamespace: 'foo',
   DockerRegistry: 'bar',
+  StatusJsonPath: 'bla',
   Verbose: true,
 };
 

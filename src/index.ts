@@ -10,6 +10,7 @@ import { renderNodeManagement } from './api/render-node';
 import { renderVirtualChainManagement } from './api/render-vc';
 import { renderServiceStatus } from './api/render-status';
 import * as Logger from './logger';
+import { StatusWriter } from './status-writer';
 
 // function wrapAsync(fn: RequestHandler): RequestHandler {
 //   return (req, res, next) => fn(req, res, next).catch(next);
@@ -19,9 +20,9 @@ export function serve(serviceConfig: ServiceConfiguration) {
   const state = new StateManager(serviceConfig);
   const blockSync = new BlockSync(state, serviceConfig);
   const imagePoll = new ImagePoll(state, serviceConfig);
+  const statusWriter = new StatusWriter(state, serviceConfig);
 
   const app = express();
-  // DEV_NOTE : O.L : Allows access from any domain.
   app.use(cors());
   app.set('json spaces', 2);
 
@@ -64,8 +65,13 @@ export function serve(serviceConfig: ServiceConfiguration) {
 
   const blockSyncTask = new TaskLoop(() => blockSync.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
   const imagePollTask = new TaskLoop(() => imagePoll.run(), serviceConfig.DockerHubPollIntervalSeconds * 1000);
+  const statusWriterTask = new TaskLoop(
+    () => statusWriter.run(blockSync.getRequestStats()),
+    serviceConfig.StatusWriteIntervalSeconds * 1000
+  );
   blockSyncTask.start();
   imagePollTask.start();
+  statusWriterTask.start();
 
   const server = app.listen(serviceConfig.Port, '0.0.0.0', () =>
     Logger.log(`Management service listening on port ${serviceConfig.Port}!`)
@@ -73,6 +79,7 @@ export function serve(serviceConfig: ServiceConfiguration) {
   server.on('close', () => {
     blockSyncTask.stop();
     imagePollTask.stop();
+    statusWriterTask.stop();
   });
   return server;
 }

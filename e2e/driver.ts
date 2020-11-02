@@ -24,6 +24,7 @@ export class TestEnvironment {
       EthereumGenesisContract: this.ethereum.getContractRegistryAddress(),
       EthereumEndpoint: `http://ganache:7545`,
       DockerNamespace: 'orbsnetwork',
+      StatusWriteIntervalSeconds: 1,
       DockerHubPollIntervalSeconds: 1,
       RegularRolloutWindowSeconds: 2,
       HotfixRolloutWindowSeconds: 2,

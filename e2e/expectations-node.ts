@@ -38,6 +38,7 @@ export const expectationNodeManagement = {
         BootstrapMode: false,
         Port: 8080,
         DockerNamespace: 'orbsnetwork',
+        StatusWriteIntervalSeconds: 1,
         DockerHubPollIntervalSeconds: 1,
         EthereumPollIntervalSeconds: 1,
         EthereumFirstBlock: 0,
