@@ -1,48 +1,16 @@
-import { Contracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/contracts';
 import { EventData } from 'web3-eth-contract';
+import {
+  ContractRegistryKey,
+  getAbiByContractAddress,
+  getAbiByContractRegistryKey,
+  getAbiByContractName,
+} from '@orbs-network/orbs-ethereum-contracts-v2';
 
 // contracts
 
-// from https://github.com/orbs-network/orbs-ethereum-contracts-v2/blob/master/test/driver.ts
-export type ContractName =
-  | 'contractRegistry' // added although not found in orbs-ethereum-contracts-v2 ContractName
-  | 'protocol'
-  | 'committee'
-  | 'elections'
-  | 'delegations'
-  | 'guardiansRegistration'
-  | 'certification'
-  | 'staking'
-  | 'subscriptions';
-
-export type ContractTypeName = keyof Contracts;
-
-// TODO: this type is needed just for getting the abi from orbs-ethereum-contracts-v2/compiledContracts[contractType]
-// once we have a nicer mechanism for abi, it should be indexed by ContractName and this type should be retired
-export function getContractTypeName(key: ContractName): ContractTypeName {
-  switch (key) {
-    case 'contractRegistry':
-      return 'ContractRegistry';
-    case 'protocol':
-      return 'Protocol';
-    case 'committee':
-      return 'Committee';
-    case 'elections':
-      return 'Elections';
-    case 'delegations':
-      return 'Delegations';
-    case 'guardiansRegistration':
-      return 'GuardiansRegistration';
-    case 'certification':
-      return 'Certification';
-    case 'staking':
-      return 'StakingContract';
-    case 'subscriptions':
-      return 'Subscriptions';
-    default:
-      throw new Error(`unknown contract name '${key}'`);
-  }
-}
+// we use the lowercase names for contracts that are also used as keys in the contract registry
+// 'contractRegistry' is unique because it's not a key in the contract registry
+export type ContractName = 'contractRegistry' | ContractRegistryKey;
 
 // events
 
@@ -109,7 +77,7 @@ export type CommitteeChangePayload = {
 
 export type StakeChangedPayload = {
   addr: string;
-  selfStake: string;
+  selfDelegatedStake: string;
   delegatedStake: string;
   effectiveStake: string;
 };
@@ -128,6 +96,7 @@ export type GuardianDataUpdatedPayload = {
   orbsAddr: string;
   name: string;
   website: string;
+  registrationTime: string;
 };
 
 export type GuardianMetadataChangedPayload = {
@@ -153,3 +122,13 @@ export type EventTypes = {
   GuardianStatusUpdated: EventData & { returnValues: GuardianStatusUpdatedPayload };
   GuardianMetadataChanged: EventData & { returnValues: GuardianMetadataChangedPayload };
 };
+
+export function getAbiForContract(address: string, contractName: ContractName) {
+  // attempts to get the ABI by address first (useful for deprecated contracts and breaking ABI changes)
+  const abi = getAbiByContractAddress(address);
+  if (abi) return abi;
+
+  // if address is unknown, rely on the latest ABI's (useful for testing mostly)
+  if (contractName === 'contractRegistry') return getAbiByContractName('ContractRegistry');
+  else return getAbiByContractRegistryKey(contractName);
+}

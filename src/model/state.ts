@@ -223,7 +223,7 @@ export class State {
       delete this.snapshot.CurrentEffectiveStake[EthAddress];
     }
     this.snapshot.CurrentDetailedStake[EthAddress] = {
-      SelfStake: orbitonsToOrbs(event.returnValues.selfStake),
+      SelfStake: orbitonsToOrbs(event.returnValues.selfDelegatedStake),
       DelegatedStake: orbitonsToOrbs(event.returnValues.delegatedStake),
     };
     if (
@@ -234,7 +234,7 @@ export class State {
     }
   }
 
-  applyNewGuardianDataUpdated(time: number, event: EventTypes['GuardianDataUpdated']) {
+  applyNewGuardianDataUpdated(_time: number, event: EventTypes['GuardianDataUpdated']) {
     const EthAddress = normalizeAddress(event.returnValues.guardian);
     const OrbsAddress = normalizeAddress(event.returnValues.orbsAddr);
     const IpAddress = getIpFromHex(event.returnValues.ip);
@@ -245,7 +245,7 @@ export class State {
         Name: event.returnValues.name,
         Website: event.returnValues.website,
         Metadata: this.snapshot.CurrentRegistrationData[EthAddress]?.Metadata ?? {},
-        RegistrationTime: this.snapshot.CurrentRegistrationData[EthAddress]?.RegistrationTime ?? time,
+        RegistrationTime: toNumber(event.returnValues.registrationTime),
       };
     } else {
       delete this.snapshot.CurrentOrbsAddress[EthAddress];

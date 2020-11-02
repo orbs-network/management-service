@@ -551,7 +551,7 @@ test('state applies meta registration data', (t) => {
 
   GuardianMetadataChanged(s, 3000, '0xA', 'REWARDS_FREQUENCY_SEC', '445566');
   t.is(s.getSnapshot().CurrentRegistrationData['a'].Metadata['REWARDS_FREQUENCY_SEC'], '445566');
-  t.is(s.getSnapshot().CurrentRegistrationData['a'].RegistrationTime, 1000);
+  t.is(s.getSnapshot().CurrentRegistrationData['a'].RegistrationTime, 19);
 });
 
 test('state applies contract address changes', (t) => {
@@ -627,7 +627,7 @@ function StakeChanged(s: State, time: number, addr: string, effectiveStake: stri
     ...eventBase,
     returnValues: {
       addr,
-      selfStake: '0',
+      selfDelegatedStake: '0',
       // eslint-disable-next-line @typescript-eslint/camelcase
       delegatedStake: effectiveStake,
       // eslint-disable-next-line @typescript-eslint/camelcase
@@ -653,6 +653,7 @@ function GuardianDataUpdated(
       name: 'name',
       website: 'website',
       isRegistered,
+      registrationTime: '19',
     },
   });
 }
