@@ -1,8 +1,7 @@
 import Web3 from 'web3';
 import { Contract, PastEventOptions } from 'web3-eth-contract';
-import { compiledContracts } from '@orbs-network/orbs-ethereum-contracts-v2/release/compiled-contracts';
 import { toNumber, DailyStats } from '../helpers';
-import { EventName, getContractTypeName, contractByEventName } from './types';
+import { EventName, contractByEventName, getAbiForContract } from './types';
 import pThrottle from 'p-throttle';
 
 const HTTP_TIMEOUT_SEC = 20;
@@ -47,7 +46,7 @@ export class EthereumReader {
 
   getContractForEvent(eventName: EventName, address: string): Contract {
     const contractName = contractByEventName(eventName);
-    const abi = compiledContracts[getContractTypeName(contractName)].abi;
+    const abi = getAbiForContract(address, contractName);
     return new this.web3.eth.Contract(abi, address);
   }
 
