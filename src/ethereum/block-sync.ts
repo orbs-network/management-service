@@ -30,6 +30,7 @@ export class BlockSync {
       GuardianDataUpdated: new LookaheadEventFetcher('GuardianDataUpdated', this.reader),
       GuardianStatusUpdated: new LookaheadEventFetcher('GuardianStatusUpdated', this.reader),
       GuardianMetadataChanged: new LookaheadEventFetcher('GuardianMetadataChanged', this.reader),
+      GuardianCertificationUpdate: new LookaheadEventFetcher('GuardianCertificationUpdate', this.reader),
     };
     Logger.log(`BlockSync: initialized with first block ${this.lastProcessedBlock}.`);
   }

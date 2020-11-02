@@ -23,6 +23,7 @@ export const eventNames: Readonly<Array<EventName>> = [
   'GuardianDataUpdated',
   'GuardianStatusUpdated',
   'GuardianMetadataChanged',
+  'GuardianCertificationUpdate',
 ];
 
 export type EventName = keyof EventTypes;
@@ -45,6 +46,8 @@ export function contractByEventName(eventName: EventName): ContractName {
       return 'elections';
     case 'GuardianMetadataChanged':
       return 'guardiansRegistration';
+    case 'GuardianCertificationUpdate':
+      return 'certification';
     default:
       throw new Error(`unknown event name '${eventName}'`);
   }
@@ -112,6 +115,11 @@ export type GuardianStatusUpdatedPayload = {
   readyForCommittee: boolean;
 };
 
+export type GuardianCertificationUpdatePayload = {
+  guardian: string;
+  isCertified: boolean;
+};
+
 export type EventTypes = {
   ContractAddressUpdated: EventData & { returnValues: ContractAddressUpdatedPayload };
   CommitteeChange: EventData & { returnValues: CommitteeChangePayload };
@@ -121,6 +129,7 @@ export type EventTypes = {
   GuardianDataUpdated: EventData & { returnValues: GuardianDataUpdatedPayload };
   GuardianStatusUpdated: EventData & { returnValues: GuardianStatusUpdatedPayload };
   GuardianMetadataChanged: EventData & { returnValues: GuardianMetadataChangedPayload };
+  GuardianCertificationUpdate: EventData & { returnValues: GuardianCertificationUpdatePayload };
 };
 
 export function getAbiForContract(address: string, contractName: ContractName) {

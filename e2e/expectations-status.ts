@@ -169,6 +169,7 @@ export const expectationStatus = {
         EffectiveStake: 30000,
         SelfStake: 30000,
         DelegatedStake: 30000,
+        IdentityType: 0,
         ElectionsStatus: {
           LastUpdateTime: isValidTimeRef,
           ReadyToSync: true,
@@ -186,6 +187,7 @@ export const expectationStatus = {
         EffectiveStake: 10000,
         SelfStake: 10000,
         DelegatedStake: 10000,
+        IdentityType: 0,
         ElectionsStatus: {
           LastUpdateTime: isValidTimeRef,
           ReadyToSync: true,
@@ -203,6 +205,7 @@ export const expectationStatus = {
         EffectiveStake: 40000,
         SelfStake: 40000,
         DelegatedStake: 40000,
+        IdentityType: 0,
         ElectionsStatus: {
           LastUpdateTime: isValidTimeRef,
           ReadyToSync: true,
@@ -220,6 +223,7 @@ export const expectationStatus = {
         EffectiveStake: 50000,
         SelfStake: 50000,
         DelegatedStake: 50000,
+        IdentityType: 0,
         ElectionsStatus: {
           LastUpdateTime: isValidTimeRef,
           ReadyToSync: true,
@@ -237,6 +241,7 @@ export const expectationStatus = {
         EffectiveStake: 20000,
         SelfStake: 20000,
         DelegatedStake: 20000,
+        IdentityType: 0,
         ElectionsStatus: {
           LastUpdateTime: isValidTimeRef,
           ReadyToSync: true,

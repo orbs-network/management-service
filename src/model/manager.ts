@@ -32,6 +32,9 @@ export class StateManager {
         case 'GuardianMetadataChanged':
           this.current.applyNewGuardianMetadataChanged(time, event as EventTypes['GuardianMetadataChanged']);
           break;
+        case 'GuardianCertificationUpdate':
+          this.current.applyNewGuardianCertificationUpdate(time, event as EventTypes['GuardianCertificationUpdate']);
+          break;
       }
     }
   }

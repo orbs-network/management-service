@@ -552,6 +552,12 @@ test('state applies meta registration data', (t) => {
   GuardianMetadataChanged(s, 3000, '0xA', 'REWARDS_FREQUENCY_SEC', '445566');
   t.is(s.getSnapshot().CurrentRegistrationData['a'].Metadata['REWARDS_FREQUENCY_SEC'], '445566');
   t.is(s.getSnapshot().CurrentRegistrationData['a'].RegistrationTime, 19);
+
+  t.falsy(s.getSnapshot().CurrentCertification['a']);
+  GuardianCertificationUpdate(s, 4000, '0xA', true);
+  t.truthy(s.getSnapshot().CurrentCertification['a']);
+  GuardianCertificationUpdate(s, 5000, '0xA', false);
+  t.falsy(s.getSnapshot().CurrentCertification['a']);
 });
 
 test('state applies contract address changes', (t) => {
@@ -712,6 +718,16 @@ function GuardianStatusUpdated(
       guardian,
       readyToSync,
       readyForCommittee,
+    },
+  });
+}
+
+function GuardianCertificationUpdate(s: State, time: number, guardian: string, isCertified: boolean) {
+  s.applyNewGuardianCertificationUpdate(time, {
+    ...eventBase,
+    returnValues: {
+      guardian,
+      isCertified,
     },
   });
 }

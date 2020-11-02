@@ -66,6 +66,9 @@ export interface StateSnapshot {
       RegistrationTime: number;
     };
   };
+  CurrentCertification: {
+    [EthAddress: string]: boolean;
+  };
   CurrentVirtualChains: {
     [VirtualChainId: string]: {
       Expiration: number;
@@ -138,6 +141,7 @@ export class State {
     CurrentOrbsAddress: {},
     CurrentElectionsStatus: {},
     CurrentRegistrationData: {},
+    CurrentCertification: {},
     CurrentVirtualChains: {},
     SubscriptionEvents: {},
     ProtocolVersionEvents: {
@@ -268,6 +272,11 @@ export class State {
       ReadyForCommittee: event.returnValues.readyForCommittee,
       TimeToStale: this.config.ElectionsStaleUpdateSeconds,
     };
+  }
+
+  applyNewGuardianCertificationUpdate(_time: number, event: EventTypes['GuardianCertificationUpdate']) {
+    const EthAddress = normalizeAddress(event.returnValues.guardian);
+    this.snapshot.CurrentCertification[EthAddress] = event.returnValues.isCertified;
   }
 
   applyNewSubscriptionChanged(time: number, event: EventTypes['SubscriptionChanged']) {

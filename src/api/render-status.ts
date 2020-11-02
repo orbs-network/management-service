@@ -40,6 +40,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
           SelfStake: snapshot.CurrentDetailedStake[EthAddress]?.SelfStake ?? 0,
           DelegatedStake: snapshot.CurrentDetailedStake[EthAddress]?.DelegatedStake ?? 0,
           ElectionsStatus: snapshot.CurrentElectionsStatus[EthAddress],
+          IdentityType: snapshot.CurrentCertification[EthAddress] ? 1 : 0,
           ...snapshot.CurrentRegistrationData[EthAddress],
         };
       }),
