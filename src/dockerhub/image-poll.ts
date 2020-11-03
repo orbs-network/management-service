@@ -11,7 +11,6 @@ export const imageNamesToPollForNewVersions = [
   'signer',
   'ethereum-writer',
   'logs-service',
-  'rewards-service',
 ];
 export const imageNamesWithGradualRollout = ['node'];
 

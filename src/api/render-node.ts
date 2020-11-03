@@ -42,10 +42,6 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
   response.services['logs-service'] = getLogsService(snapshot, config);
   if (!response.services['logs-service']) delete response.services['logs-service'];
 
-  // include rewards-service if found a viable image for it and its contract addresses are known
-  response.services['rewards-service'] = getRewardsService(snapshot, config);
-  if (!response.services['rewards-service']) delete response.services['rewards-service'];
-
   // include chains if found a viable image for node
   response.chains = Object.keys(snapshot.CurrentVirtualChains).map((vcId) =>
     getChain(parseInt(vcId), snapshot, config)
@@ -116,38 +112,6 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
       SignerEndpoint: 'http://signer:7777',
       EthereumElectionsContract: elections,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
-    },
-  };
-}
-
-function getRewardsService(snapshot: StateSnapshot, config: ServiceConfiguration) {
-  const version = snapshot.CurrentImageVersions['main']['rewards-service'];
-  if (!version) return undefined;
-  const guardian = _.findKey(
-    snapshot.CurrentOrbsAddress,
-    (orbsAddress) => orbsAddress == normalizeAddress(config['node-address'])
-  );
-  if (!guardian) return undefined;
-  const registration = snapshot.CurrentRegistrationData[guardian];
-  if (!registration) return undefined;
-  const frequency = Math.round(parseInt(registration.Metadata['REWARDS_FREQUENCY_SEC']));
-
-  return {
-    Disabled: true,
-    DockerConfig: {
-      Image: `${config.DockerNamespace}/rewards-service`,
-      Tag: version,
-      Pull: true,
-    },
-    AllowAccessToSigner: true,
-    Config: {
-      DistributionFrequencySeconds: frequency > 0 ? frequency : undefined,
-      EthereumEndpoint: config.EthereumEndpoint,
-      SignerEndpoint: 'http://signer:7777',
-      EthereumGenesisContract: config.EthereumGenesisContract,
-      GuardianAddress: `0x${guardian}`,
-      NodeOrbsAddress: normalizeAddress(config['node-address']),
-      EthereumFirstBlock: config.EthereumFirstBlock,
     },
   };
 }

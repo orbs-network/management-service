@@ -84,24 +84,6 @@ export const expectationNodeManagement = {
         StatusUpdateLoopIntervalSeconds: 20,
       },
     },
-    'rewards-service': {
-      Disabled: true,
-      DockerConfig: {
-        Image: 'orbsnetwork/rewards-service',
-        Tag: isValidImageVersion,
-        Pull: true,
-      },
-      AllowAccessToSigner: true,
-      Config: {
-        DistributionFrequencySeconds: 112233,
-        EthereumEndpoint: 'http://ganache:7545',
-        SignerEndpoint: 'http://signer:7777',
-        EthereumGenesisContract: isValidEthereumAddress,
-        GuardianAddress: '0x02ebe4663d6110aec8f816f9772a4087cc1a5ec7',
-        NodeOrbsAddress: 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
-        EthereumFirstBlock: 0,
-      },
-    },
   },
   chains: [1000000, 1000001, 1000002].map((vcId) => {
     return {
