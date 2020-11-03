@@ -60,6 +60,7 @@ test.serial('[E2E] serves /node/management as expected', async (t) => {
 
   const errors = deepDataMatcher(res, expectationNodeManagement);
   t.deepEqual(errors, []);
+  t.truthy(res.orchestrator.ExecutableImage);
 });
 
 test.serial('[E2E] serves /vchains/1000000/management as expected', async (t) => {

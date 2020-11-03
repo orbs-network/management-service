@@ -46,6 +46,7 @@ test.serial('[E2E] Bootstrap: serves /node/management as expected', async (t) =>
 
   const errors = deepDataMatcher(res, expectationNodeManagement);
   t.deepEqual(errors, []);
+  t.falsy(res.orchestrator.ExecutableImage);
 });
 
 test.serial('[E2E] Bootstrap: serves /status as expected', async (t) => {

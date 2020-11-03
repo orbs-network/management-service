@@ -23,6 +23,9 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
     services: {},
   };
 
+  // we don't want bootstrap images to cause Boyar upgrades/downgrades
+  if (config.BootstrapMode) delete response.orchestrator.ExecutableImage;
+
   // include signer if found a viable image for it
   response.services['signer'] = getSigner(snapshot, config);
   if (!response.services['signer']) delete response.services['signer'];
