@@ -14,8 +14,8 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
         ResetTimeout: '30m',
       },
       ExecutableImage: {
-        Url: 'https://github.com/orbs-network/boyarin/releases/download/v1.8.2/boyar-v1.8.2-test.bin',
-        Sha256: '8bf55bda537ea8b8a428f14f938ade4c4e7fee1e0b1bead06492ed35c4f3426a',
+        Url: 'https://github.com/orbs-network/boyarin/releases/download/v1.8.2/boyar-v1.8.2.bin',
+        Sha256: 'c3ac4e4b2528b47d304b530cb82eaac7f2f3c663763dcd9e3bcda6d4020c0f90',
       },
       'storage-driver': 'local',
       'storage-mount-type': 'bind',
