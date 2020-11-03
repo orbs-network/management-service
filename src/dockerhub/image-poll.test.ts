@@ -96,6 +96,16 @@ test('performGradualRollout works as expected', async (t) => {
   t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, 'v1.3.0');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime > 1400000000);
 
+  p.performGradualRollout('main', 'node', 'v1.2.1-immediate'); // downgrade not allowed
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.1.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, 'v1.3.0');
+  t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime > 1400000000);
+
+  p.performGradualRollout('main', 'node', 'v1.3.1-immediate');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.3.1-immediate');
+  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, '');
+  t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime == 0);
+
   p.performGradualRollout('main', 'node', 'v1.4.0-hotfix');
   p.performGradualRollout('canary', 'node', 'v1.4.0-canary-hotfix');
   await sleep(3000);

@@ -124,7 +124,11 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   // mock docker hub state with a few new versions
   const scope2 = nockDockerHub(
     { user: 'mydockernamespace', name: 'node', tags: ['v1.2.3', 'v1.2.4-canary', 'v1.2.5', 'v1.2.6-canary-hotfix'] },
-    { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v4.5.8'] },
+    {
+      user: 'mydockernamespace',
+      name: 'management-service',
+      tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v4.5.8-immediate'],
+    },
     { user: 'mydockernamespace', name: 'signer', tags: ['v1.1.0'] },
     { user: 'mydockernamespace', name: 'ethereum-writer', tags: ['v1.1.0'] },
     { user: 'mydockernamespace', name: 'logs-service', tags: ['v1.1.0'] }
@@ -154,7 +158,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   });
   t.deepEqual(res2.services['management-service'].DockerConfig, {
     Image: 'mydockernamespace/management-service',
-    Tag: 'v4.5.8', // no gradual rollout so immediate update
+    Tag: 'v4.5.8-immediate', // gradual rollout with immediate
     Pull: true,
   });
   t.deepEqual(res.services['ethereum-writer'].DockerConfig, {

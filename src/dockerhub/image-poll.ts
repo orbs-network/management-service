@@ -12,7 +12,6 @@ export const imageNamesToPollForNewVersions = [
   'ethereum-writer',
   'logs-service',
 ];
-export const imageNamesWithGradualRollout = ['node'];
 
 export type ImagePollConfiguration = DockerHubConfiguration & {
   BootstrapMode: boolean;
@@ -46,10 +45,12 @@ export class ImagePoll {
       const time = getCurrentClockTime();
       const fetchedVersions = await this.reader.fetchLatestVersion(imageName);
       for (const [rolloutGroup, imageVersion] of Object.entries(fetchedVersions)) {
-        if (imageNamesWithGradualRollout.includes(imageName)) {
-          this.performGradualRollout(rolloutGroup, imageName, imageVersion);
-        } else {
+        if (this.config.BootstrapMode) {
+          // bootstrap is just management-service - must be updated immediately
           this.performImmediateUpdate(rolloutGroup, imageName, imageVersion);
+        } else {
+          // when not in bootstrap, everything is rolled out slowly (24h by default)
+          this.performGradualRollout(rolloutGroup, imageName, imageVersion);
         }
         this.state.applyNewImageVersionPollTime(time, rolloutGroup, imageName);
       }
@@ -93,10 +94,14 @@ export class ImagePoll {
 
     // create a new pending update
     const delaySeconds = this.getGradualRolloutDelay(imageVersion);
-    this.setPendingUpdate(rolloutGroup, imageName, imageVersion, delaySeconds);
-    Logger.log(
-      `ImagePoll: new pending update of '${imageName}:${rolloutGroup}' to ${imageVersion} in ${delaySeconds} seconds.`
-    );
+    if (delaySeconds === 0) {
+      return this.performImmediateUpdate(rolloutGroup, imageName, imageVersion);
+    } else {
+      this.setPendingUpdate(rolloutGroup, imageName, imageVersion, delaySeconds);
+      Logger.log(
+        `ImagePoll: new pending update of '${imageName}:${rolloutGroup}' to ${imageVersion} in ${delaySeconds} seconds.`
+      );
+    }
   }
 
   getCurrentVersion(rolloutGroup: string, imageName: string) {
@@ -104,6 +109,7 @@ export class ImagePoll {
   }
 
   getGradualRolloutDelay(imageVersion: string): number {
+    if (Versioning.isImmediate(imageVersion)) return 0;
     const rolloutWindow = Versioning.isHotfix(imageVersion)
       ? this.config.HotfixRolloutWindowSeconds
       : this.config.RegularRolloutWindowSeconds;

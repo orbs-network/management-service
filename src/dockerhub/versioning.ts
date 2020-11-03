@@ -13,6 +13,8 @@ v{PROTOCOL}.{MINOR}.{PATCH}[-canary][-hotfix]
  
 -hotfix is an optional segment that indicates that this version should be applied faster than normal. Normal gradual rollout takes place over 24h, versions marked as hotflix roll out over 1h.
  
+-immediate is an optional segment that indicates that this version should be applied immediately without any delays.
+
 The latest available version according to semver semantics will be deployed.
  
 Examples of valid versions:
@@ -20,17 +22,20 @@ v1.2.3
 v1.2.3-hotfix
 v1.2.3-canary
 v1.2.3-canary-hotfix
- 
+v1.2.3-immediate
+v1.2.3-canary-immediate
+
 Notes:
 The v prefix is mandatory and has to be lower case.
 
 regex reference : // https://regex101.com/r/Ly7O1x/310
 */
 
-const REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-canary)?(-hotfix)?$/m;
-const MAIN_REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-hotfix)?$/m;
-const CANARY_REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-canary(-hotfix)?$/m;
+const REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-canary)?(-hotfix|-immediate)?$/m;
+const MAIN_REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-hotfix|-immediate)?$/m;
+const CANARY_REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-canary(-hotfix|-immediate)?$/m;
 const HOTFIX_REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-canary)?-hotfix$/m;
+const IMMEDIATE_REGULAR_EXPRESSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-canary)?-immediate$/m;
 
 export function isValid(src: string): boolean {
   return REGULAR_EXPRESSION.test(src);
@@ -46,6 +51,10 @@ export function isCanary(src: string): boolean {
 
 export function isHotfix(src: string): boolean {
   return HOTFIX_REGULAR_EXPRESSION.test(src);
+}
+
+export function isImmediate(src: string): boolean {
+  return IMMEDIATE_REGULAR_EXPRESSION.test(src);
 }
 
 export function compare(a: string, b: string): number {
