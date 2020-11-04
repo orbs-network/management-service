@@ -59,7 +59,7 @@
     "typescript": "~3.7.5"
   },
   "dependencies": {
-    "@orbs-network/orbs-ethereum-contracts-v2": "0.0.36",
+    "@orbs-network/orbs-ethereum-contracts-v2": "0.0.38",
     "cors": "^2.8.5",
     "deepmerge": "^4.2.2",
     "docker-hub-utils": "^1.10.29",
