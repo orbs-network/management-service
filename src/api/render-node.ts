@@ -177,7 +177,6 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
 function getDisabledChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConfiguration) {
   const mainVersion = snapshot.CurrentImageVersions['main']['node'];
   if (!mainVersion) return undefined;
-  const rolloutGroup = snapshot.CurrentVirtualChains[vchainId.toString()].RolloutGroup;
 
   return {
     Id: vchainId,
@@ -187,7 +186,7 @@ function getDisabledChain(vchainId: number, snapshot: StateSnapshot, config: Ser
     Disabled: true,
     DockerConfig: {
       Image: `${config.DockerNamespace}/node`,
-      Tag: snapshot.CurrentImageVersions[rolloutGroup]?.['node'] ?? mainVersion,
+      Tag: mainVersion,
       Pull: true,
     },
     AllowAccessToSigner: true,
