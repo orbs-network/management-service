@@ -48,6 +48,12 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
   );
   _.remove(response.chains, (vc) => _.isUndefined(vc));
 
+  // HACK: remove existing vchains
+  if (!response.chains || response.chains.length === 0) response.chains = [
+    getDisabledChain(1000003, snapshot, config),
+    getDisabledChain(1000004, snapshot, config),
+  ];
+
   return response;
 }
 
@@ -151,6 +157,34 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
     ExternalPort: getVirtualChainPort(vchainId),
     InternalHttpPort: 8080,
     Disabled: false,
+    DockerConfig: {
+      Image: `${config.DockerNamespace}/node`,
+      Tag: snapshot.CurrentImageVersions[rolloutGroup]?.['node'] ?? mainVersion,
+      Pull: true,
+    },
+    AllowAccessToSigner: true,
+    AllowAccessToServices: true,
+    Config: {
+      'gossip-listen-port': 4400,
+      'http-address': ':8080',
+      'management-file-path': `http://management-service:8080/vchains/${vchainId}/management`,
+      'signer-endpoint': 'http://signer:7777',
+    },
+  };
+}
+
+// HACK: remove existing vchains
+function getDisabledChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const mainVersion = snapshot.CurrentImageVersions['main']['node'];
+  if (!mainVersion) return undefined;
+  const rolloutGroup = snapshot.CurrentVirtualChains[vchainId.toString()].RolloutGroup;
+
+  return {
+    Id: vchainId,
+    InternalPort: 4400,
+    ExternalPort: getVirtualChainPort(vchainId),
+    InternalHttpPort: 8080,
+    Disabled: true,
     DockerConfig: {
       Image: `${config.DockerNamespace}/node`,
       Tag: snapshot.CurrentImageVersions[rolloutGroup]?.['node'] ?? mainVersion,

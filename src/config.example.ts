@@ -3,8 +3,8 @@ import { ServiceConfiguration } from './config';
 export const exampleConfig: ServiceConfiguration = {
   BootstrapMode: false,
   Port: 8080,
-  EthereumGenesisContract: '0x5454223e3078Db87e55a15bE541cc925f3702eB0',
-  EthereumFirstBlock: 11050000,
+  EthereumGenesisContract: '0xD859701C81119aB12A1e62AF6270aD2AE05c7AB3',
+  EthereumFirstBlock: 11191390,
   EthereumEndpoint: 'http://ganache:7545',
   DockerNamespace: 'orbsnetwork',
   DockerRegistry: 'https://registry.hub.docker.com',
