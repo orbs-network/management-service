@@ -177,6 +177,8 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
 function getDisabledChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConfiguration) {
   const mainVersion = snapshot.CurrentImageVersions['main']['node'];
   if (!mainVersion) return undefined;
+  // HACK: corrupt service2 on purpose  
+  if (vchainId > 1000000) throw new Error('This is an intentional exception');
 
   return {
     Id: vchainId,
