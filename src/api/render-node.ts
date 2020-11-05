@@ -3,6 +3,7 @@ import { StateSnapshot } from '../model/state';
 import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './ports';
 import { JsonResponse, normalizeAddress } from '../helpers';
+import * as Logger from '../logger';
 
 export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const response: JsonResponse = {
@@ -27,32 +28,46 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
   if (config.BootstrapMode) delete response.orchestrator.ExecutableImage;
 
   // include signer if found a viable image for it
-  response.services['signer'] = getSigner(snapshot, config);
-  if (!response.services['signer']) delete response.services['signer'];
+  try {
+    response.services['signer'] = getSigner(snapshot, config);
+    if (!response.services['signer']) delete response.services['signer'];
+  } catch (err) {
+    Logger.error(err.toString());
+  }
 
   // include management-service if found a viable image for it
-  response.services['management-service'] = getManagementService(snapshot, config);
-  if (!response.services['management-service']) delete response.services['management-service'];
+  try {
+    response.services['management-service'] = getManagementService(snapshot, config);
+    if (!response.services['management-service']) delete response.services['management-service'];
+  } catch (err) {
+    Logger.error(err.toString());
+  }
 
   // include ethereum-writer if found a viable image for it and its contract addresses are known
-  response.services['ethereum-writer'] = getEthereumWriter(snapshot, config);
-  if (!response.services['ethereum-writer']) delete response.services['ethereum-writer'];
+  try {
+    response.services['ethereum-writer'] = getEthereumWriter(snapshot, config);
+    if (!response.services['ethereum-writer']) delete response.services['ethereum-writer'];
+  } catch (err) {
+    Logger.error(err.toString());
+  }
 
   // include logs-service if found a viable image for it
-  response.services['logs-service'] = getLogsService(snapshot, config);
-  if (!response.services['logs-service']) delete response.services['logs-service'];
+  try {
+    response.services['logs-service'] = getLogsService(snapshot, config);
+    if (!response.services['logs-service']) delete response.services['logs-service'];
+  } catch (err) {
+    Logger.error(err.toString());
+  }
 
   // include chains if found a viable image for node
-  response.chains = Object.keys(snapshot.CurrentVirtualChains).map((vcId) =>
-    getChain(parseInt(vcId), snapshot, config)
-  );
-  _.remove(response.chains, (vc) => _.isUndefined(vc));
-
-  // HACK: remove existing vchains
-  if (!response.chains || response.chains.length === 0) response.chains = [
-    getDisabledChain(1000003, snapshot, config),
-    getDisabledChain(1000004, snapshot, config),
-  ];
+  try {
+    response.chains = Object.keys(snapshot.CurrentVirtualChains).map((vcId) =>
+      getChain(parseInt(vcId), snapshot, config)
+    );
+    _.remove(response.chains, (vc) => _.isUndefined(vc));
+  } catch (err) {
+    Logger.error(err.toString());
+  }
 
   return response;
 }
@@ -172,32 +187,3 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
     },
   };
 }
-
-// HACK: remove existing vchains
-function getDisabledChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConfiguration) {
-  const mainVersion = snapshot.CurrentImageVersions['main']['node'];
-  if (!mainVersion) return undefined;
-
-  return {
-    Id: vchainId,
-    InternalPort: 4400,
-    ExternalPort: getVirtualChainPort(vchainId),
-    InternalHttpPort: 8080,
-    Disabled: true,
-    DockerConfig: {
-      Image: `${config.DockerNamespace}/node`,
-      Tag: mainVersion,
-      Pull: true,
-    },
-    AllowAccessToSigner: true,
-    AllowAccessToServices: true,
-    Config: {
-      'gossip-listen-port': 4400,
-      'http-address': ':8080',
-      'management-file-path': `http://management-service:8080/vchains/${vchainId}/management`,
-      'signer-endpoint': 'http://signer:7777',
-    },
-  };
-}
-
-//
