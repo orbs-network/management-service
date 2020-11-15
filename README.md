@@ -30,6 +30,7 @@ The service is packaged as a Docker image. It is routinely published from this r
 | `EthereumEndpoint` | Optional URL for an Ethereum full node which will be used for all Ethereum queries. If not given, a local Ethereum light client will be instantiated. |
 | `DockerNamespace` | Namespace for images in the docker registry.<br>Default: `orbsnetwork` |
 | `DockerRegistry` | URL of the docker registry to rely on.<br>Default: `https://registry.hub.docker.com` |
+| `ElectionsAuditOnly` | Boolean whether the node participates in consensus or just stays stand-by for auditing.<br>Default: `false` |
 | `DockerHubPollIntervalSeconds` | How often should the docker registry be polled to search for new image versions. In seconds.<br>Default: `180` (3 minutes) |
 | `RegularRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should regular images (non-hotfix) should be rolled out. In seconds.<br>Default: `86400` (24 hours) |
 | `HotfixRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should hotfix images (non-regular) should be rolled out. In seconds.<br>Default: `3600` (1 hour) |

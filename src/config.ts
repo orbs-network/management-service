@@ -7,6 +7,7 @@ export interface ServiceConfiguration {
   EthereumEndpoint: string;
   DockerNamespace: string;
   DockerRegistry: string;
+  ElectionsAuditOnly: boolean;
   StatusJsonPath: string;
   StatusWriteIntervalSeconds: number;
   DockerHubPollIntervalSeconds: number;
@@ -29,6 +30,7 @@ export const defaultServiceConfiguration = {
   EthereumFirstBlock: 11191390,
   DockerNamespace: 'orbsnetwork',
   DockerRegistry: 'https://registry.hub.docker.com',
+  ElectionsAuditOnly: false,
   StatusJsonPath: './status/status.json',
   StatusWriteIntervalSeconds: 25,
   DockerHubPollIntervalSeconds: 3 * 60,
@@ -110,6 +112,10 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
     DockerRegistry: {
       presence: { allowEmpty: false },
       type: 'string',
+    },
+    ElectionsAuditOnly: {
+      presence: { allowEmpty: false },
+      type: 'boolean',
     },
     StatusJsonPath: {
       presence: { allowEmpty: false },

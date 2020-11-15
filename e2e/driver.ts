@@ -24,6 +24,7 @@ export class TestEnvironment {
       EthereumGenesisContract: this.ethereum.getContractRegistryAddress(),
       EthereumEndpoint: `http://ganache:7545`,
       DockerNamespace: 'orbsnetwork',
+      ElectionsAuditOnly: false,
       StatusWriteIntervalSeconds: 1,
       DockerHubPollIntervalSeconds: 1,
       RegularRolloutWindowSeconds: 2,
@@ -63,7 +64,7 @@ export class TestEnvironment {
     // step 3 - deploy ethereum PoS contracts to ganache
     test.serial.before(async (t) => {
       t.log('[E2E] deploy ethereum PoS contracts to ganache');
-      t.timeout(60 * 1000);
+      t.timeout(2 * 60 * 1000);
       const ganacheAddress = await getAddressForService(this.envName, this.pathToDockerCompose, 'ganache', 7545);
       await this.ethereum.deployContracts(() => {
         return new Web3(

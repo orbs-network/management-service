@@ -64,6 +64,7 @@ export const expectationNodeManagement = {
         SignerEndpoint: 'http://signer:7777',
         EthereumElectionsContract: isValidEthereumAddress,
         NodeOrbsAddress: 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
+        ElectionsAuditOnly: false,
       },
     },
     'logs-service': {

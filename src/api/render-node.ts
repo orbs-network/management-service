@@ -133,6 +133,7 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
       SignerEndpoint: 'http://signer:7777',
       EthereumElectionsContract: elections,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
+      ElectionsAuditOnly: config.ElectionsAuditOnly,
     },
   };
 }

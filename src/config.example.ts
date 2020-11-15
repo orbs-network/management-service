@@ -8,6 +8,7 @@ export const exampleConfig: ServiceConfiguration = {
   EthereumEndpoint: 'http://ganache:7545',
   DockerNamespace: 'orbsnetwork',
   DockerRegistry: 'https://registry.hub.docker.com',
+  ElectionsAuditOnly: false,
   StatusJsonPath: './status/status.json',
   StatusWriteIntervalSeconds: 1,
   DockerHubPollIntervalSeconds: 1,

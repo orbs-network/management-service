@@ -29,6 +29,7 @@ const inputConfigValue = {
   FinalityBufferBlocks: 0,
   DockerNamespace: 'foo',
   DockerRegistry: 'bar',
+  ElectionsAuditOnly: false,
   StatusJsonPath: 'bla',
   Verbose: true,
 };

@@ -40,6 +40,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     EthereumGenesisContract: ethereum.getContractRegistryAddress(),
     EthereumEndpoint: ethereumEndpoint,
     DockerNamespace: 'mydockernamespace',
+    ElectionsAuditOnly: true,
     FinalityBufferBlocks: finalityBufferBlocks,
     EthereumFirstBlock: firstBlock,
     RegularRolloutWindowSeconds: 1000000,
@@ -109,6 +110,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     SignerEndpoint: 'http://signer:7777',
     EthereumElectionsContract: ethereum.getContractAddress('elections'),
     NodeOrbsAddress: 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
+    ElectionsAuditOnly: true,
   });
   t.deepEqual(res.services['logs-service'].Config, {
     Port: 8080,
