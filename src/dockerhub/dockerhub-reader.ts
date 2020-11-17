@@ -2,6 +2,8 @@ import { DockerHubRepo, fetchDockerHubToken } from 'docker-hub-utils';
 import * as Versioning from './versioning';
 import fetch from 'node-fetch';
 
+const FETCH_TIMEOUT_SEC = 45;
+
 export type DockerHubConfiguration = {
   DockerNamespace: string;
   DockerRegistry: string;
@@ -20,6 +22,7 @@ export class DockerHubReader {
     const token = await fetchDockerHubToken(repository as DockerHubRepo);
     const response = await fetch(`${this.config.DockerRegistry}/v2/${repository.user}/${repository.name}/tags/list`, {
       headers: { Authorization: 'Bearer ' + token },
+      timeout: FETCH_TIMEOUT_SEC * 1000,
     });
     const text = await response.text();
     const body = JSON.parse(text);

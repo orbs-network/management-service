@@ -41,6 +41,7 @@ export class ImagePoll {
 
   // single tick of the run loop
   async run() {
+    Logger.log(`ImagePoll: about to poll ${imageNamesToPollForNewVersions} from DockerHub.`);
     for (const imageName of imageNamesToPollForNewVersions) {
       const time = getCurrentClockTime();
       const fetchedVersions = await this.reader.fetchLatestVersion(imageName);
