@@ -25,19 +25,25 @@ The service is packaged as a Docker image. It is routinely published from this r
 
 | Field Name | Description |
 | ---------- | ----------- |
-| `Port` | The port the service listens on for its endpoints.<br>Default: `8080` | 
-| `EthereumGenesisContract` | The hex address (including the leading `0x`) of the Ethereum registry contract used as genesis for all management events. Provide the address of the original contract during the launch of the network. |
-| `EthereumEndpoint` | Optional URL for an Ethereum full node which will be used for all Ethereum queries. If not given, a local Ethereum light client will be instantiated. |
-| `DockerNamespace` | Namespace for images in the docker registry.<br>Default: `orbsnetwork` |
-| `DockerRegistry` | URL of the docker registry to rely on.<br>Default: `https://registry.hub.docker.com` |
-| `ElectionsAuditOnly` | Boolean whether the node participates in consensus or just stays stand-by for auditing.<br>Default: `false` |
+| `BootstrapMode` | Whether the service is operating in bootstrap mode, meaning just upgrade ManagementService itself and suspend all other tasks.<br>Default: `false` |
+| `Port` | The port the service listens on for its endpoints.<br>Default: `8080` |
+| `EthereumGenesisContract` | The hex address (including the leading `0x`) of the Ethereum registry contract used as genesis for all management events. Provide the address of the original contract during the launch of the network.<br>Default: `0xD859701C81119aB12A1e62AF6270aD2AE05c7AB3` (Orbs PoS V2 mainnet) |
+| `EthereumFirstBlock` | Optimization. The earliest block number in Ethereum we can start scanning from (the block number when the genesis registry contract was deployed for example).<br>Default: `11191390` (Orbs PoS V2 mainnet) |
+| `EthereumEndpoint` | HTTP URL endpoint for an Ethereum full node which will be used for all Ethereum queries. |
+| `DockerRegistry` | HTTP URL of the docker registry to rely on.<br>Default: `https://registry.hub.docker.com` |
+| `DockerNamespace` | Namespace for images under the docker registry, for example [`orbsnetwork`](https://hub.docker.com/repository/docker/orbsnetwork/node).<br>Default: `orbsnetwork` |
+| `ElectionsAuditOnly` | Whether the node is audit only and should avoid joining the committee as elected validator and remain standby in the topology instead.<br>Default: `false` |
+| `StatusJsonPath` | The local path on disk where status JSON should be written by the service.<br>Default: `./status/status.json` |
+| `StatusWriteIntervalSeconds` | How often should the service write status JSON file to disk.<br>Default: `25` (seconds) |
 | `DockerHubPollIntervalSeconds` | How often should the docker registry be polled to search for new image versions. In seconds.<br>Default: `180` (3 minutes) |
 | `RegularRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should regular images (non-hotfix) should be rolled out. In seconds.<br>Default: `86400` (24 hours) |
 | `HotfixRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should hotfix images (non-regular) should be rolled out. In seconds.<br>Default: `3600` (1 hour) |
 | `EthereumPollIntervalSeconds` | How often should Ethereum be polled for new blocks containing events. In seconds.<br>Default: `30` (30 seconds) |
-| `FinalityBufferBlocks` | Ethereum finality boundary in blocks, meaning how many blocks from the tip we look it to reduce the chance of re-org.<br>Default: `100` |
-| `EthereumFirstBlock` | Optimization. The earliest block number in Ethereum we can start scanning from (the block number when the genesis registry contract was deployed for example). |
+| `EthereumRequestsPerSecondLimit` | Optional limit over how many requests per second the service is allowed to make, useful for services like Infura that have API throttling and require the service to slow down.<br>Default: `0` (no limit) |
+| `ElectionsStaleUpdateSeconds` | How long should election updates (ReadyToSync and ReadyForCommittee) make by Ethereum Writer servie live before becoming stale, `STALE_TIMEOUT` in the [spec](https://github.com/orbs-network/orbs-spec/blob/master/node-architecture/ETH-WRITER.md).<br>Default: `604800` (7 days) |
+| `FinalityBufferBlocks` | Ethereum finality boundary in blocks, meaning how many blocks from the tip we look it to reduce the chance of re-org.<br>Default: `40` (about 10 minutes) |
 | `Verbose` | Whether logging is extra verbose or not.<br>Default: `false` |
+| `node-address` | The Orbs address of the node, configured during [initialization](https://github.com/orbs-network/validator-instructions) with Polygon, for example `8cd2a24f0c3f50bce2f12c846277491433b47ae0`. |
 
 ## Developer instructions
 
