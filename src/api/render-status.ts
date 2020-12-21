@@ -6,7 +6,7 @@ import { imageNamesToPollForNewVersions } from '../dockerhub/image-poll';
 import { findAllEventsCoveringRange } from '../model/find';
 
 const ETHEREUM_REF_TIME_ALLOWED_DELAY = 20 * 60; // seconds
-const DOCKER_HUB_POLL_ALLOWED_DELAY = 20 * 60; // seconds
+const DOCKER_HUB_POLL_ALLOWED_DELAY = 60 * 60; // seconds
 
 const timeOriginallyLaunched = getCurrentClockTime();
 
