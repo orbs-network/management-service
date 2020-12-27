@@ -24,7 +24,7 @@ http.get('http://localhost:8080/status', (res) => {
 
   res.on('end', () => {
     if (statusCode == 200 && JSON.parse(data).Timestamp) {
-      console.log(data);
+      console.log(data.substr(0, 750) + "...");
       process.exit(0);
     }
     console.log(getStatusFailureJson(`HTTP code: ${statusCode}, response: '${data}'.`));
