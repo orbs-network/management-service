@@ -1,6 +1,7 @@
 import { DockerHubRepo, fetchDockerHubToken } from 'docker-hub-utils';
 import * as Versioning from './versioning';
 import fetch from 'node-fetch';
+import https from 'https';
 
 const FETCH_TIMEOUT_SEC = 45;
 
@@ -10,7 +11,11 @@ export type DockerHubConfiguration = {
 };
 
 export class DockerHubReader {
-  constructor(private config: DockerHubConfiguration) {}
+  private agent: https.Agent;
+
+  constructor(private config: DockerHubConfiguration) {
+    this.agent = new https.Agent();
+  }
 
   // TODO: consider switching to API that requires no auth token:
   //  https://registry.hub.docker.com/v2/repositories/orbsnetwork/node/tags/experimental
@@ -23,6 +28,7 @@ export class DockerHubReader {
     const response = await fetch(`${this.config.DockerRegistry}/v2/${repository.user}/${repository.name}/tags/list`, {
       headers: { Authorization: 'Bearer ' + token },
       timeout: FETCH_TIMEOUT_SEC * 1000,
+      agent: this.agent, // share connection for all requests
     });
     const text = await response.text();
     const body = JSON.parse(text);
