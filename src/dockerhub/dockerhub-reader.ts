@@ -14,7 +14,9 @@ export class DockerHubReader {
   private agent: https.Agent;
 
   constructor(private config: DockerHubConfiguration) {
-    this.agent = new https.Agent();
+    this.agent = new https.Agent({
+      maxSockets: 5,
+    });
   }
 
   // TODO: consider switching to API that requires no auth token:
