@@ -16,7 +16,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
     Timestamp: new Date().toISOString(),
     Payload: {
       Uptime: getCurrentClockTime() - timeOriginallyLaunched,
-      MemoryBytesUsed: process.memoryUsage().heapUsed,
+      MemoryUsage: process.memoryUsage(),
       Version: {
         Semantic: snapshot.CurrentVersion,
       },

@@ -13,7 +13,10 @@ export const expectationStatus = {
   Error: undefined,
   Payload: {
     Uptime: isPositiveNumber,
-    MemoryBytesUsed: isPositiveNumber,
+    MemoryUsage: {
+      heapUsed: isPositiveNumber,
+      rss: isPositiveNumber,
+    },
     CurrentRefTime: 0,
     CurrentRefBlock: 0,
     CurrentCommittee: [],

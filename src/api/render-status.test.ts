@@ -18,7 +18,7 @@ test.serial('[integration] getServiceStatus responds', (t) => {
   t.assert(new Date(res.Timestamp).getTime() > 1400000000);
   t.deepEqual(res.Payload, {
     Uptime: res.Payload.Uptime,
-    MemoryBytesUsed: res.Payload.MemoryBytesUsed,
+    MemoryUsage: res.Payload.MemoryUsage,
     Version: {
       Semantic: '',
     },

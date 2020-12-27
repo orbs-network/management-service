@@ -14,7 +14,10 @@ export const expectationStatus = {
   Error: undefined,
   Payload: {
     Uptime: isPositiveNumber,
-    MemoryBytesUsed: isPositiveNumber,
+    MemoryUsage: {
+      heapUsed: isPositiveNumber,
+      rss: isPositiveNumber,
+    },
     Version: {
       Semantic: isValidImageVersion,
     },
