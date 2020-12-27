@@ -12,6 +12,8 @@ import { renderServiceStatus } from './api/render-status';
 import * as Logger from './logger';
 import { StatusWriter } from './status-writer';
 
+const SOCKET_TIMEOUT_SEC = 60;
+
 // function wrapAsync(fn: RequestHandler): RequestHandler {
 //   return (req, res, next) => fn(req, res, next).catch(next);
 // }
@@ -76,6 +78,8 @@ export function serve(serviceConfig: ServiceConfiguration) {
   const server = app.listen(serviceConfig.Port, '0.0.0.0', () =>
     Logger.log(`Management service listening on port ${serviceConfig.Port}!`)
   );
+  server.setTimeout(SOCKET_TIMEOUT_SEC * 1000);
+  server.requestTimeout = SOCKET_TIMEOUT_SEC * 1000;
   server.on('close', () => {
     blockSyncTask.stop();
     imagePollTask.stop();
