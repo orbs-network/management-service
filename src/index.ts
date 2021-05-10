@@ -1,5 +1,6 @@
 import { ServiceConfiguration } from './config';
 import express, { Request, Response, NextFunction } from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import { errorString } from './helpers';
 import { TaskLoop } from './task-loop';
@@ -8,7 +9,7 @@ import { BlockSync } from './ethereum/block-sync';
 import { ImagePoll } from './dockerhub/image-poll';
 import { renderNodeManagement } from './api/render-node';
 import { renderVirtualChainManagement } from './api/render-vc';
-import { renderServiceStatus } from './api/render-status';
+import { renderServiceStatus, renderServiceStatusAnalytics } from './api/render-status';
 import * as Logger from './logger';
 import { StatusWriter } from './status-writer';
 
@@ -51,6 +52,12 @@ export function serve(serviceConfig: ServiceConfiguration) {
   app.get('/status', (_request, response) => {
     const snapshot = state.getCurrentSnapshot();
     const body = renderServiceStatus(snapshot, blockSync.getRequestStats(), serviceConfig);
+    response.status(200).json(body);
+  });
+
+  app.get('/status-analytics', compression(), (_request, response) => {
+    const snapshot = state.getCurrentSnapshot();
+    const body = renderServiceStatusAnalytics(snapshot, blockSync.getRequestStats(), serviceConfig);
     response.status(200).json(body);
   });
 

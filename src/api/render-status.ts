@@ -11,6 +11,27 @@ const DOCKER_HUB_POLL_ALLOWED_DELAY = 60 * 60; // seconds
 const timeOriginallyLaunched = getCurrentClockTime();
 
 export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsData, config: ServiceConfiguration) {
+  const response: JsonResponse = renderServiceStatusBase(snapshot, stats, config);
+  // TODO remove this
+  response.CommitteeEvents = findAllEventsCoveringRange(
+    snapshot.CommitteeEvents,
+    snapshot.CurrentRefTime - 60 * day,
+    snapshot.CurrentRefTime);
+
+  return response;
+}
+
+export function renderServiceStatusAnalytics(snapshot: StateSnapshot, stats: DailyStatsData, config: ServiceConfiguration) {
+  const response: JsonResponse = renderServiceStatusBase(snapshot, stats, config);
+  response.CommitteeEvents = findAllEventsCoveringRange(
+    snapshot.CommitteeEvents,
+    snapshot.CurrentRefTime - 60 * day,
+    snapshot.CurrentRefTime);
+
+  return response;
+}
+
+function renderServiceStatusBase(snapshot: StateSnapshot, stats: DailyStatsData, config: ServiceConfiguration) {
   const response: JsonResponse = {
     Status: getStatusText(snapshot),
     Timestamp: new Date().toISOString(),
@@ -45,11 +66,6 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
         };
       }),
       EthereumRequestStats: stats,
-      CommitteeEvents: findAllEventsCoveringRange(
-        snapshot.CommitteeEvents,
-        snapshot.CurrentRefTime - 60 * day,
-        snapshot.CurrentRefTime
-      ),
       Config: config,
     },
   };
