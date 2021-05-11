@@ -26,17 +26,19 @@ export class StatusWriter {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function writeFile(filePath: string, jsonObject: any) {
   ensureFileDirectoryExists(filePath);
-  let content = JSON.stringify(jsonObject, null, 2);
+  const content = JSON.stringify(jsonObject, null, 2);
   writeFileSync(filePath, content);
   // log progress
   Logger.log(`Wrote status JSON to ${filePath} (${content.length} bytes).`);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function writeFileCompress(filePath: string, jsonObject: any) {
   ensureFileDirectoryExists(filePath);
-  let content = await gzip(JSON.stringify(jsonObject, null, 2));
+  const content = await gzip(JSON.stringify(jsonObject, null, 2));
   writeFileSync(filePath, content);
   // log progress
   Logger.log(`Wrote status JSON compressed to ${filePath} (${content.length} bytes).`);

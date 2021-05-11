@@ -31,6 +31,8 @@ const inputConfigValue = {
   DockerRegistry: 'bar',
   ElectionsAuditOnly: false,
   StatusJsonPath: 'bla',
+  StatusAnalyticsJsonPath: 'bla',
+  StatusAnalyticsJsonGzipPath: 'bla',
   Verbose: true,
 };
 
