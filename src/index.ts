@@ -55,7 +55,7 @@ export function serve(serviceConfig: ServiceConfiguration) {
     response.status(200).json(body);
   });
 
-  app.get('/status-analytics', compression(), (_request, response) => {
+  app.get('/analytics', compression(), (_request, response) => {
     const snapshot = state.getCurrentSnapshot();
     const body = renderServiceStatusAnalytics(snapshot, blockSync.getRequestStats(), serviceConfig);
     response.status(200).json(body);
