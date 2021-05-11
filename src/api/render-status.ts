@@ -13,7 +13,7 @@ const timeOriginallyLaunched = getCurrentClockTime();
 export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsData, config: ServiceConfiguration) {
   const response: JsonResponse = renderServiceStatusBase(snapshot, stats, config);
   // TODO remove this
-  response.CommitteeEvents = findAllEventsCoveringRange(
+  response.Payload.CommitteeEvents = findAllEventsCoveringRange(
     snapshot.CommitteeEvents,
     snapshot.CurrentRefTime - 60 * day,
     snapshot.CurrentRefTime);
@@ -23,7 +23,7 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
 
 export function renderServiceStatusAnalytics(snapshot: StateSnapshot, stats: DailyStatsData, config: ServiceConfiguration) {
   const response: JsonResponse = renderServiceStatusBase(snapshot, stats, config);
-  response.CommitteeEvents = findAllEventsCoveringRange(
+  response.Payload.CommitteeEvents = findAllEventsCoveringRange(
     snapshot.CommitteeEvents,
     snapshot.CurrentRefTime - 60 * day,
     snapshot.CurrentRefTime);
