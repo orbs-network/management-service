@@ -44,7 +44,7 @@ export function serve(serviceConfig: ServiceConfiguration) {
 
   app.get('/vchains/:vchainId/management/:time', (request, response) => {
     const { vchainId, time } = request.params;
-    const snapshot = state.getCurrentSnapshot();
+    const snapshot = state.getHistoricSnapshot(parseInt(time));
     const body = renderHistoricVirtualChainManagement(parseInt(vchainId), parseInt(time), snapshot, serviceConfig);
     response.status(200).json(body);
   });
