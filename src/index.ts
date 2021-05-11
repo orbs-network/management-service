@@ -8,7 +8,7 @@ import { StateManager } from './model/manager';
 import { BlockSync } from './ethereum/block-sync';
 import { ImagePoll } from './dockerhub/image-poll';
 import { renderNodeManagement } from './api/render-node';
-import { renderVirtualChainManagement } from './api/render-vc';
+import { renderVirtualChainManagement, renderHistoricVirtualChainManagement } from './api/render-vc';
 import { renderServiceStatus, renderServiceStatusAnalytics } from './api/render-status';
 import * as Logger from './logger';
 import { StatusWriter } from './status-writer';
@@ -44,8 +44,8 @@ export function serve(serviceConfig: ServiceConfiguration) {
 
   app.get('/vchains/:vchainId/management/:time', (request, response) => {
     const { vchainId, time } = request.params;
-    const snapshot = state.getHistoricSnapshot(parseInt(time));
-    const body = renderVirtualChainManagement(parseInt(vchainId), snapshot, serviceConfig);
+    const snapshot = state.getCurrentSnapshot();
+    const body = renderHistoricVirtualChainManagement(parseInt(vchainId), parseInt(time), snapshot, serviceConfig);
     response.status(200).json(body);
   });
 
