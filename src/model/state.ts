@@ -39,6 +39,17 @@ export interface StateSnapshot {
       EffectiveStake: number;
     }[];
   }[];
+  LastPageCommitteeEvents: {
+    RefTime: number; // primary
+    RefBlock: number;
+    Committee: {
+      EthAddress: string;
+      OrbsAddress: string;
+      Weight: number;
+      IdentityType: number;
+      EffectiveStake: number;
+    }[];
+  }[];
   LastCommitteeEvent: {
     EthAddress: string;
     OrbsAddress: string;
@@ -140,6 +151,7 @@ export class State {
     CurrentTopology: [],
     CommitteeSets: [],
     CommitteeEvents: [],
+    LastPageCommitteeEvents: [],
     LastCommitteeEvent: [],
     CurrentEffectiveStake: {},
     CurrentDetailedStake: {},
@@ -190,6 +202,7 @@ export class State {
     const committeeEvent = calcNewCommitteeEvent(time, block, this.snapshot);
     if (!_.isEqual(committeeEvent.Committee, this.snapshot.LastCommitteeEvent)) {
       this.snapshot.CommitteeEvents.push(committeeEvent);
+      updateLastPageCommitteeEvents(time, this.snapshot, committeeEvent);
       this.snapshot.LastCommitteeEvent = _.cloneDeep(committeeEvent.Committee);
     }
 
@@ -459,6 +472,14 @@ function calcNewCommitteeEvent(time: number, block: number, snapshot: StateSnaps
       EffectiveStake,
     })),
   };
+}
+
+function updateLastPageCommitteeEvents(time: number, snapshot: StateSnapshot, committee: CommiteeEvent) {
+  snapshot.LastPageCommitteeEvents.push(committee);
+  const oldestTime = time - 24 * 60 * 60; // last page currently 24 hours or at least one event
+  while (snapshot.LastPageCommitteeEvents.length > 1 && snapshot.LastPageCommitteeEvents[0].RefTime < oldestTime) {
+    snapshot.LastPageCommitteeEvents.shift();
+  }
 }
 
 function stringArrToObj(arr: string[]) : { [k: string]: boolean } {
