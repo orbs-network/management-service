@@ -31,6 +31,40 @@ export function renderServiceStatusAnalytics(snapshot: StateSnapshot, stats: Dai
   return response;
 }
 
+export function getParticipation(snapshot: StateSnapshot, periodSec: number) : {[guardianAddress:string]: number} {
+  const aggregatedWeights : {[guardianAddress:string]: number} = {};
+  const upperBound = snapshot.CurrentRefTime; // inclusive
+  const lowerBound = upperBound - periodSec + 1; // inclusive
+  const totalWeight = upperBound - lowerBound + 1; // inclusive
+  let overlappingSetFound = false;
+
+  if (totalWeight < 1) {
+    throw new Error('period must be larger than 0 seconds and the currentRefTime must be larger than period')
+  }
+
+  for (let i = 0; i < snapshot.CommitteeSets.length; i++) {
+    const set = snapshot.CommitteeSets[i];
+    const to = Math.min(snapshot.CommitteeSets[i + 1]?.RefTime - 1 || upperBound, upperBound);
+    const firstSetPartialOverlap = !overlappingSetFound && set.RefTime < lowerBound && to >= lowerBound;
+    const from = firstSetPartialOverlap ? lowerBound : set.RefTime; // clip start of period to window lower bound
+
+    if (to < lowerBound || from > upperBound) {
+      continue; // set does not overlap with window
+    }
+    overlappingSetFound = true;
+
+    const weight = to - from + 1;
+
+    for (let j = 0; j < set.CommitteeEthAddresses.length; j++) { // let me count the weights...
+      const addr = set.CommitteeEthAddresses[j];
+      aggregatedWeights[addr] = (aggregatedWeights[addr] || 0) + weight;
+    }
+  }
+
+  Object.keys(aggregatedWeights).forEach((addr) => aggregatedWeights[addr] /= totalWeight);
+  return aggregatedWeights;
+}
+
 function renderServiceStatusBase(snapshot: StateSnapshot, stats: DailyStatsData, config: ServiceConfiguration) {
   const response: JsonResponse = {
     Status: getStatusText(snapshot),
@@ -52,6 +86,7 @@ function renderServiceStatusBase(snapshot: StateSnapshot, stats: DailyStatsData,
       ProtocolVersionEvents: snapshot.ProtocolVersionEvents,
       CurrentContractAddress: snapshot.CurrentContractAddress,
       ContractAddressChanges: snapshot.ContractAddressChanges,
+      Participation30Days: getParticipation(snapshot, 30 * 24 * 60 * 60),
       Guardians: _.mapValues(snapshot.CurrentOrbsAddress, (OrbsAddress, EthAddress) => {
         return {
           EthAddress,
