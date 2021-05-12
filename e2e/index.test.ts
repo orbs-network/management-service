@@ -4,7 +4,7 @@ import { TestEnvironment } from './driver';
 import { day, sleep, year } from '../src/helpers';
 import { deepDataMatcher } from './deep-matcher';
 import { expectationNodeManagement } from './expectations-node';
-import { expectationVcManagement } from './expectations-vc';
+import { expectationVcManagement, expectationHistoricVcManagement } from './expectations-vc';
 import { expectationStatus } from './expectations-status';
 
 let stateReadyBlockTime = 0;
@@ -98,7 +98,7 @@ test.serial('[E2E] serves /vchains/1000000/management/time as expected', async (
 
   t.log('[E2E] result:', JSON.stringify(res, null, 2));
 
-  const errors = deepDataMatcher(res, expectationVcManagement);
+  const errors = deepDataMatcher(res, expectationHistoricVcManagement);
   t.deepEqual(errors, []);
 
   t.log('fetching vchains/1000000/management/time beyond limit');
