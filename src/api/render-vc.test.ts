@@ -283,4 +283,3 @@ test.serial('[integration] renderHistoricVirtualChainManagement responds accordi
     renderVirtualChainManagement(1009999, state.getCurrentSnapshot(), config);
   });
 });
-

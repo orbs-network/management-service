@@ -212,7 +212,7 @@ export class State {
       this.snapshot.CommitteeSets.push({
         RefBlock: committeeEvent.RefBlock,
         RefTime: committeeEvent.RefTime,
-        CommitteeEthAddresses: newCommitteeSet
+        CommitteeEthAddresses: newCommitteeSet,
       });
     }
 
@@ -389,7 +389,7 @@ type CommitteeMember = {
   Weight: number;
   IdentityType: number;
   EffectiveStake: number;
-}
+};
 
 type CommiteeEvent = {
   RefTime: number;
@@ -482,14 +482,14 @@ function updateLastPageCommitteeEvents(time: number, snapshot: StateSnapshot, co
   }
 }
 
-function stringArrToObj(arr: string[]) : { [k: string]: boolean } {
-  const result : { [k: string]: boolean } = {};
-  arr.forEach(value => {result[value] = true});
+function stringArrToObj(arr: string[]): { [k: string]: boolean } {
+  const result: { [k: string]: boolean } = {};
+  arr.forEach((value) => {result[value] = true;});
   return result;
 }
 
 function calcCommitteeArraySet(member: CommitteeMember[]): string[] {
-  return member.map(m => m.EthAddress);
+  return member.map((m) => m.EthAddress);
 }
 
 function calcStaleElectionsUpdates(time: number, snapshot: StateSnapshot, config: StateConfiguration) {

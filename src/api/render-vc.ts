@@ -30,7 +30,12 @@ export function renderVirtualChainManagement(vchainId: number, snapshot: StateSn
 }
 
 // TODO future, use time to read the correct page of committee events
-export function renderHistoricVirtualChainManagement(vchainId: number, _time: number, snapshot: StateSnapshot, _config: ServiceConfiguration) {
+export function renderHistoricVirtualChainManagement(
+  vchainId: number,
+  _time: number,
+  snapshot: StateSnapshot,
+  _config: ServiceConfiguration
+) {
   // make sure the virtual chain exists
   if (!snapshot.CurrentVirtualChains[vchainId.toString()]) {
     throw new Error(`Virtual chain ${vchainId} does not exist.`);

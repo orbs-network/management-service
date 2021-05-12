@@ -16,30 +16,36 @@ export function renderServiceStatus(snapshot: StateSnapshot, stats: DailyStatsDa
   response.Payload.CommitteeEvents = findAllEventsCoveringRange(
     snapshot.CommitteeEvents,
     snapshot.CurrentRefTime - 60 * day,
-    snapshot.CurrentRefTime);
+    snapshot.CurrentRefTime
+  );
 
   return response;
 }
 
-export function renderServiceStatusAnalytics(snapshot: StateSnapshot, stats: DailyStatsData, config: ServiceConfiguration) {
+export function renderServiceStatusAnalytics(
+  snapshot: StateSnapshot,
+  stats: DailyStatsData,
+  config: ServiceConfiguration
+) {
   const response: JsonResponse = renderServiceStatusBase(snapshot, stats, config);
   response.Payload.CommitteeEvents = findAllEventsCoveringRange(
     snapshot.CommitteeEvents,
     snapshot.CurrentRefTime - 60 * day,
-    snapshot.CurrentRefTime);
+    snapshot.CurrentRefTime
+  );
 
   return response;
 }
 
-export function getParticipation(snapshot: StateSnapshot, periodSec: number) : {[guardianAddress:string]: number} {
-  const aggregatedWeights : {[guardianAddress:string]: number} = {};
+export function getParticipation(snapshot: StateSnapshot, periodSec: number): { [guardianAddress: string]: number } {
+  const aggregatedWeights: { [guardianAddress: string]: number } = {};
   const upperBound = snapshot.CurrentRefTime; // inclusive
   const lowerBound = upperBound - periodSec + 1; // inclusive
   const totalWeight = upperBound - lowerBound + 1; // inclusive
   let overlappingSetFound = false;
 
   if (totalWeight < 1) {
-    throw new Error('period must be larger than 0 seconds and the currentRefTime must be larger than period')
+    throw new Error('period must be larger than 0 seconds and the currentRefTime must be larger than period');
   }
 
   for (let i = 0; i < snapshot.CommitteeSets.length; i++) {
@@ -55,13 +61,13 @@ export function getParticipation(snapshot: StateSnapshot, periodSec: number) : {
 
     const weight = to - from + 1;
 
-    for (let j = 0; j < set.CommitteeEthAddresses.length; j++) { // let me count the weights...
+    for (let j = 0; j < set.CommitteeEthAddresses.length; j++) {
       const addr = set.CommitteeEthAddresses[j];
       aggregatedWeights[addr] = (aggregatedWeights[addr] || 0) + weight;
     }
   }
 
-  Object.keys(aggregatedWeights).forEach((addr) => aggregatedWeights[addr] /= totalWeight);
+  Object.keys(aggregatedWeights).forEach((addr) => (aggregatedWeights[addr] /= totalWeight));
   return aggregatedWeights;
 }
 
