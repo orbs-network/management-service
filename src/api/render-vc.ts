@@ -12,7 +12,7 @@ export function renderVirtualChainManagement(vchainId: number, snapshot: StateSn
 
   const response: JsonResponse = {
     CurrentRefTime: snapshot.CurrentRefTime,
-    PageStartRefTime: snapshot.PageStartRefTime,
+    PageStartRefTime: snapshot.LastPageCommitteeEvents[0].RefTime,
     PageEndRefTime: snapshot.PageEndRefTime,
     VirtualChains: {
       [vchainId.toString()]: {
