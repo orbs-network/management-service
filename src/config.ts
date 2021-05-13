@@ -9,6 +9,8 @@ export interface ServiceConfiguration {
   DockerRegistry: string;
   ElectionsAuditOnly: boolean;
   StatusJsonPath: string;
+  StatusAnalyticsJsonPath: string;
+  StatusAnalyticsJsonGzipPath: string;
   StatusWriteIntervalSeconds: number;
   DockerHubPollIntervalSeconds: number;
   RegularRolloutWindowSeconds: number;
@@ -32,6 +34,8 @@ export const defaultServiceConfiguration = {
   DockerRegistry: 'https://registry.hub.docker.com',
   ElectionsAuditOnly: false,
   StatusJsonPath: './status/status.json',
+  StatusAnalyticsJsonPath: './status/analytics.json',
+  StatusAnalyticsJsonGzipPath: './status/analytics.json.gz',
   StatusWriteIntervalSeconds: 25,
   DockerHubPollIntervalSeconds: 3 * 60,
   RegularRolloutWindowSeconds: 24 * 60 * 60,
@@ -118,6 +122,14 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       type: 'boolean',
     },
     StatusJsonPath: {
+      presence: { allowEmpty: false },
+      type: 'string',
+    },
+    StatusAnalyticsJsonPath: {
+      presence: { allowEmpty: false },
+      type: 'string',
+    },
+    StatusAnalyticsJsonGzipPath: {
       presence: { allowEmpty: false },
       type: 'string',
     },

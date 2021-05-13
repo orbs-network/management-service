@@ -1,8 +1,9 @@
 import { mkdirSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
+import { gzip } from 'node-gzip';
 import { StateManager } from './model/manager';
 import { ServiceConfiguration } from './config';
-import { renderServiceStatus } from './api/render-status';
+import { renderServiceStatus, renderServiceStatusAnalytics } from './api/render-status';
 import { DailyStatsData, sleep } from './helpers';
 import * as Logger from './logger';
 
@@ -14,17 +15,33 @@ export class StatusWriter {
     // render status
     const snapshot = this.state.getCurrentSnapshot();
     const status = renderServiceStatus(snapshot, stats, this.config);
+    const statusAnalytics = renderServiceStatusAnalytics(snapshot, stats, this.config);
 
-    // do the actual writing to local file
-    const filePath = this.config.StatusJsonPath;
-    ensureFileDirectoryExists(filePath);
-    const content = JSON.stringify(status, null, 2);
-    writeFileSync(filePath, content);
+    // do the actual writing to local files
+    writeFile(this.config.StatusJsonPath, status);
+    writeFile(this.config.StatusAnalyticsJsonPath, statusAnalytics);
+    await writeFileCompress(this.config.StatusAnalyticsJsonGzipPath, statusAnalytics);
 
-    // log progress
-    Logger.log(`Wrote status JSON to ${filePath} (${content.length} bytes).`);
     await sleep(0); // for eslint
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function writeFile(filePath: string, jsonObject: any) {
+  ensureFileDirectoryExists(filePath);
+  const content = JSON.stringify(jsonObject, null, 2);
+  writeFileSync(filePath, content);
+  // log progress
+  Logger.log(`Wrote status JSON to ${filePath} (${content.length} bytes).`);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function writeFileCompress(filePath: string, jsonObject: any) {
+  ensureFileDirectoryExists(filePath);
+  const content = await gzip(JSON.stringify(jsonObject, null, 2));
+  writeFileSync(filePath, content);
+  // log progress
+  Logger.log(`Wrote status JSON compressed to ${filePath} (${content.length} bytes).`);
 }
 
 export function ensureFileDirectoryExists(filePath: string) {

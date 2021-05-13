@@ -23,24 +23,22 @@ export interface StateSnapshot {
   }[];
   CurrentCandidates: { EthAddress: string; IsStandby: boolean; Name: string }[];
   CurrentTopology: { EthAddress: string; OrbsAddress: string; Ip: string; Port: number; Name: string }[]; // Port overridden by processor
+  CommitteeSets: {
+    RefTime: number; // primary
+    RefBlock: number;
+    CommitteeEthAddresses: string[];
+  }[];
   CommitteeEvents: {
     RefTime: number; // primary
     RefBlock: number;
-    Committee: {
-      EthAddress: string;
-      OrbsAddress: string;
-      Weight: number;
-      IdentityType: number;
-      EffectiveStake: number;
-    }[];
+    Committee: CommitteeMember[];
   }[];
-  LastCommitteeEvent: {
-    EthAddress: string;
-    OrbsAddress: string;
-    Weight: number;
-    IdentityType: number;
-    EffectiveStake: number;
+  LastPageCommitteeEvents: {
+    RefTime: number; // primary
+    RefBlock: number;
+    Committee: CommitteeMember[];
   }[];
+  LastCommitteeEvent: CommitteeMember[];
   CurrentEffectiveStake: { [EthAddress: string]: number }; // in ORBS
   CurrentDetailedStake: {
     [EthAddress: string]: {
@@ -133,7 +131,9 @@ export class State {
     CurrentCommittee: [],
     CurrentCandidates: [],
     CurrentTopology: [],
+    CommitteeSets: [],
     CommitteeEvents: [],
+    LastPageCommitteeEvents: [],
     LastCommitteeEvent: [],
     CurrentEffectiveStake: {},
     CurrentDetailedStake: {},
@@ -178,12 +178,28 @@ export class State {
     this.snapshot.CurrentRefTime = time;
     this.snapshot.CurrentRefBlock = block;
     this.snapshot.PageEndRefTime = time;
-    // see if we need to generate a new CommitteeEvent
+
+    // before any state changes
     const committeeEvent = calcNewCommitteeEvent(time, block, this.snapshot);
+    const newCommitteeSet = calcCommitteeArraySet(committeeEvent.Committee);
+    const prevCommitteeSet = calcCommitteeArraySet(this.snapshot.LastCommitteeEvent);
+
+    // see if the committee has changed
     if (!_.isEqual(committeeEvent.Committee, this.snapshot.LastCommitteeEvent)) {
       this.snapshot.CommitteeEvents.push(committeeEvent);
+      updateLastPageCommitteeEvents(time, this.snapshot, committeeEvent);
       this.snapshot.LastCommitteeEvent = _.cloneDeep(committeeEvent.Committee);
     }
+
+    // see if the committee set has changed
+    if (!_.isEqual(stringArrToObj(newCommitteeSet), stringArrToObj(prevCommitteeSet))) { // ignore order
+      this.snapshot.CommitteeSets.push({
+        RefBlock: committeeEvent.RefBlock,
+        RefTime: committeeEvent.RefTime,
+        CommitteeEthAddresses: newCommitteeSet,
+      });
+    }
+
     // state sections with special business logic
     calcStaleElectionsUpdates(time, this.snapshot, this.config);
     this.snapshot.CurrentCandidates = calcCandidates(this.snapshot);
@@ -351,16 +367,18 @@ export class State {
 type CommiteeNodes = { EthAddress: string; Weight: number; Name: string }[];
 type CandidateNodes = { EthAddress: string; IsStandby: boolean; Name: string }[];
 type TopologyNodes = { EthAddress: string; OrbsAddress: string; Ip: string; Port: number; Name: string }[];
+type CommitteeMember = {
+  EthAddress: string;
+  OrbsAddress: string;
+  Weight: number;
+  IdentityType: number;
+  EffectiveStake: number;
+};
+
 type CommiteeEvent = {
   RefTime: number;
   RefBlock: number;
-  Committee: {
-    EthAddress: string;
-    OrbsAddress: string;
-    Weight: number;
-    IdentityType: number;
-    EffectiveStake: number;
-  }[];
+  Committee: CommitteeMember[];
 };
 
 function calcCandidates(snapshot: StateSnapshot): CandidateNodes {
@@ -438,6 +456,24 @@ function calcNewCommitteeEvent(time: number, block: number, snapshot: StateSnaps
       EffectiveStake,
     })),
   };
+}
+
+function updateLastPageCommitteeEvents(time: number, snapshot: StateSnapshot, committee: CommiteeEvent) {
+  snapshot.LastPageCommitteeEvents.push(committee);
+  const oldestTime = time - 24 * 60 * 60; // last page currently 24 hours or at least one event
+  while (snapshot.LastPageCommitteeEvents.length > 1 && snapshot.LastPageCommitteeEvents[0].RefTime < oldestTime) {
+    snapshot.LastPageCommitteeEvents.shift();
+  }
+}
+
+function stringArrToObj(arr: string[]): { [k: string]: boolean } {
+  const result: { [k: string]: boolean } = {};
+  arr.forEach((value) => {result[value] = true;});
+  return result;
+}
+
+function calcCommitteeArraySet(member: CommitteeMember[]): string[] {
+  return member.map((m) => m.EthAddress);
 }
 
 function calcStaleElectionsUpdates(time: number, snapshot: StateSnapshot, config: StateConfiguration) {

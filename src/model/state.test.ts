@@ -111,6 +111,17 @@ test('state applies commitee, standby, IPs and topology', (t) => {
     { EthAddress: 'p', IsStandby: false, Name: 'name' },
   ]);
 
+  t.is(s.getSnapshot().CommitteeSets.length, 3);
+
+  t.is(s.getSnapshot().CommitteeSets[0].RefTime, 1000);
+  t.deepEqual(s.getSnapshot().CommitteeSets[0].CommitteeEthAddresses, ['a', 'b', 'c']);
+
+  t.is(s.getSnapshot().CommitteeSets[1].RefTime, 2000);
+  t.deepEqual(s.getSnapshot().CommitteeSets[1].CommitteeEthAddresses, ['b', 'c', 'z']);
+
+  t.is(s.getSnapshot().CommitteeSets[2].RefTime, day + 3000);
+  t.deepEqual(s.getSnapshot().CommitteeSets[2].CommitteeEthAddresses, ['x', 'z']);
+
   t.is(s.getSnapshot().CommitteeEvents.length, 3);
   t.is(s.getSnapshot().CommitteeEvents[0].RefTime, 1000);
   t.deepEqual(s.getSnapshot().CommitteeEvents[0].Committee, [

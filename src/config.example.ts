@@ -10,6 +10,8 @@ export const exampleConfig: ServiceConfiguration = {
   DockerRegistry: 'https://registry.hub.docker.com',
   ElectionsAuditOnly: false,
   StatusJsonPath: './status/status.json',
+  StatusAnalyticsJsonPath: './status/analytics.json',
+  StatusAnalyticsJsonGzipPath: './status/analytics.json.gz',
   StatusWriteIntervalSeconds: 1,
   DockerHubPollIntervalSeconds: 1,
   RegularRolloutWindowSeconds: 5,
