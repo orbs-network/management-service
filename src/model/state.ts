@@ -31,32 +31,14 @@ export interface StateSnapshot {
   CommitteeEvents: {
     RefTime: number; // primary
     RefBlock: number;
-    Committee: {
-      EthAddress: string;
-      OrbsAddress: string;
-      Weight: number;
-      IdentityType: number;
-      EffectiveStake: number;
-    }[];
+    Committee: CommitteeMember[];
   }[];
   LastPageCommitteeEvents: {
     RefTime: number; // primary
     RefBlock: number;
-    Committee: {
-      EthAddress: string;
-      OrbsAddress: string;
-      Weight: number;
-      IdentityType: number;
-      EffectiveStake: number;
-    }[];
+    Committee: CommitteeMember[];
   }[];
-  LastCommitteeEvent: {
-    EthAddress: string;
-    OrbsAddress: string;
-    Weight: number;
-    IdentityType: number;
-    EffectiveStake: number;
-  }[];
+  LastCommitteeEvent: CommitteeMember[];
   CurrentEffectiveStake: { [EthAddress: string]: number }; // in ORBS
   CurrentDetailedStake: {
     [EthAddress: string]: {
@@ -196,10 +178,13 @@ export class State {
     this.snapshot.CurrentRefTime = time;
     this.snapshot.CurrentRefBlock = block;
     this.snapshot.PageEndRefTime = time;
+
+    // before any state changes
+    const committeeEvent = calcNewCommitteeEvent(time, block, this.snapshot);
+    const newCommitteeSet = calcCommitteeArraySet(committeeEvent.Committee);
     const prevCommitteeSet = calcCommitteeArraySet(this.snapshot.LastCommitteeEvent);
 
-    // see if we need to generate a new CommitteeEvent
-    const committeeEvent = calcNewCommitteeEvent(time, block, this.snapshot);
+    // see if the committee has changed
     if (!_.isEqual(committeeEvent.Committee, this.snapshot.LastCommitteeEvent)) {
       this.snapshot.CommitteeEvents.push(committeeEvent);
       updateLastPageCommitteeEvents(time, this.snapshot, committeeEvent);
@@ -207,7 +192,6 @@ export class State {
     }
 
     // see if the committee set has changed
-    const newCommitteeSet = calcCommitteeArraySet(committeeEvent.Committee);
     if (!_.isEqual(stringArrToObj(newCommitteeSet), stringArrToObj(prevCommitteeSet))) { // ignore order
       this.snapshot.CommitteeSets.push({
         RefBlock: committeeEvent.RefBlock,
