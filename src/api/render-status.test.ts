@@ -138,9 +138,8 @@ test.serial('[integration] getParticipation responds', (t) => {
   const res6 = getParticipation(state.getSnapshot(), 10);
   t.log('res6:', JSON.stringify(res5, null, 2));
   t.deepEqual(res6, {
-    a: 2 / 10 // despite
+    a: 2 / 10, // count 1060 only once
   });
-
 });
 
 function CommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {
