@@ -61,6 +61,8 @@ test.serial('[integration] getParticipation responds', (t) => {
   CommitteeChange(state, 1019, 'c', true);
   state.applyNewTimeRef(1019, block++);
 
+  state.applyNewTimeRef(1020, block++);
+
   // process
   const res1 = getParticipation(state.getSnapshot(), 40);
 
@@ -94,7 +96,7 @@ test.serial('[integration] getParticipation responds', (t) => {
   state.applyNewTimeRef(1020, block++);
 
   //
-  state.applyNewTimeRef(1025, block++);
+  state.applyNewTimeRef(1026, block++);
   const res4 = getParticipation(state.getSnapshot(), 40);
   t.log('res4:', JSON.stringify(res4, null, 2));
   t.deepEqual(res4, {
@@ -108,7 +110,7 @@ test.serial('[integration] getParticipation responds', (t) => {
   state.applyNewTimeRef(1029, block++);
 
   // ten more seconds pass without change
-  state.applyNewTimeRef(1039, block++);
+  state.applyNewTimeRef(1040, block++);
 
   const res5 = getParticipation(state.getSnapshot(), 40);
 
@@ -118,6 +120,27 @@ test.serial('[integration] getParticipation responds', (t) => {
     b: 30 / 40, // in: 1010-1039 ==> 30
     c: 21 / 40, // in: 1019-1039 ==> 21
   });
+
+  CommitteeChange(state, 1050, 'a', false);
+  CommitteeChange(state, 1050, 'b', false);
+  CommitteeChange(state, 1050, 'c', false);
+  state.applyNewTimeRef(1050, block++);
+
+  CommitteeChange(state, 1059, 'a', true);
+  state.applyNewTimeRef(1059, block++);
+
+  CommitteeChange(state, 1060, 'a', false);
+  CommitteeChange(state, 1060, 'a', true);
+  CommitteeChange(state, 1060, 'a', false);
+  CommitteeChange(state, 1060, 'a', true);
+  state.applyNewTimeRef(1060, block++);
+  state.applyNewTimeRef(1061, block++);
+  const res6 = getParticipation(state.getSnapshot(), 10);
+  t.log('res6:', JSON.stringify(res5, null, 2));
+  t.deepEqual(res6, {
+    a: 2 / 10 // despite
+  });
+
 });
 
 function CommitteeChange(s: State, time: number, addr: string, inCommittee: boolean) {
