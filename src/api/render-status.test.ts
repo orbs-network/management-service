@@ -1,6 +1,6 @@
 import test from 'ava';
 import { StateManager } from '../model/manager';
-import { renderServiceStatus, getParticipation } from './render-status';
+import { getParticipation, renderServiceStatus, renderServiceStatusAnalytics } from './render-status';
 import { exampleConfig } from '../config.example';
 import { DailyStatsData } from '../helpers';
 import { State } from '../model/state';
@@ -11,6 +11,44 @@ test.serial('[integration] getServiceStatus responds', (t) => {
 
   // process
   const res = renderServiceStatus(state.getCurrentSnapshot(), stats, exampleConfig);
+
+  t.log('result:', JSON.stringify(res, null, 2));
+
+  t.assert(res.Error.length > 0);
+  t.assert(res.Status.length > 0);
+  t.assert(new Date(res.Timestamp).getTime() > 1400000000);
+  t.deepEqual(res.Payload, {
+    Uptime: res.Payload.Uptime,
+    MemoryUsage: res.Payload.MemoryUsage,
+    Version: {
+      Semantic: '',
+    },
+    CurrentRefTime: 0,
+    CurrentRefBlock: 0,
+    CurrentCommittee: [],
+    CurrentCandidates: [],
+    CurrentTopology: [],
+    CurrentImageVersions: { main: {}, canary: {} },
+    CurrentImageVersionsUpdater: { main: {}, canary: {} },
+    CurrentVirtualChains: {},
+    ProtocolVersionEvents: { main: [], canary: [] },
+    CurrentContractAddress: {
+      contractRegistry: exampleConfig.EthereumGenesisContract,
+    },
+    ContractAddressChanges: [],
+    Guardians: {},
+    EthereumRequestStats: [],
+    Participation30Days: {},
+    Config: exampleConfig,
+  });
+});
+
+test.serial('[integration] getServiceStatusAnalytics responds', (t) => {
+  const state = new StateManager(exampleConfig);
+  const stats: DailyStatsData = [];
+
+  // process
+  const res = renderServiceStatusAnalytics(state.getCurrentSnapshot(), stats, exampleConfig);
 
   t.log('result:', JSON.stringify(res, null, 2));
 
