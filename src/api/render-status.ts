@@ -32,9 +32,9 @@ export function renderServiceStatusAnalytics(
 
 export function getParticipation(snapshot: StateSnapshot, periodSec: number): { [guardianAddress: string]: number } {
   const aggregatedWeights: { [guardianAddress: string]: number } = {};
-  const upperBound = snapshot.CurrentRefTime; // inclusive
-  const lowerBound = upperBound - periodSec + 1; // inclusive
-  const totalWeight = upperBound - lowerBound + 1; // inclusive
+  const upperBound = snapshot.CurrentRefTime;
+  const lowerBound = upperBound - periodSec;
+  const totalWeight = upperBound - lowerBound;
   let overlappingSetFound = false;
 
   if (totalWeight < 1) {
@@ -43,16 +43,16 @@ export function getParticipation(snapshot: StateSnapshot, periodSec: number): { 
 
   for (let i = 0; i < snapshot.CommitteeSets.length; i++) {
     const set = snapshot.CommitteeSets[i];
-    const to = Math.min(snapshot.CommitteeSets[i + 1]?.RefTime - 1 || upperBound, upperBound);
+    const to = Math.min(snapshot.CommitteeSets[i + 1]?.RefTime || upperBound, upperBound);
     const firstSetPartialOverlap = !overlappingSetFound && set.RefTime < lowerBound && to >= lowerBound;
     const from = firstSetPartialOverlap ? lowerBound : set.RefTime; // clip start of period to window lower bound
 
-    if (to < lowerBound || from > upperBound) {
+    if (to <= lowerBound || from >= upperBound) {
       continue; // set does not overlap with window
     }
     overlappingSetFound = true;
 
-    const weight = to - from + 1;
+    const weight = to - from;
 
     for (let j = 0; j < set.CommitteeEthAddresses.length; j++) {
       const addr = set.CommitteeEthAddresses[j];
