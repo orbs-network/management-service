@@ -1,5 +1,6 @@
 import { DockerHubRepo, fetchDockerHubToken } from 'docker-hub-utils';
 import * as Versioning from './versioning';
+import * as Logger from '../logger';
 import fetch from 'node-fetch';
 import https from 'https';
 
@@ -27,23 +28,29 @@ export class DockerHubReader {
     const res: { [RolloutGroup: string]: string } = {};
     const repository = { user: this.config.DockerNamespace, name: repositoryName };
     const token = await fetchDockerHubToken(repository as DockerHubRepo);
-    const response = await fetch(`${this.config.DockerRegistry}/v2/${repository.user}/${repository.name}/tags/list`, {
+    const dockerFetchURL = `${this.config.DockerRegistry}/v2/${repository.user}/${repository.name}/tags/list`;
+    const response = await fetch(dockerFetchURL, {
       headers: { Authorization: 'Bearer ' + token },
       timeout: FETCH_TIMEOUT_SEC * 1000,
       agent: this.agent, // share connection for all requests
     });
-    const text = await response.text();
-    const body = JSON.parse(text);
-    const tags = body?.tags;
-    if (tags && Array.isArray(tags) && tags.every((t) => typeof t === 'string')) {
-      const mainVersions = tags.filter(Versioning.isMain).sort(Versioning.compare);
-      if (mainVersions.length) {
-        res['main'] = mainVersions[mainVersions.length - 1];
+    if (response.ok && String(response.headers.get('content-type')).toLowerCase().includes('application/json')) {
+      const body = await response.json();
+      const tags = body?.tags;
+      if (tags && Array.isArray(tags) && tags.every((t) => typeof t === 'string')) {
+        const mainVersions = tags.filter(Versioning.isMain).sort(Versioning.compare);
+        if (mainVersions.length) {
+          res['main'] = mainVersions[mainVersions.length - 1];
+        }
+        const canaryVersions = tags.filter(Versioning.isCanary).sort(Versioning.compare);
+        if (canaryVersions.length) {
+          res['canary'] = canaryVersions[canaryVersions.length - 1];
+        }
+      } else {
+        Logger.error(`ImagePoll: repository ${repository.name} could not read tag or empty list from URL ${dockerFetchURL}.`);
       }
-      const canaryVersions = tags.filter(Versioning.isCanary).sort(Versioning.compare);
-      if (canaryVersions.length) {
-        res['canary'] = canaryVersions[canaryVersions.length - 1];
-      }
+    } else {
+      Logger.error(`ImagePoll: repository ${repository.name} failed to get response 200 and/or JSON from URL ${dockerFetchURL}.`);
     }
     return res;
   }
