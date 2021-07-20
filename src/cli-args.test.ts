@@ -32,7 +32,6 @@ const inputConfigValue = {
   ElectionsAuditOnly: false,
   StatusJsonPath: 'bla',
   StatusAnalyticsJsonPath: 'bla',
-  StatusAnalyticsJsonGzipPath: 'bla',
   Verbose: true,
 };
 

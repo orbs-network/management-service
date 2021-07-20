@@ -11,7 +11,6 @@ export const exampleConfig: ServiceConfiguration = {
   ElectionsAuditOnly: false,
   StatusJsonPath: './status/status.json',
   StatusAnalyticsJsonPath: './status/analytics.json',
-  StatusAnalyticsJsonGzipPath: './status/analytics.json.gz',
   StatusWriteIntervalSeconds: 1,
   DockerHubPollIntervalSeconds: 1,
   RegularRolloutWindowSeconds: 5,
