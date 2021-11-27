@@ -1,5 +1,5 @@
 import test from 'ava';
-import {isValid, compare, isHotfix, isImmediate, parseImageTag} from './versioning';
+import { isValid, compare, isHotfix, isImmediate, parseImageTag } from './versioning';
 
 test('isValid returns true on valid versions', (t) => {
   const validTags = [
@@ -167,16 +167,12 @@ test('regression sort', (t) => {
   t.deepEqual(sorted, ['v1.3.9', 'myhub.com/myorg/node:v1.3.11', 'v1.3.13']);
 });
 test('can parse image name from the tag', (t) => {
-  const validTags = [
-    'v1.1.4-canary',
-    'myhub.com:23433/myorg/node:v1.0.6-canary-hotfix',
-    ':v0.0.8',
-  ];
+  const validTags = ['v1.1.4-canary', 'myhub.com:23433/myorg/node:v1.0.6-canary-hotfix', ':v0.0.8'];
   const breakDown = [
-    {Image: '', Tag: 'v1.1.4-canary'},
-    {Image: 'myhub.com:23433/myorg/node', Tag: 'v1.0.6-canary-hotfix'},
-    {Image: '', Tag: 'v0.0.8'},
-  ]
+    { Image: '', Tag: 'v1.1.4-canary' },
+    { Image: 'myhub.com:23433/myorg/node', Tag: 'v1.0.6-canary-hotfix' },
+    { Image: '', Tag: 'v0.0.8' },
+  ];
   for (let i = 0; i < validTags.length; i++) {
     t.deepEqual(parseImageTag(validTags[i]), breakDown[i]);
   }

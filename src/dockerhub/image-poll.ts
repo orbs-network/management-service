@@ -4,7 +4,7 @@ import { DeploymentDescriptorConfiguration, DockerHubReader } from './dockerhub-
 import { getCurrentClockTime } from '../helpers';
 import * as Versioning from '../dockerhub/versioning';
 import * as Logger from '../logger';
-import {services} from "./deployment-descriptor";
+import { services } from './deployment-descriptor';
 
 export const imageNamesToPollForNewVersions: services[] = [
   'management-service',

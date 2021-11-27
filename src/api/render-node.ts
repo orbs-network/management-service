@@ -4,7 +4,7 @@ import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './ports';
 import { JsonResponse, normalizeAddress } from '../helpers';
 import * as Logger from '../logger';
-import {parseImageTag} from "../dockerhub/versioning";
+import { parseImageTag } from '../dockerhub/versioning';
 
 export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const response: JsonResponse = {
@@ -62,9 +62,7 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
   // include chains if found a viable image for node
   try {
-    response.chains = Object.keys(snapshot.CurrentVirtualChains).map((vcId) =>
-      getChain(parseInt(vcId), snapshot)
-    );
+    response.chains = Object.keys(snapshot.CurrentVirtualChains).map((vcId) => getChain(parseInt(vcId), snapshot));
     _.remove(response.chains, (vc) => _.isUndefined(vc));
   } catch (err) {
     Logger.error(err.toString());

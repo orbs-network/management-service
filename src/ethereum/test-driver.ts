@@ -37,7 +37,7 @@ export class EthereumTestDriver {
 
   async closeConnections() {
     const provider = this.orbsPosV2Driver?.web3?.currentProvider;
-    const hdwalletProvider = (provider as unknown) as HDWalletProvider;
+    const hdwalletProvider = provider as unknown as HDWalletProvider;
     if (hdwalletProvider?.engine?.stop) {
       await hdwalletProvider.engine.stop();
     }

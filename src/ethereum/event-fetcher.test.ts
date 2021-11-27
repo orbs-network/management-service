@@ -51,7 +51,7 @@ class MockEthereumReader {
 }
 
 function getMockReader(eventStream = getRandomEvents()): MockEthereumReader & EthereumReader {
-  return (new MockEthereumReader(eventStream) as unknown) as MockEthereumReader & EthereumReader;
+  return new MockEthereumReader(eventStream) as unknown as MockEthereumReader & EthereumReader;
 }
 
 // fetcher defaults overrides for tests

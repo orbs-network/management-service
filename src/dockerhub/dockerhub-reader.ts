@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import https from 'https';
-import {DeploymentDescriptor, services} from "./deployment-descriptor";
+import { DeploymentDescriptor, services } from './deployment-descriptor';
 
 const FETCH_TIMEOUT_SEC = 45;
 
@@ -20,7 +20,7 @@ export class DockerHubReader {
   async fetchLatestDeploymentDescriptor(): Promise<DeploymentDescriptor> {
     const response = await fetch(this.config.DeploymentDescriptorUrl, {
       timeout: FETCH_TIMEOUT_SEC * 1000,
-      agent: this.agent
+      agent: this.agent,
     });
     return response.json();
   }
@@ -30,17 +30,16 @@ export class DockerHubReader {
     const res: { [RolloutGroup: string]: string } = {};
     const response = await fetch(this.config.DeploymentDescriptorUrl, {
       timeout: FETCH_TIMEOUT_SEC * 1000,
-      agent: this.agent
+      agent: this.agent,
     });
     const body: DeploymentDescriptor = await response.json();
 
     if (body.ImageVersions[repositoryName]?.image) {
-      res['main'] = body.ImageVersions[repositoryName]!.image
+      res['main'] = body.ImageVersions[repositoryName]!.image;
     }
 
-    if (repositoryName == "node" &&
-        body.ImageVersions["node-canary"]?.image) {
-      res['canary'] = body.ImageVersions["node-canary"]?.image
+    if (repositoryName == 'node' && body.ImageVersions['node-canary']?.image) {
+      res['canary'] = body.ImageVersions['node-canary']?.image;
     }
 
     // TODO where do we check that 1) the tag is well formed 2) the tag exists

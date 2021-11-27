@@ -38,11 +38,11 @@ const IMMEDIATE_REGULAR_EXPRESSION = /v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(
 export function isValid(src: string): boolean {
   const result = REGULAR_EXPRESSION.exec(src);
   if (!result) {
-    return false
+    return false;
   }
 
   if (result.index === 0) {
-    return true // missing the image name part - TODO should this be false?
+    return true; // missing the image name part - TODO should this be false?
   }
 
   return src.charAt(result.index - 1) === ':'; // the legal delimiter between image and tag
@@ -56,34 +56,34 @@ export function isImmediate(src: string): boolean {
   return IMMEDIATE_REGULAR_EXPRESSION.test(src);
 }
 
-export function parseImageTag(src: string): { Image: string, Tag: string } {
+export function parseImageTag(src: string): { Image: string; Tag: string } {
   const result = REGULAR_EXPRESSION.exec(src);
 
   if (!result) {
-    throw new Error('Invalid version tag')
+    throw new Error('Invalid version tag');
   }
 
   if (result.index === 0) {
     return {
       Image: '',
-      Tag: src
-    }
+      Tag: src,
+    };
   }
 
   if (result.index === 1) {
     if (src.startsWith(':')) {
       return {
         Image: '',
-        Tag: src.slice(1)
-      }
+        Tag: src.slice(1),
+      };
     }
-    throw new Error('Invalid Image name')
+    throw new Error('Invalid Image name');
   }
 
-  return  {
-    Image: src.slice(0,result.index - 1),
-    Tag: src.slice(result.index)
-  }
+  return {
+    Image: src.slice(0, result.index - 1),
+    Tag: src.slice(result.index),
+  };
 }
 
 export function compare(a: string, b: string): number {
