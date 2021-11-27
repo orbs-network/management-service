@@ -5,8 +5,7 @@ export interface ServiceConfiguration {
   Port: number;
   EthereumGenesisContract: string;
   EthereumEndpoint: string;
-  DockerNamespace: string;
-  DockerRegistry: string;
+  DeploymentDescriptorUrl: string;
   ElectionsAuditOnly: boolean;
   StatusJsonPath: string;
   StatusAnalyticsJsonPath: string;
@@ -30,8 +29,7 @@ export const defaultServiceConfiguration = {
   Port: 8080,
   EthereumGenesisContract: '0xD859701C81119aB12A1e62AF6270aD2AE05c7AB3',
   EthereumFirstBlock: 11191390,
-  DockerNamespace: 'orbsnetwork',
-  DockerRegistry: 'https://registry.hub.docker.com',
+  DeploymentDescriptorUrl: 'https://orbs-network.github.io/mainnet-deployment/manifest.json',
   ElectionsAuditOnly: false,
   StatusJsonPath: './status/status.json',
   StatusAnalyticsJsonPath: './status/analytics.json',
@@ -62,6 +60,13 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       presence: { allowEmpty: false },
       type: 'number',
       numericality: { noStrings: true },
+    },
+    DeploymentDescriptorUrl: {
+      presence: { allowEmpty: false },
+      type: 'string',
+      url: {
+        allowLocal: true,
+      },
     },
     ElectionsStaleUpdateSeconds: {
       presence: { allowEmpty: false },
@@ -108,14 +113,6 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       presence: { allowEmpty: false },
       type: 'integer',
       numericality: { noStrings: true },
-    },
-    DockerNamespace: {
-      presence: { allowEmpty: false },
-      type: 'string',
-    },
-    DockerRegistry: {
-      presence: { allowEmpty: false },
-      type: 'string',
     },
     ElectionsAuditOnly: {
       presence: { allowEmpty: false },

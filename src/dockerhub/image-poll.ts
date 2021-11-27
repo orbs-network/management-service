@@ -1,11 +1,12 @@
 import crypto from 'crypto';
 import { StateManager } from '../model/manager';
-import { DockerHubConfiguration, DockerHubReader } from './dockerhub-reader';
+import { DeploymentDescriptorConfiguration, DockerHubReader } from './dockerhub-reader';
 import { getCurrentClockTime } from '../helpers';
 import * as Versioning from '../dockerhub/versioning';
 import * as Logger from '../logger';
+import {services} from "./deployment-descriptor";
 
-export const imageNamesToPollForNewVersions = [
+export const imageNamesToPollForNewVersions: services[] = [
   'management-service',
   'node',
   'signer',
@@ -13,7 +14,7 @@ export const imageNamesToPollForNewVersions = [
   'logs-service',
 ];
 
-export type ImagePollConfiguration = DockerHubConfiguration & {
+export type ImagePollConfiguration = DeploymentDescriptorConfiguration & {
   BootstrapMode: boolean;
   RegularRolloutWindowSeconds: number;
   HotfixRolloutWindowSeconds: number;

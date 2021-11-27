@@ -21,6 +21,7 @@ const inputConfigValue = {
   EthereumFirstBlock: 0,
   EthereumPollIntervalSeconds: 0.5,
   EthereumRequestsPerSecondLimit: 0,
+  DeploymentDescriptorUrl: 'https://buzz.com',
   ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
   RegularRolloutWindowSeconds: 1,
   HotfixRolloutWindowSeconds: 1,

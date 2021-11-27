@@ -1,35 +1,33 @@
 import test from 'ava';
-import { nockDockerHub } from './test-driver';
-import { DockerHubReader } from './dockerhub-reader';
+import {nockDeploymentManifestJson} from './test-driver';
+import {DeploymentDescriptorConfiguration, DockerHubReader} from './dockerhub-reader';
+import {DeploymentDescriptor} from "./deployment-descriptor";
 
 test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) => {
-  const config = {
-    DockerNamespace: 'orbsnetwork',
-    DockerRegistry: 'https://registry.hub.docker.com',
+  const config : DeploymentDescriptorConfiguration= {
+    DeploymentDescriptorUrl : 'https://orbs-network.github.io/mainnet-deployment/manifest.json'
   };
   const reader = new DockerHubReader(config);
-  const repository = { user: config.DockerNamespace, name: 'node' };
-  const tags = [
-    'audit',
-    'v0.0.7',
-    'v1.1.1',
-    'v1.1.0-hotfix',
-    'v0.9.9',
-    'v0.0.0',
-    'v9.9.9 ',
-    'v1.2.3-canary',
-    'v5.4.3-canary-hotfix',
-    'foo v4.0.4 bar',
-    'v1.0.10',
-    'v9.9.8-canary ',
-    'v0.0.1-canary-hotfix',
-    '0432a81f',
-    'G-0-N',
-    'v9.9.9-0432a81f',
-  ];
-  const scope = nockDockerHub({ ...repository, tags });
-  const latestVersion = await reader.fetchLatestVersion(repository.name);
-  t.is(latestVersion['main'], 'v1.1.1');
-  t.is(latestVersion['canary'], 'v5.4.3-canary-hotfix');
+  const deploymentDescriptor: DeploymentDescriptor = {
+    Desc: "Stable and Canary versions for Orbs network",
+    SchemaVersion: 1,
+    ImageVersions: {
+      "management-service-bootstrap": {
+        "image": "orbsnetworkstaging/management-service:experimental",
+        "comment": "for use by a node deployment/installation tool"
+      },
+      "management-service": {"image": "orbsnetworkstaging/management-service:experimental"},
+      "node": {"image": "orbsnetwork/node:v2.0.15"},
+      "node-canary": {"image": "orbsnetwork/node:v2.0.16"},
+      "signer": {"image": "orbsnetwork/signer:v2.3.0"},
+      "ethereum-writer": {"image": "orbsnetwork/ethereum-writer:v1.2.5"},
+      "logs-service": {"image": "orbsnetwork/logs-service:v1.1.4"}
+    }
+  }
+
+  const scope = nockDeploymentManifestJson(deploymentDescriptor);
+  const latestVersion = await reader.fetchLatestVersion('node');
+  t.is(latestVersion['main'], 'orbsnetwork/node:v2.0.15');
+  t.is(latestVersion['canary'], 'orbsnetwork/node:v2.0.16');
   scope.done();
 });

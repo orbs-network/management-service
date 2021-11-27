@@ -1,17 +1,12 @@
 import nock from 'nock';
+import {DeploymentDescriptor} from "./deployment-descriptor";
 
-export function nockDockerHub(...repositories: { user: string; name: string; tags: string[] }[]) {
-  nock(/docker/); // prevent requests to docker domain from goinig to network
-  nock('https://auth.docker.io') // allow asking for token from auth
-    .get(/token/)
-    .times(repositories.length) // once per repo
-    .reply(200, { token: 'token placeholder' });
-
-  let registryScope = nock('https://registry.hub.docker.com'); // expect polling tags list
-  for (const repository of repositories) {
+export function nockDeploymentManifestJson(desc: DeploymentDescriptor) {
+    let registryScope = nock('https://orbs-network.github.io'); // expect manifest
     registryScope = registryScope
-      .get(`/v2/${repository.user}/${repository.name}/tags/list`) // for each repo
-      .reply(200, { tags: repository.tags });
-  }
-  return registryScope;
+        .log(console.log)
+        .get(`/mainnet-deployment/manifest.json`) // for each repo
+        .reply(200, desc);
+
+    return registryScope;
 }
