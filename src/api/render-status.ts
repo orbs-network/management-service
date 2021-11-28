@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
 import { ServiceConfiguration } from '../config';
 import { getCurrentClockTime, JsonResponse, DailyStatsData, day } from '../helpers';
-import { imageNamesToPollForNewVersions } from '../dockerhub/image-poll';
+import { imageNamesToPollForNewVersions } from '../deployment/image-poll';
 import { findAllEventsCoveringRange } from '../model/find';
 
 const ETHEREUM_REF_TIME_ALLOWED_DELAY = 20 * 60; // seconds

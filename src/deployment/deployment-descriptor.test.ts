@@ -1,13 +1,12 @@
 import test from 'ava';
 import { nockDeploymentManifestJson } from './test-driver';
-import { DeploymentDescriptorConfiguration, DockerHubReader } from './dockerhub-reader';
-import { DeploymentDescriptor } from './deployment-descriptor';
+import {DeploymentDescriptor, DeploymentDescriptorConfiguration, DeploymentDescriptorReader} from './deployment-descriptor';
 
 test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) => {
   const config: DeploymentDescriptorConfiguration = {
     DeploymentDescriptorUrl: 'https://orbs-network.github.io/mainnet-deployment/manifest.json',
   };
-  const reader = new DockerHubReader(config);
+  const reader = new DeploymentDescriptorReader(config);
   const deploymentDescriptor: DeploymentDescriptor = {
     Desc: 'Stable and Canary versions for Orbs network',
     SchemaVersion: 1,
@@ -26,8 +25,8 @@ test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) =
   };
 
   const scope = nockDeploymentManifestJson(deploymentDescriptor);
-  const latestVersion = await reader.fetchLatestVersion('node');
-  t.is(latestVersion['main'], 'orbsnetwork/node:v2.0.15');
-  t.is(latestVersion['canary'], 'orbsnetwork/node:v2.0.16');
+  const latestVersion = await reader.fetchLatestVersion(['node']);
+  t.is(latestVersion['node']['main'], 'orbsnetwork/node:v2.0.15');
+  t.is(latestVersion['node']['canary'], 'orbsnetwork/node:v2.0.16');
   scope.done();
 });

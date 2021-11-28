@@ -4,7 +4,7 @@ import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './ports';
 import { JsonResponse, normalizeAddress } from '../helpers';
 import * as Logger from '../logger';
-import { parseImageTag } from '../dockerhub/versioning';
+import { parseImageTag } from '../deployment/versioning';
 
 export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const response: JsonResponse = {

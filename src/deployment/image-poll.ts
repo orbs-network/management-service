@@ -1,10 +1,9 @@
 import crypto from 'crypto';
 import { StateManager } from '../model/manager';
-import { DeploymentDescriptorConfiguration, DockerHubReader } from './dockerhub-reader';
+import {DeploymentDescriptorConfiguration, DeploymentDescriptorReader, services} from './deployment-descriptor';
 import { getCurrentClockTime } from '../helpers';
-import * as Versioning from '../dockerhub/versioning';
+import * as Versioning from './/versioning';
 import * as Logger from '../logger';
-import { services } from './deployment-descriptor';
 
 export const imageNamesToPollForNewVersions: services[] = [
   'management-service',
@@ -26,7 +25,7 @@ interface PendingUpdate {
 }
 
 export class ImagePoll {
-  private reader: DockerHubReader;
+  private reader: DeploymentDescriptorReader;
   private delayedUpdates: { [RolloutGroup: string]: { [ImageName: string]: PendingUpdate } };
 
   constructor(private state: StateManager, private config: ImagePollConfiguration) {
@@ -35,7 +34,7 @@ export class ImagePoll {
       imageNamesToPollForNewVersions.splice(0);
       imageNamesToPollForNewVersions.push('management-service');
     }
-    this.reader = new DockerHubReader(config);
+    this.reader = new DeploymentDescriptorReader(config);
     this.delayedUpdates = { main: {}, canary: {} };
     Logger.log(`ImagePoll: initialized.`);
   }
@@ -43,10 +42,10 @@ export class ImagePoll {
   // single tick of the run loop
   async run() {
     Logger.log(`ImagePoll: about to poll ${imageNamesToPollForNewVersions} from DockerHub.`);
+    const time = getCurrentClockTime();
+    const fetchedVersions = await this.reader.fetchLatestVersion(imageNamesToPollForNewVersions);
     for (const imageName of imageNamesToPollForNewVersions) {
-      const time = getCurrentClockTime();
-      const fetchedVersions = await this.reader.fetchLatestVersion(imageName);
-      for (const [rolloutGroup, imageVersion] of Object.entries(fetchedVersions)) {
+      for (const [rolloutGroup, imageVersion] of Object.entries(fetchedVersions[imageName])) {
         if (this.config.BootstrapMode) {
           // bootstrap is just management-service - must be updated immediately
           this.performImmediateUpdate(rolloutGroup, imageName, imageVersion);

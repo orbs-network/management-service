@@ -3,8 +3,8 @@ import { EthereumTestDriver } from '../ethereum/test-driver';
 import { renderNodeManagement } from './render-node';
 import { BlockSync } from '../ethereum/block-sync';
 import { StateManager } from '../model/manager';
-import { nockDeploymentManifestJson } from '../dockerhub/test-driver';
-import { ImagePoll } from '../dockerhub/image-poll';
+import { nockDeploymentManifestJson } from '../deployment/test-driver';
+import { ImagePoll } from '../deployment/image-poll';
 import { exampleConfig } from '../config.example';
 import { day, sleep } from '../helpers';
 
@@ -32,8 +32,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
         'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
         'logs-service': { image: 'orbsnetwork/logs-service:v1.1.0' },
       },
-    },
-    5
+    }
   );
 
   // setup Ethereum state
@@ -151,8 +150,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
         'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
         'logs-service': { image: 'orbsnetwork/logs-service:v1.1.0' },
       },
-    },
-    5
+    }
   );
 
   // run poller and process again

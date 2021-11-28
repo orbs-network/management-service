@@ -6,7 +6,7 @@ import { errorString } from './helpers';
 import { TaskLoop } from './task-loop';
 import { StateManager } from './model/manager';
 import { BlockSync } from './ethereum/block-sync';
-import { ImagePoll } from './dockerhub/image-poll';
+import { ImagePoll } from './deployment/image-poll';
 import { renderNodeManagement } from './api/render-node';
 import { renderVirtualChainManagement, renderHistoricVirtualChainManagement } from './api/render-vc';
 import { renderServiceStatus, renderServiceStatusAnalytics } from './api/render-status';
