@@ -5,7 +5,7 @@ import {
   isValidBlock,
   isValidTimestamp,
   isNonEmptyString,
-  isPositiveNumber,
+  isPositiveNumber, isValidFullImageName,
 } from './deep-matcher';
 
 export const expectationStatus = {
