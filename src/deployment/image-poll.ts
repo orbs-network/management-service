@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { StateManager } from '../model/manager';
-import {DeploymentDescriptorConfiguration, DeploymentDescriptorReader, services} from './deployment-descriptor';
+import { DeploymentDescriptorConfiguration, DeploymentDescriptorReader, services } from './deployment-descriptor';
 import { getCurrentClockTime } from '../helpers';
 import * as Versioning from './/versioning';
 import * as Logger from '../logger';

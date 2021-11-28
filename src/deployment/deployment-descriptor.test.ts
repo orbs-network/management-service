@@ -1,6 +1,10 @@
 import test from 'ava';
 import { nockDeploymentManifestJson } from './test-driver';
-import {DeploymentDescriptor, DeploymentDescriptorConfiguration, DeploymentDescriptorReader} from './deployment-descriptor';
+import {
+  DeploymentDescriptor,
+  DeploymentDescriptorConfiguration,
+  DeploymentDescriptorReader,
+} from './deployment-descriptor';
 
 test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) => {
   const config: DeploymentDescriptorConfiguration = {
