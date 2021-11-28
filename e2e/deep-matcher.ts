@@ -45,7 +45,7 @@ export function isValidImageVersion(str: string) {
 export function isValidFullImageName(str: string) {
   if (!str || str.length === 0) return false;
 
-  const commaDelimArr = str.split(":");
+  const commaDelimArr = str.split(':');
 
   // TODO check the full form of the reference not just the last
 
