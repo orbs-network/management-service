@@ -3,8 +3,8 @@ import {
   isValidTimestamp,
   isNonEmptyString,
   isPositiveNumber,
-  isValidImageVersion,
-  isValidTimeRef, isValidFullImageName,
+  isValidTimeRef,
+  isValidFullImageName,
 } from '../deep-matcher';
 
 export const expectationStatus = {

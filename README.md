@@ -31,7 +31,7 @@ The service is packaged as a Docker image. It is routinely published from this r
 | `EthereumFirstBlock` | Optimization. The earliest block number in Ethereum we can start scanning from (the block number when the genesis registry contract was deployed for example).<br>Default: `11191390` (Orbs PoS V2 mainnet) |
 | `EthereumEndpoint` | HTTP URL endpoint for an Ethereum full node which will be used for all Ethereum queries. |
 | `ElectionsAuditOnly` | Whether the node is audit only and should avoid joining the committee as elected validator and remain standby in the topology instead.<br>Default: `false` |
-| `DeploymentDescriptorUrl` | Locator of the deployment descriptor for automatic software upgrades.<br>Default: `https://orbs-network.github.io/mainnet-deployment/manifest.json` |
+| `DeploymentDescriptorUrl` | Locator of the deployment descriptor for automatic software upgrades.<br>Default: `https://deployment.orbs.network/mainnet.json` |
 | `StatusJsonPath` | The local path on disk where status JSON should be written by the service.<br>Default: `./status/status.json` |
 | `StatusWriteIntervalSeconds` | How often should the service write status JSON file to disk.<br>Default: `25` (seconds) |
 | `DockerHubPollIntervalSeconds` | How often should the docker registry be polled to search for new image versions. In seconds.<br>Default: `180` (3 minutes) |

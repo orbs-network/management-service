@@ -8,7 +8,7 @@ import {
 
 test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) => {
   const config: DeploymentDescriptorConfiguration = {
-    DeploymentDescriptorUrl: 'https://orbs-network.github.io/mainnet-deployment/manifest.json',
+    DeploymentDescriptorUrl: 'https://deployment.orbs.network/mainnet.json',
   };
   const reader = new DeploymentDescriptorReader(config);
   const deploymentDescriptor: DeploymentDescriptor = {

@@ -1,6 +1,6 @@
 import test from 'ava';
 import { EthereumTestDriver } from '../src/ethereum/test-driver';
-import { dockerComposeTool, getAddressForService, getLogsForService } from 'docker-compose-mocha';
+import { dockerComposeTool, getAddressForService } from 'docker-compose-mocha';
 import fetch from 'node-fetch';
 import { retry } from 'ts-retry-promise';
 import { join } from 'path';
