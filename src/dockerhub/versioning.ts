@@ -35,6 +35,7 @@ const REGULAR_EXPRESSION = /v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-canary)?(
 const HOTFIX_REGULAR_EXPRESSION = /v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-canary)?-hotfix$/m;
 const IMMEDIATE_REGULAR_EXPRESSION = /v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-canary)?-immediate$/m;
 
+// TODO check that the image name part is well formed, not just the tag
 export function isValid(src: string): boolean {
   const result = REGULAR_EXPRESSION.exec(src);
   if (!result) {
@@ -42,7 +43,7 @@ export function isValid(src: string): boolean {
   }
 
   if (result.index === 0) {
-    return true; // missing the image name part - TODO should this be false?
+    return true;
   }
 
   return src.charAt(result.index - 1) === ':'; // the legal delimiter between image and tag

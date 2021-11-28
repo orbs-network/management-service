@@ -6,6 +6,7 @@ export type services =
   | 'logs-service'
   | 'node'
   | 'node-canary';
+
 export type DeploymentDescriptor = {
   Desc?: string;
   SchemaVersion: number | string;

@@ -42,7 +42,6 @@ export class DockerHubReader {
       res['canary'] = body.ImageVersions['node-canary']?.image;
     }
 
-    // TODO where do we check that 1) the tag is well formed 2) the tag exists
     return res;
   }
 }
