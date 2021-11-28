@@ -42,6 +42,16 @@ export function isValidImageVersion(str: string) {
   return str && str.startsWith('v') && str.split('.').length == 3;
 }
 
+export function isValidFullImageName(str: string) {
+  if (!str || str.length === 0) return false;
+
+  const commaDelimArr = str.split(":");
+
+  // TODO check the full form of the reference not just the last
+
+  return isValidImageVersion(commaDelimArr[commaDelimArr.length - 1]);
+}
+
 export function isValidTimeRef(str: string) {
   return str && parseInt(str) > 1400000000;
 }

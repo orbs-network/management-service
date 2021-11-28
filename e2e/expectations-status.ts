@@ -93,8 +93,8 @@ export const expectationStatus = {
     ],
     CurrentImageVersions: {
       main: {
-        'management-service': isValidImageVersion,
-        node: isValidImageVersion,
+        'management-service': isValidFullImageName,
+        node: isValidFullImageName,
       },
     },
     CurrentImageVersionsUpdater: {

@@ -17,7 +17,7 @@ export const expectationNodeManagement = {
       ExternalPort: 7666,
       Disabled: false,
       DockerConfig: {
-        Image: 'orbsnetwork/management-service',
+        Image: 'orbsnetworkstaging/management-service',
         Tag: isValidImageVersion,
         Pull: true,
       },

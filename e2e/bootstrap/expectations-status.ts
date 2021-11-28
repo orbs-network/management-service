@@ -24,7 +24,7 @@ export const expectationStatus = {
     CurrentTopology: [],
     CurrentImageVersions: {
       main: {
-        'management-service': isValidImageVersion,
+        'management-service': isValidFullImageName,
       },
       canary: {},
     },
