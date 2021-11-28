@@ -16,22 +16,25 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   const finalityBufferBlocks = 5;
 
   // mock docker hub state
-  const scope = nockDeploymentManifestJson({
-    Desc: 'Stable and Canary versions for Orbs network',
-    SchemaVersion: 1,
-    ImageVersions: {
-      'management-service-bootstrap': {
-        image: 'orbsnetwork/management-service:experimental',
-        comment: 'for use by a node deployment/installation tool',
+  const scope = nockDeploymentManifestJson(
+    {
+      Desc: 'Stable and Canary versions for Orbs network',
+      SchemaVersion: 1,
+      ImageVersions: {
+        'management-service-bootstrap': {
+          image: 'orbsnetwork/management-service:experimental',
+          comment: 'for use by a node deployment/installation tool',
+        },
+        'management-service': { image: 'orbsnetwork/management-service:v4.5.6' },
+        node: { image: 'orbsnetwork/node:v1.2.3' },
+        'node-canary': { image: 'orbsnetwork/node:v1.2.4-canary' },
+        signer: { image: 'orbsnetwork/signer:v1.1.0' },
+        'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
+        'logs-service': { image: 'orbsnetwork/logs-service:v1.1.0' },
       },
-      'management-service': { image: 'orbsnetwork/management-service:v4.5.6' },
-      'node': { image: 'orbsnetwork/node:v1.2.3' },
-      'node-canary': { image: 'orbsnetwork/node:v1.2.4-canary' },
-      'signer': { image: 'orbsnetwork/signer:v1.1.0' },
-      'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
-      'logs-service': { image: 'orbsnetwork/logs-service:v1.1.0' },
     },
-  }, 5);
+    5
+  );
 
   // setup Ethereum state
   const firstBlock = await ethereum.getCurrentBlockPreDeploy(ethereumEndpoint);
@@ -132,22 +135,25 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   scope.done();
 
   // mock docker hub state with a few new versions
-  const scope2 = nockDeploymentManifestJson({
-    Desc: 'Stable and Canary versions for Orbs network',
-    SchemaVersion: 1,
-    ImageVersions: {
-      'management-service-bootstrap': {
-        image: 'orbsnetwork/management-service:experimental',
-        comment: 'for use by a node deployment/installation tool',
+  const scope2 = nockDeploymentManifestJson(
+    {
+      Desc: 'Stable and Canary versions for Orbs network',
+      SchemaVersion: 1,
+      ImageVersions: {
+        'management-service-bootstrap': {
+          image: 'orbsnetwork/management-service:experimental',
+          comment: 'for use by a node deployment/installation tool',
+        },
+        'management-service': { image: 'orbsnetwork/management-service:v4.5.8-immediate' },
+        node: { image: 'orbsnetwork/node:v1.2.5' },
+        'node-canary': { image: 'orbsnetwork/node:v1.2.6-canary-hotfix' },
+        signer: { image: 'orbsnetwork/signer:v1.1.0' },
+        'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
+        'logs-service': { image: 'orbsnetwork/logs-service:v1.1.0' },
       },
-      'management-service': { image: 'orbsnetwork/management-service:v4.5.8-immediate' },
-      'node': { image: 'orbsnetwork/node:v1.2.5' },
-      'node-canary': { image: 'orbsnetwork/node:v1.2.6-canary-hotfix' },
-      'signer': { image: 'orbsnetwork/signer:v1.1.0' },
-      'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
-      'logs-service': { image: 'orbsnetwork/logs-service:v1.1.0' },
     },
-  }, 5);
+    5
+  );
 
   // run poller and process again
   await imagePoll.run();
