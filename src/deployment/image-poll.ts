@@ -44,6 +44,11 @@ export class ImagePoll {
     Logger.log(`ImagePoll: about to poll ${imageNamesToPollForNewVersions} from deployment descriptor.`);
     const time = getCurrentClockTime();
     const fetchedVersions = await this.reader.fetchLatestVersion(imageNamesToPollForNewVersions);
+
+    // TODO add protection here - if we don't have a valid management-service we must throw here
+    // otherwise boyar might shut down management service forever
+    // TBD - what other services are required?
+
     for (const imageName of imageNamesToPollForNewVersions) {
       for (const [rolloutGroup, imageVersion] of Object.entries(fetchedVersions[imageName])) {
         if (this.config.BootstrapMode) {
