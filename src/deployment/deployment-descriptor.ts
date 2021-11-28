@@ -41,10 +41,10 @@ export class DeploymentDescriptorReader {
       timeout: FETCH_TIMEOUT_SEC * 1000,
       agent: this.agent,
     });
+
     return response.json();
   }
 
-  // TODO use fetchLatestDeploymentDescriptor instead or cache the json
   async fetchLatestVersion(
     serviceNames: services[]
   ): Promise<{ [serviceName: string]: { [RolloutGroup: string]: string } }> {
