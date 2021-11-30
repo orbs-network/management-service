@@ -44,6 +44,14 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
     Logger.error(err.toString());
   }
 
+  // include matic-committee-reader if found a viable image for it
+  try {
+    response.services['matic-reader'] = getMaticReader(snapshot, config);
+    if (!response.services['matic-reader']) delete response.services['matic-reader'];
+  } catch (err) {
+    Logger.error(err.toString());
+  }
+
   // include ethereum-writer if found a viable image for it and its contract addresses are known
   try {
     response.services['ethereum-writer'] = getEthereumWriter(snapshot, config);
@@ -104,6 +112,35 @@ function getManagementService(snapshot: StateSnapshot, config: ServiceConfigurat
     },
     Config: {
       ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
+      BootstrapMode: false,
+    },
+  };
+}
+
+function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const version = snapshot.CurrentImageVersions['main']['management-service']; // NOTE, management service image serves two purposes
+  if (!version) return undefined;
+
+  return {
+    InternalPort: 8080,
+    ExternalPort: 7667,
+    Disabled: false,
+    DockerConfig: {
+      ...parseImageTag(version),
+      Pull: true,
+    },
+    Config: {
+      EthereumGenesisContract: "0x91e9C60D04653c95f206CF274cfD03eb031531Af",
+      // NOTE - do not commit a payed account url with Key here
+      EthereumEndpoint: "https://polygon-rpc.com/",
+      DeploymentDescriptorPollIntervalSeconds: 9999999, // TODO refine after disabling polling
+      EthereumPollIntervalSeconds: 5,
+      ElectionsStaleUpdateSeconds: config.ElectionsStaleUpdateSeconds, // TODO TBD - what does it mean in matic
+      FinalityBufferBlocks: config.FinalityBufferBlocks, // TODO TBD
+      EthereumFirstBlock: 21700000,
+      Verbose: true, // TODO TBD
+      'node-address': config["node-address"],
+
       BootstrapMode: false,
     },
   };
