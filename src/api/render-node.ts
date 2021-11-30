@@ -60,6 +60,14 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
     Logger.error(err.toString());
   }
 
+  // include matic-writer if found a viable image for it and its contract addresses are known
+  try {
+    response.services['matic-writer'] = getMaticWriter(snapshot, config);
+    if (!response.services['matic-writer']) delete response.services['matic-writer'];
+  } catch (err) {
+    Logger.error(err.toString());
+  }
+
   // include logs-service if found a viable image for it
   try {
     response.services['logs-service'] = getLogsService(snapshot);
@@ -168,6 +176,29 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
       EthereumElectionsContract: elections,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       ElectionsAuditOnly: config.ElectionsAuditOnly,
+    },
+  };
+}
+
+function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const version = snapshot.CurrentImageVersions['main']['ethereum-writer'];
+  if (!version) return undefined;
+
+  return {
+    Disabled: false,
+    DockerConfig: {
+      ...parseImageTag(version),
+      Pull: true,
+    },
+    AllowAccessToSigner: true,
+    AllowAccessToServices: true,
+    Config: {
+      ManagementServiceEndpoint: 'http://matic-reader:8080',
+      EthereumEndpoint: 'https://polygon-mainnet.g.alchemy.com/v2/Pe1v1WpSGDVAmY0J3MoawJrbr12ETPnO',
+      SignerEndpoint: 'http://signer:7777',
+      EthereumElectionsContract: "0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6", // TODO no support for upgrades
+      NodeOrbsAddress: normalizeAddress(config['node-address']),
+      ElectionsAuditOnly: false,
     },
   };
 }
