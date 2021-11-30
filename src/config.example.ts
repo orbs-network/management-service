@@ -12,7 +12,7 @@ export const exampleConfig: ServiceConfiguration = {
   StatusAnalyticsJsonPath: './status/analytics.json',
   StatusAnalyticsJsonGzipPath: './status/analytics.json.gz',
   StatusWriteIntervalSeconds: 1,
-  DockerHubPollIntervalSeconds: 1,
+  DeploymentDescriptorPollIntervalSeconds: 1,
   RegularRolloutWindowSeconds: 5,
   HotfixRolloutWindowSeconds: 1,
   EthereumPollIntervalSeconds: 1,

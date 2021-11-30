@@ -34,7 +34,7 @@ The service is packaged as a Docker image. It is routinely published from this r
 | `DeploymentDescriptorUrl` | Locator of the deployment descriptor for automatic software upgrades.<br>Default: `https://deployment.orbs.network/mainnet.json` |
 | `StatusJsonPath` | The local path on disk where status JSON should be written by the service.<br>Default: `./status/status.json` |
 | `StatusWriteIntervalSeconds` | How often should the service write status JSON file to disk.<br>Default: `25` (seconds) |
-| `DockerHubPollIntervalSeconds` | How often should the docker registry be polled to search for new image versions. In seconds.<br>Default: `180` (3 minutes) |
+| `DeploymentDescriptorPollIntervalSeconds` | How often should the docker registry be polled to search for new image versions. In seconds.<br>Default: `180` (3 minutes) |
 | `RegularRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should regular images (non-hotfix) should be rolled out. In seconds.<br>Default: `86400` (24 hours) |
 | `HotfixRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should hotfix images (non-regular) should be rolled out. In seconds.<br>Default: `3600` (1 hour) |
 | `EthereumPollIntervalSeconds` | How often should Ethereum be polled for new blocks containing events. In seconds.<br>Default: `30` (30 seconds) |

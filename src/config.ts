@@ -11,7 +11,7 @@ export interface ServiceConfiguration {
   StatusAnalyticsJsonPath: string;
   StatusAnalyticsJsonGzipPath: string;
   StatusWriteIntervalSeconds: number;
-  DockerHubPollIntervalSeconds: number;
+  DeploymentDescriptorPollIntervalSeconds: number;
   RegularRolloutWindowSeconds: number;
   HotfixRolloutWindowSeconds: number;
   EthereumPollIntervalSeconds: number;
@@ -35,7 +35,7 @@ export const defaultServiceConfiguration = {
   StatusAnalyticsJsonPath: './status/analytics.json',
   StatusAnalyticsJsonGzipPath: './status/analytics.json.gz',
   StatusWriteIntervalSeconds: 25,
-  DockerHubPollIntervalSeconds: 3 * 60,
+  DeploymentDescriptorPollIntervalSeconds: 3 * 60,
   RegularRolloutWindowSeconds: 24 * 60 * 60,
   HotfixRolloutWindowSeconds: 60 * 60,
   EthereumPollIntervalSeconds: 30,
@@ -78,7 +78,7 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       type: 'number',
       numericality: { noStrings: true },
     },
-    DockerHubPollIntervalSeconds: {
+    DeploymentDescriptorPollIntervalSeconds: {
       presence: { allowEmpty: false },
       type: 'number',
       numericality: { noStrings: true },

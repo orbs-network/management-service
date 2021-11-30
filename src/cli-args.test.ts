@@ -26,7 +26,7 @@ const inputConfigValue = {
   RegularRolloutWindowSeconds: 1,
   HotfixRolloutWindowSeconds: 1,
   StatusWriteIntervalSeconds: 1,
-  DockerHubPollIntervalSeconds: 1,
+  DeploymentDescriptorPollIntervalSeconds: 1,
   FinalityBufferBlocks: 0,
   DockerNamespace: 'foo',
   DockerRegistry: 'bar',

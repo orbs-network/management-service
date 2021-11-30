@@ -26,7 +26,7 @@ export class TestEnvironment {
       DockerNamespace: 'orbsnetwork',
       ElectionsAuditOnly: false,
       StatusWriteIntervalSeconds: 1,
-      DockerHubPollIntervalSeconds: 1,
+      DeploymentDescriptorPollIntervalSeconds: 1,
       RegularRolloutWindowSeconds: 2,
       HotfixRolloutWindowSeconds: 2,
       EthereumPollIntervalSeconds: 1,
