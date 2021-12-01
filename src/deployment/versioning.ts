@@ -65,7 +65,7 @@ export function parseImageTag(src: string): undefined | { Image: string; Tag: st
 
   if (result.index < 2) return undefined; // no image name part
 
-  if (src.charAt(result.index - 1) != ':') return undefined;// TODO verify separator using reg. exp.
+  if (src.charAt(result.index - 1) != ':') return undefined; // TODO verify separator using reg. exp.
 
   return {
     Image: src.slice(0, result.index - 1), // TODO match image name using named group in reg. exp.
