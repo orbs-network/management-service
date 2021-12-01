@@ -12,15 +12,24 @@ test('isValid returns true on valid versions', (t) => {
     'myhub.com/myorg/node:v0.0.0-immediate',
     'myhub.com/myorg/node:v1.22.333-immediate',
     'myhub.com/myorg/node:v0.0.0-canary-immediate',
-    'v0.0.0',
-    'v1.22.333',
-    'v0.0.0-canary',
-    'v0.0.0-hotfix',
-    'v1.22.333-hotfix',
-    'v0.0.0-canary-hotfix',
-    'v0.0.0-immediate',
-    'v1.22.333-immediate',
-    'v0.0.0-canary-immediate',
+    'foo:999/bar:v0.0.0',
+    'foo:999/bar:v1.22.333',
+    'foo:999/bar:v0.0.0-canary',
+    'foo:999/bar:v0.0.0-hotfix',
+    'foo:999/bar:v1.22.333-hotfix',
+    'foo:999/bar:v0.0.0-canary-hotfix',
+    'foo:999/bar:v0.0.0-immediate',
+    'foo/bar:v1.22.333-immediate',
+    'foo/bar:v0.0.0-canary-immediate',
+    'a:v0.0.0',
+    'a:v1.22.333',
+    'a:v0.0.0-canary',
+    'a:v0.0.0-hotfix',
+    'a:v1.22.333-hotfix',
+    'a:v0.0.0-canary-hotfix',
+    'a:v0.0.0-immediate',
+    'a:v1.22.333-immediate',
+    'a:v0.0.0-canary-immediate',
   ];
   for (const tag of validTags) {
     t.true(isValid(tag), tag);
@@ -28,14 +37,14 @@ test('isValid returns true on valid versions', (t) => {
 });
 
 test('isHotfix returns true on valid versions', (t) => {
-  const validTags = ['v0.0.0-hotfix', 'v1.22.333-hotfix', 'v0.0.0-canary-hotfix'];
+  const validTags = ['a:v0.0.0-hotfix', 'a:v1.22.333-hotfix', 'a:v0.0.0-canary-hotfix'];
   for (const tag of validTags) {
     t.true(isHotfix(tag), tag);
   }
 });
 
 test('isImmediate returns true on valid versions', (t) => {
-  const validTags = ['v0.0.0-immediate', 'v1.22.333-immediate', 'v0.0.0-canary-immediate'];
+  const validTags = ['a:v0.0.0-immediate', 'a:v1.22.333-immediate', 'a:v0.0.0-canary-immediate'];
   for (const tag of validTags) {
     t.true(isImmediate(tag), tag);
   }
@@ -60,6 +69,23 @@ test('isValid returns false on invalid versions', (t) => {
     'v1.2.3-immediate-hotfix',
     'v1.2.3-hotfix-hotfix',
     'v1.2.3-immediate-immediate',
+    'foo:999/bar:G-0-H',
+    'foo:999/bar:C-0-N',
+    'foo:999/bar:0.0.0',
+    'foo:999/bar:v0.0.0 foo',
+    'foo:999/bar:foo v0.0.0',
+    'foo:999/bar:v0.0',
+    'foo:999/bar:v0.0.',
+    'foo:999/bar:v0.0.0 -canary',
+    'foo:999/bar:v0.0.0-canar y',
+    'foo:999/bar:v01.22.333',
+    'foo:999/bar:v0.0.0-ferrary',
+    'foo:999/bar:v0.0.0-ferrary+slow',
+    'foo:999/bar:v1.3.13-cc1cc788',
+    'foo:999/bar:v1.2.3-hotfix-immediate',
+    'foo:999/bar:v1.2.3-immediate-hotfix',
+    'foo:999/bar:v1.2.3-hotfix-hotfix',
+    'foo:999/bar:v1.2.3-immediate-immediate',
   ];
   for (const tag of invalidTags) {
     t.false(isValid(tag), tag);
@@ -124,47 +150,43 @@ test('isImmediate returns false on invalid versions', (t) => {
 
 test('compare sorts the latest version at the smallest index', (t) => {
   const validTags = [
-    'v1.1.4-canary',
+    'a:v1.1.4-canary',
     'myhub.com/myorg/node:v1.0.6-canary-hotfix',
-    'v0.0.8',
-    'v0.0.11',
+    'a:v0.0.8',
+    'a:v0.0.11',
     'myhub.com/myorg/node:v0.0.1-hotfix',
-    'v0.0.0',
-    '',
-    'v0.2.5',
-    'v0.2.3-immediate',
-    'v1.0.0',
+    'a:v0.0.0',
+    'a:v0.2.5',
+    'a:v0.2.3-immediate',
+    'a:v1.0.0',
     'myhub.com/myorg/node:v1.1.3',
-    'v0.20.0-hotfix',
-    '',
-    'v0.2.0-canary',
-    'v1.11.0',
-    'v1.1.0',
+    'a:v0.20.0-hotfix',
+    'a:v0.2.0-canary',
+    'a:v1.11.0',
+    'a:v1.1.0',
   ];
   const sorted = validTags.sort(compare);
   t.deepEqual(sorted, [
-    '',
-    '',
-    'v0.0.0',
+    'a:v0.0.0',
     'myhub.com/myorg/node:v0.0.1-hotfix',
-    'v0.0.8',
-    'v0.0.11',
-    'v0.2.0-canary',
-    'v0.2.3-immediate',
-    'v0.2.5',
-    'v0.20.0-hotfix',
-    'v1.0.0',
+    'a:v0.0.8',
+    'a:v0.0.11',
+    'a:v0.2.0-canary',
+    'a:v0.2.3-immediate',
+    'a:v0.2.5',
+    'a:v0.20.0-hotfix',
+    'a:v1.0.0',
     'myhub.com/myorg/node:v1.0.6-canary-hotfix',
-    'v1.1.0',
+    'a:v1.1.0',
     'myhub.com/myorg/node:v1.1.3',
-    'v1.1.4-canary',
-    'v1.11.0',
+    'a:v1.1.4-canary',
+    'a:v1.11.0',
   ]);
 });
 test('regression sort', (t) => {
-  const validTags = ['myhub.com/myorg/node:v1.3.11', 'v1.3.9', 'v1.3.13'];
+  const validTags = ['a:myhub.com/myorg/node:v1.3.11', 'a:v1.3.9', 'a:v1.3.13'];
   const sorted = validTags.sort(compare);
-  t.deepEqual(sorted, ['v1.3.9', 'myhub.com/myorg/node:v1.3.11', 'v1.3.13']);
+  t.deepEqual(sorted, ['a:v1.3.9', 'a:myhub.com/myorg/node:v1.3.11', 'a:v1.3.13']);
 });
 
 test('can parse image name from the tag', (t) => {
