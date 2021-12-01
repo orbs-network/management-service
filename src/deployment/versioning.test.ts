@@ -166,14 +166,116 @@ test('regression sort', (t) => {
   const sorted = validTags.sort(compare);
   t.deepEqual(sorted, ['v1.3.9', 'myhub.com/myorg/node:v1.3.11', 'v1.3.13']);
 });
+
 test('can parse image name from the tag', (t) => {
-  const validTags = ['v1.1.4-canary', 'myhub.com:23433/myorg/node:v1.0.6-canary-hotfix', ':v0.0.8'];
-  const breakDown = [
-    { Image: '', Tag: 'v1.1.4-canary' },
-    { Image: 'myhub.com:23433/myorg/node', Tag: 'v1.0.6-canary-hotfix' },
-    { Image: '', Tag: 'v0.0.8' },
+  const validTags = [
+    'a:v1.1.4-canary',
+    'myhub.com:23433/myorg/node:v1.0.6-canary-hotfix',
+    'myhub.com/myorg/node:v1.0.6-canary-hotfix',
+    'b:v0.0.8',
+    'myhub.com/myorg/node:v0.0.11',
+    'myhub.com/myorg/node:v0.0.1-hotfix',
+    'foo:bar:c:v0.0.0',
+    '::d:v0.2.5',
+    'e:v0.2.3-immediate',
+    'f:v1.0.0',
   ];
+
+  const breakDown = [
+    { Image: 'a', Tag: 'v1.1.4-canary' },
+    { Image: 'myhub.com:23433/myorg/node', Tag: 'v1.0.6-canary-hotfix' },
+    { Image: 'myhub.com/myorg/node', Tag: 'v1.0.6-canary-hotfix' },
+    { Image: 'b', Tag: 'v0.0.8' },
+    { Image: 'myhub.com/myorg/node', Tag: 'v0.0.11' },
+    { Image: 'myhub.com/myorg/node', Tag: 'v0.0.1-hotfix' },
+    { Image: 'foo:bar:c', Tag: 'v0.0.0' },
+    { Image: '::d', Tag: 'v0.2.5' },
+    { Image: 'e', Tag: 'v0.2.3-immediate' },
+    { Image: 'f', Tag: 'v1.0.0' },
+  ];
+
   for (let i = 0; i < validTags.length; i++) {
     t.deepEqual(parseImageTag(validTags[i]), breakDown[i]);
+  }
+});
+
+test('returns undefined if image name missing or malformed tag', (t) => {
+  const invalidNamesWithTags = [
+    'G-0-H',
+    'C-0-N',
+    '0.0.0',
+    'v0.0.0 foo',
+    'foo v0.0.0',
+    'v0.0',
+    'v0.0.',
+    'v0.0.0 -canary',
+    'v0.0.0-canar y',
+    'v01.22.333',
+    'v0.0.0-ferrary',
+    'v0.0.0-ferrary+slow',
+    'v1.3.13-cc1cc788',
+    'v1.2.3-hotfix-immediate',
+    'v1.2.3-immediate-hotfix',
+    'v1.2.3-hotfix-hotfix',
+    'v1.2.3-immediate-immediate',
+    ':G-0-H',
+    ':C-0-N',
+    ':0.0.0',
+    ':v0.0.0 foo',
+    ':foo v0.0.0',
+    ':v0.0',
+    ':v0.0.',
+    ':v0.0.0 -canary',
+    ':v0.0.0-canar y',
+    ':v01.22.333',
+    ':v0.0.0-ferrary',
+    ':v0.0.0-ferrary+slow',
+    ':v1.3.13-cc1cc788',
+    ':v1.2.3-hotfix-immediate',
+    ':v1.2.3-immediate-hotfix',
+    ':v1.2.3-hotfix-hotfix',
+    ':v1.2.3-immediate-immediate',
+    'v1.1.4-canary',
+    'v1.0.6-canary-hotfix',
+    'v0.0.8',
+    'v0.0.11',
+    'v0.0.1-hotfix',
+    'v0.0.0',
+    'v0.2.5',
+    'v0.2.3-immediate',
+    'v1.0.0',
+    'v1.1.3',
+    'v0.20.0-hotfix',
+    'v0.2.0-canary',
+    'v1.11.0',
+    'v1.1.0',
+    ':v1.1.4-canary',
+    ':v1.0.6-canary-hotfix',
+    ':v0.0.8',
+    ':v0.0.11',
+    ':v0.0.1-hotfix',
+    ':v0.0.0',
+    ':v0.2.5',
+    ':v0.2.3-immediate',
+    ':v1.0.0',
+    ':v1.1.3',
+    ':v0.20.0-hotfix',
+    ':v0.2.0-canary',
+    ':v1.11.0',
+    ':v1.1.0',
+    'av1.1.4-canary',
+    'sv1.0.6-canary-hotfix',
+    'dv0.0.8',
+    'fv0.0.11',
+    'gv0.0.1-hotfix',
+    'hv0.0.0',
+    'jv0.2.5',
+    'kv0.2.3-immediate',
+    'zv1.0.0',
+    'xv1.1.3',
+  ];
+
+  for (let i = 0; i < invalidNamesWithTags.length; i++) {
+    t.deepEqual(parseImageTag(invalidNamesWithTags[i]), undefined);
   }
 });

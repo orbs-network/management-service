@@ -57,32 +57,18 @@ export function isImmediate(src: string): boolean {
   return IMMEDIATE_REGULAR_EXPRESSION.test(src);
 }
 
-export function parseImageTag(src: string): { Image: string; Tag: string } {
+export function parseImageTag(src: string): undefined | { Image: string; Tag: string } {
+  if (!src) return undefined;
+
   const result = REGULAR_EXPRESSION.exec(src);
+  if (!result) return undefined;
 
-  if (!result) {
-    throw new Error('Invalid version tag');
-  }
+  if (result.index < 2) return undefined; // no image name part
 
-  if (result.index === 0) {
-    return {
-      Image: '',
-      Tag: src,
-    };
-  }
-
-  if (result.index === 1) {
-    if (src.startsWith(':')) {
-      return {
-        Image: '',
-        Tag: src.slice(1),
-      };
-    }
-    throw new Error('Invalid Image name');
-  }
+  if (src.charAt(result.index - 1) != ':') return undefined;// TODO verify separator using reg. exp.
 
   return {
-    Image: src.slice(0, result.index - 1),
+    Image: src.slice(0, result.index - 1), // TODO match image name using named group in reg. exp.
     Tag: src.slice(result.index),
   };
 }
