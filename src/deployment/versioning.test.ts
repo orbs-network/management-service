@@ -295,6 +295,23 @@ test('returns undefined if image name missing or malformed tag', (t) => {
     'kv0.2.3-immediate',
     'zv1.0.0',
     'xv1.1.3',
+    'foo:G-0-H',
+    'foo::C-0-N',
+    'foo::0.0.0',
+    'foo::v0.0.0 foo',
+    'foo::foo v0.0.0',
+    'foo::v0.0',
+    'foo::v0.0.',
+    'foo::v0.0.0 -canary',
+    'foo::v0.0.0-canar y',
+    'foo::v01.22.333',
+    'foo::v0.0.0-ferrary',
+    'foo::v0.0.0-ferrary+slow',
+    'foo::v1.3.13-cc1cc788',
+    'foo::v1.2.3-hotfix-immediate',
+    'foo::v1.2.3-immediate-hotfix',
+    'foo::v1.2.3-hotfix-hotfix',
+    'foo::v1.2.3-immediate-immediate',
   ];
 
   for (let i = 0; i < invalidNamesWithTags.length; i++) {
