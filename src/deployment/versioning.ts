@@ -30,10 +30,12 @@ The v prefix is mandatory and has to be lower case.
 
 regex reference : // https://regex101.com/r/Ly7O1x/310
 */
+
+//TODO deploymentSubset part is deprecated and no longer in use. remove.
 const FULL_REGULAR_EXPRESSION =
   /(?<imageName>.+):(?<tag>v(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)(-(?<deploymentSubset>canary))?(-(?<rolloutWindow>hotfix|immediate))?)$/m;
 
-// TODO check that the image name part is well formed, not just the tag
+// TODO check that the imageName part is well formed, not just the tag
 export function isValid(src: string): boolean {
   return FULL_REGULAR_EXPRESSION.test(src);
 }
@@ -44,14 +46,6 @@ export function isHotfix(src: string): boolean {
     return false;
   }
   return parsed.groups['rolloutWindow'] === 'hotfix';
-}
-
-export function isCanary(src: string): boolean {
-  const parsed: any = FULL_REGULAR_EXPRESSION.exec(src);
-  if (!parsed) {
-    return false;
-  }
-  return parsed.groups['deploymentSubset'] === 'canary';
 }
 
 export function isImmediate(src: string): boolean {
