@@ -151,7 +151,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
 
       // TODO add "CommitteeReaderOnlyMode", and ChainId
       BootstrapMode: false,
-      ChainId: 137
+      ChainId: 137,
     },
   };
 }
@@ -200,7 +200,7 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
       EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6', // TODO no support for upgrades
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       ElectionsAuditOnly: false,
-      ChainId: 137
+      ChainId: 137,
     },
   };
 }
