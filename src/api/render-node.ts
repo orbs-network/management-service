@@ -134,13 +134,16 @@ function getManagementService(snapshot: StateSnapshot, config: ServiceConfigurat
 function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const version = snapshot.CurrentImageVersions['main']['management-service']; // NOTE, management service image serves two purposes
   if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
 
   return {
     InternalPort: 8080,
     ExternalPort: 7667,
     Disabled: false,
     DockerConfig: {
-      ...parseImageTag(version),
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
       Pull: true,
     },
     Config: {
@@ -192,11 +195,14 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
 function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const version = snapshot.CurrentImageVersions['main']['ethereum-writer'];
   if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
 
   return {
     Disabled: false,
     DockerConfig: {
-      ...parseImageTag(version),
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
       Pull: true,
     },
     AllowAccessToSigner: true,
