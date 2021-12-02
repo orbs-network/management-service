@@ -149,9 +149,8 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       Verbose: true, // TODO TBD
       'node-address': config['node-address'],
 
-      // TODO add "CommitteeReaderOnlyMode", and ChainId
+      // TODO add "CommitteeReaderOnlyMode"
       BootstrapMode: false,
-      ChainId: 137,
     },
   };
 }
@@ -200,7 +199,6 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
       EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6', // TODO no support for upgrades
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       ElectionsAuditOnly: false,
-      ChainId: 137,
     },
   };
 }
