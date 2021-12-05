@@ -212,6 +212,7 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
       EthereumEndpoint: 'https://polygon-mainnet.g.alchemy.com/v2/Pe1v1WpSGDVAmY0J3MoawJrbr12ETPnO',
       SignerEndpoint: 'http://signer:7777',
       EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6', // TODO no support for upgrades
+      EthereumDiscountGasPriceFactor: 3,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       ElectionsAuditOnly: false,
     },
