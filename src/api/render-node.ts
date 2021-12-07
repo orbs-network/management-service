@@ -4,6 +4,7 @@ import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './ports';
 import { JsonResponse, normalizeAddress } from '../helpers';
 import * as Logger from '../logger';
+import { parseImageTag } from '../deployment/versioning';
 
 export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const response: JsonResponse = {
@@ -29,7 +30,7 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
   // include signer if found a viable image for it
   try {
-    response.services['signer'] = getSigner(snapshot, config);
+    response.services['signer'] = getSigner(snapshot);
     if (!response.services['signer']) delete response.services['signer'];
   } catch (err) {
     Logger.error(err.toString());
@@ -53,7 +54,7 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
   // include logs-service if found a viable image for it
   try {
-    response.services['logs-service'] = getLogsService(snapshot, config);
+    response.services['logs-service'] = getLogsService(snapshot);
     if (!response.services['logs-service']) delete response.services['logs-service'];
   } catch (err) {
     Logger.error(err.toString());
@@ -61,9 +62,7 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
   // include chains if found a viable image for node
   try {
-    response.chains = Object.keys(snapshot.CurrentVirtualChains).map((vcId) =>
-      getChain(parseInt(vcId), snapshot, config)
-    );
+    response.chains = Object.keys(snapshot.CurrentVirtualChains).map((vcId) => getChain(parseInt(vcId), snapshot));
     _.remove(response.chains, (vc) => _.isUndefined(vc));
   } catch (err) {
     Logger.error(err.toString());
@@ -74,16 +73,18 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
 // helpers
 
-function getSigner(snapshot: StateSnapshot, config: ServiceConfiguration) {
+function getSigner(snapshot: StateSnapshot) {
   const version = snapshot.CurrentImageVersions['main']['signer'];
   if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
 
   return {
     InternalPort: 7777,
     Disabled: false,
     DockerConfig: {
-      Image: `${config.DockerNamespace}/signer`,
-      Tag: version,
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
       Pull: true,
     },
     Config: {
@@ -95,14 +96,16 @@ function getSigner(snapshot: StateSnapshot, config: ServiceConfiguration) {
 function getManagementService(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const version = snapshot.CurrentImageVersions['main']['management-service'];
   if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
 
   return {
     InternalPort: 8080,
     ExternalPort: 7666,
     Disabled: false,
     DockerConfig: {
-      Image: `${config.DockerNamespace}/management-service`,
-      Tag: version,
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
       Pull: true,
     },
     Config: {
@@ -117,12 +120,14 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
   if (!version) return undefined;
   const elections = snapshot.CurrentContractAddress['elections'];
   if (!elections) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
 
   return {
     Disabled: false,
     DockerConfig: {
-      Image: `${config.DockerNamespace}/ethereum-writer`,
-      Tag: version,
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
       Pull: true,
     },
     AllowAccessToSigner: true,
@@ -138,17 +143,19 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
   };
 }
 
-function getLogsService(snapshot: StateSnapshot, config: ServiceConfiguration) {
+function getLogsService(snapshot: StateSnapshot) {
   const version = snapshot.CurrentImageVersions['main']['logs-service'];
   if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
 
   return {
     InternalPort: 8080,
     ExternalPort: 8666,
     Disabled: false,
     DockerConfig: {
-      Image: `${config.DockerNamespace}/logs-service`,
-      Tag: version,
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
       Pull: true,
     },
     MountNodeLogs: true,
@@ -162,10 +169,15 @@ function getLogsService(snapshot: StateSnapshot, config: ServiceConfiguration) {
   };
 }
 
-function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConfiguration) {
+function getChain(vchainId: number, snapshot: StateSnapshot) {
   const mainVersion = snapshot.CurrentImageVersions['main']['node'];
   if (!mainVersion) return undefined;
   const rolloutGroup = snapshot.CurrentVirtualChains[vchainId.toString()].RolloutGroup;
+
+  const version = snapshot.CurrentImageVersions[rolloutGroup]?.['node'] ?? mainVersion;
+  if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
 
   return {
     Id: vchainId,
@@ -174,8 +186,8 @@ function getChain(vchainId: number, snapshot: StateSnapshot, config: ServiceConf
     InternalHttpPort: 8080,
     Disabled: false,
     DockerConfig: {
-      Image: `${config.DockerNamespace}/node`,
-      Tag: snapshot.CurrentImageVersions[rolloutGroup]?.['node'] ?? mainVersion,
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
       Pull: true,
     },
     AllowAccessToSigner: true,

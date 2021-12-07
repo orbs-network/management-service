@@ -192,7 +192,8 @@ export class State {
     }
 
     // see if the committee set has changed
-    if (!_.isEqual(stringArrToObj(newCommitteeSet), stringArrToObj(prevCommitteeSet))) { // ignore order
+    if (!_.isEqual(stringArrToObj(newCommitteeSet), stringArrToObj(prevCommitteeSet))) {
+      // ignore order
       this.snapshot.CommitteeSets.push({
         RefBlock: committeeEvent.RefBlock,
         RefTime: committeeEvent.RefTime,
@@ -468,7 +469,9 @@ function updateLastPageCommitteeEvents(time: number, snapshot: StateSnapshot, co
 
 function stringArrToObj(arr: string[]): { [k: string]: boolean } {
   const result: { [k: string]: boolean } = {};
-  arr.forEach((value) => {result[value] = true;});
+  arr.forEach((value) => {
+    result[value] = true;
+  });
   return result;
 }
 

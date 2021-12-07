@@ -30,12 +30,11 @@ The service is packaged as a Docker image. It is routinely published from this r
 | `EthereumGenesisContract` | The hex address (including the leading `0x`) of the Ethereum registry contract used as genesis for all management events. Provide the address of the original contract during the launch of the network.<br>Default: `0xD859701C81119aB12A1e62AF6270aD2AE05c7AB3` (Orbs PoS V2 mainnet) |
 | `EthereumFirstBlock` | Optimization. The earliest block number in Ethereum we can start scanning from (the block number when the genesis registry contract was deployed for example).<br>Default: `11191390` (Orbs PoS V2 mainnet) |
 | `EthereumEndpoint` | HTTP URL endpoint for an Ethereum full node which will be used for all Ethereum queries. |
-| `DockerRegistry` | HTTP URL of the docker registry to rely on.<br>Default: `https://registry.hub.docker.com` |
-| `DockerNamespace` | Namespace for images under the docker registry, for example [`orbsnetwork`](https://hub.docker.com/repository/docker/orbsnetwork/node).<br>Default: `orbsnetwork` |
 | `ElectionsAuditOnly` | Whether the node is audit only and should avoid joining the committee as elected validator and remain standby in the topology instead.<br>Default: `false` |
+| `DeploymentDescriptorUrl` | Locator of the deployment descriptor for automatic software upgrades.<br>Default: `https://deployment.orbs.network/mainnet.json` |
 | `StatusJsonPath` | The local path on disk where status JSON should be written by the service.<br>Default: `./status/status.json` |
 | `StatusWriteIntervalSeconds` | How often should the service write status JSON file to disk.<br>Default: `25` (seconds) |
-| `DockerHubPollIntervalSeconds` | How often should the docker registry be polled to search for new image versions. In seconds.<br>Default: `180` (3 minutes) |
+| `DeploymentDescriptorPollIntervalSeconds` | How often should the docker registry be polled to search for new image versions. In seconds.<br>Default: `180` (3 minutes) |
 | `RegularRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should regular images (non-hotfix) should be rolled out. In seconds.<br>Default: `86400` (24 hours) |
 | `HotfixRolloutWindowSeconds` | During gradual rollout of image versions, over how long of a period should hotfix images (non-regular) should be rolled out. In seconds.<br>Default: `3600` (1 hour) |
 | `EthereumPollIntervalSeconds` | How often should Ethereum be polled for new blocks containing events. In seconds.<br>Default: `30` (30 seconds) |

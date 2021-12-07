@@ -27,7 +27,7 @@ test('getGradualRolloutDelay returns random values in window', (t) => {
 
   let sumHotfix = 0;
   for (let i = 0; i < iterations; i++) {
-    const delay = p.getGradualRolloutDelay('v1.2.3-hotfix');
+    const delay = p.getGradualRolloutDelay('foo:v1.2.3-hotfix');
     t.assert(delay >= 0);
     t.assert(delay <= 2000);
     sumHotfix += delay;
@@ -42,17 +42,17 @@ test('performImmediateUpdate does not downgrade', (t) => {
   const s = new StateManager(exampleConfig);
   const p = new ImagePoll(s, exampleConfig);
 
-  p.performImmediateUpdate('main', 'node', 'v1.0.0');
-  p.performImmediateUpdate('main', 'node', 'v1.0.0'); // if poll provides the same version
-  p.performImmediateUpdate('main', 'node', 'v2.0.0');
-  p.performImmediateUpdate('main', 'node', 'v1.8.0'); // downgrade not allowed
-  p.performImmediateUpdate('canary', 'node', 'v5.0.0');
-  p.performImmediateUpdate('canary', 'node', 'v6.0.0-4729843');
-  p.performImmediateUpdate('main', 'management-service', 'v7.0.0');
+  p.performImmediateUpdate('main', 'node', 'foo:v1.0.0');
+  p.performImmediateUpdate('main', 'node', 'foo:v1.0.0'); // if poll provides the same version
+  p.performImmediateUpdate('main', 'node', 'foo:v2.0.0');
+  p.performImmediateUpdate('main', 'node', 'foo:v1.8.0'); // downgrade not allowed
+  p.performImmediateUpdate('canary', 'node', 'foo:v5.0.0');
+  p.performImmediateUpdate('canary', 'node', 'foo:v6.0.0-4729843');
+  p.performImmediateUpdate('main', 'management-service', 'foo:v7.0.0');
 
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v2.0.0');
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['management-service'], 'v7.0.0');
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['canary']['node'], 'v5.0.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'foo:v2.0.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['management-service'], 'foo:v7.0.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['canary']['node'], 'foo:v5.0.0');
 });
 
 test('performGradualRollout works as expected', async (t) => {
@@ -67,52 +67,52 @@ test('performGradualRollout works as expected', async (t) => {
   s.applyNewImageVersionPollTime(0, 'main', 'node');
   s.applyNewImageVersionPollTime(0, 'canary', 'node');
 
-  p.performGradualRollout('main', 'node', 'v1.1.0');
-  p.performGradualRollout('canary', 'node', 'v1.1.0-canary');
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.1.0');
+  p.performGradualRollout('main', 'node', 'foo:v1.1.0');
+  p.performGradualRollout('canary', 'node', 'foo:v1.1.0-canary');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'foo:v1.1.0');
   t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, '');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime == 0);
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['canary']['node'], 'v1.1.0-canary');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['canary']['node'], 'foo:v1.1.0-canary');
   t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['canary']['node'].PendingVersion, '');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['canary']['node'].PendingVersionTime == 0);
 
-  p.performGradualRollout('main', 'node', 'v1.1.0'); // if poll provides the same version
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.1.0');
+  p.performGradualRollout('main', 'node', 'foo:v1.1.0'); // if poll provides the same version
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'foo:v1.1.0');
   t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, '');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime == 0);
 
-  p.performGradualRollout('main', 'node', 'v1.2.0');
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.1.0');
-  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, 'v1.2.0');
+  p.performGradualRollout('main', 'node', 'foo:v1.2.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'foo:v1.1.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, 'foo:v1.2.0');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime > 1400000000);
 
-  p.performGradualRollout('main', 'node', 'v1.3.0');
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.1.0');
-  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, 'v1.3.0');
+  p.performGradualRollout('main', 'node', 'foo:v1.3.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'foo:v1.1.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, 'foo:v1.3.0');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime > 1400000000);
 
-  p.performGradualRollout('main', 'node', 'v1.2.0'); // downgrade not allowed
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.1.0');
-  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, 'v1.3.0');
+  p.performGradualRollout('main', 'node', 'foo:v1.2.0'); // downgrade not allowed
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'foo:v1.1.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, 'foo:v1.3.0');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime > 1400000000);
 
-  p.performGradualRollout('main', 'node', 'v1.2.1-immediate'); // downgrade not allowed
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.1.0');
-  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, 'v1.3.0');
+  p.performGradualRollout('main', 'node', 'foo:v1.2.1-immediate'); // downgrade not allowed
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'foo:v1.1.0');
+  t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, 'foo:v1.3.0');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime > 1400000000);
 
-  p.performGradualRollout('main', 'node', 'v1.3.1-immediate');
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.3.1-immediate');
+  p.performGradualRollout('main', 'node', 'foo:v1.3.1-immediate');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'foo:v1.3.1-immediate');
   t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, '');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime == 0);
 
-  p.performGradualRollout('main', 'node', 'v1.4.0-hotfix');
-  p.performGradualRollout('canary', 'node', 'v1.4.0-canary-hotfix');
+  p.performGradualRollout('main', 'node', 'foo:v1.4.0-hotfix');
+  p.performGradualRollout('canary', 'node', 'foo:v1.4.0-canary-hotfix');
   await sleep(3000);
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'v1.4.0-hotfix');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['main']['node'], 'foo:v1.4.0-hotfix');
   t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersion, '');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['main']['node'].PendingVersionTime == 0);
-  t.is(s.getCurrentSnapshot().CurrentImageVersions['canary']['node'], 'v1.4.0-canary-hotfix');
+  t.is(s.getCurrentSnapshot().CurrentImageVersions['canary']['node'], 'foo:v1.4.0-canary-hotfix');
   t.is(s.getCurrentSnapshot().CurrentImageVersionsUpdater['canary']['node'].PendingVersion, '');
   t.assert(s.getCurrentSnapshot().CurrentImageVersionsUpdater['canary']['node'].PendingVersionTime == 0);
 });

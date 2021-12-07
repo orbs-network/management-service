@@ -17,7 +17,7 @@ export const expectationNodeManagement = {
       ExternalPort: 7666,
       Disabled: false,
       DockerConfig: {
-        Image: 'orbsnetwork/management-service',
+        Image: 'orbsnetworkstaging/management-service',
         Tag: isValidImageVersion,
         Pull: true,
       },
@@ -26,7 +26,7 @@ export const expectationNodeManagement = {
         Port: 8080,
         DockerNamespace: 'orbsnetwork',
         StatusWriteIntervalSeconds: 1,
-        DockerHubPollIntervalSeconds: 1,
+        DeploymentDescriptorPollIntervalSeconds: 1,
         EthereumPollIntervalSeconds: 1,
         EthereumFirstBlock: 0,
         FinalityBufferBlocks: 10,

@@ -3,8 +3,8 @@ import { EthereumTestDriver } from '../ethereum/test-driver';
 import { renderNodeManagement } from './render-node';
 import { BlockSync } from '../ethereum/block-sync';
 import { StateManager } from '../model/manager';
-import { nockDockerHub } from '../dockerhub/test-driver';
-import { ImagePoll } from '../dockerhub/image-poll';
+import { nockDeploymentManifestJson } from '../deployment/test-driver';
+import { ImagePoll } from '../deployment/image-poll';
 import { exampleConfig } from '../config.example';
 import { day, sleep } from '../helpers';
 
@@ -16,13 +16,22 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   const finalityBufferBlocks = 5;
 
   // mock docker hub state
-  const scope = nockDockerHub(
-    { user: 'mydockernamespace', name: 'node', tags: ['v0.0.1', 'v1.2.3', 'v1.2.4-canary', 'v1.0.0'] },
-    { user: 'mydockernamespace', name: 'management-service', tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v3.9.9'] },
-    { user: 'mydockernamespace', name: 'signer', tags: ['v1.1.0'] },
-    { user: 'mydockernamespace', name: 'ethereum-writer', tags: ['v1.1.0'] },
-    { user: 'mydockernamespace', name: 'logs-service', tags: ['v1.1.0'] }
-  );
+  const scope = nockDeploymentManifestJson({
+    Desc: 'Stable and Canary versions for Orbs network',
+    SchemaVersion: 1,
+    ImageVersions: {
+      'management-service-bootstrap': {
+        image: 'orbsnetwork/management-service:experimental',
+        comment: 'for use by a node deployment/installation tool',
+      },
+      'management-service': { image: 'orbsnetwork/management-service:v4.5.6' },
+      node: { image: 'orbsnetwork/node:v1.2.3' },
+      'node-canary': { image: 'orbsnetwork/node:v1.2.4-canary' },
+      signer: { image: 'orbsnetwork/signer:v1.1.0' },
+      'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
+      'logs-service': { image: 'orbsnetwork/logs-service:v1.1.0' },
+    },
+  });
 
   // setup Ethereum state
   const firstBlock = await ethereum.getCurrentBlockPreDeploy(ethereumEndpoint);
@@ -39,7 +48,6 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     ...exampleConfig,
     EthereumGenesisContract: ethereum.getContractRegistryAddress(),
     EthereumEndpoint: ethereumEndpoint,
-    DockerNamespace: 'mydockernamespace',
     ElectionsAuditOnly: true,
     FinalityBufferBlocks: finalityBufferBlocks,
     EthereumFirstBlock: firstBlock,
@@ -68,7 +76,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.is(res.chains[0].ExternalPort, 10000);
   t.is(res.chains[0].Config['management-file-path'], 'http://management-service:8080/vchains/1000000/management');
   t.deepEqual(res.chains[0].DockerConfig, {
-    Image: 'mydockernamespace/node',
+    Image: 'orbsnetwork/node',
     Tag: 'v1.2.3',
     Pull: true,
   });
@@ -76,27 +84,27 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.is(res.chains[1].ExternalPort, 10001);
   t.is(res.chains[1].Config['management-file-path'], 'http://management-service:8080/vchains/1000001/management');
   t.deepEqual(res.chains[1].DockerConfig, {
-    Image: 'mydockernamespace/node',
+    Image: 'orbsnetwork/node',
     Tag: 'v1.2.4-canary',
     Pull: true,
   });
   t.deepEqual(res.services['signer'].DockerConfig, {
-    Image: 'mydockernamespace/signer',
+    Image: 'orbsnetwork/signer',
     Tag: 'v1.1.0',
     Pull: true,
   });
   t.deepEqual(res.services['management-service'].DockerConfig, {
-    Image: 'mydockernamespace/management-service',
+    Image: 'orbsnetwork/management-service',
     Tag: 'v4.5.6',
     Pull: true,
   });
   t.deepEqual(res.services['ethereum-writer'].DockerConfig, {
-    Image: 'mydockernamespace/ethereum-writer',
+    Image: 'orbsnetwork/ethereum-writer',
     Tag: 'v1.1.0',
     Pull: true,
   });
   t.deepEqual(res.services['logs-service'].DockerConfig, {
-    Image: 'mydockernamespace/logs-service',
+    Image: 'orbsnetwork/logs-service',
     Tag: 'v1.1.0',
     Pull: true,
   });
@@ -124,17 +132,22 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   scope.done();
 
   // mock docker hub state with a few new versions
-  const scope2 = nockDockerHub(
-    { user: 'mydockernamespace', name: 'node', tags: ['v1.2.3', 'v1.2.4-canary', 'v1.2.5', 'v1.2.6-canary-hotfix'] },
-    {
-      user: 'mydockernamespace',
-      name: 'management-service',
-      tags: ['v0.9.9', 'v4.5.6', 'v4.5.7-canary', 'v4.5.8-immediate'],
+  const scope2 = nockDeploymentManifestJson({
+    Desc: 'Stable and Canary versions for Orbs network',
+    SchemaVersion: 1,
+    ImageVersions: {
+      'management-service-bootstrap': {
+        image: 'orbsnetwork/management-service:experimental',
+        comment: 'for use by a node deployment/installation tool',
+      },
+      'management-service': { image: 'orbsnetwork/management-service:v4.5.8-immediate' },
+      node: { image: 'orbsnetwork/node:v1.2.5' },
+      'node-canary': { image: 'orbsnetwork/node:v1.2.6-canary-hotfix' },
+      signer: { image: 'orbsnetwork/signer:v1.1.0' },
+      'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
+      'logs-service': { image: 'orbsnetwork/logs-service:v1.1.0' },
     },
-    { user: 'mydockernamespace', name: 'signer', tags: ['v1.1.0'] },
-    { user: 'mydockernamespace', name: 'ethereum-writer', tags: ['v1.1.0'] },
-    { user: 'mydockernamespace', name: 'logs-service', tags: ['v1.1.0'] }
-  );
+  });
 
   // run poller and process again
   await imagePoll.run();
@@ -144,32 +157,32 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.log('result2:', JSON.stringify(res2, null, 2));
 
   t.deepEqual(res2.chains[0].DockerConfig, {
-    Image: 'mydockernamespace/node',
+    Image: 'orbsnetwork/node',
     Tag: 'v1.2.3', // slow gradual rollout so no change yet
     Pull: true,
   });
   t.deepEqual(res2.chains[1].DockerConfig, {
-    Image: 'mydockernamespace/node',
+    Image: 'orbsnetwork/node',
     Tag: 'v1.2.6-canary-hotfix', // gradual rollout with fast change
     Pull: true,
   });
   t.deepEqual(res2.services['signer'].DockerConfig, {
-    Image: 'mydockernamespace/signer',
+    Image: 'orbsnetwork/signer',
     Tag: 'v1.1.0', // no upgrade
     Pull: true,
   });
   t.deepEqual(res2.services['management-service'].DockerConfig, {
-    Image: 'mydockernamespace/management-service',
+    Image: 'orbsnetwork/management-service',
     Tag: 'v4.5.8-immediate', // gradual rollout with immediate
     Pull: true,
   });
   t.deepEqual(res.services['ethereum-writer'].DockerConfig, {
-    Image: 'mydockernamespace/ethereum-writer',
+    Image: 'orbsnetwork/ethereum-writer',
     Tag: 'v1.1.0', // no upgrade
     Pull: true,
   });
   t.deepEqual(res.services['logs-service'].DockerConfig, {
-    Image: 'mydockernamespace/logs-service',
+    Image: 'orbsnetwork/logs-service',
     Tag: 'v1.1.0', // no upgrade
     Pull: true,
   });

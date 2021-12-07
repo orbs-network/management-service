@@ -3,8 +3,8 @@ import {
   isValidTimestamp,
   isNonEmptyString,
   isPositiveNumber,
-  isValidImageVersion,
   isValidTimeRef,
+  isValidFullImageName,
 } from '../deep-matcher';
 
 export const expectationStatus = {
@@ -24,7 +24,7 @@ export const expectationStatus = {
     CurrentTopology: [],
     CurrentImageVersions: {
       main: {
-        'management-service': isValidImageVersion,
+        'management-service': isValidFullImageName,
       },
       canary: {},
     },
@@ -49,7 +49,7 @@ export const expectationStatus = {
       EthereumEndpoint: `http://ganache:7545`,
       DockerNamespace: 'orbsnetwork',
       StatusWriteIntervalSeconds: 1,
-      DockerHubPollIntervalSeconds: 1,
+      DeploymentDescriptorPollIntervalSeconds: 1,
       RegularRolloutWindowSeconds: 2,
       HotfixRolloutWindowSeconds: 2,
       EthereumPollIntervalSeconds: 1,
@@ -64,7 +64,7 @@ export const expectationStatus = {
         EthereumEndpoint: `http://ganache:7545`,
         DockerNamespace: 'orbsnetwork',
         StatusWriteIntervalSeconds: 1,
-        DockerHubPollIntervalSeconds: 1,
+        DeploymentDescriptorPollIntervalSeconds: 1,
         RegularRolloutWindowSeconds: 2,
         HotfixRolloutWindowSeconds: 2,
         EthereumPollIntervalSeconds: 1,

@@ -6,7 +6,7 @@ import { errorString } from './helpers';
 import { TaskLoop } from './task-loop';
 import { StateManager } from './model/manager';
 import { BlockSync } from './ethereum/block-sync';
-import { ImagePoll } from './dockerhub/image-poll';
+import { ImagePoll } from './deployment/image-poll';
 import { renderNodeManagement } from './api/render-node';
 import { renderVirtualChainManagement, renderHistoricVirtualChainManagement } from './api/render-vc';
 import { renderServiceStatus, renderServiceStatusAnalytics } from './api/render-status';
@@ -73,7 +73,10 @@ export function serve(serviceConfig: ServiceConfiguration) {
   });
 
   const blockSyncTask = new TaskLoop(() => blockSync.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
-  const imagePollTask = new TaskLoop(() => imagePoll.run(), serviceConfig.DockerHubPollIntervalSeconds * 1000);
+  const imagePollTask = new TaskLoop(
+    () => imagePoll.run(),
+    serviceConfig.DeploymentDescriptorPollIntervalSeconds * 1000
+  );
   const statusWriterTask = new TaskLoop(
     () => statusWriter.run(blockSync.getRequestStats()),
     serviceConfig.StatusWriteIntervalSeconds * 1000
