@@ -10,8 +10,10 @@ export type DeploymentDescriptorConfiguration = {
 export type services =
   | 'management-service-bootstrap'
   | 'management-service'
+  | 'matic-reader'
   | 'signer'
   | 'ethereum-writer'
+  | 'matic-writer'
   | 'logs-service'
   | 'node'
   | 'node-canary';
