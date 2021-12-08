@@ -20,10 +20,12 @@ test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) =
         comment: 'for use by a node deployment/installation tool',
       },
       'management-service': { image: 'orbsnetworkstaging/management-service:experimental' },
+      'matic-reader': { image: 'orbsnetworkstaging/management-service:experimental' },
       node: { image: 'orbsnetwork/node:v2.0.15' },
       'node-canary': { image: 'orbsnetwork/node:v2.0.16' },
       signer: { image: 'orbsnetwork/signer:v2.3.0' },
       'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.2.5' },
+      'matic-writer': { image: 'orbsnetwork/ethereum-writer:v1.2.5' },
       'logs-service': { image: 'orbsnetwork/logs-service:v1.1.4' },
     },
   };
