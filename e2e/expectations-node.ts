@@ -49,6 +49,30 @@ export const expectationNodeManagement = {
         'node-address': 'ecfcCcbc1E54852337298c7E90f5eceE79439e67',
       },
     },
+    'matic-reader': {
+      InternalPort: 8080,
+      ExternalPort: 7667,
+      Disabled: false,
+      DockerConfig: {
+        Image: 'orbsnetworkstaging/management-service',
+        Tag: isValidImageVersion,
+        Pull: true,
+      },
+      Config: {
+        BootstrapMode: false,
+        Port: 8080,
+        DockerNamespace: 'orbsnetwork',
+        StatusWriteIntervalSeconds: 1,
+        DeploymentDescriptorPollIntervalSeconds: 1,
+        EthereumPollIntervalSeconds: 1,
+        EthereumFirstBlock: 0,
+        FinalityBufferBlocks: 10,
+        Verbose: true,
+        EthereumGenesisContract: isValidEthereumAddress,
+        EthereumEndpoint: 'http://ganache:7545',
+        'node-address': 'ecfcCcbc1E54852337298c7E90f5eceE79439e67',
+      },
+    },
     'ethereum-writer': {
       Disabled: false,
       DockerConfig: {
@@ -60,6 +84,24 @@ export const expectationNodeManagement = {
       AllowAccessToServices: true,
       Config: {
         ManagementServiceEndpoint: 'http://management-service:8080',
+        EthereumEndpoint: 'http://ganache:7545',
+        SignerEndpoint: 'http://signer:7777',
+        EthereumElectionsContract: isValidEthereumAddress,
+        NodeOrbsAddress: 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
+        ElectionsAuditOnly: false,
+      },
+    },
+    'matic-writer': {
+      Disabled: false,
+      DockerConfig: {
+        Image: 'orbsnetwork/ethereum-writer',
+        Tag: isValidImageVersion,
+        Pull: true,
+      },
+      AllowAccessToSigner: true,
+      AllowAccessToServices: true,
+      Config: {
+        ManagementServiceEndpoint: 'http://matic-reader:8080',
         EthereumEndpoint: 'http://ganache:7545',
         SignerEndpoint: 'http://signer:7777',
         EthereumElectionsContract: isValidEthereumAddress,
