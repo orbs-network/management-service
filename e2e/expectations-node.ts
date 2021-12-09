@@ -17,7 +17,7 @@ export const expectationNodeManagement = {
       InternalPort: 7777,
       Disabled: false,
       DockerConfig: {
-        Image: 'orbsnetwork/signer',
+        Image: 'e2e-mock/signer',
         Tag: isValidImageVersion,
         Pull: true,
       },
@@ -30,14 +30,13 @@ export const expectationNodeManagement = {
       ExternalPort: 7666,
       Disabled: false,
       DockerConfig: {
-        Image: 'orbsnetworkstaging/management-service',
+        Image: 'e2e-mock/management-service',
         Tag: isValidImageVersion,
         Pull: true,
       },
       Config: {
         BootstrapMode: false,
         Port: 8080,
-        DockerNamespace: 'orbsnetwork',
         StatusWriteIntervalSeconds: 1,
         DeploymentDescriptorPollIntervalSeconds: 1,
         EthereumPollIntervalSeconds: 1,
@@ -54,29 +53,28 @@ export const expectationNodeManagement = {
       ExternalPort: 7667,
       Disabled: false,
       DockerConfig: {
-        Image: 'orbsnetworkstaging/management-service',
+        Image: 'e2e-mock/management-service',
         Tag: isValidImageVersion,
         Pull: true,
       },
       Config: {
         BootstrapMode: false,
         Port: 8080,
-        DockerNamespace: 'orbsnetwork',
         StatusWriteIntervalSeconds: 1,
-        DeploymentDescriptorPollIntervalSeconds: 1,
-        EthereumPollIntervalSeconds: 1,
-        EthereumFirstBlock: 0,
+        DeploymentDescriptorPollIntervalSeconds: 600,
+        EthereumPollIntervalSeconds: 10,
+        EthereumFirstBlock: 21700000,
         FinalityBufferBlocks: 10,
         Verbose: true,
         EthereumGenesisContract: isValidEthereumAddress,
-        EthereumEndpoint: 'http://ganache:7545',
+        EthereumEndpoint: 'https://polygon-mainnet.g.alchemy.com/v2/Pe1v1WpSGDVAmY0J3MoawJrbr12ETPnO',
         'node-address': 'ecfcCcbc1E54852337298c7E90f5eceE79439e67',
       },
     },
     'ethereum-writer': {
       Disabled: false,
       DockerConfig: {
-        Image: 'orbsnetwork/ethereum-writer',
+        Image: 'e2e-mock/ethereum-writer',
         Tag: isValidImageVersion,
         Pull: true,
       },
@@ -94,7 +92,7 @@ export const expectationNodeManagement = {
     'matic-writer': {
       Disabled: false,
       DockerConfig: {
-        Image: 'orbsnetwork/ethereum-writer',
+        Image: 'e2e-mock/ethereum-writer',
         Tag: isValidImageVersion,
         Pull: true,
       },
@@ -102,7 +100,7 @@ export const expectationNodeManagement = {
       AllowAccessToServices: true,
       Config: {
         ManagementServiceEndpoint: 'http://matic-reader:8080',
-        EthereumEndpoint: 'http://ganache:7545',
+        EthereumEndpoint: 'https://polygon-mainnet.g.alchemy.com/v2/Pe1v1WpSGDVAmY0J3MoawJrbr12ETPnO',
         SignerEndpoint: 'http://signer:7777',
         EthereumElectionsContract: isValidEthereumAddress,
         NodeOrbsAddress: 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
@@ -114,7 +112,7 @@ export const expectationNodeManagement = {
       ExternalPort: 8666,
       Disabled: false,
       DockerConfig: {
-        Image: 'orbsnetwork/logs-service',
+        Image: 'e2e-mock/logs-service',
         Tag: isValidImageVersion,
         Pull: true,
       },
@@ -136,7 +134,7 @@ export const expectationNodeManagement = {
       InternalHttpPort: 8080,
       Disabled: false,
       DockerConfig: {
-        Image: 'orbsnetwork/node',
+        Image: 'e2e-mock/node',
         Tag: isValidImageVersion,
         Pull: true,
       },

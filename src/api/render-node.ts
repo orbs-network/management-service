@@ -147,6 +147,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       Pull: true,
     },
     Config: {
+      Port: 8080,
       EthereumGenesisContract: '0x91e9C60D04653c95f206CF274cfD03eb031531Af',
       // NOTE - do not commit a payed account url with Key here
       EthereumEndpoint: 'https://polygon-mainnet.g.alchemy.com/v2/Pe1v1WpSGDVAmY0J3MoawJrbr12ETPnO',
@@ -155,6 +156,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       ElectionsStaleUpdateSeconds: config.ElectionsStaleUpdateSeconds, // TODO TBD - what does it mean in matic
       FinalityBufferBlocks: config.FinalityBufferBlocks, // TODO TBD
       EthereumFirstBlock: 21700000,
+      StatusWriteIntervalSeconds: 1,
       Verbose: true, // TODO TBD
       'node-address': config['node-address'],
 

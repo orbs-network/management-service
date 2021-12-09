@@ -36,6 +36,7 @@ export class TestEnvironment {
       EthereumFirstBlock: 0,
       Verbose: true,
       'node-address': 'ecfcCcbc1E54852337298c7E90f5eceE79439e67', // Guardian3 (mixed case!)
+      DeploymentDescriptorUrl: 'https://deployment.orbs.network/management-service-e2e.json', // TODO: move to local docker
     };
   }
 

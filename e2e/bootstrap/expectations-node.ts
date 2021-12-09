@@ -17,7 +17,7 @@ export const expectationNodeManagement = {
       ExternalPort: 7666,
       Disabled: false,
       DockerConfig: {
-        Image: 'orbsnetworkstaging/management-service',
+        Image: 'e2e-mock/management-service',
         Tag: isValidImageVersion,
         Pull: true,
       },
