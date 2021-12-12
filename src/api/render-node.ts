@@ -132,7 +132,7 @@ function getManagementService(snapshot: StateSnapshot, config: ServiceConfigurat
 }
 
 function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
-  const version = snapshot.CurrentImageVersions['main']['matic-reader']; // NOTE, management service image serves two purposes
+  const version = snapshot.CurrentImageVersions['main']['management-service']; // NOTE, management service image serves two purposes
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
@@ -195,7 +195,7 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
 }
 
 function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
-  const version = snapshot.CurrentImageVersions['main']['matic-writer'];
+  const version = snapshot.CurrentImageVersions['main']['ethereum-writer'];
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
