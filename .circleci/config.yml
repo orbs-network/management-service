@@ -1,14 +1,15 @@
 version: 2.1
 orbs:
-  node: circleci/node@3.0.1
+  node: circleci/node@4.9.0
   docker: circleci/docker@0.5.19
 jobs:
   build-and-test:
-    machine: true
+    machine:
+      image: ubuntu-2004:202010-01 # recommended linux image
     steps:
       - checkout
       - node/install:
-          node-version: '12.18.0'
+          node-version: '16.13.1'
       - docker/install-docker
       - run: node --version
       - run: npm --version
@@ -20,7 +21,7 @@ jobs:
           name: spinning up ganache
           command: npm run start:eth
           background: true
-      - run: sleep 10 && mkdir -p _out/unit _out/e2e
+      - run: mkdir -p _out/unit _out/e2e
       - run: npm test --  --timeout=5m --tap --no-color| npx tap-xunit > _out/unit/test.xml
       - run: npm run build
       - run: npm run test:e2e --  --timeout=10m --tap --no-color| npx tap-xunit > _out/e2e/test.xml
@@ -30,11 +31,12 @@ jobs:
           path: _out
 
   build-and-release-to-staging:
-    machine: true
+    machine:
+      image: ubuntu-2004:202010-01 # recommended linux image
     steps:
       - checkout
       - node/install:
-          node-version: '12.18.0'
+          node-version: '16.13.1'
       - docker/install-docker
       - run: ./boyar/create-version-file.sh
       - node/install-packages
@@ -42,11 +44,12 @@ jobs:
       - run: ./.circleci/release-to-staging.sh
 
   build-and-release:
-    machine: true
+    machine:
+      image: ubuntu-2004:202010-01 # recommended linux image
     steps:
       - checkout
       - node/install:
-          node-version: '12.18.0'
+          node-version: '16.13.1'
       - docker/install-docker
       - run: ./boyar/create-version-file.sh
       - node/install-packages
