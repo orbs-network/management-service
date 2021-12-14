@@ -217,6 +217,7 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
       EthereumDiscountGasPriceFactor: 1,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       ElectionsAuditOnly: false,
+      // SuspendVoteUnready: false,
     },
   };
 }
