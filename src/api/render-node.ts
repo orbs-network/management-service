@@ -136,7 +136,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
-  if (!config?.MaticEndpoint) return undefined;
+  // if (!config?.MaticEndpoint) return undefined;
 
   return {
     InternalPort: 8080,
@@ -200,7 +200,7 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
-  if (!config?.MaticEndpoint) return undefined;
+  // if (!config?.MaticEndpoint) return undefined;
 
   return {
     Disabled: false,
