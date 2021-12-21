@@ -100,17 +100,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     Tag: 'v4.5.6',
     Pull: true,
   });
-  t.deepEqual(res.services['matic-reader'].DockerConfig, {
-    Image: 'orbsnetwork/management-service',
-    Tag: 'v4.5.6',
-    Pull: true,
-  });
   t.deepEqual(res.services['ethereum-writer'].DockerConfig, {
-    Image: 'orbsnetwork/ethereum-writer',
-    Tag: 'v1.1.0',
-    Pull: true,
-  });
-  t.deepEqual(res.services['matic-writer'].DockerConfig, {
     Image: 'orbsnetwork/ethereum-writer',
     Tag: 'v1.1.0',
     Pull: true,
