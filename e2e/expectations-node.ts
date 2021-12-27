@@ -67,7 +67,7 @@ export const expectationNodeManagement = {
         FinalityBufferBlocks: 10,
         Verbose: true,
         EthereumGenesisContract: isValidEthereumAddress,
-        EthereumEndpoint: 'http://ganache:7546',
+        EthereumEndpoint: 'mock-endpoint',
         'node-address': 'ecfcCcbc1E54852337298c7E90f5eceE79439e67',
       },
     },
@@ -100,7 +100,7 @@ export const expectationNodeManagement = {
       AllowAccessToServices: true,
       Config: {
         ManagementServiceEndpoint: 'http://matic-reader:8080',
-        EthereumEndpoint: 'http://ganache:7546',
+        EthereumEndpoint: 'mock-endpoint',
         SignerEndpoint: 'http://signer:7777',
         EthereumElectionsContract: isValidEthereumAddress,
         NodeOrbsAddress: 'ecfcccbc1e54852337298c7e90f5ecee79439e67',

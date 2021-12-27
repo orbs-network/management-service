@@ -13,7 +13,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
 
   const ethereum = new EthereumTestDriver(true);
   const ethereumEndpoint = 'http://localhost:7545';
-  const maticEndpoint = 'http://localhost:7546';
+  const maticEndpoint = 'mock-endpoint';
   const finalityBufferBlocks = 5;
 
   // mock docker hub state

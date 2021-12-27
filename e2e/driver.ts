@@ -23,7 +23,7 @@ export class TestEnvironment {
       Port: 8080,
       EthereumGenesisContract: this.ethereum.getContractRegistryAddress(),
       EthereumEndpoint: `http://ganache:7545`,
-      MaticEndpoint: `http://ganache:7546`,
+      MaticEndpoint: `mock-endpoint`,
       DockerNamespace: 'orbsnetwork',
       ElectionsAuditOnly: false,
       StatusWriteIntervalSeconds: 1,
