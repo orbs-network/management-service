@@ -16,7 +16,7 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
         ResetTimeout: '30m',
       },
       ExecutableImage: {
-        Url: 'https://drive.google.com/file/d/1vO3Tnd-g6xgF9mNU6LEC1LRrTJsmVQRf/view?usp=sharing',
+        Url: 'https://amihaz.github.io/staging-deployment/boyar-v1.11.3.bin',
         Sha256: 'e1a9a5bd8adbce3b3a1ebdf1e82075646e3cb7ed45dd0daa05325cf6a5eec70a',
       },
       'storage-driver': 'local',
