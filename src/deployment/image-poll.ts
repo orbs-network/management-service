@@ -11,6 +11,7 @@ export const imageNamesToPollForNewVersions: services[] = [
   'signer',
   'ethereum-writer',
   'logs-service',
+  'keepers'
 ];
 
 export type ImagePollConfiguration = DeploymentDescriptorConfiguration & {

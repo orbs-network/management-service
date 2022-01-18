@@ -52,6 +52,14 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
     Logger.error(err.toString());
   }
 
+  // include keepers if found a viable image for it
+  try {
+    response.services['keepers'] = getKeepers(snapshot, config);
+    if (!response.services['keepers']) delete response.services['keepers'];
+  } catch (err) {
+    Logger.error(err.toString());
+  }
+
   // include logs-service if found a viable image for it
   try {
     response.services['logs-service'] = getLogsService(snapshot);
@@ -139,6 +147,34 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
       EthereumElectionsContract: elections,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       ElectionsAuditOnly: config.ElectionsAuditOnly,
+    },
+  };
+}
+
+function getKeepers(snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const version = snapshot.CurrentImageVersions['main']['keepers'];
+  if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
+
+  return {
+    Disabled: false,
+    DockerConfig: {
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
+      Pull: true,
+    },
+    AllowAccessToSigner: true,
+    AllowAccessToServices: true,
+    Config: {
+      ManagementServiceEndpoint: 'http://management-service:8080',
+      EthereumEndpoint: 'https://bsc-dataseed.binance.org/',
+      SignerEndpoint: 'http://signer:7777',
+      // EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6',
+      EthereumDiscountGasPriceFactor: 1,
+      NodeOrbsAddress: normalizeAddress(config['node-address']),
+      // ElectionsAuditOnly: false,
+      // SuspendVoteUnready: false,
     },
   };
 }

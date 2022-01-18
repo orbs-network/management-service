@@ -13,6 +13,7 @@ export type services =
   | 'signer'
   | 'ethereum-writer'
   | 'logs-service'
+  | 'keepers'
   | 'node'
   | 'node-canary';
 
