@@ -77,11 +77,10 @@ export function normalizeAddress(address: string): string {
   return address.toLowerCase();
 }
 
-export function deobfuscateUrl(obfUrl: number []): string {
-
+export function deobfuscateUrl(obfUrl: number[]): string {
   let deobfUrl = '';
   for (let i = 0; i < obfUrl.length; i++) {
-	deobfUrl += String.fromCharCode(obfUrl[i])
+    deobfUrl += String.fromCharCode(obfUrl[i]);
   }
 
   return deobfUrl;

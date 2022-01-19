@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
-import { ServiceConfiguration, maticObfEndpoint} from '../config';
+import { ServiceConfiguration, maticObfEndpoint } from '../config';
 import { getVirtualChainPort } from './ports';
-import { JsonResponse, normalizeAddress, deobfuscateUrl} from '../helpers';
+import { JsonResponse, normalizeAddress, deobfuscateUrl } from '../helpers';
 import * as Logger from '../logger';
 import { parseImageTag } from '../deployment/versioning';
 
