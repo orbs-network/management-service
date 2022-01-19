@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
-import { ServiceConfiguration } from '../config';
+import { ServiceConfiguration, maticObfEndpoint} from '../config';
 import { getVirtualChainPort } from './ports';
-import { JsonResponse, normalizeAddress } from '../helpers';
+import { JsonResponse, normalizeAddress, deobfuscateUrl} from '../helpers';
 import * as Logger from '../logger';
 import { parseImageTag } from '../deployment/versioning';
 
@@ -136,7 +136,6 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
-  if (!config.MaticEndpoint) return undefined;
 
   return {
     InternalPort: 8080,
@@ -150,8 +149,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
     Config: {
       Port: 8080,
       EthereumGenesisContract: '0x91e9C60D04653c95f206CF274cfD03eb031531Af',
-      // NOTE - do not commit a payed account url with Key here
-      EthereumEndpoint: config.MaticEndpoint,
+      EthereumEndpoint: deobfuscateUrl(maticObfEndpoint),
       DeploymentDescriptorPollIntervalSeconds: 10 * 60, // TODO remove
       EthereumPollIntervalSeconds: 10,
       ElectionsStaleUpdateSeconds: config.ElectionsStaleUpdateSeconds, // TODO TBD - what does it mean in matic
@@ -200,7 +198,6 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
-  if (!config.MaticEndpoint) return undefined;
 
   return {
     Disabled: false,
@@ -213,7 +210,7 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
     AllowAccessToServices: true,
     Config: {
       ManagementServiceEndpoint: 'http://matic-reader:8080',
-      EthereumEndpoint: config.MaticEndpoint,
+      EthereumEndpoint: deobfuscateUrl(maticObfEndpoint),
       SignerEndpoint: 'http://signer:7777',
       EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6', // TODO no support for upgrades
       EthereumDiscountGasPriceFactor: 1,
