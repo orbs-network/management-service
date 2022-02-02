@@ -147,7 +147,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       Pull: true,
     },
     Config: {
-	  // TODO: ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
+      // TODO: ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
 
       Port: 8080,
       EthereumGenesisContract: '0x91e9C60D04653c95f206CF274cfD03eb031531Af',
