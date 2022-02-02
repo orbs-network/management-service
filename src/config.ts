@@ -5,7 +5,7 @@ export interface ServiceConfiguration {
   Port: number;
   EthereumGenesisContract: string;
   EthereumEndpoint: string;
-  MaticEndpoint?: string;
+  MaticEndpoint?: string; // TODO: remove
   DeploymentDescriptorUrl: string;
   ElectionsAuditOnly: boolean;
   StatusJsonPath: string;

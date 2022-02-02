@@ -147,17 +147,19 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       Pull: true,
     },
     Config: {
+	  // TODO: ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
+
       Port: 8080,
       EthereumGenesisContract: '0x91e9C60D04653c95f206CF274cfD03eb031531Af',
       EthereumEndpoint: deobfuscateUrl(maticObfEndpoint),
-      DeploymentDescriptorPollIntervalSeconds: 10 * 60, // TODO remove
-      EthereumPollIntervalSeconds: 10,
-      ElectionsStaleUpdateSeconds: config.ElectionsStaleUpdateSeconds, // TODO TBD - what does it mean in matic
-      FinalityBufferBlocks: config.FinalityBufferBlocks, // TODO TBD
+      // DeploymentDescriptorPollIntervalSeconds: 10 * 60, // TODO remove
+      // EthereumPollIntervalSeconds: 10,
+      // ElectionsStaleUpdateSeconds: config.ElectionsStaleUpdateSeconds, // TODO TBD - what does it mean in matic
+      // FinalityBufferBlocks: config.FinalityBufferBlocks, // TODO TBD
       EthereumFirstBlock: 21700000,
-      StatusWriteIntervalSeconds: 1,
-      Verbose: true, // TODO TBD
-      'node-address': config['node-address'],
+      StatusWriteIntervalSeconds: 1, // TODO should be default
+      Verbose: true, // TODO should be default
+      'node-address': config['node-address'], // TODO should be default
 
       // TODO add "CommitteeReaderOnlyMode"
       BootstrapMode: false,
