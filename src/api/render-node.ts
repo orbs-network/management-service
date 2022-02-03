@@ -119,6 +119,7 @@ function getManagementService(snapshot: StateSnapshot, config: ServiceConfigurat
     Config: {
       ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
       BootstrapMode: false,
+      DeploymentDescriptorPollIntervalSeconds: 60 // TODO: fixme for testing only
     },
   };
 }
