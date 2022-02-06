@@ -219,7 +219,7 @@ function getKeepers(snapshot: StateSnapshot, config: ServiceConfiguration) {
     AllowAccessToSigner: true,
     AllowAccessToServices: true,
     Config: {
-      ManagementServiceEndpoint: 'http://management-service:8080',
+      ManagementServiceEndpoint: 'http://matic-reader:8080', // TODO: change to 'http://management-service:8080',
       EthereumEndpoint: 'https://speedy-nodes-nyc.moralis.io/e25f7625703c58a9068b9947/bsc/mainnet',
       SignerEndpoint: 'http://signer:7777',
       // EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6',
