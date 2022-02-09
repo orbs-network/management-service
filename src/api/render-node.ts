@@ -225,7 +225,7 @@ function getKeepers(snapshot: StateSnapshot, config: ServiceConfiguration) {
       // EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6',
       EthereumDiscountGasPriceFactor: 1,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
-      BIUrl: "http://logs.orbs.network:3001/putes/keepers-ew"
+      BIUrl: 'http://logs.orbs.network:3001/putes/keepers-ew',
       // ElectionsAuditOnly: false,
       // SuspendVoteUnready: false,
     },
