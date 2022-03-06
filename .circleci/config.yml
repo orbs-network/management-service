@@ -4,7 +4,8 @@ orbs:
   docker: circleci/docker@0.5.19
 jobs:
   build-and-test:
-    machine: true
+    machine:
+      image: ubuntu-2004:202101-01
     steps:
       - checkout
       - node/install:
@@ -30,7 +31,8 @@ jobs:
           path: _out    
   
   build-and-release-to-staging:
-    machine: true
+    machine:
+      image: ubuntu-2004:202101-01
     steps:
       - checkout
       - node/install:
@@ -42,7 +44,8 @@ jobs:
       - run: ./.circleci/release-to-staging.sh
 
   build-and-release:
-    machine: true
+    machine:
+      image: ubuntu-2004:202101-01
     steps:
       - checkout
       - node/install:
