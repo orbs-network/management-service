@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
-import { ServiceConfiguration } from '../config';
+import { ServiceConfiguration, maticObfEndpoint } from '../config';
 import { getVirtualChainPort } from './ports';
-import { JsonResponse, normalizeAddress } from '../helpers';
+import { JsonResponse, normalizeAddress, deobfuscateUrl } from '../helpers';
 import * as Logger from '../logger';
 import { parseImageTag } from '../deployment/versioning';
 
@@ -44,10 +44,26 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
     Logger.error(err.toString());
   }
 
+  // include matic-committee-reader if found a viable image for it
+  try {
+    response.services['matic-reader'] = getMaticReader(snapshot, config);
+    if (!response.services['matic-reader']) delete response.services['matic-reader'];
+  } catch (err) {
+    Logger.error(err.toString());
+  }
+
   // include ethereum-writer if found a viable image for it and its contract addresses are known
   try {
     response.services['ethereum-writer'] = getEthereumWriter(snapshot, config);
     if (!response.services['ethereum-writer']) delete response.services['ethereum-writer'];
+  } catch (err) {
+    Logger.error(err.toString());
+  }
+
+  // include matic-writer if found a viable image for it and its contract addresses are known
+  try {
+    response.services['matic-writer'] = getMaticWriter(snapshot, config);
+    if (!response.services['matic-writer']) delete response.services['matic-writer'];
   } catch (err) {
     Logger.error(err.toString());
   }
@@ -115,6 +131,33 @@ function getManagementService(snapshot: StateSnapshot, config: ServiceConfigurat
   };
 }
 
+function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const version = snapshot.CurrentImageVersions['main']['matic-reader']; // NOTE, management service image serves two purposes
+  if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
+
+  return {
+    InternalPort: 8080,
+    ExternalPort: 7667,
+    Disabled: false,
+    DockerConfig: {
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
+      Pull: true,
+    },
+    Config: {
+      Port: 8080,
+      EthereumGenesisContract: '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77',
+      EthereumEndpoint: deobfuscateUrl(maticObfEndpoint),
+      EthereumFirstBlock: 21700000,
+      'node-address': config['node-address'],
+
+      BootstrapMode: false,
+    },
+  };
+}
+
 function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const version = snapshot.CurrentImageVersions['main']['ethereum-writer'];
   if (!version) return undefined;
@@ -139,6 +182,34 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
       EthereumElectionsContract: elections,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       ElectionsAuditOnly: config.ElectionsAuditOnly,
+    },
+  };
+}
+
+function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const version = snapshot.CurrentImageVersions['main']['matic-writer'];
+  if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
+
+  return {
+    Disabled: false,
+    DockerConfig: {
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
+      Pull: true,
+    },
+    AllowAccessToSigner: true,
+    AllowAccessToServices: true,
+    Config: {
+      ManagementServiceEndpoint: 'http://matic-reader:8080',
+      EthereumEndpoint: deobfuscateUrl(maticObfEndpoint),
+      SignerEndpoint: 'http://signer:7777',
+      EthereumElectionsContract: '0x94f2da1ef22649c642500e8B1C3252A4670eE95b',
+      EthereumDiscountGasPriceFactor: 1,
+      NodeOrbsAddress: normalizeAddress(config['node-address']),
+      ElectionsAuditOnly: false,
+      // SuspendVoteUnready: false,
     },
   };
 }

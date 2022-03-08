@@ -41,6 +41,7 @@ class MockEthereumReader {
   public delays = true;
   constructor(public eventStream: MockEvent[]) {}
   async getPastEvents(_en: EventName, { fromBlock, toBlock }: PastEventOptions) {
+    if (fromBlock === undefined || toBlock === undefined) return []; // TODO: throw error in this case
     const res = _.filter(this.eventStream, (event) => event.blockNumber >= fromBlock && event.blockNumber <= toBlock);
     if (this.delays) await new Promise((resolve) => setTimeout(resolve, 1)); // sleep 1 ms to add scheduling jitter
     return res;

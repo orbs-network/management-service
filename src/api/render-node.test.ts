@@ -13,6 +13,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
 
   const ethereum = new EthereumTestDriver(true);
   const ethereumEndpoint = 'http://localhost:7545';
+  const maticEndpoint = 'mock-endpoint';
   const finalityBufferBlocks = 5;
 
   // mock docker hub state
@@ -25,10 +26,12 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
         comment: 'for use by a node deployment/installation tool',
       },
       'management-service': { image: 'orbsnetwork/management-service:v4.5.6' },
+      'matic-reader': { image: 'orbsnetwork/management-service:v4.5.6' },
       node: { image: 'orbsnetwork/node:v1.2.3' },
       'node-canary': { image: 'orbsnetwork/node:v1.2.4-canary' },
       signer: { image: 'orbsnetwork/signer:v1.1.0' },
       'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
+      'matic-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
       'logs-service': { image: 'orbsnetwork/logs-service:v1.1.0' },
     },
   });
@@ -48,6 +51,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     ...exampleConfig,
     EthereumGenesisContract: ethereum.getContractRegistryAddress(),
     EthereumEndpoint: ethereumEndpoint,
+    MaticEndpoint: maticEndpoint,
     ElectionsAuditOnly: true,
     FinalityBufferBlocks: finalityBufferBlocks,
     EthereumFirstBlock: firstBlock,
@@ -98,7 +102,17 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     Tag: 'v4.5.6',
     Pull: true,
   });
+  t.deepEqual(res.services['matic-reader'].DockerConfig, {
+    Image: 'orbsnetwork/management-service',
+    Tag: 'v4.5.6',
+    Pull: true,
+  });
   t.deepEqual(res.services['ethereum-writer'].DockerConfig, {
+    Image: 'orbsnetwork/ethereum-writer',
+    Tag: 'v1.1.0',
+    Pull: true,
+  });
+  t.deepEqual(res.services['matic-writer'].DockerConfig, {
     Image: 'orbsnetwork/ethereum-writer',
     Tag: 'v1.1.0',
     Pull: true,
@@ -141,10 +155,12 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
         comment: 'for use by a node deployment/installation tool',
       },
       'management-service': { image: 'orbsnetwork/management-service:v4.5.8-immediate' },
+      'matic-reader': { image: 'orbsnetwork/management-service:v4.5.8-immediate' },
       node: { image: 'orbsnetwork/node:v1.2.5' },
       'node-canary': { image: 'orbsnetwork/node:v1.2.6-canary-hotfix' },
       signer: { image: 'orbsnetwork/signer:v1.1.0' },
       'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
+      'matic-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
       'logs-service': { image: 'orbsnetwork/logs-service:v1.1.0' },
     },
   });

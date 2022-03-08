@@ -7,9 +7,11 @@ import * as Logger from '../logger';
 
 export const imageNamesToPollForNewVersions: services[] = [
   'management-service',
+  'matic-reader',
   'node',
   'signer',
   'ethereum-writer',
+  'matic-writer',
   'logs-service',
 ];
 

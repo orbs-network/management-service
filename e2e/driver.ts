@@ -23,6 +23,7 @@ export class TestEnvironment {
       Port: 8080,
       EthereumGenesisContract: this.ethereum.getContractRegistryAddress(),
       EthereumEndpoint: `http://ganache:7545`,
+      MaticEndpoint: `mock-endpoint`,
       DockerNamespace: 'orbsnetwork',
       ElectionsAuditOnly: false,
       StatusWriteIntervalSeconds: 1,
@@ -36,6 +37,7 @@ export class TestEnvironment {
       EthereumFirstBlock: 0,
       Verbose: true,
       'node-address': 'ecfcCcbc1E54852337298c7E90f5eceE79439e67', // Guardian3 (mixed case!)
+      DeploymentDescriptorUrl: 'https://deployment.orbs.network/e2e/management-service-test.json', // TODO: move to local docker
     };
   }
 
