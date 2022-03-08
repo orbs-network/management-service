@@ -68,14 +68,6 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
     Logger.error(err.toString());
   }
 
-  // include keepers if found a viable image for it
-  try {
-    response.services['keepers'] = getKeepers(snapshot, config);
-    if (!response.services['keepers']) delete response.services['keepers'];
-  } catch (err) {
-    Logger.error(err.toString());
-  }
-
   // include logs-service if found a viable image for it
   try {
     response.services['logs-service'] = getLogsService(snapshot);
@@ -135,7 +127,6 @@ function getManagementService(snapshot: StateSnapshot, config: ServiceConfigurat
     Config: {
       ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
       BootstrapMode: false,
-      DeploymentDescriptorPollIntervalSeconds: 60, // TODO: fixme for testing only
     },
   };
 }
@@ -156,19 +147,12 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       Pull: true,
     },
     Config: {
-      // TODO: ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
-
       Port: 8080,
       EthereumGenesisContract: '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77',
-      EthereumEndpoint: deobfuscateUrl(maticObfEndpoint), // TODO: change to non restricted endpoint
-      // DeploymentDescriptorPollIntervalSeconds: 10 * 60, // TODO remove
-      // EthereumPollIntervalSeconds: 10,
-      // ElectionsStaleUpdateSeconds: config.ElectionsStaleUpdateSeconds, // TODO TBD - what does it mean in matic
-      // FinalityBufferBlocks: config.FinalityBufferBlocks, // TODO TBD
+      EthereumEndpoint: deobfuscateUrl(maticObfEndpoint),
       EthereumFirstBlock: 21700000,
-      'node-address': config['node-address'], // TODO should be default
+      'node-address': config['node-address'],
 
-      // TODO add "CommitteeReaderOnlyMode"
       BootstrapMode: false,
     },
   };
@@ -202,35 +186,6 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
   };
 }
 
-function getKeepers(snapshot: StateSnapshot, config: ServiceConfiguration) {
-  const version = snapshot.CurrentImageVersions['main']['keepers'];
-  if (!version) return undefined;
-  const imageTag = parseImageTag(version);
-  if (!imageTag) return undefined;
-
-  return {
-    Disabled: false,
-    DockerConfig: {
-      Image: imageTag.Image,
-      Tag: imageTag.Tag,
-      Pull: true,
-    },
-    AllowAccessToSigner: true,
-    AllowAccessToServices: true,
-    Config: {
-      ManagementServiceEndpoint: 'http://matic-reader:8080', // TODO: change to 'http://management-service:8080',
-      EthereumEndpoint: 'https://speedy-nodes-nyc.moralis.io/e25f7625703c58a9068b9947/bsc/mainnet',
-      SignerEndpoint: 'http://signer:7777',
-      // EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6',
-      EthereumDiscountGasPriceFactor: 1,
-      NodeOrbsAddress: normalizeAddress(config['node-address']),
-      BIUrl: 'http://logs.orbs.network:3001/putes/keepers-ew',
-      // ElectionsAuditOnly: false,
-      // SuspendVoteUnready: false,
-    },
-  };
-}
-
 function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const version = snapshot.CurrentImageVersions['main']['matic-writer'];
   if (!version) return undefined;
@@ -250,7 +205,7 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
       ManagementServiceEndpoint: 'http://matic-reader:8080',
       EthereumEndpoint: deobfuscateUrl(maticObfEndpoint),
       SignerEndpoint: 'http://signer:7777',
-      EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6', // TODO no support for upgrades
+      EthereumElectionsContract: '0x94f2da1ef22649c642500e8B1C3252A4670eE95b',
       EthereumDiscountGasPriceFactor: 1,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       ElectionsAuditOnly: false,

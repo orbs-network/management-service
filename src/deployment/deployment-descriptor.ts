@@ -15,7 +15,6 @@ export type services =
   | 'ethereum-writer'
   | 'matic-writer'
   | 'logs-service'
-  | 'keepers'
   | 'node'
   | 'node-canary';
 
