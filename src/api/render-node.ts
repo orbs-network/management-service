@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
-import { ServiceConfiguration, maticObfEndpoint } from '../config';
+import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './ports';
-import { JsonResponse, normalizeAddress, deobfuscateUrl } from '../helpers';
+import { JsonResponse, normalizeAddress} from '../helpers';
 import * as Logger from '../logger';
 import { parseImageTag } from '../deployment/versioning';
 
@@ -149,7 +149,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
     Config: {
       Port: 8080,
       EthereumGenesisContract: '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77',
-      EthereumEndpoint: deobfuscateUrl(maticObfEndpoint),
+      EthereumEndpoint: 'https://matic-router.global.ssl.fastly.net',
       EthereumFirstBlock: 21700000,
       'node-address': config['node-address'],
 
@@ -203,7 +203,7 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
     AllowAccessToServices: true,
     Config: {
       ManagementServiceEndpoint: 'http://matic-reader:8080',
-      EthereumEndpoint: deobfuscateUrl(maticObfEndpoint),
+      EthereumEndpoint: 'https://matic-router.global.ssl.fastly.net',
       SignerEndpoint: 'http://signer:7777',
       EthereumElectionsContract: '0x94f2da1ef22649c642500e8B1C3252A4670eE95b',
       EthereumDiscountGasPriceFactor: 1,
