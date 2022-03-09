@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
 import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './ports';
-import { JsonResponse, normalizeAddress} from '../helpers';
+import { JsonResponse, normalizeAddress } from '../helpers';
 import * as Logger from '../logger';
 import { parseImageTag } from '../deployment/versioning';
 
