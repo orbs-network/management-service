@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
-import { ServiceConfiguration, maticObfEndpoint } from '../config';
+import { ServiceConfiguration } from '../config';
 import { getVirtualChainPort } from './ports';
-import { JsonResponse, normalizeAddress, deobfuscateUrl } from '../helpers';
+import { JsonResponse, normalizeAddress } from '../helpers';
 import * as Logger from '../logger';
 import { parseImageTag } from '../deployment/versioning';
 
@@ -135,7 +135,6 @@ function getManagementService(snapshot: StateSnapshot, config: ServiceConfigurat
     Config: {
       ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
       BootstrapMode: false,
-      DeploymentDescriptorPollIntervalSeconds: 60, // TODO: fixme for testing only
     },
   };
 }
@@ -156,19 +155,11 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       Pull: true,
     },
     Config: {
-      // TODO: ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
-
       Port: 8080,
       EthereumGenesisContract: '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77',
-      EthereumEndpoint: deobfuscateUrl(maticObfEndpoint), // TODO: change to non restricted endpoint
-      // DeploymentDescriptorPollIntervalSeconds: 10 * 60, // TODO remove
-      // EthereumPollIntervalSeconds: 10,
-      // ElectionsStaleUpdateSeconds: config.ElectionsStaleUpdateSeconds, // TODO TBD - what does it mean in matic
-      // FinalityBufferBlocks: config.FinalityBufferBlocks, // TODO TBD
+      EthereumEndpoint: config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net',
       EthereumFirstBlock: 21700000,
-      'node-address': config['node-address'], // TODO should be default
-
-      // TODO add "CommitteeReaderOnlyMode"
+      'node-address': config['node-address'],
       BootstrapMode: false,
     },
   };
@@ -248,9 +239,9 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
     AllowAccessToServices: true,
     Config: {
       ManagementServiceEndpoint: 'http://matic-reader:8080',
-      EthereumEndpoint: deobfuscateUrl(maticObfEndpoint),
+      EthereumEndpoint: config.EthereumEndpoint?? 'https://matic-router.global.ssl.fastly.net',
       SignerEndpoint: 'http://signer:7777',
-      EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6', // TODO no support for upgrades
+      EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6',
       EthereumDiscountGasPriceFactor: 1,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       ElectionsAuditOnly: false,
