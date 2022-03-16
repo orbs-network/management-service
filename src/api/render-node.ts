@@ -149,7 +149,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
     Config: {
       Port: 8080,
       EthereumGenesisContract: '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77',
-      EthereumEndpoint: 'https://matic-router.global.ssl.fastly.net',
+      EthereumEndpoint: config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net',
       EthereumFirstBlock: 21700000,
       'node-address': config['node-address'],
 
