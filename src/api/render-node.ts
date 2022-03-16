@@ -156,7 +156,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
     },
     Config: {
       Port: 8080,
-      EthereumGenesisContract: '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77',
+      EthereumGenesisContract: '0x91e9C60D04653c95f206CF274cfD03eb031531Af',
       EthereumEndpoint: config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net',
       EthereumFirstBlock: 21700000,
       'node-address': config['node-address'],
@@ -212,7 +212,6 @@ function getKeepers(snapshot: StateSnapshot, config: ServiceConfiguration) {
       ManagementServiceEndpoint: 'http://matic-reader:8080', // TODO: change to 'http://management-service:8080',
       EthereumEndpoint: 'https://speedy-nodes-nyc.moralis.io/e25f7625703c58a9068b9947/bsc/mainnet',
       SignerEndpoint: 'http://signer:7777',
-      // EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6',
       EthereumDiscountGasPriceFactor: 1,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       BIUrl: 'http://logs.orbs.network:3001/putes/keepers-ew',
@@ -239,7 +238,7 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
     AllowAccessToServices: true,
     Config: {
       ManagementServiceEndpoint: 'http://matic-reader:8080',
-      EthereumEndpoint: config.EthereumEndpoint?? 'https://matic-router.global.ssl.fastly.net',
+      EthereumEndpoint: config.EthereumEndpoint ?? 'https://matic-router.global.ssl.fastly.net',
       SignerEndpoint: 'http://signer:7777',
       EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6',
       EthereumDiscountGasPriceFactor: 1,
