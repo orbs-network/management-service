@@ -110,3 +110,7 @@ npm run test:e2e
 ```
 
 Runs end-to-end tests against a built docker image.
+
+### Matic-reader - Polygon
+
+The code has been updated to add EVM read capabalities from Polygon network, as well as Ethereum in order to support polygon proof of stake functionality as of March 29 2022.
