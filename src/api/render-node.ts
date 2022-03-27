@@ -137,6 +137,20 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
 
+  const maticConfig: {[index: string]:any} = {
+    ...config.ExternalLaunchConfig,
+    BootstrapMode: false,
+    };
+    maticConfig.Port =8080;
+    maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
+    maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';
+    maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
+    maticConfig.EthereumFirstBlock = 21700000;
+    maticConfig['node-address'] =  config['node-address'];
+    maticConfig.DeploymentDescriptorPollIntervalSeconds = 600;
+    maticConfig.EthereumPollIntervalSeconds = 10;
+
+
   return {
     InternalPort: 8080,
     ExternalPort: 7667,
@@ -146,15 +160,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       Tag: imageTag.Tag,
       Pull: true,
     },
-    Config: {
-      Port: 8080,
-      EthereumGenesisContract: '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77',
-      EthereumEndpoint: config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net',
-      EthereumFirstBlock: 21700000,
-      'node-address': config['node-address'],
-
-      BootstrapMode: false,
-    },
+    Config: {...maticConfig},
   };
 }
 
@@ -203,7 +209,7 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
     AllowAccessToServices: true,
     Config: {
       ManagementServiceEndpoint: 'http://matic-reader:8080',
-      EthereumEndpoint: 'https://matic-router.global.ssl.fastly.net',
+      EthereumEndpoint: config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net',
       SignerEndpoint: 'http://signer:7777',
       EthereumElectionsContract: '0x94f2da1ef22649c642500e8B1C3252A4670eE95b',
       EthereumDiscountGasPriceFactor: 1,

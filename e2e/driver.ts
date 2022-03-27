@@ -60,7 +60,7 @@ export class TestEnvironment {
     // step 2 - let ganache warm up
     test.serial.before(async (t) => {
       t.log('[E2E] wait 5 seconds for ganache to warm up');
-      await sleep(5000);
+      await sleep(10000);
     });
 
     // step 3 - deploy ethereum PoS contracts to ganache
