@@ -160,7 +160,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       EthereumEndpoint: config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net',
       EthereumFirstBlock: 21700000,
       'node-address': config['node-address'],
-      DeploymentDescriptorUrl: config.DeploymentDescriptorUrl,
+      DeploymentDescriptorUrl: config.ExternalLaunchConfig.DeploymentDescriptorUrl,
       BootstrapMode: false,
     },
   };
