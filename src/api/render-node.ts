@@ -161,6 +161,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       EthereumFirstBlock: 21700000,
       'node-address': config['node-address'],
       DeploymentDescriptorUrl: config.ExternalLaunchConfig.DeploymentDescriptorUrl,
+      ElectionsAuditOnly: config.ExternalLaunchConfig.ElectionsAuditOnly,
       BootstrapMode: false,
     },
   };
