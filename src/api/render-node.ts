@@ -15,9 +15,10 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
         ReadInterval: '30s',
         ResetTimeout: '30m',
       },
-      ExecutableImage: {              
-        Url: 'https://github.com/orbs-network/boyarin/releases/download/v.12.0-alpha/boyar-v1.12.0.bin',
-        Sha256: '13292389f9ade95a32103e6dcefa9d287ec76ab2c0d0d79e9bcae439d496b7fa',
+      ExecutableImage: {
+              
+        Url: 'https://github.com/orbs-network/boyarin/releases/download/untagged-195d33b4970e1b68b430/boyar-v1.12.0.bin',
+        Sha256: 'aee58b7c3a1f396ce1c9e1715e77ec2de9218f880988559867411065f88eabde',
       },
       'storage-driver': 'local',
       'storage-mount-type': 'bind',
@@ -137,19 +138,18 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
 
-  const maticConfig: {[index: string]:any} = {
+  const maticConfig: { [index: string]: any } = {
     ...config.ExternalLaunchConfig,
     BootstrapMode: false,
-    };
-    maticConfig.Port =8080;
-    maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
-    maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';
-    maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
-    maticConfig.EthereumFirstBlock = 21700000;
-    maticConfig['node-address'] =  config['node-address'];
-    maticConfig.DeploymentDescriptorPollIntervalSeconds = 600;
-    maticConfig.EthereumPollIntervalSeconds = 10;
-
+  };
+  maticConfig.Port = 8080;
+  maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
+  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';
+  maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
+  maticConfig.EthereumFirstBlock = 21700000;
+  maticConfig['node-address'] = config['node-address'];
+  maticConfig.DeploymentDescriptorPollIntervalSeconds = 600;
+  maticConfig.EthereumPollIntervalSeconds = 10;
 
   return {
     InternalPort: 8080,
@@ -160,7 +160,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       Tag: imageTag.Tag,
       Pull: true,
     },
-    Config: {...maticConfig},
+    Config: { ...maticConfig },
   };
 }
 
