@@ -16,8 +16,9 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
         ResetTimeout: '30m',
       },
       ExecutableImage: {
-        Url: 'https://github.com/orbs-network/boyarin/releases/download/v1.11.2/boyar-v1.11.2.bin',
-        Sha256: 'fe6f0d4107741be0adab843e2deca6ed7f28e67fe6dc8d856e45d50a8caf2065',
+              
+        Url: 'https://github.com/orbs-network/boyarin/releases/download/v1.12.0/boyar-v1.12.0.bin',
+        Sha256: '63de081e5a0841dfc83aed2aca76551389b365d256945aaf647ecbc4b07de499',
       },
       'storage-driver': 'local',
       'storage-mount-type': 'bind',
@@ -137,19 +138,18 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
 
-  const maticConfig: {[index: string]:any} = {
+  const maticConfig: { [index: string]: any } = {
     ...config.ExternalLaunchConfig,
     BootstrapMode: false,
-    };
-    maticConfig.Port =8080;
-    maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
-    maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';
-    maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
-    maticConfig.EthereumFirstBlock = 21700000;
-    maticConfig['node-address'] =  config['node-address'];
-    maticConfig.DeploymentDescriptorPollIntervalSeconds = 600;
-    maticConfig.EthereumPollIntervalSeconds = 10;
-
+  };
+  maticConfig.Port = 8080;
+  maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
+  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';
+  maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
+  maticConfig.EthereumFirstBlock = 21700000;
+  maticConfig['node-address'] = config['node-address'];
+  maticConfig.DeploymentDescriptorPollIntervalSeconds = 600;
+  maticConfig.EthereumPollIntervalSeconds = 10;
 
   return {
     InternalPort: 8080,
@@ -160,7 +160,7 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
       Tag: imageTag.Tag,
       Pull: true,
     },
-    Config: {...maticConfig},
+    Config: { ...maticConfig },
   };
 }
 
