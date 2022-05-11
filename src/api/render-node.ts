@@ -15,10 +15,9 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
         ReadInterval: '30s',
         ResetTimeout: '30m',
       },
-      ExecutableImage: {
-              
-        Url: 'https://github.com/orbs-network/boyarin/releases/download/v1.12.0/boyar-v1.12.0.bin',
-        Sha256: '63de081e5a0841dfc83aed2aca76551389b365d256945aaf647ecbc4b07de499',
+      ExecutableImage: {              
+        Url: 'https://github.com/orbs-network/boyarin/releases/download/v1.12.1/boyar-v1.12.1.bin',
+        Sha256: '9d7f7702b3bba582b8b60bd4ac4b870c1ab86b6f16bdfe182bbadae4f9358c83',
       },
       'storage-driver': 'local',
       'storage-mount-type': 'bind',
@@ -144,12 +143,10 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
   };
   maticConfig.Port = 8080;
   maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
-  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';
-  maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
+  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';  
   maticConfig.EthereumFirstBlock = 21700000;
-  maticConfig['node-address'] = config['node-address'];
-  maticConfig.DeploymentDescriptorPollIntervalSeconds = 600;
-  maticConfig.EthereumPollIntervalSeconds = 10;
+  maticConfig['node-address'] = config['node-address'];  
+  maticConfig.EthereumPollIntervalSeconds = 300; // every 5 minutes
 
   return {
     InternalPort: 8080,
