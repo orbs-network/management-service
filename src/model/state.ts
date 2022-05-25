@@ -11,6 +11,13 @@ const NUM_STANDBYS = 5;
 export interface StateSnapshot {
   CurrentRefTime: number; // primary, everything is by time
   CurrentRefBlock: number;
+  TotalEventsProcessed: number;
+  EventsStats: {
+      [key: number]: {
+            RefTime: number;
+            EventsCount: number;
+      };
+  };
   PageStartRefTime: number;
   PageEndRefTime: number;
   CurrentCommittee: {
@@ -126,6 +133,8 @@ export class State {
   private snapshot: StateSnapshot = {
     CurrentRefTime: 0,
     CurrentRefBlock: 0,
+    TotalEventsProcessed: 0,
+    EventsStats: {},
     PageStartRefTime: 0,
     PageEndRefTime: 0,
     CurrentCommittee: [],
@@ -178,6 +187,7 @@ export class State {
     this.snapshot.CurrentRefTime = time;
     this.snapshot.CurrentRefBlock = block;
     this.snapshot.PageEndRefTime = time;
+    this.snapshot.TotalEventsProcessed = calcEventsCount(this.snapshot);
 
     // before any state changes
     const committeeEvent = calcNewCommitteeEvent(time, block, this.snapshot);
@@ -363,6 +373,16 @@ export class State {
       PendingVersionTime: pendingTime,
     };
   }
+
+  applyEventsStats(block: number, time: number, events: number) {
+    if (block in this.snapshot.EventsStats) {
+      Logger.error(` applyEventsStats : overwriting an existing stats for block ${block}, time ${block}, events count ${events}  `);
+    }
+    this.snapshot.EventsStats[block] = {
+      RefTime: time,
+      EventsCount: events
+    };
+  }
 }
 
 type CommiteeNodes = { EthAddress: string; Weight: number; Name: string }[];
@@ -493,4 +513,16 @@ function calcStaleElectionsUpdates(time: number, snapshot: StateSnapshot, config
       snapshot.CurrentElectionsStatus[node.EthAddress].TimeToStale = config.ElectionsStaleUpdateSeconds;
     }
   }
+}
+
+function calcEventsCount(snapshot: StateSnapshot) {
+  const result = Object.entries(snapshot.EventsStats)
+      .filter( ([k, _]) => toNumber(k) <= snapshot.CurrentRefBlock)
+      .reduce( (
+                  total,
+                  [_, cur] : [string, { RefTime: number; EventsCount: number; }]
+                ) => total + cur.EventsCount, 0);
+
+  console.log( "calcEventsCount res: ", result);
+  return result;
 }

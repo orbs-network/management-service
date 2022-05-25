@@ -24,6 +24,7 @@ export const expectationStatus = {
     },
     CurrentRefTime: isValidTimeRef,
     CurrentRefBlock: isValidBlock,
+    TotalEventsProcessed: isPositiveNumber,
     CurrentCommittee: [
       {
         EthAddress: '44ea9fbfebb3162a5778b30fb2ba2a66cc5291a8',
