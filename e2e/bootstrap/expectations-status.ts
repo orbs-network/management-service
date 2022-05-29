@@ -19,7 +19,13 @@ export const expectationStatus = {
     },
     CurrentRefTime: 0,
     CurrentRefBlock: 0,
-    TotalEventsProcessed: 0,
+    EventsStats: {
+      LastUpdateBlock: 0,
+      TotalEventsProcessed: 0,
+      EventCount: [
+        {Count: isPositiveNumber}
+      ]
+    },
     CurrentCommittee: [],
     CurrentCandidates: [],
     CurrentTopology: [],

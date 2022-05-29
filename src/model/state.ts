@@ -11,12 +11,14 @@ const NUM_STANDBYS = 5;
 export interface StateSnapshot {
   CurrentRefTime: number; // primary, everything is by time
   CurrentRefBlock: number;
-  TotalEventsProcessed: number;
   EventsStats: {
-      [key: number]: {
-            RefTime: number;
-            EventsCount: number;
-      };
+    LastUpdateBlock: number;
+    TotalEventsProcessed: number;
+    EventCount: {
+      [EventName: string]: {
+        Count: number;
+      }
+    }
   };
   PageStartRefTime: number;
   PageEndRefTime: number;
@@ -133,8 +135,11 @@ export class State {
   private snapshot: StateSnapshot = {
     CurrentRefTime: 0,
     CurrentRefBlock: 0,
-    TotalEventsProcessed: 0,
-    EventsStats: {},
+    EventsStats: {
+      LastUpdateBlock: 0,
+      TotalEventsProcessed: 0,
+      EventCount: {}
+    },
     PageStartRefTime: 0,
     PageEndRefTime: 0,
     CurrentCommittee: [],
@@ -187,7 +192,6 @@ export class State {
     this.snapshot.CurrentRefTime = time;
     this.snapshot.CurrentRefBlock = block;
     this.snapshot.PageEndRefTime = time;
-    this.snapshot.TotalEventsProcessed = calcEventsCount(this.snapshot);
 
     // before any state changes
     const committeeEvent = calcNewCommitteeEvent(time, block, this.snapshot);
@@ -374,14 +378,17 @@ export class State {
     };
   }
 
-  applyEventsStats(block: number, time: number, events: number) {
-    if (block in this.snapshot.EventsStats) {
-      Logger.error(` applyEventsStats : overwriting an existing stats for block ${block}, time ${block}, events count ${events}  `);
+  applyNewEventsProcessed(block: number, events: string[]) {
+    if (block <= this.snapshot.EventsStats.LastUpdateBlock) {
+      Logger.error(` applyEventsStats : already applied stats for block ${block}, events count ${events}  `);
     }
-    this.snapshot.EventsStats[block] = {
-      RefTime: time,
-      EventsCount: events
-    };
+    events.map((eventName) => {
+      const count = this.snapshot.EventsStats.EventCount[eventName]?.Count ?? 0;
+      this.snapshot.EventsStats.EventCount[eventName] = {
+        Count: count + 1
+      }
+    });
+    this.snapshot.EventsStats.TotalEventsProcessed += events.length;
   }
 }
 
@@ -513,16 +520,4 @@ function calcStaleElectionsUpdates(time: number, snapshot: StateSnapshot, config
       snapshot.CurrentElectionsStatus[node.EthAddress].TimeToStale = config.ElectionsStaleUpdateSeconds;
     }
   }
-}
-
-function calcEventsCount(snapshot: StateSnapshot) {
-  const result = Object.entries(snapshot.EventsStats)
-      .filter( ([k, _]) => toNumber(k) <= snapshot.CurrentRefBlock)
-      .reduce( (
-                  total,
-                  [_, cur] : [string, { RefTime: number; EventsCount: number; }]
-                ) => total + cur.EventsCount, 0);
-
-  console.log( "calcEventsCount res: ", result);
-  return result;
 }

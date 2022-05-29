@@ -37,8 +37,8 @@ export class StateManager {
           break;
       }
     }
-    this.current.applyEventsStats(block, time, events.length);
-  }
+    this.current.applyNewEventsProcessed(block, events.map((e) => e.event));
+  };
 
   constructor(private config: StateConfiguration) {
     this.current = new State(this.config);

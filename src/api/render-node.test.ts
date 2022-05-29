@@ -142,6 +142,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
     StatusUpdateLoopIntervalSeconds: 20,
   });
   t.assert(res.orchestrator);
+
   scope.done();
 
   // mock docker hub state with a few new versions
