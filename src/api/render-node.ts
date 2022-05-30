@@ -5,6 +5,7 @@ import { getVirtualChainPort } from './ports';
 import { JsonResponse, normalizeAddress } from '../helpers';
 import * as Logger from '../logger';
 import { parseImageTag } from '../deployment/versioning';
+import { imageNamesToPollForNewVersions } from '../deployment/image-poll';
 
 export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const response: JsonResponse = {
@@ -15,7 +16,7 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
         ReadInterval: '30s',
         ResetTimeout: '30m',
       },
-      ExecutableImage: {              
+      ExecutableImage: {
         Url: 'https://github.com/orbs-network/boyarin/releases/download/v1.12.1/boyar-v1.12.1.bin',
         Sha256: '9d7f7702b3bba582b8b60bd4ac4b870c1ab86b6f16bdfe182bbadae4f9358c83',
       },
@@ -84,6 +85,18 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
     Logger.error(err.toString());
   }
 
+  //include generic services which do not have specific render functions
+  try {
+    for( const genSvc of imageNamesToPollForNewVersions )
+      // only for nodes which havent been rendered yet
+      if(!(genSvc in response.services)){
+        response.services[genSvc] = getGenericService(genSvc, snapshot, config)
+    } 
+  }
+  catch (err) {
+    Logger.error("render generic server: " + err.toString());
+  }
+  
   return response;
 }
 
@@ -143,9 +156,9 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
   };
   maticConfig.Port = 8080;
   maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
-  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';  
+  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';
   maticConfig.EthereumFirstBlock = 21700000;
-  maticConfig['node-address'] = config['node-address'];  
+  maticConfig['node-address'] = config['node-address'];
   maticConfig.EthereumPollIntervalSeconds = 300; // every 5 minutes
 
   return {
@@ -239,6 +252,27 @@ function getLogsService(snapshot: StateSnapshot) {
       LogsPath: '/opt/orbs/logs',
       StatusJsonPath: './status/status.json',
       StatusUpdateLoopIntervalSeconds: 20,
+    },
+  };
+}
+
+function getGenericService(name:string, snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const version = snapshot.CurrentImageVersions['main'][name];
+  if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
+
+  return {
+    Disabled: false,
+    DockerConfig: {
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
+      Pull: true,
+    },
+    AllowAccessToSigner: true,
+    AllowAccessToServices: true,
+    Config: {
+      "todo":"get from descriptor"
     },
   };
 }
