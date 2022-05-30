@@ -17,7 +17,7 @@ export type services =
   | 'logs-service'
   | 'node'
   | 'node-canary'
-    'hello';
+  | 'hello';
 
 export type DeploymentDescriptor = {
   Desc?: string;

@@ -87,16 +87,15 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
   //include generic services which do not have specific render functions
   try {
-    for( const genSvc of imageNamesToPollForNewVersions )
-      // only for nodes which havent been rendered yet
-      if(!(genSvc in response.services)){
-        response.services[genSvc] = getGenericService(genSvc, snapshot, config)
-    } 
+    // only for nodes which havent been rendered yet
+    for (const genSvc of imageNamesToPollForNewVersions)
+      if (!(genSvc in response.services)) {
+        response.services[genSvc] = getGenericService(genSvc, snapshot, config);
+      }
+  } catch (err) {
+    Logger.error('render generic server: ' + err.toString());
   }
-  catch (err) {
-    Logger.error("render generic server: " + err.toString());
-  }
-  
+
   return response;
 }
 
@@ -256,7 +255,7 @@ function getLogsService(snapshot: StateSnapshot) {
   };
 }
 
-function getGenericService(name:string, snapshot: StateSnapshot, config: ServiceConfiguration) {
+function getGenericService(name: string, snapshot: StateSnapshot, config: ServiceConfiguration) {
   const version = snapshot.CurrentImageVersions['main'][name];
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
@@ -272,8 +271,9 @@ function getGenericService(name:string, snapshot: StateSnapshot, config: Service
     AllowAccessToSigner: true,
     AllowAccessToServices: true,
     Config: {
-      "todo":"get from descriptor"
-    },
+        ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
+        BootstrapMode: false,
+    }    
   };
 }
 
