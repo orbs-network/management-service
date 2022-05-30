@@ -16,7 +16,8 @@ export type services =
   | 'matic-writer'
   | 'logs-service'
   | 'node'
-  | 'node-canary';
+  | 'node-canary'
+    'hello';
 
 export type DeploymentDescriptor = {
   Desc?: string;
