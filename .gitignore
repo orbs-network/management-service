@@ -1,7 +1,7 @@
 # Ignore generated directories
 dist/
 exec/
-
+.idea/
 # temp build artifacts
 .version
 
