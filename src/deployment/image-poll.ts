@@ -12,8 +12,8 @@ export const imageNamesToPollForNewVersions: services[] = [
   'signer',
   'ethereum-writer',
   'matic-writer',
-  'logs-service',
-  'hello',
+  'logs-service',  
+  'hello'
 ];
 
 export type ImagePollConfiguration = DeploymentDescriptorConfiguration & {
@@ -46,7 +46,7 @@ export class ImagePoll {
   async run() {
     Logger.log(`ImagePoll: about to poll ${imageNamesToPollForNewVersions} from deployment descriptor.`);
     const time = getCurrentClockTime();
-    const fetchedVersions = await this.reader.fetchLatestVersion(imageNamesToPollForNewVersions);
+    const fetchedVersions = await this.reader.fetchLatestVersion(); // open protocol
 
     // TODO add protection here - if we don't have a valid management-service we must throw here
     // otherwise boyar might shut down management service forever

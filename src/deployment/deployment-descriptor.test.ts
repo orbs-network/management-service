@@ -31,7 +31,7 @@ test.serial('fetchLatestTagElement gets latest tag from docker hub', async (t) =
   };
 
   const scope = nockDeploymentManifestJson(deploymentDescriptor);
-  const latestVersion = await reader.fetchLatestVersion(['node']);
+  const latestVersion = await reader.fetchLatestVersion();
   t.is(latestVersion['node']['main'], 'orbsnetwork/node:v2.0.15');
   t.is(latestVersion['node']['canary'], 'orbsnetwork/node:v2.0.16');
   scope.done();

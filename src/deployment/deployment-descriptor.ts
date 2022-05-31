@@ -17,7 +17,7 @@ export type services =
   | 'logs-service'
   | 'node'
   | 'node-canary'
-  | 'hello';
+  | string; // added for generic services   
 
 export type DeploymentDescriptor = {
   Desc?: string;
@@ -48,14 +48,13 @@ export class DeploymentDescriptorReader {
     return response.json();
   }
 
-  async fetchLatestVersion(
-    serviceNames: services[]
-  ): Promise<{ [serviceName: string]: { [RolloutGroup: string]: string } }> {
+  async fetchLatestVersion (): Promise<{ [serviceName: string]: { [RolloutGroup: string]: string } }> {
     const res: { [serviceName: string]: { [RolloutGroup: string]: string } } = {};
 
     const body: DeploymentDescriptor = await this.fetchLatestDeploymentDescriptor();
 
-    for (const serviceName of serviceNames) {
+    //for (const serviceName of serviceNames) { closed protocol
+    for (const serviceName in body.ImageVersions) { // uv - open protocol
       const imageResult: { [RolloutGroup: string]: string } = {};
       if (body.ImageVersions[serviceName]?.image) {
         imageResult['main'] = body.ImageVersions[serviceName]!.image;

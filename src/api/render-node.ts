@@ -271,9 +271,9 @@ function getGenericService(name: string, snapshot: StateSnapshot, config: Servic
     AllowAccessToSigner: true,
     AllowAccessToServices: true,
     Config: {
-        ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
-        BootstrapMode: false,
-    }    
+      ...config.ExternalLaunchConfig, // to avoid the defaults from config (bugfix)
+      BootstrapMode: false,
+    },
   };
 }
 
