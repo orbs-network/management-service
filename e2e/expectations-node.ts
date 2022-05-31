@@ -125,6 +125,24 @@ export const expectationNodeManagement = {
         StatusUpdateLoopIntervalSeconds: 20,
       },
     },
+    // 'odnp-audit': {
+    //   Disabled: false,
+    //   DockerConfig: {
+    //     Image: 'e2e-mock/odnp-audit',
+    //     Tag: isValidImageVersion,
+    //     Pull: true,
+    //   },
+    //   AllowAccessToSigner: true,
+    //   AllowAccessToServices: true,
+    //   Config: {
+    //     ManagementServiceEndpoint: 'http://matic-reader:8080',
+    //     EthereumEndpoint: 'mock-endpoint',
+    //     SignerEndpoint: 'http://signer:7777',
+    //     EthereumElectionsContract: isValidEthereumAddress,
+    //     NodeOrbsAddress: 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
+    //     ElectionsAuditOnly: false,
+    //   },
+    // },
   },
   chains: [1000000, 1000001, 1000002].map((vcId) => {
     return {
