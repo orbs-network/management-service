@@ -13,7 +13,7 @@ export const imageNamesToPollForNewVersions: services[] = [
   'ethereum-writer',
   'matic-writer',
   'logs-service',
-  'odnp-audit'
+  'odnp-audit',
 ];
 
 export type ImagePollConfiguration = DeploymentDescriptorConfiguration & {

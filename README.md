@@ -121,3 +121,5 @@ he netwrok runs another docker image of this repo under the name matic-reader to
 
 Open Defi Notification Protocol
 Service to audit notification data
+internal port 80
+external port 8082

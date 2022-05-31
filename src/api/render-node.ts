@@ -15,7 +15,7 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
         ReadInterval: '30s',
         ResetTimeout: '30m',
       },
-      ExecutableImage: {              
+      ExecutableImage: {
         Url: 'https://github.com/orbs-network/boyarin/releases/download/v1.12.1/boyar-v1.12.1.bin',
         Sha256: '9d7f7702b3bba582b8b60bd4ac4b870c1ab86b6f16bdfe182bbadae4f9358c83',
       },
@@ -151,9 +151,9 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
   };
   maticConfig.Port = 8080;
   maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
-  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';  
+  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';
   maticConfig.EthereumFirstBlock = 21700000;
-  maticConfig['node-address'] = config['node-address'];  
+  maticConfig['node-address'] = config['node-address'];
   maticConfig.EthereumPollIntervalSeconds = 300; // every 5 minutes
 
   return {
@@ -232,6 +232,8 @@ function getODNP(snapshot: StateSnapshot, config: ServiceConfiguration) {
   if (!imageTag) return undefined;
 
   return {
+    InternalPort: 80,
+    ExternalPort: 8082,
     Disabled: false,
     DockerConfig: {
       Image: imageTag.Image,
@@ -244,7 +246,7 @@ function getODNP(snapshot: StateSnapshot, config: ServiceConfiguration) {
       SignerEndpoint: 'http://signer:7777',
       EthereumElectionsContract: '0x94f2da1ef22649c642500e8B1C3252A4670eE95b',
       EthereumDiscountGasPriceFactor: 1,
-      NodeOrbsAddress: normalizeAddress(config['node-address'])      
+      NodeOrbsAddress: normalizeAddress(config['node-address']),
     },
   };
 }
