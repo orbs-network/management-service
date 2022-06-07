@@ -86,7 +86,7 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
   // include odnp open-defi-notification-protocol if found a viable image for it and its contract addresses are known
   try {
-    response.services['odnp-audit'] = getODNP(snapshot, config);
+    response.services['odnp-audit'] = getODNP(snapshot)//, config);
     if (!response.services['odnp-audit']) delete response.services['odnp-audit'];
   } catch (err) {
     Logger.error(err.toString());
@@ -225,15 +225,39 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
   };
 }
 
-function getODNP(snapshot: StateSnapshot, config: ServiceConfiguration) {
+// function getODNP(snapshot: StateSnapshot, config: ServiceConfiguration) {
+//   const version = snapshot.CurrentImageVersions['main']['odnp-audit'];
+//   if (!version) return undefined;
+//   const imageTag = parseImageTag(version);
+//   if (!imageTag) return undefined;
+
+//   return {
+//     InternalPort: 80,
+//     ExternalPort: 8082,
+//     Disabled: false,
+//     DockerConfig: {
+//       Image: imageTag.Image,
+//       Tag: imageTag.Tag,
+//       Pull: true,
+//     },
+//     AllowAccessToSigner: true,
+//     AllowAccessToServices: true,
+//     Config: {
+//       SignerEndpoint: 'http://signer:7777',
+//       EthereumElectionsContract: '0x94f2da1ef22649c642500e8B1C3252A4670eE95b',
+//       EthereumDiscountGasPriceFactor: 1,
+//       NodeOrbsAddress: normalizeAddress(config['node-address']),
+//     },
+//   };
+// }
+
+function getODNP(snapshot: StateSnapshot){//}, config: ServiceConfiguration) {
   const version = snapshot.CurrentImageVersions['main']['odnp-audit'];
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
 
   return {
-    InternalPort: 80,
-    ExternalPort: 8082,
     Disabled: false,
     DockerConfig: {
       Image: imageTag.Image,
@@ -242,12 +266,16 @@ function getODNP(snapshot: StateSnapshot, config: ServiceConfiguration) {
     },
     AllowAccessToSigner: true,
     AllowAccessToServices: true,
-    Config: {
-      SignerEndpoint: 'http://signer:7777',
-      EthereumElectionsContract: '0x94f2da1ef22649c642500e8B1C3252A4670eE95b',
-      EthereumDiscountGasPriceFactor: 1,
-      NodeOrbsAddress: normalizeAddress(config['node-address']),
-    },
+    // Config: {
+    //   ManagementServiceEndpoint: 'http://management-service:8080',
+    //   EthereumEndpoint: 'https://bsc-dataseed.binance.org/',
+    //   SignerEndpoint: 'http://signer:7777',
+    //   // EthereumElectionsContract: '0xb3F54212F32c1F6b5a79124C2B7399078aa9d7E6',
+    //   EthereumDiscountGasPriceFactor: 1,
+    //   NodeOrbsAddress: normalizeAddress(config['node-address']),
+    //   // ElectionsAuditOnly: false,
+    //   // SuspendVoteUnready: false,
+    // },
   };
 }
 
