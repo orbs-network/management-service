@@ -76,12 +76,3 @@ export function normalizeAddress(address: string): string {
   if (address.startsWith('0x')) return address.substr(2).toLowerCase();
   return address.toLowerCase();
 }
-
-export function deobfuscateUrl(obfUrl: number[]): string {
-  let deobfUrl = '';
-  for (let i = 0; i < obfUrl.length; i++) {
-    deobfUrl += String.fromCharCode(obfUrl[i]);
-  }
-
-  return deobfUrl;
-}

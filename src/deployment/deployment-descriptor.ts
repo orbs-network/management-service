@@ -17,6 +17,7 @@ export type services =
   | 'logs-service'
   | 'node'
   | 'node-canary'
+  | 'keepers'
   | 'odnp-audit'; // open defi notification protocol
 
 export type DeploymentDescriptor = {

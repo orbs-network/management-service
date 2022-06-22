@@ -84,6 +84,14 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
     Logger.error(err.toString());
   }
 
+  // include keepers
+  try {
+    response.services['keepers'] = getKeepers(snapshot, config);
+    if (!response.services['keepers']) delete response.services['keepers'];
+  } catch (err) {
+    Logger.error(err.toString());
+  }
+
   // include odnp open-defi-notification-protocol if found a viable image for it and its contract addresses are known
   try {
     response.services['odnp-audit'] = getODNP(snapshot, config);
@@ -151,9 +159,9 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
   };
   maticConfig.Port = 8080;
   maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
-  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';
+  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';  
   maticConfig.EthereumFirstBlock = 21700000;
-  maticConfig['node-address'] = config['node-address'];
+  maticConfig['node-address'] = config['node-address'];  
   maticConfig.EthereumPollIntervalSeconds = 300; // every 5 minutes
 
   return {
@@ -193,6 +201,34 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
       EthereumElectionsContract: elections,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       ElectionsAuditOnly: config.ElectionsAuditOnly,
+    },
+  };
+}
+
+function getKeepers(snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const version = snapshot.CurrentImageVersions['main']['keepers'];
+  if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
+
+  return {
+    Disabled: false,
+    DockerConfig: {
+      Image: imageTag.Image,
+      Tag: imageTag.Tag,
+      Pull: true,
+    },
+    AllowAccessToSigner: true,
+    AllowAccessToServices: true,
+    Config: {
+      ManagementServiceEndpoint: 'http://matic-reader:8080', // TODO: change to 'http://management-service:8080',
+      EthereumEndpoint: 'https://speedy-nodes-nyc.moralis.io/e25f7625703c58a9068b9947/bsc/mainnet',
+      SignerEndpoint: 'http://signer:7777',
+      EthereumDiscountGasPriceFactor: 1,
+      NodeOrbsAddress: normalizeAddress(config['node-address']),
+      BIUrl: 'http://logs.orbs.network:3001/putes/keepers-ew',
+      // ElectionsAuditOnly: false,
+      // SuspendVoteUnready: false,
     },
   };
 }
