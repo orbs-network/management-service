@@ -22,9 +22,7 @@ export const expectationStatus = {
     EventsStats: {
       LastUpdateBlock: 0,
       TotalEventsProcessed: 0,
-      EventCount: [
-        {Count: isPositiveNumber}
-      ]
+      EventCount: [{ Count: isPositiveNumber }],
     },
     CurrentCommittee: [],
     CurrentCandidates: [],

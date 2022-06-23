@@ -27,9 +27,7 @@ export const expectationStatus = {
     EventsStats: {
       LastUpdateBlock: isValidBlock,
       TotalEventsProcessed: isPositiveNumber,
-      EventCount: [
-        {Count: isPositiveNumber}
-      ]
+      EventCount: [{ Count: isPositiveNumber }],
     },
 
     CurrentCommittee: [

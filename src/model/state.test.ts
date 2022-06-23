@@ -604,7 +604,6 @@ test('state applies contract address changes', (t) => {
   ]);
 });
 
-
 test('state update events stats', (t) => {
   const s = new State();
   const events1 = [
@@ -616,7 +615,7 @@ test('state update events stats', (t) => {
     'GuardianStatusUpdated',
     'GuardianMetadataChanged',
     'GuardianCertificationUpdate',
-    'StakeChanged'
+    'StakeChanged',
   ];
   s.applyNewEventsProcessed(10001, events1);
   t.is(s.getSnapshot().EventsStats.TotalEventsProcessed, events1.length);
@@ -630,7 +629,7 @@ test('state update events stats', (t) => {
     'SubscriptionChanged',
     'SubscriptionChanged',
     'StakeChanged',
-    'StakeChanged'
+    'StakeChanged',
   ];
   s.applyNewEventsProcessed(10112, events2);
   t.is(s.getSnapshot().EventsStats.TotalEventsProcessed, events1.length + events2.length);

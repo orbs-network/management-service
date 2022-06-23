@@ -17,8 +17,8 @@ export interface StateSnapshot {
     EventCount: {
       [EventName: string]: {
         Count: number;
-      }
-    }
+      };
+    };
   };
   PageStartRefTime: number;
   PageEndRefTime: number;
@@ -138,7 +138,7 @@ export class State {
     EventsStats: {
       LastUpdateBlock: 0,
       TotalEventsProcessed: 0,
-      EventCount: {}
+      EventCount: {},
     },
     PageStartRefTime: 0,
     PageEndRefTime: 0,
@@ -385,8 +385,8 @@ export class State {
     events.map((eventName) => {
       const count = this.snapshot.EventsStats.EventCount[eventName]?.Count ?? 0;
       this.snapshot.EventsStats.EventCount[eventName] = {
-        Count: count + 1
-      }
+        Count: count + 1,
+      };
     });
     this.snapshot.EventsStats.TotalEventsProcessed += events.length;
   }
