@@ -8,7 +8,7 @@ import * as Logger from '../logger';
 
 const NUM_STANDBYS = 5;
 const NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME = 1656399600; //breaking change time set
-export {NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME}
+export { NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME };
 
 export interface StateSnapshot {
   CurrentRefTime: number; // primary, everything is by time
@@ -479,7 +479,7 @@ function fixCommitteeWeights(committee: CommiteeNodes, stake: { [EthAddress: str
 function fixCommitteeWeightsNew(committee: CommiteeNodes, stake: { [EthAddress: string]: number }): void {
   const totalStake = _.sum(_.map(committee, (node) => stake[node.EthAddress] ?? 0));
   for (const node of committee) {
-    node.Weight = Math.max(stake[node.EthAddress] ?? 0, Math.round(totalStake / (2/3*committee.length)));
+    node.Weight = Math.max(stake[node.EthAddress] ?? 0, Math.round(totalStake / ((2 / 3) * committee.length)));
   }
 }
 
