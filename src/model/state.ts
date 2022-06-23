@@ -11,6 +11,15 @@ const NUM_STANDBYS = 5;
 export interface StateSnapshot {
   CurrentRefTime: number; // primary, everything is by time
   CurrentRefBlock: number;
+  EventsStats: {
+    LastUpdateBlock: number;
+    TotalEventsProcessed: number;
+    EventCount: {
+      [EventName: string]: {
+        Count: number;
+      }
+    }
+  };
   PageStartRefTime: number;
   PageEndRefTime: number;
   CurrentCommittee: {
@@ -126,6 +135,11 @@ export class State {
   private snapshot: StateSnapshot = {
     CurrentRefTime: 0,
     CurrentRefBlock: 0,
+    EventsStats: {
+      LastUpdateBlock: 0,
+      TotalEventsProcessed: 0,
+      EventCount: {}
+    },
     PageStartRefTime: 0,
     PageEndRefTime: 0,
     CurrentCommittee: [],
@@ -362,6 +376,19 @@ export class State {
       PendingVersion: pendingVersion,
       PendingVersionTime: pendingTime,
     };
+  }
+
+  applyNewEventsProcessed(block: number, events: string[]) {
+    if (block <= this.snapshot.EventsStats.LastUpdateBlock) {
+      Logger.error(` applyEventsStats : already applied stats for block ${block}, events count ${events}  `);
+    }
+    events.map((eventName) => {
+      const count = this.snapshot.EventsStats.EventCount[eventName]?.Count ?? 0;
+      this.snapshot.EventsStats.EventCount[eventName] = {
+        Count: count + 1
+      }
+    });
+    this.snapshot.EventsStats.TotalEventsProcessed += events.length;
   }
 }
 

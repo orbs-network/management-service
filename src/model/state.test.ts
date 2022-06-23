@@ -604,6 +604,41 @@ test('state applies contract address changes', (t) => {
   ]);
 });
 
+
+test('state update events stats', (t) => {
+  const s = new State();
+  const events1 = [
+    'ContractAddressUpdated',
+    'CommitteeChange',
+    'SubscriptionChanged',
+    'ProtocolVersionChanged',
+    'GuardianDataUpdated',
+    'GuardianStatusUpdated',
+    'GuardianMetadataChanged',
+    'GuardianCertificationUpdate',
+    'StakeChanged'
+  ];
+  s.applyNewEventsProcessed(10001, events1);
+  t.is(s.getSnapshot().EventsStats.TotalEventsProcessed, events1.length);
+
+  const events2 = [
+    'CommitteeChange',
+    'CommitteeChange',
+    'CommitteeChange',
+    'CommitteeChange',
+    'SubscriptionChanged',
+    'SubscriptionChanged',
+    'SubscriptionChanged',
+    'StakeChanged',
+    'StakeChanged'
+  ];
+  s.applyNewEventsProcessed(10112, events2);
+  t.is(s.getSnapshot().EventsStats.TotalEventsProcessed, events1.length + events2.length);
+  t.is(s.getSnapshot().EventsStats.EventCount['CommitteeChange'].Count, 5);
+  t.is(s.getSnapshot().EventsStats.EventCount['StakeChanged'].Count, 3);
+  t.is(s.getSnapshot().EventsStats.EventCount['ProtocolVersionChanged'].Count, 1);
+});
+
 function ContractAddressUpdated(s: State, time: number, contractName: ContractName, addr: string) {
   s.applyNewContractAddressUpdated(time, {
     ...eventBase,
