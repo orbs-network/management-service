@@ -86,16 +86,16 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
   // include keepers
   try {
-    response.services['keepers'] = getKeepers(snapshot, config);
-    if (!response.services['keepers']) delete response.services['keepers'];
+    response.services['vm-keepers'] = getKeepers(snapshot, config);
+    if (!response.services['vm-keepers']) delete response.services['vm-keepers'];
   } catch (err) {
     Logger.error(err.toString());
   }
 
   // include odnp open-defi-notification-protocol if found a viable image for it and its contract addresses are known
   try {
-    response.services['notifications'] = getNotifications(snapshot, config);
-    if (!response.services['notifications']) delete response.services['notifications'];
+    response.services['vm-notifications'] = getNotifications(snapshot, config);
+    if (!response.services['vm-notifications']) delete response.services['vm-notifications'];
   } catch (err) {
     Logger.error(err.toString());
   }
@@ -206,7 +206,7 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
 }
 
 function getKeepers(snapshot: StateSnapshot, config: ServiceConfiguration) {
-  const version = snapshot.CurrentImageVersions['main']['keepers'];
+  const version = snapshot.CurrentImageVersions['main']['vm-keepers'];
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
@@ -262,7 +262,7 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
 }
 
 function getNotifications(snapshot: StateSnapshot, config: ServiceConfiguration) {
-  const version = snapshot.CurrentImageVersions['main']['notifications'];
+  const version = snapshot.CurrentImageVersions['main']['vm-notifications'];
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;

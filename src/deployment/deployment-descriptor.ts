@@ -17,8 +17,8 @@ export type services =
   | 'logs-service'
   | 'node'
   | 'node-canary'
-  | 'keepers'
-  | 'notifications'; // open defi notification protocol
+  | 'vm-keepers'
+  | 'vm-notifications'; // open defi notification protocol
 
 export type DeploymentDescriptor = {
   Desc?: string;

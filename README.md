@@ -117,11 +117,14 @@ The code has been updated to add EVM read capabalities for Polygon network, as w
 
 he netwrok runs another docker image of this repo under the name matic-reader to support reading from POS contracts on polygon netwrok.
 
-### Keepers
+# ORBS VM (L3)
+
+### vm-keepers
 
 Service that keeps time for tasks to be done on ETH L1 and L2 networks.
+will be change to **vm-lambda** when ready
 
-### Notifications 
+### vm-notifications 
 
 Open Defi Notification Protocol
 Service to enable defi notifications

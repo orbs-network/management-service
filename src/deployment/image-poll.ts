@@ -13,8 +13,8 @@ export const imageNamesToPollForNewVersions: services[] = [
   'ethereum-writer',
   'matic-writer',
   'logs-service',
-  'keepers',
-  'notifications',
+  'vm-keepers',
+  'vm-notifications',
 ];
 
 export type ImagePollConfiguration = DeploymentDescriptorConfiguration & {
