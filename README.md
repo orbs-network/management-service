@@ -117,7 +117,7 @@ The code has been updated to add EVM read capabalities for Polygon network, as w
 
 he netwrok runs another docker image of this repo under the name matic-reader to support reading from POS contracts on polygon netwrok.
 
-# ORBS VM (L3)
+# ORBS VM - L3 Virtual Machine which (docker container)
 
 ### vm-keepers
 
