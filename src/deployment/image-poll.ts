@@ -14,7 +14,7 @@ export const imageNamesToPollForNewVersions: services[] = [
   'matic-writer',
   'logs-service',
   'keepers',
-  'odnp-audit',
+  'notifications',
 ];
 
 export type ImagePollConfiguration = DeploymentDescriptorConfiguration & {

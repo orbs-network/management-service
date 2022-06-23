@@ -94,8 +94,8 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
   // include odnp open-defi-notification-protocol if found a viable image for it and its contract addresses are known
   try {
-    response.services['odnp-audit'] = getODNP(snapshot, config);
-    if (!response.services['odnp-audit']) delete response.services['odnp-audit'];
+    response.services['notifications'] = getNotifications(snapshot, config);
+    if (!response.services['notifications']) delete response.services['notifications'];
   } catch (err) {
     Logger.error(err.toString());
   }
@@ -159,9 +159,9 @@ function getMaticReader(snapshot: StateSnapshot, config: ServiceConfiguration) {
   };
   maticConfig.Port = 8080;
   maticConfig.EthereumGenesisContract = '0x35eA0D75b2a3aB06393749B4651DfAD1Ffd49A77';
-  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';  
+  maticConfig.EthereumEndpoint = config.MaticEndpoint ?? 'https://matic-router.global.ssl.fastly.net';
   maticConfig.EthereumFirstBlock = 21700000;
-  maticConfig['node-address'] = config['node-address'];  
+  maticConfig['node-address'] = config['node-address'];
   maticConfig.EthereumPollIntervalSeconds = 300; // every 5 minutes
 
   return {
@@ -261,8 +261,8 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
   };
 }
 
-function getODNP(snapshot: StateSnapshot, config: ServiceConfiguration) {
-  const version = snapshot.CurrentImageVersions['main']['odnp-audit'];
+function getNotifications(snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const version = snapshot.CurrentImageVersions['main']['notifications'];
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;

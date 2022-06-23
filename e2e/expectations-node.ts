@@ -125,10 +125,10 @@ export const expectationNodeManagement = {
         StatusUpdateLoopIntervalSeconds: 20,
       },
     },
-    // 'odnp-audit': {
+    // 'notifications': {
     //   Disabled: false,
     //   DockerConfig: {
-    //     Image: 'e2e-mock/odnp-audit',
+    //     Image: 'e2e-mock/notifications',
     //     Tag: isValidImageVersion,
     //     Pull: true,
     //   },
