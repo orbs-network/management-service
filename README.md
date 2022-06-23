@@ -117,9 +117,13 @@ The code has been updated to add EVM read capabalities for Polygon network, as w
 
 he netwrok runs another docker image of this repo under the name matic-reader to support reading from POS contracts on polygon netwrok.
 
-### ODNP-AUDIT 
+### Keepers
+
+Service that keeps time for tasks to be done on ETH L1 and L2 networks.
+
+### Notifications 
 
 Open Defi Notification Protocol
-Service to audit notification data
+Service to enable defi notifications
 internal port 80
 external port 8082
