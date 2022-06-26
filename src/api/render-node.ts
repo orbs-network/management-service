@@ -221,7 +221,7 @@ function getKeepers(snapshot: StateSnapshot, config: ServiceConfiguration) {
     AllowAccessToSigner: true,
     AllowAccessToServices: true,
     Config: {
-      ManagementServiceEndpoint: 'http://matic-reader:8080', // TODO: change to 'http://management-service:8080',
+      ManagementServiceEndpoint: 'http://management-service:8080',
       EthereumEndpoint: 'https://speedy-nodes-nyc.moralis.io/e25f7625703c58a9068b9947/bsc/mainnet',
       SignerEndpoint: 'http://signer:7777',
       EthereumDiscountGasPriceFactor: 1,
@@ -280,7 +280,7 @@ function getNotifications(snapshot: StateSnapshot, config: ServiceConfiguration)
     AllowAccessToServices: true,
     Config: {
       SignerEndpoint: 'http://signer:7777',
-      EthereumElectionsContract: '0x94f2da1ef22649c642500e8B1C3252A4670eE95b',
+      EthereumElectionsContract: '0x02Ca9F2c5dD0635516241efD480091870277865b',
       EthereumDiscountGasPriceFactor: 1,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
     },
