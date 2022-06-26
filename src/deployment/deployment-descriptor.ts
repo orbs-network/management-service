@@ -16,7 +16,9 @@ export type services =
   | 'matic-writer'
   | 'logs-service'
   | 'node'
-  | 'node-canary';
+  | 'node-canary'
+  | 'vm-keepers'
+  | 'vm-notifications'; // open defi notification protocol
 
 export type DeploymentDescriptor = {
   Desc?: string;

@@ -1,7 +1,9 @@
 import test from 'ava';
-import { State } from './state';
+import { State, NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME } from './state';
 import { day } from '../helpers';
 import { ContractName } from '../ethereum/types';
+import { Committee as testCommittee } from './committee_example_test.json';
+import _ from 'lodash';
 
 test('state applies time ref and ref block', (t) => {
   const s = new State();
@@ -275,6 +277,56 @@ test('state calculates committee weights correctly and guardian stake', (t) => {
     b: { SelfStake: 0, DelegatedStake: 30000 },
     c: { SelfStake: 0, DelegatedStake: 10000 },
   });
+});
+
+test('state calculates committee weights correctly: New weight calc ', (t) => {
+  const s = new State();
+  testCommittee.Members.map((m: { EthAddress: string; Weight: number; EffectiveStake: number }) => {
+    const weight = m.EffectiveStake.toString();
+    GuardianCommitteeWeight(
+      s,
+      m.EthAddress,
+      weight.padEnd(weight.length + 18, '0'),
+      true,
+      NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME - 1
+    );
+  });
+  t.is(s.getSnapshot().CurrentCommittee.length, testCommittee.Members.length);
+  for (const node of s.getSnapshot().CurrentCommittee) {
+    t.is(s.getSnapshot().CurrentEffectiveStake[node.EthAddress], node.EffectiveStake);
+  }
+  t.is(
+    _.filter(s.getSnapshot().CurrentCommittee, (m) => m.EthAddress == 'f7ae622c77d0580f02bcb2f92380d61e3f6e466c')[0]
+      .Weight,
+    _.filter(testCommittee.Members, (m) => m.EthAddress == 'f7ae622c77d0580f02bcb2f92380d61e3f6e466c')[0].Weight
+  );
+
+  testCommittee.Members.map((m: { EthAddress: string; Weight: number; EffectiveStake: number }) => {
+    const weight = m.EffectiveStake.toString();
+    GuardianCommitteeWeight(
+      s,
+      m.EthAddress,
+      weight.padEnd(weight.length + 18, '0'),
+      true,
+      NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME
+    );
+  });
+
+  t.assert(
+    _.filter(s.getSnapshot().CurrentCommittee, (m) => m.EthAddress == 'f7ae622c77d0580f02bcb2f92380d61e3f6e466c')[0]
+      .Weight >
+      _.filter(testCommittee.Members, (m) => m.EthAddress == 'f7ae622c77d0580f02bcb2f92380d61e3f6e466c')[0].Weight
+  );
+
+  const totalWeight = _.sum(_.map(s.getSnapshot().CurrentCommittee, (node) => node.Weight ?? 0));
+  const totalStake = _.sum(_.map(s.getSnapshot().CurrentCommittee, (node) => node.EffectiveStake ?? 0));
+
+  const top3Sum = [
+    _.sumBy(s.getSnapshot().CurrentCommittee.slice(0, 3), 'Weight'),
+    _.sumBy(s.getSnapshot().CurrentCommittee.slice(0, 3), 'EffectiveStake'),
+  ];
+  t.assert(top3Sum[0] / totalWeight < 1 / 3);
+  t.assert(top3Sum[1] / totalStake < 2 / 3);
 });
 
 test('state applies elections status updates and sets candidates accordingly', (t) => {
@@ -604,6 +656,40 @@ test('state applies contract address changes', (t) => {
   ]);
 });
 
+test('state update events stats', (t) => {
+  const s = new State();
+  const events1 = [
+    'ContractAddressUpdated',
+    'CommitteeChange',
+    'SubscriptionChanged',
+    'ProtocolVersionChanged',
+    'GuardianDataUpdated',
+    'GuardianStatusUpdated',
+    'GuardianMetadataChanged',
+    'GuardianCertificationUpdate',
+    'StakeChanged',
+  ];
+  s.applyNewEventsProcessed(10001, events1);
+  t.is(s.getSnapshot().EventsStats.TotalEventsProcessed, events1.length);
+
+  const events2 = [
+    'CommitteeChange',
+    'CommitteeChange',
+    'CommitteeChange',
+    'CommitteeChange',
+    'SubscriptionChanged',
+    'SubscriptionChanged',
+    'SubscriptionChanged',
+    'StakeChanged',
+    'StakeChanged',
+  ];
+  s.applyNewEventsProcessed(10112, events2);
+  t.is(s.getSnapshot().EventsStats.TotalEventsProcessed, events1.length + events2.length);
+  t.is(s.getSnapshot().EventsStats.EventCount['CommitteeChange'].Count, 5);
+  t.is(s.getSnapshot().EventsStats.EventCount['StakeChanged'].Count, 3);
+  t.is(s.getSnapshot().EventsStats.EventCount['ProtocolVersionChanged'].Count, 1);
+});
+
 function ContractAddressUpdated(s: State, time: number, contractName: ContractName, addr: string) {
   s.applyNewContractAddressUpdated(time, {
     ...eventBase,
@@ -627,8 +713,8 @@ function CommitteeChange(s: State, time: number, addr: string, inCommittee: bool
   });
 }
 
-function GuardianCommitteeWeight(s: State, addr: string, weight: string, inCommittee: boolean) {
-  s.applyNewCommitteeChange(1000, {
+function GuardianCommitteeWeight(s: State, addr: string, weight: string, inCommittee: boolean, time = 1000) {
+  s.applyNewCommitteeChange(time, {
     ...eventBase,
     returnValues: {
       addr,

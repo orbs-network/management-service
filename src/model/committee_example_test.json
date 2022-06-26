@@ -1,0 +1,184 @@
+{
+  "Committee": {
+    "Members": [
+      {
+        "EthAddress": "9520f53fd81c668e8088ae194c40e3f977b73d28",
+        "Weight": 263504404,
+        "IdentityType": 1,
+        "Name": "NEOPLY",
+        "EnterTime": 1607335579,
+        "EffectiveStake": 263504404
+      },
+      {
+        "EthAddress": "c5e624d6824e626a6f14457810e794e4603cfee2",
+        "Weight": 124110926,
+        "IdentityType": 1,
+        "Name": "오뽀가디언 - WhaleCoreStake - ORBS KOREA - ",
+        "EnterTime": 1604998489,
+        "EffectiveStake": 124110926
+      },
+      {
+        "EthAddress": "63aef7616882f488bca97361d1c24f05b4657ae5",
+        "Weight": 100429252,
+        "IdentityType": 1,
+        "Name": "japan-guardian-altive-orbs-v2",
+        "EnterTime": 1605025823,
+        "EffectiveStake": 100429252
+      },
+      {
+        "EthAddress": "8ddb908c77ccc9cfde28ddf84311cb6fdf3f3125",
+        "Weight": 69479363,
+        "IdentityType": 1,
+        "Name": "ZZANG-ORBS (짱)",
+        "EnterTime": 1605025823,
+        "EffectiveStake": 69479363
+      },
+      {
+        "EthAddress": "3d726623456e34e8a7f5567f6249ec4d72cc3595",
+        "Weight": 37704048,
+        "IdentityType": 1,
+        "Name": "(1++흑우) BlackBull Guardian Cooperative",
+        "EnterTime": 1604941531,
+        "EffectiveStake": 37704048
+      },
+      {
+        "EthAddress": "0874bc1383958e2475df73dc68c4f09658e23777",
+        "Weight": 33824182,
+        "IdentityType": 0,
+        "Name": "Wings Stiftung",
+        "EnterTime": 1604914239,
+        "EffectiveStake": 4620543
+      },
+      {
+        "EthAddress": "0c56b39184e22249e35efcb9394872f0d025256b",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "AngelSong-of-Orbs",
+        "EnterTime": 1604985908,
+        "EffectiveStake": 33650031
+      },
+      {
+        "EthAddress": "17fe98a222c41217c51c823352537dc542ad06ef",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "FREEMAN",
+        "EnterTime": 1604936575,
+        "EffectiveStake": 18441748
+      },
+      {
+        "EthAddress": "4aca0c63e351b2ea44ee628425710e933b5b3396",
+        "Weight": 33824182,
+        "IdentityType": 0,
+        "Name": "0xCORE",
+        "EnterTime": 1638333838,
+        "EffectiveStake": 1810
+      },
+      {
+        "EthAddress": "5320a3141fe602909ad7a8bb811a38b44f1584d9",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "JAPAN（Dクル）",
+        "EnterTime": 1637288983,
+        "EffectiveStake": 1218211
+      },
+      {
+        "EthAddress": "55fa13b0ed6502243ff69707ffbc2ef4c77d3555",
+        "Weight": 33824182,
+        "IdentityType": 0,
+        "Name": "Orbs Guardians",
+        "EnterTime": 1607437194,
+        "EffectiveStake": 2764953
+      },
+      {
+        "EthAddress": "5aefc9c2960635b2b1209d4330c84c15d9983ff5",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "Citadel.one",
+        "EnterTime": 1604942236,
+        "EffectiveStake": 24802
+      },
+      {
+        "EthAddress": "69c57da3914693dbc5e96ff6c37216e70c6fbbc9",
+        "Weight": 33824182,
+        "IdentityType": 0,
+        "Name": "Paradigm",
+        "EnterTime": 1604941849,
+        "EffectiveStake": 153933
+      },
+      {
+        "EthAddress": "6dda3d258e21abc37668e82ae543e8c77567f220",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "DELIGHT",
+        "EnterTime": 1605025823,
+        "EffectiveStake": 3423475
+      },
+      {
+        "EthAddress": "7f0e5488a651c08f84df8e4088303c94c58a728b",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "Guardians of Blockchain (가.오.블)",
+        "EnterTime": 1604918321,
+        "EffectiveStake": 13139329
+      },
+      {
+        "EthAddress": "9b3853cc5734f18ab95e99e6fa4e7fb5da1e1186",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "MollBBang",
+        "EnterTime": 1605025823,
+        "EffectiveStake": 0
+      },
+      {
+        "EthAddress": "a29b7abb4cbfe6405e24647a3f02471fc1f2f047",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "okx_orbs",
+        "EnterTime": 1649322904,
+        "EffectiveStake": 120
+      },
+      {
+        "EthAddress": "c82ec0f3c834d337c51c9375a1c0a65ce7aadaec",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "ORBS-POS",
+        "EnterTime": 1637868135,
+        "EffectiveStake": 3284521
+      },
+      {
+        "EthAddress": "c90ef369d33e80e308e74896975baafd38cac0be",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "Orbsian",
+        "EnterTime": 1615189165,
+        "EffectiveStake": 32665
+      },
+      {
+        "EthAddress": "ca565ccb6434e0adf49b2d66df12b0046b013d7f",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "Moonstake",
+        "EnterTime": 1618483144,
+        "EffectiveStake": 20078398
+      },
+      {
+        "EthAddress": "f0db4646e4be8e2094cd6d7c6d253a87eec7af58",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "Good relation-Guardian(굿가)",
+        "EnterTime": 1604971159,
+        "EffectiveStake": 21495262
+      },
+      {
+        "EthAddress": "f7ae622c77d0580f02bcb2f92380d61e3f6e466c",
+        "Weight": 33824182,
+        "IdentityType": 1,
+        "Name": "Guardians-of-Orbs",
+        "EnterTime": 1604941592,
+        "EffectiveStake": 26574218
+      }
+    ],
+    "PrevBlockReferenceTime": 1652072635,
+    "Size": 22
+  }
+}

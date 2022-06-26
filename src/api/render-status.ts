@@ -76,6 +76,7 @@ function renderServiceStatusBase(snapshot: StateSnapshot, stats: DailyStatsData,
       },
       CurrentRefTime: snapshot.CurrentRefTime,
       CurrentRefBlock: snapshot.CurrentRefBlock,
+      EventsStats: snapshot.EventsStats,
       CurrentCommittee: snapshot.CurrentCommittee,
       CurrentCandidates: snapshot.CurrentCandidates,
       CurrentTopology: snapshot.CurrentTopology,
@@ -120,8 +121,10 @@ function getStatusText(snapshot: StateSnapshot) {
   const now = getCurrentClockTime();
   const refTimeAgo = now - snapshot.CurrentRefTime;
   res.push(`RefTime = ${snapshot.CurrentRefTime} (${refTimeAgo} sec ago)`);
+  res.push(`RefBlock = ${snapshot.CurrentRefBlock}`);
+  res.push(`TotalEventsProcessed = ${snapshot.EventsStats.TotalEventsProcessed}`);
   res.push(`committee size = ${snapshot.CurrentCommittee.length}`);
-  res.push(`stable node = ${snapshot.CurrentImageVersions['main']['node']}`);
+  res.push(`stable node = ${snapshot.CurrentImageVersions['main']['node']}\n`);
   return res.join(', ');
 }
 

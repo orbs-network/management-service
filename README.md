@@ -116,3 +116,17 @@ Runs end-to-end tests against a built docker image.
 The code has been updated to add EVM read capabalities for Polygon network, as well as Ethereum in order to support polygon proof of stake functionality as of March 29 2022.
 
 he netwrok runs another docker image of this repo under the name matic-reader to support reading from POS contracts on polygon netwrok.
+
+# ORBS VM - L3 Virtual Machine which (docker container)
+
+### vm-keepers
+
+Service that keeps time for tasks to be done on ETH L1 and L2 networks.
+will be change to **vm-lambda** when ready
+
+### vm-notifications 
+
+Open Defi Notification Protocol
+Service to enable defi notifications
+internal port 80
+external port 8082

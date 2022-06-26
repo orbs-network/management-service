@@ -5,7 +5,7 @@ import { EventTypes } from '../ethereum/types';
 export class StateManager {
   private current: State;
 
-  applyNewEvents(time: number, events: EventData[]) {
+  applyNewEvents(block: number, time: number, events: EventData[]) {
     for (const event of events) {
       switch (event.event) {
         case 'ContractAddressUpdated':
@@ -37,6 +37,10 @@ export class StateManager {
           break;
       }
     }
+    this.current.applyNewEventsProcessed(
+      block,
+      events.map((e) => e.event)
+    );
   }
 
   constructor(private config: StateConfiguration) {

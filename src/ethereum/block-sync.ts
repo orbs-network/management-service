@@ -80,7 +80,7 @@ export class BlockSync {
     // only apply to state if we have events in this block
     if (sorted.length == 0) return;
     const blockTime = await this.reader.getRefTime(blockNumber);
-    this.state.applyNewEvents(blockTime, sorted);
+    this.state.applyNewEvents(blockNumber, blockTime, sorted);
     this.state.applyNewTimeRef(blockTime, blockNumber);
     Logger.log(`BlockSync: processed ${sorted.length} events in block ${blockNumber} with time ${blockTime}.`);
   }

@@ -7,10 +7,21 @@ import { defaultServiceConfiguration } from '../config';
 import * as Logger from '../logger';
 
 const NUM_STANDBYS = 5;
+const NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME = 1656406800; //breaking change time set
+export { NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME };
 
 export interface StateSnapshot {
   CurrentRefTime: number; // primary, everything is by time
   CurrentRefBlock: number;
+  EventsStats: {
+    LastUpdateBlock: number;
+    TotalEventsProcessed: number;
+    EventCount: {
+      [EventName: string]: {
+        Count: number;
+      };
+    };
+  };
   PageStartRefTime: number;
   PageEndRefTime: number;
   CurrentCommittee: {
@@ -126,6 +137,11 @@ export class State {
   private snapshot: StateSnapshot = {
     CurrentRefTime: 0,
     CurrentRefBlock: 0,
+    EventsStats: {
+      LastUpdateBlock: 0,
+      TotalEventsProcessed: 0,
+      EventCount: {},
+    },
     PageStartRefTime: 0,
     PageEndRefTime: 0,
     CurrentCommittee: [],
@@ -232,7 +248,13 @@ export class State {
         EffectiveStake: this.snapshot.CurrentEffectiveStake[EthAddress],
       });
     }
-    fixCommitteeWeights(this.snapshot.CurrentCommittee, this.snapshot.CurrentEffectiveStake);
+
+    if (time < NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME) {
+      fixCommitteeWeights(this.snapshot.CurrentCommittee, this.snapshot.CurrentEffectiveStake);
+    } else {
+      fixCommitteeWeightsNew(this.snapshot.CurrentCommittee, this.snapshot.CurrentEffectiveStake);
+    }
+
     this.snapshot.CurrentCommittee = _.sortBy(this.snapshot.CurrentCommittee, (node) => node.EthAddress);
     this.snapshot.CurrentCommittee = _.sortBy(this.snapshot.CurrentCommittee, (node) => -1 * node.Weight);
   }
@@ -363,6 +385,19 @@ export class State {
       PendingVersionTime: pendingTime,
     };
   }
+
+  applyNewEventsProcessed(block: number, events: string[]) {
+    if (block <= this.snapshot.EventsStats.LastUpdateBlock) {
+      Logger.error(` applyEventsStats : already applied stats for block ${block}, events count ${events}  `);
+    }
+    events.map((eventName) => {
+      const count = this.snapshot.EventsStats.EventCount[eventName]?.Count ?? 0;
+      this.snapshot.EventsStats.EventCount[eventName] = {
+        Count: count + 1,
+      };
+    });
+    this.snapshot.EventsStats.TotalEventsProcessed += events.length;
+  }
 }
 
 type CommiteeNodes = { EthAddress: string; Weight: number; Name: string }[];
@@ -438,6 +473,13 @@ function fixCommitteeWeights(committee: CommiteeNodes, stake: { [EthAddress: str
   const totalStake = _.sum(_.map(committee, (node) => stake[node.EthAddress] ?? 0));
   for (const node of committee) {
     node.Weight = Math.max(stake[node.EthAddress] ?? 0, Math.round(totalStake / committee.length));
+  }
+}
+
+function fixCommitteeWeightsNew(committee: CommiteeNodes, stake: { [EthAddress: string]: number }): void {
+  const totalStake = _.sum(_.map(committee, (node) => stake[node.EthAddress] ?? 0));
+  for (const node of committee) {
+    node.Weight = Math.max(stake[node.EthAddress] ?? 0, Math.round(totalStake / ((2 / 3) * committee.length)));
   }
 }
 

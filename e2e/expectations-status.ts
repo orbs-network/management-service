@@ -2,7 +2,7 @@ import {
   isValidTimeRef,
   isValidEthereumAddress,
   isValidImageVersion,
-  isValidBlock,
+  isNonNegative,
   isValidTimestamp,
   isNonEmptyString,
   isPositiveNumber,
@@ -23,7 +23,13 @@ export const expectationStatus = {
       Semantic: isValidImageVersion,
     },
     CurrentRefTime: isValidTimeRef,
-    CurrentRefBlock: isValidBlock,
+    CurrentRefBlock: isNonNegative,
+    EventsStats: {
+      LastUpdateBlock: isNonNegative,
+      TotalEventsProcessed: isNonNegative,
+      EventCount: {},
+    },
+
     CurrentCommittee: [
       {
         EthAddress: '44ea9fbfebb3162a5778b30fb2ba2a66cc5291a8',
