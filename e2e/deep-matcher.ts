@@ -56,8 +56,8 @@ export function isValidTimeRef(str: string) {
   return str && parseInt(str) > 1400000000;
 }
 
-export function isValidBlock(str: string) {
-  return str && parseInt(str) > 0;
+export function isNonNegative(str: string) {
+  return parseInt(str) >= 0;
 }
 
 export function isValidTimestamp(str: string) {

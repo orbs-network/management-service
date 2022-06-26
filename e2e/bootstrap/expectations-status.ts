@@ -5,6 +5,7 @@ import {
   isPositiveNumber,
   isValidTimeRef,
   isValidFullImageName,
+  isNonNegative,
 } from '../deep-matcher';
 
 export const expectationStatus = {
@@ -20,9 +21,9 @@ export const expectationStatus = {
     CurrentRefTime: 0,
     CurrentRefBlock: 0,
     EventsStats: {
-      LastUpdateBlock: 0,
-      TotalEventsProcessed: 0,
-      EventCount: [{ Count: isPositiveNumber }],
+      LastUpdateBlock: isNonNegative,
+      TotalEventsProcessed: isNonNegative,
+      EventCount: {},
     },
     CurrentCommittee: [],
     CurrentCandidates: [],

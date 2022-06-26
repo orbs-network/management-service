@@ -28,7 +28,7 @@ test.serial('[integration] getServiceStatus responds', (t) => {
     EventsStats: {
       LastUpdateBlock: 0,
       TotalEventsProcessed: 0,
-      EventCount: [],
+      EventCount: {},
     },
     CurrentCommittee: [],
     CurrentCandidates: [],
@@ -71,7 +71,7 @@ test.serial('[integration] getServiceStatusAnalytics responds', (t) => {
     EventsStats: {
       LastUpdateBlock: 0,
       TotalEventsProcessed: 0,
-      EventCount: [],
+      EventCount: {},
     },
     CurrentCommittee: [],
     CurrentCandidates: [],
