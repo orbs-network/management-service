@@ -7,7 +7,7 @@ import { findAllEventsCoveringRange } from '../model/find';
 
 const ETHEREUM_REF_TIME_ALLOWED_DELAY = 20 * 60; // seconds
 const DOCKER_HUB_POLL_ALLOWED_DELAY = 60 * 60; // seconds
-const L3_VM_PREFIX = "vm-";
+const L3_VM_PREFIX = 'vm-';
 
 const timeOriginallyLaunched = getCurrentClockTime();
 
@@ -138,7 +138,7 @@ function getErrorText(snapshot: StateSnapshot) {
   }
   for (const imageName of imageNamesToPollForNewVersions) {
     // exclude "vm-" prefix
-    if(imageName.substring(0,3).toLowerCase() !== L3_VM_PREFIX){
+    if (imageName.substring(0, 3).toLowerCase() !== L3_VM_PREFIX) {
       const polledAgo = now - (snapshot.CurrentImageVersionsUpdater['main'][imageName]?.LastPollTime ?? 0);
       if (polledAgo > DOCKER_HUB_POLL_ALLOWED_DELAY) {
         res.push(`Stable version poll for ${imageName} is too old (${polledAgo} sec ago).`);
