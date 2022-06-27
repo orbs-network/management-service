@@ -7,6 +7,7 @@ import { findAllEventsCoveringRange } from '../model/find';
 
 const ETHEREUM_REF_TIME_ALLOWED_DELAY = 20 * 60; // seconds
 const DOCKER_HUB_POLL_ALLOWED_DELAY = 60 * 60; // seconds
+const L3_VM_PREFIX = "vm-";
 
 const timeOriginallyLaunched = getCurrentClockTime();
 
@@ -136,9 +137,12 @@ function getErrorText(snapshot: StateSnapshot) {
     res.push(`Ethereum RefTime is too old (${refTimeAgo} sec ago).`);
   }
   for (const imageName of imageNamesToPollForNewVersions) {
-    const polledAgo = now - (snapshot.CurrentImageVersionsUpdater['main'][imageName]?.LastPollTime ?? 0);
-    if (polledAgo > DOCKER_HUB_POLL_ALLOWED_DELAY) {
-      res.push(`Stable version poll for ${imageName} is too old (${polledAgo} sec ago).`);
+    // exclude "vm-" prefix
+    if(imageName.substring(0,3).toLowerCase() !== L3_VM_PREFIX){
+      const polledAgo = now - (snapshot.CurrentImageVersionsUpdater['main'][imageName]?.LastPollTime ?? 0);
+      if (polledAgo > DOCKER_HUB_POLL_ALLOWED_DELAY) {
+        res.push(`Stable version poll for ${imageName} is too old (${polledAgo} sec ago).`);
+      }
     }
   }
   // only go over images that we really care if the canary version is found or not
