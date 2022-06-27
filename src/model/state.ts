@@ -7,7 +7,7 @@ import { defaultServiceConfiguration } from '../config';
 import * as Logger from '../logger';
 
 const NUM_STANDBYS = 5;
-const NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME = 1656406800; //breaking change time set
+const NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME = 1661583600; //breaking change time set 
 export { NEW_FIX_COMMITTEE_WEIGHTS_BREAKING_CHANGE_TIME };
 
 export interface StateSnapshot {
