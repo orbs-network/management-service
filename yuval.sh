@@ -25,3 +25,13 @@ docker push orbsnetworkstaging/management-service:v100.5.1-immediate
 docker pull orbsnetworkstaging/management-service:v2.1.2-eae055a5
 docker tag  orbsnetworkstaging/management-service:v2.1.2-eae055a5 orbsnetworkstaging/management-service:v100.6.0-immediate
 docker push orbsnetworkstaging/management-service:v100.6.0-immediate
+
+
+# weights and VM notifications and keepers v2.2.0
+# also - v2.1.2-dae32c32 == experimental
+docker pull orbsnetworkstaging/management-service:experimental
+docker tag  orbsnetworkstaging/management-service:experimental orbsnetworkstaging/management-service:v100.6.1-immediate
+docker push orbsnetworkstaging/management-service:v100.6.1-immediate
+
+
+
