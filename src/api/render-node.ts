@@ -222,7 +222,7 @@ function getKeepers(snapshot: StateSnapshot, config: ServiceConfiguration) {
     AllowAccessToServices: true,
     Config: {
       ManagementServiceEndpoint: 'http://management-service:8080',
-      EthereumEndpoint: 'https://speedy-nodes-nyc.moralis.io/e25f7625703c58a9068b9947/bsc/mainnet',
+      EthereumEndpoint: 'https://bsc-dataseed1.binance.org/',
       SignerEndpoint: 'http://signer:7777',
       EthereumDiscountGasPriceFactor: 1,
       NodeOrbsAddress: normalizeAddress(config['node-address']),
