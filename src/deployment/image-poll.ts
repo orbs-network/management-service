@@ -1,6 +1,11 @@
 import crypto from 'crypto';
 import { StateManager } from '../model/manager';
-import { DeploymentDescriptorConfiguration, DeploymentDescriptorReader, services } from './deployment-descriptor';
+import {
+  DeploymentDescriptor,
+  DeploymentDescriptorConfiguration,
+  DeploymentDescriptorReader,
+  services
+} from './deployment-descriptor';
 import { getCurrentClockTime } from '../helpers';
 import * as Versioning from './/versioning';
 import * as Logger from '../logger';
@@ -13,8 +18,6 @@ export const imageNamesToPollForNewVersions: services[] = [
   'ethereum-writer',
   'matic-writer',
   'logs-service',
-  'vm-keepers',
-  'vm-notifications',
 ];
 
 export type ImagePollConfiguration = DeploymentDescriptorConfiguration & {
@@ -45,15 +48,18 @@ export class ImagePoll {
 
   // single tick of the run loop
   async run() {
-    Logger.log(`ImagePoll: about to poll ${imageNamesToPollForNewVersions} from deployment descriptor.`);
+    Logger.log(`ImagePoll: about to poll ${imageNamesToPollForNewVersions} + VMs from deployment descriptor.`);
     const time = getCurrentClockTime();
-    const fetchedVersions = await this.reader.fetchLatestVersion(imageNamesToPollForNewVersions);
+
+    const descriptorBody: DeploymentDescriptor = await this.reader.fetchLatestDeploymentDescriptor();
+    const fetchedVersions = this.reader.parseDescriptor(descriptorBody, imageNamesToPollForNewVersions);
+    this.state.setRawDescriptor(descriptorBody)
 
     // TODO add protection here - if we don't have a valid management-service we must throw here
     // otherwise boyar might shut down management service forever
     // TBD - what other services are required?
 
-    for (const imageName of imageNamesToPollForNewVersions) {
+    for (const imageName in fetchedVersions) {
       for (const [rolloutGroup, imageVersion] of Object.entries(fetchedVersions[imageName])) {
         if (this.config.BootstrapMode) {
           // bootstrap is just management-service - must be updated immediately

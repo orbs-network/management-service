@@ -5,6 +5,7 @@ import { getVirtualChainPort } from './ports';
 import { JsonResponse, normalizeAddress } from '../helpers';
 import * as Logger from '../logger';
 import { parseImageTag } from '../deployment/versioning';
+import {L3_VM_PREFIX} from "./render-status"
 
 export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const response: JsonResponse = {
@@ -84,20 +85,11 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
     Logger.error(err.toString());
   }
 
-  // include keepers
-  try {
-    response.services['vm-keepers'] = getKeepers(snapshot, config);
-    if (!response.services['vm-keepers']) delete response.services['vm-keepers'];
-  } catch (err) {
-    Logger.error(err.toString());
-  }
-
-  // include odnp open-defi-notification-protocol if found a viable image for it and its contract addresses are known
-  try {
-    response.services['vm-notifications'] = getNotifications(snapshot, config);
-    if (!response.services['vm-notifications']) delete response.services['vm-notifications'];
-  } catch (err) {
-    Logger.error(err.toString());
+  // generic approach for VMs
+  for (const serviceName in snapshot.CurrentImageVersions['main']) {
+    if (serviceName.startsWith(L3_VM_PREFIX)) {
+      response.services[serviceName] = getVM(serviceName, snapshot)
+    }
   }
 
   return response;
@@ -205,34 +197,6 @@ function getEthereumWriter(snapshot: StateSnapshot, config: ServiceConfiguration
   };
 }
 
-function getKeepers(snapshot: StateSnapshot, config: ServiceConfiguration) {
-  const version = snapshot.CurrentImageVersions['main']['vm-keepers'];
-  if (!version) return undefined;
-  const imageTag = parseImageTag(version);
-  if (!imageTag) return undefined;
-
-  return {
-    Disabled: false,
-    DockerConfig: {
-      Image: imageTag.Image,
-      Tag: imageTag.Tag,
-      Pull: true,
-    },
-    AllowAccessToSigner: true,
-    AllowAccessToServices: true,
-    Config: {
-      ManagementServiceEndpoint: 'http://management-service:8080',
-      EthereumEndpoint: 'https://bsc-dataseed1.binance.org/',
-      SignerEndpoint: 'http://signer:7777',
-      EthereumDiscountGasPriceFactor: 1,
-      NodeOrbsAddress: normalizeAddress(config['node-address']),
-      BIUrl: 'http://logs.orbs.network:3001/putes/keepers-ew',
-      // ElectionsAuditOnly: false,
-      // SuspendVoteUnready: false,
-    },
-  };
-}
-
 function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const version = snapshot.CurrentImageVersions['main']['matic-writer'];
   if (!version) return undefined;
@@ -257,32 +221,6 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
       NodeOrbsAddress: normalizeAddress(config['node-address']),
       ElectionsAuditOnly: false,
       // SuspendVoteUnready: false,
-    },
-  };
-}
-
-function getNotifications(snapshot: StateSnapshot, config: ServiceConfiguration) {
-  const version = snapshot.CurrentImageVersions['main']['vm-notifications'];
-  if (!version) return undefined;
-  const imageTag = parseImageTag(version);
-  if (!imageTag) return undefined;
-
-  return {
-    InternalPort: 80,
-    ExternalPort: 8082,
-    Disabled: false,
-    DockerConfig: {
-      Image: imageTag.Image,
-      Tag: imageTag.Tag,
-      Pull: true,
-    },
-    AllowAccessToSigner: true,
-    AllowAccessToServices: true,
-    Config: {
-      SignerEndpoint: 'http://signer:7777',
-      EthereumElectionsContract: '0x02Ca9F2c5dD0635516241efD480091870277865b',
-      EthereumDiscountGasPriceFactor: 1,
-      NodeOrbsAddress: normalizeAddress(config['node-address']),
     },
   };
 }
@@ -343,4 +281,19 @@ function getChain(vchainId: number, snapshot: StateSnapshot) {
       'signer-endpoint': 'http://signer:7777',
     },
   };
+}
+
+function getVM(serviceName: string, snapshot: StateSnapshot) {
+  const version = snapshot.CurrentImageVersions['main'][serviceName];
+  if (!version) return undefined;
+  const imageTag = parseImageTag(version);
+  if (!imageTag) return undefined;
+
+  const result: any = {};
+  for (const [key, value] of Object.entries(snapshot.rawDescriptor.ImageVersions[serviceName])) {
+    if (!["image", "comment"].includes(key))
+      result[key] = value;
+  }
+
+  return result;
 }

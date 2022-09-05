@@ -1,6 +1,7 @@
 import { EventData } from 'web3-eth-contract';
 import { State, StateSnapshot, StateConfiguration } from './state';
 import { EventTypes } from '../ethereum/types';
+import {DeploymentDescriptor} from "../deployment/deployment-descriptor";
 
 export class StateManager {
   private current: State;
@@ -76,5 +77,9 @@ export class StateManager {
     }
     // TODO: improve to a more efficient implementation that only returns a subset of events
     return this.current.getSnapshot();
+  }
+
+  setRawDescriptor(body: DeploymentDescriptor) {
+    this.current.setRawDescriptor(body)
   }
 }

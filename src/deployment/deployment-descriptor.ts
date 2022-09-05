@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import https from 'https';
+import {L3_VM_PREFIX} from "../api/render-status";
 
 const FETCH_TIMEOUT_SEC = 45;
 
@@ -17,16 +18,13 @@ export type services =
   | 'logs-service'
   | 'node'
   | 'node-canary'
-  | 'vm-keepers'
-  | 'vm-notifications'; // open defi notification protocol
 
 export type DeploymentDescriptor = {
   Desc?: string;
   SchemaVersion: number | string;
   ImageVersions: {
-    [serviceName in services]?: {
-      image: string;
-      comment?: string;
+    [serviceName: string]: {
+      [property: string]: any
     };
   };
 };
@@ -49,23 +47,31 @@ export class DeploymentDescriptorReader {
     return response.json();
   }
 
-  async fetchLatestVersion(
-    serviceNames: services[]
-  ): Promise<{ [serviceName: string]: { [RolloutGroup: string]: string } }> {
+  parseDescriptor(
+    descriptor: DeploymentDescriptor, serviceNames: services[]
+  ):{ [serviceName: string]: { [RolloutGroup: string]: string } } {
     const res: { [serviceName: string]: { [RolloutGroup: string]: string } } = {};
 
-    const body: DeploymentDescriptor = await this.fetchLatestDeploymentDescriptor();
 
     for (const serviceName of serviceNames) {
       const imageResult: { [RolloutGroup: string]: string } = {};
-      if (body.ImageVersions[serviceName]?.image) {
-        imageResult['main'] = body.ImageVersions[serviceName]!.image;
+      if (descriptor.ImageVersions[serviceName]?.image) {
+        imageResult['main'] = descriptor.ImageVersions[serviceName]!.image;
       }
 
-      if (serviceName == 'node' && body.ImageVersions['node-canary']?.image) {
-        imageResult['canary'] = body.ImageVersions['node-canary']?.image;
+      if (serviceName == 'node' && descriptor.ImageVersions['node-canary']?.image) {
+        imageResult['canary'] = descriptor.ImageVersions['node-canary']?.image;
       }
       res[serviceName] = imageResult;
+    }
+
+    // VMs (dynamic loading)
+    for (const serviceName in descriptor.ImageVersions) {
+      if (serviceName.startsWith(L3_VM_PREFIX)) {
+        const imageResult: { [RolloutGroup: string]: string } = {};
+        imageResult['main'] = descriptor.ImageVersions[serviceName].image;
+        res[serviceName] = imageResult;
+      }
     }
 
     return res;
