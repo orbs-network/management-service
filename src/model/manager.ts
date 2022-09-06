@@ -1,7 +1,7 @@
 import { EventData } from 'web3-eth-contract';
 import { State, StateSnapshot, StateConfiguration } from './state';
 import { EventTypes } from '../ethereum/types';
-import {DeploymentDescriptor} from "../deployment/deployment-descriptor";
+import { DeploymentDescriptor } from '../deployment/deployment-descriptor';
 
 export class StateManager {
   private current: State;
@@ -80,6 +80,6 @@ export class StateManager {
   }
 
   setRawDescriptor(body: DeploymentDescriptor) {
-    this.current.setRawDescriptor(body)
+    this.current.setRawDescriptor(body);
   }
 }

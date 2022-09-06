@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import https from 'https';
-import {L3_VM_PREFIX} from "../api/render-status";
+import { L3_VM_PREFIX } from '../api/render-status';
 
 const FETCH_TIMEOUT_SEC = 45;
 
@@ -17,14 +17,15 @@ export type services =
   | 'matic-writer'
   | 'logs-service'
   | 'node'
-  | 'node-canary'
+  | 'node-canary';
 
 export type DeploymentDescriptor = {
   Desc?: string;
   SchemaVersion: number | string;
+
   ImageVersions: {
     [serviceName: string]: {
-      [property: string]: any
+      [property: string]: any;
     };
   };
 };
@@ -48,10 +49,10 @@ export class DeploymentDescriptorReader {
   }
 
   parseDescriptor(
-    descriptor: DeploymentDescriptor, serviceNames: services[]
-  ):{ [serviceName: string]: { [RolloutGroup: string]: string } } {
+    descriptor: DeploymentDescriptor,
+    serviceNames: services[]
+  ): { [serviceName: string]: { [RolloutGroup: string]: string } } {
     const res: { [serviceName: string]: { [RolloutGroup: string]: string } } = {};
-
 
     for (const serviceName of serviceNames) {
       const imageResult: { [RolloutGroup: string]: string } = {};

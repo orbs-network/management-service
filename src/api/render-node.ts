@@ -5,7 +5,7 @@ import { getVirtualChainPort } from './ports';
 import { JsonResponse, normalizeAddress } from '../helpers';
 import * as Logger from '../logger';
 import { parseImageTag } from '../deployment/versioning';
-import {L3_VM_PREFIX} from "./render-status"
+import { L3_VM_PREFIX } from './render-status';
 
 export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const response: JsonResponse = {
@@ -88,7 +88,7 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
   // generic approach for VMs
   for (const serviceName in snapshot.CurrentImageVersions['main']) {
     if (serviceName.startsWith(L3_VM_PREFIX)) {
-      response.services[serviceName] = getVM(serviceName, snapshot)
+      response.services[serviceName] = getVM(serviceName, snapshot, config);
     }
   }
 
@@ -283,7 +283,7 @@ function getChain(vchainId: number, snapshot: StateSnapshot) {
   };
 }
 
-function getVM(serviceName: string, snapshot: StateSnapshot) {
+function getVM(serviceName: string, snapshot: StateSnapshot, config: ServiceConfiguration) {
   const version = snapshot.CurrentImageVersions['main'][serviceName];
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
@@ -291,9 +291,9 @@ function getVM(serviceName: string, snapshot: StateSnapshot) {
 
   const result: any = {};
   for (const [key, value] of Object.entries(snapshot.rawDescriptor.ImageVersions[serviceName])) {
-    if (!["image", "comment"].includes(key))
-      result[key] = value;
+    if (!['image', 'comment'].includes(key)) result[key] = value;
   }
+  if (result.Config) result.Config['NodeOrbsAddress'] = normalizeAddress(config['node-address'])
 
   return result;
 }

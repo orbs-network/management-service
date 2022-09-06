@@ -5,7 +5,7 @@ import { getIpFromHex, toNumber, normalizeAddress } from '../helpers';
 import { findAllEventsCoveringRange } from './find';
 import { defaultServiceConfiguration } from '../config';
 import * as Logger from '../logger';
-import {DeploymentDescriptor} from "../deployment/deployment-descriptor";
+import { DeploymentDescriptor } from '../deployment/deployment-descriptor';
 
 const NUM_STANDBYS = 5;
 // June 30 Thursday 11:00 IL Time
@@ -123,7 +123,7 @@ export interface StateSnapshot {
     Address: string;
   }[];
   CurrentVersion: string;
-  rawDescriptor: {[key: string]: any};
+  rawDescriptor: { [key: string]: any };
 }
 
 export type StateConfiguration = {
@@ -178,7 +178,7 @@ export class State {
     CurrentContractAddress: {},
     ContractAddressChanges: [],
     CurrentVersion: '',
-    rawDescriptor: {}
+    rawDescriptor: {},
   };
 
   constructor(private config = defaultStateConfiguration) {
