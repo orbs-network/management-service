@@ -1,6 +1,7 @@
 # Ignore generated directories
 dist/
 exec/
+_out/
 
 # temp build artifacts
 .version

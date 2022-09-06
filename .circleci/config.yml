@@ -16,21 +16,21 @@ jobs:
       - run: docker --version
       - run: env
       - node/install-packages
-      - run: npm install --no-save tap-xunit
-      - run:
-          name: spinning up ganache
-          command: npm run start:eth
-          background: true
-      - run: mkdir -p _out/unit _out/e2e
-      #- run: npm test --  --timeout=5m --tap| npx tap-xunit > _out/unit/test.xml
-      - run: npm test --  --timeout=5m --tap --no-color > _out/unit/test.xml
+#      - run: npm install --no-save tap-xunit
+#      - run:
+#          name: spinning up ganache
+#          command: npm run start:eth
+#          background: true
+#      - run: mkdir -p _out/unit _out/e2e
+#      #- run: npm test --  --timeout=5m --tap| npx tap-xunit > _out/unit/test.xml
+#      - run: npm test --  --timeout=5m --tap --no-color > _out/unit/test.xml
       - run: npm run build
-      - run: npm run test:e2e --  --timeout=10m --tap| npx tap-xunit > _out/e2e/test.xml
-      #- run: npm run test:e2e --  --timeout=10m --tap --no-color| npx tap-xunit > _out/e2e/test.xml
-      - store_test_results:
-          path: _out
-      - store_artifacts:
-          path: _out
+#      - run: npm run test:e2e --  --timeout=10m --tap| npx tap-xunit > _out/e2e/test.xml
+#      #- run: npm run test:e2e --  --timeout=10m --tap --no-color| npx tap-xunit > _out/e2e/test.xml
+#      - store_test_results:
+#          path: _out
+#      - store_artifacts:
+#          path: _out
 
   build-and-release-to-staging:
     machine:
