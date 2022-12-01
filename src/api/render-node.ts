@@ -5,7 +5,31 @@ import { getVirtualChainPort } from './ports';
 import { JsonResponse, normalizeAddress } from '../helpers';
 import * as Logger from '../logger';
 import { parseImageTag } from '../deployment/versioning';
+import { services } from '../deployment/deployment-descriptor';
 
+
+const EXTERNAL_VM_PORTS:any = {
+  'vm-notifications':8082,
+  'vm-twap':8083,
+}
+function renderVM(services:JsonResponse, vmName:services, snapshot: StateSnapshot, config: ServiceConfiguration){
+  try {    
+    services[vmName] = getVM(vmName,snapshot, config);
+    if(!services[vmName]){
+      delete services[vmName];
+      Logger.error(`getVM(${vmName}) failed, ${snapshot}`);
+      return;
+    }
+    // exposing ports
+    if(EXTERNAL_VM_PORTS[vmName]){
+      services[vmName].InternalPort = 80;
+      services[vmName].ExternalPort = EXTERNAL_VM_PORTS[vmName];
+    }
+  } catch (err) {
+    Logger.error(err.toString());
+  }
+
+}
 export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceConfiguration) {
   const response: JsonResponse = {
     network: [],
@@ -93,13 +117,11 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
   }
 
   // include odnp open-defi-notification-protocol if found a viable image for it and its contract addresses are known
-  try {
-    response.services['vm-notifications'] = getNotifications(snapshot, config);
-    if (!response.services['vm-notifications']) delete response.services['vm-notifications'];
-  } catch (err) {
-    Logger.error(err.toString());
-  }
+  renderVM(response.services, 'vm-notifications', snapshot, config);
 
+  // include TWAP TAKER
+  renderVM(response.services, 'vm-twap', snapshot, config);
+  
   return response;
 }
 
@@ -261,15 +283,13 @@ function getMaticWriter(snapshot: StateSnapshot, config: ServiceConfiguration) {
   };
 }
 
-function getNotifications(snapshot: StateSnapshot, config: ServiceConfiguration) {
-  const version = snapshot.CurrentImageVersions['main']['vm-notifications'];
+function getVM(vmName:services, snapshot: StateSnapshot, config: ServiceConfiguration) {
+  const version = snapshot.CurrentImageVersions['main'][vmName];
   if (!version) return undefined;
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
 
-  return {
-    InternalPort: 80,
-    ExternalPort: 8082,
+  const res =  {    
     Disabled: false,
     DockerConfig: {
       Image: imageTag.Image,
@@ -285,7 +305,9 @@ function getNotifications(snapshot: StateSnapshot, config: ServiceConfiguration)
       NodeOrbsAddress: normalizeAddress(config['node-address']),
     },
   };
+  return res;
 }
+
 
 function getLogsService(snapshot: StateSnapshot) {
   const version = snapshot.CurrentImageVersions['main']['logs-service'];

@@ -18,7 +18,8 @@ export type services =
   | 'node'
   | 'node-canary'
   | 'vm-keepers'
-  | 'vm-notifications'; // open defi notification protocol
+  | 'vm-notifications'// open defi notification protocol
+  | 'vm-twap'; // twap taker
 
 export type DeploymentDescriptor = {
   Desc?: string;
