@@ -25,7 +25,7 @@ jobs:
       #- run: npm test --  --timeout=5m --tap| npx tap-xunit > _out/unit/test.xml
       - run: npm test --  --timeout=5m --tap --no-color > _out/unit/test.xml
       - run: npm run build
-      - run: npm run test:e2e --  --timeout=10m --tap| npx tap-xunit > _out/e2e/test.xml
+      - run: npm run test:e2e --  --timeout=20m --tap| npx tap-xunit > _out/e2e/test.xml
       #- run: npm run test:e2e --  --timeout=10m --tap --no-color| npx tap-xunit > _out/e2e/test.xml
       - store_test_results:
           path: _out
@@ -60,8 +60,7 @@ jobs:
 
 workflows:
   build-and-test:
-    jobs:
-      - build-and-test
+    jobs:      
       - build-and-release-to-staging:
           filters:
             branches:
