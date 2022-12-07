@@ -24,7 +24,7 @@ jobs:
       - run: mkdir -p _out/unit _out/e2e      
       - run: npm run build
       - run: npm test --  --timeout=10m --tap --no-color > _out/unit/test.xml
-      - run: npm run test:e2e --  --timeout=15m --tap| npx tap-xunit > _out/e2e/test.xml      
+      #- run: npm run test:e2e --  --timeout=15m --tap| npx tap-xunit > _out/e2e/test.xml      
       - store_test_results:
           path: _out
       - store_artifacts:
