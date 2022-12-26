@@ -16,6 +16,7 @@ export const imageNamesToPollForNewVersions: services[] = [
   'vm-keepers',
   'vm-notifications',
   'vm-twap',
+  'vm-lambda',
 ];
 
 export type ImagePollConfiguration = DeploymentDescriptorConfiguration & {

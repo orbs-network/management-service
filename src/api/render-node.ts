@@ -121,7 +121,10 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
   // include TWAP TAKER
   renderVM(response.services, 'vm-twap', snapshot, config);
-  
+
+    // include Lambda
+  renderVM(response.services, 'vm-lambda', snapshot, config);
+
   return response;
 }
 
