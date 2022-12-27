@@ -1,5 +1,4 @@
 import { isValidImageVersion, isValidEthereumAddress } from './deep-matcher';
-import { getVirtualChainPort } from '../src/api/ports';
 
 export const expectationNodeManagement = {
   network: [],
@@ -143,27 +142,5 @@ export const expectationNodeManagement = {
     //     ElectionsAuditOnly: false,
     //   },
     // },
-  },
-  chains: [1000000, 1000001, 1000002].map((vcId) => {
-    return {
-      Id: vcId,
-      InternalPort: 4400,
-      ExternalPort: getVirtualChainPort(vcId),
-      InternalHttpPort: 8080,
-      Disabled: false,
-      DockerConfig: {
-        Image: 'e2e-mock/node',
-        Tag: isValidImageVersion,
-        Pull: true,
-      },
-      AllowAccessToSigner: true,
-      AllowAccessToServices: true,
-      Config: {
-        'gossip-listen-port': 4400,
-        'http-address': ':8080',
-        'management-file-path': `http://management-service:8080/vchains/${vcId}/management`,
-        'signer-endpoint': 'http://signer:7777',
-      },
-    };
-  }),
+  }
 };

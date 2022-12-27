@@ -419,120 +419,18 @@ test('state applies elections status updates and sets candidates accordingly', (
 test('state applies virtual chain subscriptions', (t) => {
   const s = new State();
 
-  SubscriptionChanged(s, 1000, 'V1', 9010);
   s.applyNewTimeRef(1000, 100);
 
-  SubscriptionChanged(s, 2000, 'V2', 3500);
-  SubscriptionChanged(s, 2000, 'V3', 3500);
   s.applyNewTimeRef(2000, 200);
 
-  SubscriptionChanged(s, 3000, 'V3', 9020);
-  SubscriptionChanged(s, 3000, 'V4', 4500);
-  SubscriptionChanged(s, 3000, 'V5', 3500);
   s.applyNewTimeRef(3000, 300);
 
-  SubscriptionChanged(s, 4000, 'V4', 4700);
-  SubscriptionChanged(s, 4000, 'V5', 9030);
   s.applyNewTimeRef(4000, 400);
 
   s.applyNewTimeRef(5000, 500);
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
-  t.is(s.getSnapshot().CurrentVirtualChains['V1'].Expiration, 9010);
-  t.is(s.getSnapshot().CurrentVirtualChains['V2'].Expiration, 3500);
-  t.is(s.getSnapshot().CurrentVirtualChains['V3'].Expiration, 9020);
-  t.is(s.getSnapshot().CurrentVirtualChains['V4'].Expiration, 4700);
-  t.is(s.getSnapshot().CurrentVirtualChains['V5'].Expiration, 9030);
-
-  t.is(s.getSnapshot().SubscriptionEvents['V1'].length, 2);
-  t.is(s.getSnapshot().SubscriptionEvents['V1'][0].RefTime, 1000);
-  t.is(s.getSnapshot().SubscriptionEvents['V1'][0].Data.Status, 'active');
-  t.is(s.getSnapshot().SubscriptionEvents['V1'][1].RefTime, 9010);
-  t.is(s.getSnapshot().SubscriptionEvents['V1'][1].Data.Status, 'expired');
-
-  t.is(s.getSnapshot().SubscriptionEvents['V2'].length, 2);
-  t.is(s.getSnapshot().SubscriptionEvents['V2'][0].RefTime, 2000);
-  t.is(s.getSnapshot().SubscriptionEvents['V2'][0].Data.Status, 'active');
-  t.is(s.getSnapshot().SubscriptionEvents['V2'][1].RefTime, 3500);
-  t.is(s.getSnapshot().SubscriptionEvents['V2'][1].Data.Status, 'expired');
-
-  t.is(s.getSnapshot().SubscriptionEvents['V3'].length, 3);
-  t.is(s.getSnapshot().SubscriptionEvents['V3'][0].RefTime, 2000);
-  t.is(s.getSnapshot().SubscriptionEvents['V3'][0].Data.Status, 'active');
-  t.is(s.getSnapshot().SubscriptionEvents['V3'][1].RefTime, 3000);
-  t.is(s.getSnapshot().SubscriptionEvents['V3'][1].Data.Status, 'active');
-  t.is(s.getSnapshot().SubscriptionEvents['V3'][2].RefTime, 9020);
-  t.is(s.getSnapshot().SubscriptionEvents['V3'][2].Data.Status, 'expired');
-
-  t.is(s.getSnapshot().SubscriptionEvents['V4'].length, 3);
-  t.is(s.getSnapshot().SubscriptionEvents['V4'][0].RefTime, 3000);
-  t.is(s.getSnapshot().SubscriptionEvents['V4'][0].Data.Status, 'active');
-  t.is(s.getSnapshot().SubscriptionEvents['V4'][1].RefTime, 4000);
-  t.is(s.getSnapshot().SubscriptionEvents['V4'][1].Data.Status, 'active');
-  t.is(s.getSnapshot().SubscriptionEvents['V4'][2].RefTime, 4700);
-  t.is(s.getSnapshot().SubscriptionEvents['V4'][2].Data.Status, 'expired');
-
-  t.is(s.getSnapshot().SubscriptionEvents['V5'].length, 4);
-  t.is(s.getSnapshot().SubscriptionEvents['V5'][0].RefTime, 3000);
-  t.is(s.getSnapshot().SubscriptionEvents['V5'][0].Data.Status, 'active');
-  t.is(s.getSnapshot().SubscriptionEvents['V5'][1].RefTime, 3500);
-  t.is(s.getSnapshot().SubscriptionEvents['V5'][1].Data.Status, 'expired');
-  t.is(s.getSnapshot().SubscriptionEvents['V5'][2].RefTime, 4000);
-  t.is(s.getSnapshot().SubscriptionEvents['V5'][2].Data.Status, 'active');
-  t.is(s.getSnapshot().SubscriptionEvents['V5'][3].RefTime, 9030);
-  t.is(s.getSnapshot().SubscriptionEvents['V5'][3].Data.Status, 'expired');
-
-  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V1'], {
-    Expiration: 9010,
-    RolloutGroup: 'main',
-    IdentityType: 0,
-    GenesisRefTime: 9999,
-    Tier: 'defaultTier',
-    Name: 'name',
-    Owner: 'owner',
-    Rate: '1111',
-  });
-  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V2'], {
-    Expiration: 3500,
-    Tier: 'defaultTier',
-    RolloutGroup: 'main',
-    IdentityType: 0,
-    GenesisRefTime: 9999,
-    Name: 'name',
-    Owner: 'owner',
-    Rate: '1111',
-  });
-  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V3'], {
-    Expiration: 9020,
-    Tier: 'defaultTier',
-    RolloutGroup: 'main',
-    IdentityType: 0,
-    GenesisRefTime: 9999,
-    Name: 'name',
-    Owner: 'owner',
-    Rate: '1111',
-  });
-  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V4'], {
-    Expiration: 4700,
-    Tier: 'defaultTier',
-    RolloutGroup: 'main',
-    IdentityType: 0,
-    GenesisRefTime: 9999,
-    Name: 'name',
-    Owner: 'owner',
-    Rate: '1111',
-  });
-  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V5'], {
-    Expiration: 9030,
-    Tier: 'defaultTier',
-    RolloutGroup: 'main',
-    IdentityType: 0,
-    GenesisRefTime: 9999,
-    Name: 'name',
-    Owner: 'owner',
-    Rate: '1111',
-  });
 });
 
 test('state applies protocol version changes', (t) => {
@@ -769,23 +667,6 @@ function GuardianMetadataChanged(s: State, time: number, guardian: string, key: 
       key,
       newValue: value,
       oldValue: 'unknown',
-    },
-  });
-}
-
-function SubscriptionChanged(s: State, time: number, vcId: string, expiresAt: number) {
-  s.applyNewSubscriptionChanged(time, {
-    ...eventBase,
-    returnValues: {
-      name: 'name',
-      owner: 'owner',
-      vcId,
-      genRefTime: '9999',
-      expiresAt: expiresAt.toString(),
-      tier: 'defaultTier',
-      deploymentSubset: 'main',
-      rate: '1111',
-      isCertified: false,
     },
   });
 }

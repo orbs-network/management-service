@@ -27,8 +27,6 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
       },
       'management-service': { image: 'orbsnetwork/management-service:v4.5.6' },
       'matic-reader': { image: 'orbsnetwork/management-service:v4.5.6' },
-      node: { image: 'orbsnetwork/node:v1.2.3' },
-      'node-canary': { image: 'orbsnetwork/node:v1.2.4-canary' },
       signer: { image: 'orbsnetwork/signer:v1.1.0' },
       'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
       'matic-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
@@ -40,10 +38,7 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   const firstBlock = await ethereum.getCurrentBlockPreDeploy(ethereumEndpoint);
   await ethereum.deployContracts();
   await ethereum.setupInitialCommittee();
-  await ethereum.addVchain(30 * day, 'main');
-  await ethereum.addVchain(30 * day, 'canary');
   await ethereum.increaseTime(40 * day);
-  await ethereum.extendVchain('1000000', 90 * day);
   await ethereum.increaseBlocks(finalityBufferBlocks + 1);
 
   // setup local state
@@ -78,20 +73,8 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
   t.is(res.chains.length, 2);
   t.is(res.chains[0].Id, 1000000);
   t.is(res.chains[0].ExternalPort, 10000);
-  t.is(res.chains[0].Config['management-file-path'], 'http://management-service:8080/vchains/1000000/management');
-  t.deepEqual(res.chains[0].DockerConfig, {
-    Image: 'orbsnetwork/node',
-    Tag: 'v1.2.3',
-    Pull: true,
-  });
   t.is(res.chains[1].Id, 1000001);
   t.is(res.chains[1].ExternalPort, 10001);
-  t.is(res.chains[1].Config['management-file-path'], 'http://management-service:8080/vchains/1000001/management');
-  t.deepEqual(res.chains[1].DockerConfig, {
-    Image: 'orbsnetwork/node',
-    Tag: 'v1.2.4-canary',
-    Pull: true,
-  });
   t.deepEqual(res.services['signer'].DockerConfig, {
     Image: 'orbsnetwork/signer',
     Tag: 'v1.1.0',
@@ -156,8 +139,6 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
       },
       'management-service': { image: 'orbsnetwork/management-service:v4.5.8-immediate' },
       'matic-reader': { image: 'orbsnetwork/management-service:v4.5.8-immediate' },
-      node: { image: 'orbsnetwork/node:v1.2.5' },
-      'node-canary': { image: 'orbsnetwork/node:v1.2.6-canary-hotfix' },
       signer: { image: 'orbsnetwork/signer:v1.1.0' },
       'ethereum-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
       'matic-writer': { image: 'orbsnetwork/ethereum-writer:v1.1.0' },
@@ -172,16 +153,6 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
 
   t.log('result2:', JSON.stringify(res2, null, 2));
 
-  t.deepEqual(res2.chains[0].DockerConfig, {
-    Image: 'orbsnetwork/node',
-    Tag: 'v1.2.3', // slow gradual rollout so no change yet
-    Pull: true,
-  });
-  t.deepEqual(res2.chains[1].DockerConfig, {
-    Image: 'orbsnetwork/node',
-    Tag: 'v1.2.6-canary-hotfix', // gradual rollout with fast change
-    Pull: true,
-  });
   t.deepEqual(res2.services['signer'].DockerConfig, {
     Image: 'orbsnetwork/signer',
     Tag: 'v1.1.0', // no upgrade

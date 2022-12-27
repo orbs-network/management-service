@@ -14,9 +14,6 @@ export class StateManager {
         case 'CommitteeChange':
           this.current.applyNewCommitteeChange(time, event as EventTypes['CommitteeChange']);
           break;
-        case 'SubscriptionChanged':
-          this.current.applyNewSubscriptionChanged(time, event as EventTypes['SubscriptionChanged']);
-          break;
         case 'ProtocolVersionChanged':
           this.current.applyNewProtocolVersionChanged(time, event as EventTypes['ProtocolVersionChanged']);
           break;

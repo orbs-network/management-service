@@ -4,20 +4,15 @@ import { Driver } from '@orbs-network/orbs-ethereum-contracts-v2';
 import {
   evmIncreaseTime,
   evmMine,
-  getTopBlockTimestamp,
 } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/helpers';
 import { DriverOptions } from '@orbs-network/orbs-ethereum-contracts-v2/release/test/driver';
-import { MonthlySubscriptionPlanContract } from '@orbs-network/orbs-ethereum-contracts-v2/release/typings/monthly-subscription-plan-contract';
 import { toNumber } from '../helpers';
 import { ContractName } from './types';
 
 const SCENARIO_MAX_COMMITTEE_SIZE = 2;
-const SUBSCRIPTION_MONTHLY_RATE = 1000;
-const SECONDS_IN_MONTH = 30 * 24 * 60 * 60;
 
 export class EthereumTestDriver {
   private orbsPosV2Driver?: Driver;
-  private subscriber?: MonthlySubscriptionPlanContract;
 
   constructor(public verbose = false) {}
 
@@ -31,7 +26,6 @@ export class EthereumTestDriver {
     const d = this.orbsPosV2Driver;
 
     if (this.verbose) console.log(`[posv2] about to deploy subscriber and deployment subset`);
-    this.subscriber = await d.newSubscriber('defaultTier', SUBSCRIPTION_MONTHLY_RATE);
     await d.protocol.createDeploymentSubset('canary', 1, { from: d.functionalManager.address });
   }
 
@@ -72,45 +66,6 @@ export class EthereumTestDriver {
     const v5 = await this.addGuardian(false, '50000000000000000000000');
     await this.increaseTime(1000);
     return { v1, v2, v3, v4, v5 };
-  }
-
-  async addVchain(timeUntilExpires: number, rolloutGroup = 'main') {
-    if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
-    if (!this.subscriber) throw new Error(`Subscriber contract not deployed`);
-    const d = this.orbsPosV2Driver;
-
-    if (this.verbose) console.log(`[posv2] about to add vchain`);
-    const payment = Math.round(SUBSCRIPTION_MONTHLY_RATE * (timeUntilExpires / SECONDS_IN_MONTH));
-    const payerAddress = d.contractsOwnerAddress;
-    await d.erc20.assign(payerAddress, payment);
-    await d.erc20.approve(this.subscriber.address, payment, { from: payerAddress });
-    await this.subscriber.createVC('vc1', payment, false, rolloutGroup, { from: payerAddress });
-    await this.increaseTime(1000);
-  }
-
-  async extendVchain(vcId: string, timeUntilExpires: number) {
-    if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
-    if (!this.subscriber) throw new Error(`Subscriber contract not deployed`);
-    const d = this.orbsPosV2Driver;
-
-    if (this.verbose) console.log(`[posv2] about to extend vchain`);
-    const payment = Math.round(SUBSCRIPTION_MONTHLY_RATE * (timeUntilExpires / SECONDS_IN_MONTH));
-    const payerAddress = d.contractsOwnerAddress;
-    await d.erc20.assign(payerAddress, payment);
-    await d.erc20.approve(this.subscriber.address, payment, { from: payerAddress });
-    await this.subscriber.extendSubscription(vcId, payment, { from: payerAddress });
-    await this.increaseTime(1000);
-  }
-
-  async upgradeProtocolVersion(newVersion: number, timeUntilUpgrade: number, rolloutGroup = 'main') {
-    if (!this.orbsPosV2Driver) throw new Error(`Driver contracts not deployed`);
-    const d = this.orbsPosV2Driver;
-
-    if (this.verbose) console.log(`[posv2] about to upgrade protocol version`);
-    const currTime: number = await getTopBlockTimestamp(d);
-    await d.protocol.setProtocolVersion(rolloutGroup, newVersion, currTime + timeUntilUpgrade, {
-      from: d.functionalManager.address,
-    });
   }
 
   async addGuardian(committee: boolean, stake = '10000') {

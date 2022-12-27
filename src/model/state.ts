@@ -79,24 +79,6 @@ export interface StateSnapshot {
   CurrentCertification: {
     [EthAddress: string]: boolean;
   };
-  CurrentVirtualChains: {
-    [VirtualChainId: string]: {
-      Expiration: number;
-      RolloutGroup: string;
-      IdentityType: number;
-      Tier: string;
-      GenesisRefTime: number;
-      Owner: string;
-      Name: string;
-      Rate: string;
-    };
-  };
-  SubscriptionEvents: {
-    [VirtualChainId: string]: {
-      RefTime: number;
-      Data: { Status: 'active' | 'expired'; Tier: string; RolloutGroup: string; IdentityType: number };
-    }[];
-  };
   ProtocolVersionEvents: {
     [RolloutGroup: string]: {
       RefTime: number;
@@ -159,8 +141,6 @@ export class State {
     CurrentElectionsStatus: {},
     CurrentRegistrationData: {},
     CurrentCertification: {},
-    CurrentVirtualChains: {},
-    SubscriptionEvents: {},
     ProtocolVersionEvents: {
       main: [],
       canary: [],
@@ -317,33 +297,6 @@ export class State {
   applyNewGuardianCertificationUpdate(_time: number, event: EventTypes['GuardianCertificationUpdate']) {
     const EthAddress = normalizeAddress(event.returnValues.guardian);
     this.snapshot.CurrentCertification[EthAddress] = event.returnValues.isCertified;
-  }
-
-  applyNewSubscriptionChanged(time: number, event: EventTypes['SubscriptionChanged']) {
-    const eventBody = {
-      Tier: event.returnValues.tier,
-      RolloutGroup: event.returnValues.deploymentSubset,
-      IdentityType: event.returnValues.isCertified ? 1 : 0,
-      GenesisRefTime: toNumber(event.returnValues.genRefTime),
-      Owner: event.returnValues.owner,
-      Name: event.returnValues.name,
-      Rate: event.returnValues.rate,
-    };
-    this.snapshot.CurrentVirtualChains[event.returnValues.vcId] = {
-      Expiration: toNumber(event.returnValues.expiresAt),
-      ...eventBody,
-    };
-    const existingEvents = this.snapshot.SubscriptionEvents[event.returnValues.vcId] ?? [];
-    const noFutureEvents = _.filter(existingEvents, (event) => event.RefTime <= time);
-    noFutureEvents.push({
-      RefTime: time,
-      Data: { Status: 'active', ...eventBody },
-    });
-    noFutureEvents.push({
-      RefTime: toNumber(event.returnValues.expiresAt),
-      Data: { Status: 'expired', ...eventBody },
-    });
-    this.snapshot.SubscriptionEvents[event.returnValues.vcId] = noFutureEvents;
   }
 
   applyNewProtocolVersionChanged(time: number, event: EventTypes['ProtocolVersionChanged']) {

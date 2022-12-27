@@ -118,29 +118,6 @@ export const expectationStatus = {
         },
       },
     },
-    CurrentVirtualChains: {
-      '1000000': {
-        Expiration: isValidTimeRef,
-        GenesisRefTime: isValidTimeRef,
-        IdentityType: 0,
-        RolloutGroup: 'main',
-        Tier: 'defaultTier',
-      },
-      '1000001': {
-        Expiration: isValidTimeRef,
-        GenesisRefTime: isValidTimeRef,
-        IdentityType: 0,
-        RolloutGroup: 'canary',
-        Tier: 'defaultTier',
-      },
-      '1000002': {
-        Expiration: isValidTimeRef,
-        GenesisRefTime: isValidTimeRef,
-        IdentityType: 0,
-        RolloutGroup: 'main',
-        Tier: 'defaultTier',
-      },
-    },
     ProtocolVersionEvents: {
       main: [
         {

@@ -1,7 +1,7 @@
 import test from 'ava';
 import { join } from 'path';
 import { TestEnvironment } from '../driver';
-import { day, sleep, year } from '../../src/helpers';
+import { day, sleep } from '../../src/helpers';
 import { deepDataMatcher } from '../deep-matcher';
 import { expectationNodeManagement } from './expectations-node';
 import { expectationStatus } from './expectations-status';
@@ -14,14 +14,6 @@ test.serial.before(async (t) => {
   t.log('[E2E] Bootstrap: set up ethereum state');
   t.timeout(60 * 1000);
   await driver.ethereum.setupInitialCommittee();
-  await driver.ethereum.addVchain(30 * day, 'main');
-  await driver.ethereum.addVchain(30 * day, 'canary');
-  await driver.ethereum.upgradeProtocolVersion(17, 60 * day, 'main');
-  await driver.ethereum.increaseTime(40 * day);
-  await driver.ethereum.extendVchain('1000000', 90 * day);
-  await driver.ethereum.upgradeProtocolVersion(19, 2 * day, 'main');
-  await driver.ethereum.upgradeProtocolVersion(20, 2 * day, 'canary');
-  await driver.ethereum.addVchain(90 * day, 'main');
   await driver.ethereum.increaseTime(10 * day);
   await driver.ethereum.increaseBlocks(1);
   stateReadyBlockTime = await driver.ethereum.getCurrentBlockTime();
