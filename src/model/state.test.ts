@@ -416,23 +416,6 @@ test('state applies elections status updates and sets candidates accordingly', (
   ]);
 });
 
-test('state applies virtual chain subscriptions', (t) => {
-  const s = new State();
-
-  s.applyNewTimeRef(1000, 100);
-
-  s.applyNewTimeRef(2000, 200);
-
-  s.applyNewTimeRef(3000, 300);
-
-  s.applyNewTimeRef(4000, 400);
-
-  s.applyNewTimeRef(5000, 500);
-
-  t.log(JSON.stringify(s.getSnapshot(), null, 2));
-
-});
-
 test('state applies protocol version changes', (t) => {
   const s = new State();
 
