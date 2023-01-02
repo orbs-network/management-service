@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import { StateSnapshot } from '../model/state';
 import { ServiceConfiguration } from '../config';
-import { getVirtualChainPort } from './ports';
 import { JsonResponse, normalizeAddress } from '../helpers';
 import * as Logger from '../logger';
 import { parseImageTag } from '../deployment/versioning';
@@ -13,7 +12,7 @@ const EXTERNAL_VM_PORTS:any = {
   'vm-twap':8083,
 }
 function renderVM(services:JsonResponse, vmName:services, snapshot: StateSnapshot, config: ServiceConfiguration){
-  try {    
+  try {
     services[vmName] = getVM(vmName,snapshot, config);
     if(!services[vmName]){
       delete services[vmName];
@@ -100,14 +99,6 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
     Logger.error(err.toString());
   }
 
-  // include chains if found a viable image for node
-  try {
-    response.chains = Object.keys(snapshot.CurrentVirtualChains).map((vcId) => getChain(parseInt(vcId), snapshot));
-    _.remove(response.chains, (vc) => _.isUndefined(vc));
-  } catch (err) {
-    Logger.error(err.toString());
-  }
-
   // include keepers
   try {
     response.services['vm-keepers'] = getKeepers(snapshot, config);
@@ -121,7 +112,7 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
   // include TWAP TAKER
   renderVM(response.services, 'vm-twap', snapshot, config);
-  
+
   return response;
 }
 
@@ -289,7 +280,7 @@ function getVM(vmName:services, snapshot: StateSnapshot, config: ServiceConfigur
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
 
-  const res =  {    
+  const res =  {
     Disabled: false,
     DockerConfig: {
       Image: imageTag.Image,
@@ -331,38 +322,6 @@ function getLogsService(snapshot: StateSnapshot) {
       LogsPath: '/opt/orbs/logs',
       StatusJsonPath: './status/status.json',
       StatusUpdateLoopIntervalSeconds: 20,
-    },
-  };
-}
-
-function getChain(vchainId: number, snapshot: StateSnapshot) {
-  const mainVersion = snapshot.CurrentImageVersions['main']['node'];
-  if (!mainVersion) return undefined;
-  const rolloutGroup = snapshot.CurrentVirtualChains[vchainId.toString()].RolloutGroup;
-
-  const version = snapshot.CurrentImageVersions[rolloutGroup]?.['node'] ?? mainVersion;
-  if (!version) return undefined;
-  const imageTag = parseImageTag(version);
-  if (!imageTag) return undefined;
-
-  return {
-    Id: vchainId,
-    InternalPort: 4400,
-    ExternalPort: getVirtualChainPort(vchainId),
-    InternalHttpPort: 8080,
-    Disabled: false,
-    DockerConfig: {
-      Image: imageTag.Image,
-      Tag: imageTag.Tag,
-      Pull: true,
-    },
-    AllowAccessToSigner: true,
-    AllowAccessToServices: true,
-    Config: {
-      'gossip-listen-port': 4400,
-      'http-address': ':8080',
-      'management-file-path': `http://management-service:8080/vchains/${vchainId}/management`,
-      'signer-endpoint': 'http://signer:7777',
     },
   };
 }

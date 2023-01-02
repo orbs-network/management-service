@@ -15,8 +15,6 @@ export type services =
   | 'ethereum-writer'
   | 'matic-writer'
   | 'logs-service'
-  | 'node'
-  | 'node-canary'
   | 'vm-keepers'
   | 'vm-notifications'// open defi notification protocol
   | 'vm-twap'; // twap taker
@@ -63,9 +61,6 @@ export class DeploymentDescriptorReader {
         imageResult['main'] = body.ImageVersions[serviceName]!.image;
       }
 
-      if (serviceName == 'node' && body.ImageVersions['node-canary']?.image) {
-        imageResult['canary'] = body.ImageVersions['node-canary']?.image;
-      }
       res[serviceName] = imageResult;
     }
 
