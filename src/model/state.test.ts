@@ -439,12 +439,6 @@ test('state applies virtual chain subscriptions', (t) => {
 
   t.log(JSON.stringify(s.getSnapshot(), null, 2));
 
-  t.is(s.getSnapshot().CurrentVirtualChains['V1'].Expiration, 9010);
-  t.is(s.getSnapshot().CurrentVirtualChains['V2'].Expiration, 3500);
-  t.is(s.getSnapshot().CurrentVirtualChains['V3'].Expiration, 9020);
-  t.is(s.getSnapshot().CurrentVirtualChains['V4'].Expiration, 4700);
-  t.is(s.getSnapshot().CurrentVirtualChains['V5'].Expiration, 9030);
-
   t.is(s.getSnapshot().SubscriptionEvents['V1'].length, 2);
   t.is(s.getSnapshot().SubscriptionEvents['V1'][0].RefTime, 1000);
   t.is(s.getSnapshot().SubscriptionEvents['V1'][0].Data.Status, 'active');
@@ -483,56 +477,6 @@ test('state applies virtual chain subscriptions', (t) => {
   t.is(s.getSnapshot().SubscriptionEvents['V5'][3].RefTime, 9030);
   t.is(s.getSnapshot().SubscriptionEvents['V5'][3].Data.Status, 'expired');
 
-  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V1'], {
-    Expiration: 9010,
-    RolloutGroup: 'main',
-    IdentityType: 0,
-    GenesisRefTime: 9999,
-    Tier: 'defaultTier',
-    Name: 'name',
-    Owner: 'owner',
-    Rate: '1111',
-  });
-  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V2'], {
-    Expiration: 3500,
-    Tier: 'defaultTier',
-    RolloutGroup: 'main',
-    IdentityType: 0,
-    GenesisRefTime: 9999,
-    Name: 'name',
-    Owner: 'owner',
-    Rate: '1111',
-  });
-  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V3'], {
-    Expiration: 9020,
-    Tier: 'defaultTier',
-    RolloutGroup: 'main',
-    IdentityType: 0,
-    GenesisRefTime: 9999,
-    Name: 'name',
-    Owner: 'owner',
-    Rate: '1111',
-  });
-  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V4'], {
-    Expiration: 4700,
-    Tier: 'defaultTier',
-    RolloutGroup: 'main',
-    IdentityType: 0,
-    GenesisRefTime: 9999,
-    Name: 'name',
-    Owner: 'owner',
-    Rate: '1111',
-  });
-  t.deepEqual(s.getSnapshot().CurrentVirtualChains['V5'], {
-    Expiration: 9030,
-    Tier: 'defaultTier',
-    RolloutGroup: 'main',
-    IdentityType: 0,
-    GenesisRefTime: 9999,
-    Name: 'name',
-    Owner: 'owner',
-    Rate: '1111',
-  });
 });
 
 test('state applies protocol version changes', (t) => {

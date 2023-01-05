@@ -35,7 +35,6 @@ test.serial('[integration] getServiceStatus responds', (t) => {
     CurrentTopology: [],
     CurrentImageVersions: { main: {}, canary: {} },
     CurrentImageVersionsUpdater: { main: {}, canary: {} },
-    CurrentVirtualChains: {},
     ProtocolVersionEvents: { main: [], canary: [] },
     CurrentContractAddress: {
       contractRegistry: exampleConfig.EthereumGenesisContract,
@@ -78,7 +77,6 @@ test.serial('[integration] getServiceStatusAnalytics responds', (t) => {
     CurrentTopology: [],
     CurrentImageVersions: { main: {}, canary: {} },
     CurrentImageVersionsUpdater: { main: {}, canary: {} },
-    CurrentVirtualChains: {},
     ProtocolVersionEvents: { main: [], canary: [] },
     CurrentContractAddress: {
       contractRegistry: exampleConfig.EthereumGenesisContract,

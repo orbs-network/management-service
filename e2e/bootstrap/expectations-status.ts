@@ -44,7 +44,6 @@ export const expectationStatus = {
       },
       canary: {},
     },
-    CurrentVirtualChains: {},
     ProtocolVersionEvents: { main: [], canary: [] },
     CurrentContractAddress: {},
     Guardians: {},
