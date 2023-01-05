@@ -125,7 +125,6 @@ function getStatusText(snapshot: StateSnapshot) {
   res.push(`RefBlock = ${snapshot.CurrentRefBlock}`);
   res.push(`TotalEventsProcessed = ${snapshot.EventsStats.TotalEventsProcessed}`);
   res.push(`committee size = ${snapshot.CurrentCommittee.length}`);
-  res.push(`stable node = ${snapshot.CurrentImageVersions['main']['node']}\n`);
   return res.join(', ');
 }
 
@@ -145,12 +144,7 @@ function getErrorText(snapshot: StateSnapshot) {
       }
     }
   }
-  // only go over images that we really care if the canary version is found or not
-  for (const imageName of ['node']) {
-    const polledAgo = now - (snapshot.CurrentImageVersionsUpdater['canary'][imageName]?.LastPollTime ?? 0);
-    if (polledAgo > DOCKER_HUB_POLL_ALLOWED_DELAY) {
-      res.push(`Canary version poll for ${imageName} is too old (${polledAgo} sec ago).`);
-    }
-  }
+
   return res.join(' ');
+
 }
