@@ -17,7 +17,8 @@ export type services =
   | 'logs-service'
   | 'vm-keepers'
   | 'vm-notifications'// open defi notification protocol
-  | 'vm-twap'; // twap taker
+  | 'vm-twap' // twap taker
+  | 'vm-lambda'; // twap taker
 
 export type DeploymentDescriptor = {
   Desc?: string;
