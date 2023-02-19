@@ -13,7 +13,7 @@ const EXTERNAL_VM_PORTS:any = {
   'vm-twap':8083,
 }
 function renderVM(services:JsonResponse, vmName:services, snapshot: StateSnapshot, config: ServiceConfiguration){
-  try {    
+  try {
     services[vmName] = getVM(vmName,snapshot, config);
     if(!services[vmName]){
       delete services[vmName];
@@ -40,8 +40,8 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
         ResetTimeout: '30m',
       },
       ExecutableImage: {
-        Url: 'https://github.com/orbs-network/boyarin/releases/download/v1.12.1/boyar-v1.12.1.bin',
-        Sha256: '9d7f7702b3bba582b8b60bd4ac4b870c1ab86b6f16bdfe182bbadae4f9358c83',
+        Url: 'https://github.com/orbs-network/boyarin/releases/download/v1.12.2/boyar-v1.12.2.bin',
+        Sha256: 'd2de1cbd7a3cfae7e57f8b33019b984dcabecdc231ac52fc483147ce20f19f62',
       },
       'storage-driver': 'local',
       'storage-mount-type': 'bind',
@@ -121,7 +121,7 @@ export function renderNodeManagement(snapshot: StateSnapshot, config: ServiceCon
 
   // include TWAP TAKER
   renderVM(response.services, 'vm-twap', snapshot, config);
-  
+
   return response;
 }
 
@@ -289,7 +289,7 @@ function getVM(vmName:services, snapshot: StateSnapshot, config: ServiceConfigur
   const imageTag = parseImageTag(version);
   if (!imageTag) return undefined;
 
-  const res =  {    
+  const res =  {
     Disabled: false,
     DockerConfig: {
       Image: imageTag.Image,
