@@ -29,6 +29,8 @@ jobs:
       - name: Run npm install
         run: npm install
       - run: npm install --no-save tap-xunit
+      - name: spinning up ganache
+        run: npm run start:eth &
       - run: mkdir -p _out/unit _out/e2e
       - run: npm test --  --timeout=1m --tap| npx tap-xunit > _out/unit/test.xml
       - run: npm run build
