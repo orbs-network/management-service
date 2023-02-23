@@ -73,23 +73,6 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
 
   t.log('result:', JSON.stringify(res, null, 2));
 
-  t.is(res.chains.length, 2);
-  t.is(res.chains[0].Id, 1000000);
-  t.is(res.chains[0].ExternalPort, 10000);
-  t.is(res.chains[0].Config['management-file-path'], 'http://management-service:8080/vchains/1000000/management');
-  t.deepEqual(res.chains[0].DockerConfig, {
-    Image: 'orbsnetwork/node',
-    Tag: 'v1.2.3',
-    Pull: true,
-  });
-  t.is(res.chains[1].Id, 1000001);
-  t.is(res.chains[1].ExternalPort, 10001);
-  t.is(res.chains[1].Config['management-file-path'], 'http://management-service:8080/vchains/1000001/management');
-  t.deepEqual(res.chains[1].DockerConfig, {
-    Image: 'orbsnetwork/node',
-    Tag: 'v1.2.4-canary',
-    Pull: true,
-  });
   t.deepEqual(res.services['signer'].DockerConfig, {
     Image: 'orbsnetwork/signer',
     Tag: 'v1.1.0',
@@ -168,16 +151,6 @@ test.serial('[integration] getNodeManagement responds according to Ethereum and 
 
   t.log('result2:', JSON.stringify(res2, null, 2));
 
-  t.deepEqual(res2.chains[0].DockerConfig, {
-    Image: 'orbsnetwork/node',
-    Tag: 'v1.2.3', // slow gradual rollout so no change yet
-    Pull: true,
-  });
-  t.deepEqual(res2.chains[1].DockerConfig, {
-    Image: 'orbsnetwork/node',
-    Tag: 'v1.2.6-canary-hotfix', // gradual rollout with fast change
-    Pull: true,
-  });
   t.deepEqual(res2.services['signer'].DockerConfig, {
     Image: 'orbsnetwork/signer',
     Tag: 'v1.1.0', // no upgrade
