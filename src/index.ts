@@ -18,11 +18,11 @@ const SOCKET_TIMEOUT_SEC = 60;
 //   return (req, res, next) => fn(req, res, next).catch(next);
 // }
 
-export function serve(serviceConfig: ServiceConfiguration) {
+export function serve(serviceConfig: ServiceConfiguration, censoredConfig: ServiceConfiguration) {
   const state = new StateManager(serviceConfig);
   const blockSync = new BlockSync(state, serviceConfig);
   const imagePoll = new ImagePoll(state, serviceConfig);
-  const statusWriter = new StatusWriter(state, serviceConfig);
+  const statusWriter = new StatusWriter(state, censoredConfig);
 
   const app = express();
   app.use(cors());
