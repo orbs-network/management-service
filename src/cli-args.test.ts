@@ -3,7 +3,18 @@ import { parseArgs } from './cli-args';
 import mock from 'mock-fs';
 import { ServiceConfiguration, validateServiceConfiguration } from './config';
 
+let env: NodeJS.ProcessEnv;
+
+test.before(() => {
+  env = process.env;
+});
+
+test.beforeEach(() => {
+  process.env = { ...env };
+});
+
 test.serial.afterEach.always(() => {
+  process.env = env;
   mock.restore();
 });
 
@@ -34,7 +45,7 @@ const inputConfigValue = {
   StatusJsonPath: 'bla',
   StatusAnalyticsJsonPath: 'bla',
   StatusAnalyticsJsonGzipPath: 'bla',
-  Verbose: true,
+  Verbose: false,
 };
 
 const expectedConfigValue: ServiceConfiguration = {
@@ -42,7 +53,45 @@ const expectedConfigValue: ServiceConfiguration = {
   ExternalLaunchConfig: inputConfigValue,
 };
 
-test.serial('parseOptions with file', (t) => {
+test('parseOptions with no file', (t) => {
+  t.throws(() => parseArgs(['--config', configPath]));
+});
+
+test('parseOptions with no config and no environment variables', (t) => {
+  t.throws(() => parseArgs([]));
+});
+
+test('parseOptions: environment variables and no config', (t) => {
+  const mockEthereumEndpoint = 'https://mainnet.infura.io/v3/1234567890';
+  const mockNodeAddress = '0x1234567890';
+  process.env.ETHEREUM_ENDPOINT = mockEthereumEndpoint;
+  process.env.NODE_ADDRESS = mockNodeAddress;
+
+  const output = parseArgs([]);
+
+  t.assert((output.ExternalLaunchConfig = {}));
+  t.assert((output.StatusJsonPath = './status/status.json'));
+  t.assert((output.EthereumEndpoint = mockEthereumEndpoint));
+  t.assert((output['node-address'] = mockNodeAddress));
+});
+
+test('parseOptions: env vars take precedence', (t) => {
+  const mockEthereumEndpoint = 'https://mainnet.infura.io/v3/1234567890';
+  const mockNodeAddress = '0x1234567890';
+  process.env.ETHEREUM_ENDPOINT = mockEthereumEndpoint;
+  process.env.NODE_ADDRESS = mockNodeAddress;
+
+  mock({
+    [configPath]: JSON.stringify(inputConfigValue),
+  });
+
+  const output = parseArgs(['--config', configPath]);
+
+  t.assert((output.EthereumEndpoint = mockEthereumEndpoint));
+  t.assert((output['node-address'] = mockNodeAddress));
+});
+
+test('parseOptions with file', (t) => {
   mock({
     [configPath]: JSON.stringify(inputConfigValue),
   });
@@ -50,19 +99,11 @@ test.serial('parseOptions with file', (t) => {
   t.deepEqual(parseArgs(['--config', configPath]), expectedConfigValue);
 });
 
-test.serial('parseOptions with partial file (complete default values)', (t) => {
+test('parseOptions with partial file (complete default values)', (t) => {
   mock({
     [configPath]: JSON.stringify(minimalConfigValue),
   });
 
   const options = parseArgs(['--config', configPath]);
   t.deepEqual(validateServiceConfiguration(options), undefined);
-});
-
-test.serial('parseOptions with no file', (t) => {
-  t.throws(() => parseArgs(['--config', configPath]));
-});
-
-test.serial('parseOptions with no config', (t) => {
-  t.throws(() => parseArgs([]));
 });
