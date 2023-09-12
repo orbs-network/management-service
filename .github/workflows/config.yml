@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 16
       - name: setup-docker
-        uses: docker-practice/actions-setup-docker@1.0.11
+        uses: docker-practice/actions-setup-docker@master
       - run: node --version
       - run: npm --version
       - run: docker --version
