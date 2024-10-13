@@ -50,7 +50,7 @@ export class EthereumReader {
   // for faster sync time
   
 
-  async getBlockTime(blockNumber: number | 'latest'): Promise<number | null> {    
+  async getBlockTime(blockNumber: number): Promise<number | null> {    
     const url = `https://${subDomain}.${domain}/api/blocktime?block=${blockNumber}`    
     try {
       const res = await fetch(url, {
