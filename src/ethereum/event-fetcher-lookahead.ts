@@ -25,8 +25,8 @@ export class LookaheadEventFetcher extends EventFetcher {
   protected autoscaleStreak = 0;
 
   static DefaultAutoscaleOptions: AutoscaleOptions = {
-    initialPageSize: 100000,
-    maxPageSize: 1000000,
+    initialPageSize: 500000,
+    maxPageSize: 5000000,
     minPageSize: 1000,
     pageGrowFactor: 2,
     pageGrowAfter: 5,
