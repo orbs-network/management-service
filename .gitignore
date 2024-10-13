@@ -69,3 +69,9 @@ typings/
 
 # version
 .version
+
+# code generated
+status/
+
+# IDE
+.vscode/
