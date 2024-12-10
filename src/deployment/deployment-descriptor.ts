@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import https from 'https';
+import http from "node:http";
 
 const FETCH_TIMEOUT_SEC = 45;
 
@@ -32,12 +33,18 @@ export type DeploymentDescriptor = {
 };
 
 export class DeploymentDescriptorReader {
-  private agent: https.Agent;
+  private agent: http.Agent;
 
   constructor(private config: DeploymentDescriptorConfiguration) {
-    this.agent = new https.Agent({
-      maxSockets: 5,
-    });
+    if (config.DeploymentDescriptorUrl.startsWith('https://')) {
+      this.agent = new https.Agent({
+        maxSockets: 5,
+      });
+    } else {
+        this.agent = new http.Agent({
+          maxSockets: 5,
+        });
+    }
   }
 
   async fetchLatestDeploymentDescriptor(): Promise<DeploymentDescriptor> {

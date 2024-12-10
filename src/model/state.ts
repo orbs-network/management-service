@@ -266,6 +266,8 @@ export class State {
   }
 
   applyNewGuardianDataUpdated(_time: number, event: EventTypes['GuardianDataUpdated']) {
+    Logger.log (`name: ${event.returnValues.name}`);
+
     const EthAddress = normalizeAddress(event.returnValues.guardian);
     const OrbsAddress = normalizeAddress(event.returnValues.orbsAddr);
     const IpAddress = getIpFromHex(event.returnValues.ip);

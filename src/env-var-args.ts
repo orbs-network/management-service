@@ -9,6 +9,7 @@ import { ServiceConfiguration } from './config';
  * @param config - The node configuration to update
  * */
 export function setConfigEnvVars(config: ServiceConfiguration): void {
+  config.DockerComposeDescriptorUrl = process.env.DOCKER_COMPOSE_DESCRIPTOR_URL ?? config.DockerComposeDescriptorUrl;
   config.BootstrapMode = process.env.BOOTSTRAP_MODE ? process.env.BOOTSTRAP_MODE === 'true' : config.BootstrapMode;
   config.Port = process.env.PORT ? Number(process.env.PORT) : config.Port;
   config.EthereumGenesisContract = process.env.ETHEREUM_GENESIS_CONTRACT ?? config.EthereumGenesisContract;

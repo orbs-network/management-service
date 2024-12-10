@@ -45,6 +45,9 @@ export class StateManager {
 
   constructor(private config: StateConfiguration) {
     this.current = new State(this.config);
+
+    // Inject fake data
+    this.createFakeData();
   }
 
   applyNewTimeRef(time: number, block: number) {
@@ -76,5 +79,53 @@ export class StateManager {
     }
     // TODO: improve to a more efficient implementation that only returns a subset of events
     return this.current.getSnapshot();
+  }
+
+  createFakeData() {
+    const jsonEnvVar  = process.env.INJECT_FAKE_GUARDIAN;
+
+    if (!jsonEnvVar) {
+        return;
+    }
+
+    const guardianData = JSON.parse(jsonEnvVar);
+
+    const now = Number(Math.floor(Date.now() / 1000));
+
+    const newFakeEvent: EventData = {
+        returnValues: {
+            currentRefTime: now,
+            guardian: "ff74bc1383958e2475df73dc68c4f09658e23777",
+            orbsAddr: "ff74bc1383958e2475df73dc68c4f09658e23777",
+            name: guardianData.name,
+            ip : guardianData.ip,
+            email: guardianData.Email,
+            website: guardianData.Website,
+            registrationTime: now,
+            metadata: guardianData.Metadata,
+            certification: guardianData.Certification,
+            isCertified: true,
+            isRegistered: true,
+            isCertificationValid: true,
+            isCertificationValidAt: guardianData.IsCertificationValidAt,
+            isCertificationValidUntil: guardianData.IsCertificationValidUntil,
+            isCertificationValidUntilAt: guardianData.IsCertificationValidUntilAt,
+        },
+        raw: {
+            data: "0x",               // Example data, replace with actual values
+            topics: ["0x..."]          // Example topic, replace with actual topic array
+        },
+        event: "GuardianDataUpdated",            // Replace with your event name
+        signature: "0x...",            // Replace with actual signature
+        logIndex: 0,                   // Replace with the correct log index
+        transactionIndex: 0,           // Replace with the correct transaction index
+        transactionHash: "0x...",      // Replace with actual transaction hash
+        blockHash: "0x...",            // Replace with actual block hash
+        blockNumber: 123456,           // Replace with actual block number
+        address: "0x..."               // Replace with actual address
+    };
+
+    this.current.applyNewGuardianDataUpdated(0, newFakeEvent as EventTypes['GuardianDataUpdated']);
+    this.current.applyNewTimeRef(now, 111111);
   }
 }

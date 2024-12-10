@@ -1,16 +1,16 @@
-import { ServiceConfiguration } from './config';
-import express, { Request, Response, NextFunction } from 'express';
+import {ServiceConfiguration} from './config';
+import express, {NextFunction, Request, Response} from 'express';
 import compression from 'compression';
 import cors from 'cors';
-import { errorString } from './helpers';
-import { TaskLoop } from './task-loop';
-import { StateManager } from './model/manager';
-import { BlockSync } from './ethereum/block-sync';
-import { ImagePoll } from './deployment/image-poll';
-import { renderNodeManagement } from './api/render-node';
-import { renderServiceStatus, renderServiceStatusAnalytics } from './api/render-status';
+import {errorString} from './helpers';
+import {TaskLoop} from './task-loop';
+import {StateManager} from './model/manager';
+import {BlockSync} from './ethereum/block-sync';
+import {renderNodeManagement} from './api/render-node';
+import {renderServiceStatus, renderServiceStatusAnalytics} from './api/render-status';
 import * as Logger from './logger';
-import { StatusWriter } from './status-writer';
+import {StatusWriter} from './status-writer';
+import {DockerComposeReader} from "./deployment/dd-docker-compose";
 
 const SOCKET_TIMEOUT_SEC = 60;
 
@@ -21,7 +21,9 @@ const SOCKET_TIMEOUT_SEC = 60;
 export function serve(serviceConfig: ServiceConfiguration, censoredConfig: ServiceConfiguration) {
   const state = new StateManager(serviceConfig);
   const blockSync = new BlockSync(state, serviceConfig);
-  const imagePoll = new ImagePoll(state, serviceConfig);
+  //const imagePoll = new ImagePoll(state, serviceConfig);
+  //const dockerComposeReader = new DockerComposeReader(state, serviceConfig);
+  const dockerComposeReader = new DockerComposeReader(state);
   const statusWriter = new StatusWriter(state, censoredConfig);
 
   const app = express();
@@ -58,8 +60,12 @@ export function serve(serviceConfig: ServiceConfiguration, censoredConfig: Servi
   });
 
   const blockSyncTask = new TaskLoop(() => blockSync.run(), serviceConfig.EthereumPollIntervalSeconds * 1000);
-  const imagePollTask = new TaskLoop(
-    () => imagePoll.run(),
+  // const imagePollTask = new TaskLoop(
+  //   () => imagePoll.run(),
+  //   serviceConfig.DeploymentDescriptorPollIntervalSeconds * 1000
+  // );
+  const dockerComposeTask = new TaskLoop(
+    () => dockerComposeReader.run(),
     serviceConfig.DeploymentDescriptorPollIntervalSeconds * 1000
   );
   const statusWriterTask = new TaskLoop(
@@ -67,7 +73,8 @@ export function serve(serviceConfig: ServiceConfiguration, censoredConfig: Servi
     serviceConfig.StatusWriteIntervalSeconds * 1000
   );
   blockSyncTask.start();
-  imagePollTask.start();
+  // imagePollTask.start();
+  dockerComposeTask.start();
   statusWriterTask.start();
 
   const server = app.listen(serviceConfig.Port, '0.0.0.0', () =>
@@ -77,7 +84,7 @@ export function serve(serviceConfig: ServiceConfiguration, censoredConfig: Servi
   server.requestTimeout = SOCKET_TIMEOUT_SEC * 1000;
   server.on('close', () => {
     blockSyncTask.stop();
-    imagePollTask.stop();
+    // imagePollTask.stop();
     statusWriterTask.stop();
   });
   return server;

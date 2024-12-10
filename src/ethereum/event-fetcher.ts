@@ -16,7 +16,7 @@ export abstract class EventFetcher {
   }
 
   // every fetcher instance should override this function
-  abstract async fetchBlock(blockNumber: number, latestAllowedBlock: number): Promise<EventData[]>;
+  abstract fetchBlock(blockNumber: number, latestAllowedBlock: number): Promise<EventData[]>;
 }
 
 // the simplest fetcher, yet inefficient, good for testing

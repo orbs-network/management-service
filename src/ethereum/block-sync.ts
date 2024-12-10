@@ -42,6 +42,12 @@ export class BlockSync {
     const latestAllowedBlock = await this.getLatestBlockUnderFinality();
     Logger.log(`BlockSync: run started at ${this.lastProcessedBlock} allowed to go to ${latestAllowedBlock}.`);
 
+    const jsonEnvVar  = process.env.INJECT_FAKE_GUARDIAN;
+
+    if (jsonEnvVar) {
+        return;
+    }
+
     // go over blocks one by one and process their events
     while (this.lastProcessedBlock < latestAllowedBlock) {
       await this.processEventsInBlock(this.lastProcessedBlock + 1, latestAllowedBlock);
