@@ -19,7 +19,7 @@ export class BlockSync {
   private eventFetchers: { [T in EventName]: EventFetcher };
 
   constructor(private state: StateManager, private config: BlockSyncConfiguration) {
-    this.reader = new EthereumReader(config);
+    this.reader = new EthereumReader(config, () => this.resetAllContracts());
     this.lastProcessedBlock = config.EthereumFirstBlock;
     this.eventFetchers = {
       ContractAddressUpdated: new LookaheadEventFetcher('ContractAddressUpdated', this.reader),
@@ -63,6 +63,14 @@ export class BlockSync {
   // we read blocks 1-1000 from old address and blocks 1001+ from the new address.
   // This simplification is ok because contracts will be locked from emitting events during transition.
 
+  resetAllContracts() {
+    console.log('resetAllContracts');
+    for (const eventName of eventNames) {
+      console.log ('resetContract', eventName);
+      this.eventFetchers[eventName].resetContract();
+    }
+  }
+
   async processEventsInBlock(blockNumber: number, latestAllowedBlock: number) {
     // update all contract addresses according to state to track changes in contract registry
     for (const eventName of eventNames) {
@@ -82,7 +90,28 @@ export class BlockSync {
     const blockTime = await this.reader.getRefTime(blockNumber);
     this.state.applyNewEvents(blockNumber, blockTime, sorted);
     this.state.applyNewTimeRef(blockTime, blockNumber);
-    Logger.log(`BlockSync: processed ${sorted.length} events in block ${blockNumber} with time ${blockTime}.`);
+    Logger.log(`BlockSync: processed ${sorted.length} events in block ${blockNumber} with time ${blockTime}, (${this.secondsDeltaToTimeString(blockTime)}).`);
+  }
+
+  secondsDeltaToTimeString(totalSeconds : number) : string {
+    // Get the current timestamp in seconds
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+
+    // Calculate the delta (difference)
+    const deltaSeconds = Math.abs(totalSeconds - nowInSeconds);
+
+    // Calculate days, hours, minutes, and seconds
+    const days = Math.floor(deltaSeconds / (24 * 60 * 60));
+    let remainingSeconds = deltaSeconds % (24 * 60 * 60);
+
+    const hours = Math.floor(remainingSeconds / (60 * 60));
+    remainingSeconds %= 60 * 60;
+
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+
+    // Pad with leading zeros and format as DD:HH:MM:SS
+    return `${String(days).padStart(2, '0')}d:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
   getRequestStats(): DailyStatsData {

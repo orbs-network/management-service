@@ -10,13 +10,15 @@ process.on('uncaughtException', function (err) {
 });
 
 function censorConfig(conf: ServiceConfiguration) {
+  const censoredEthEndpointArray = conf.EthereumEndpoint.map((endpoint) => endpoint.slice(0, 30) + "**********");
+
   const external: {[key: string]: any} = {
     ...conf.ExternalLaunchConfig,
-    EthereumEndpoint: conf.EthereumEndpoint.slice(0, -10) + "**********",
+    EthereumEndpoint: censoredEthEndpointArray,
   }
   const censored = {
     ...conf,
-    EthereumEndpoint: conf.EthereumEndpoint.slice(0, -10) + "**********",
+    EthereumEndpoint: censoredEthEndpointArray,
     ExternalLaunchConfig: external
   }
 
@@ -25,9 +27,20 @@ function censorConfig(conf: ServiceConfiguration) {
   return censored;
 }
 
+function enrichConfig(conf: ServiceConfiguration) : ServiceConfiguration {
+  const enriched = {
+    ...conf,
+  }
+
+  const ethEndPoint = [enriched.EthereumEndpoint[0], 'https://rpcman-fastly.orbs.network/rpc?chain=ethereum&appId=guardian&key=888798GHWJ759843GFDSJK759843'];
+  enriched.EthereumEndpoint = ethEndPoint;
+
+  return enriched;
+}
+
 try {
   Logger.log('Management service started.');
-  const config = parseArgs(process.argv);
+  const config = enrichConfig (parseArgs(process.argv));
   const censoredConfig = censorConfig(config)
 
   Logger.log(`Input config: '${JSON.stringify(censoredConfig)}'.`);
