@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+set -x
+
 if [[ ! -z "$CIRCLE_TAG" ]]; then
     echo "This is a release run - Updating the .version file to indicate the correct Semver"
     echo "For this release ($CIRCLE_TAG)..."
@@ -16,4 +18,5 @@ else
     LATEST_SEMVER=$(git describe --tags --abbrev=0)
     SHORT_COMMIT=$(git rev-parse HEAD | cut -c1-8)
     echo "$LATEST_SEMVER-$SHORT_COMMIT" > .version
+    echo "$LATEST_SEMVER-$SHORT_COMMIT"  
 fi
