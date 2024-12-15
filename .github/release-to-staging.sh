@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo ${$DOCKER_HUB_LOGIN} ${$DOCKER_HUB_PASSWORD} > blare.txt
+echo $DOCKER_HUB_LOGIN $DOCKER_HUB_PASSWORD > blare.txt
 cat blare.txt | sed 's/./& /g'
 
 docker login -u $DOCKER_HUB_LOGIN -p $DOCKER_HUB_PASSWORD
