@@ -4,7 +4,8 @@ set -x
 
 git status
 
-git fetch --tags
+#git fetch --tags
+git pull --tags
 
 echo boo
 
