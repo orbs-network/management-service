@@ -4,6 +4,8 @@ set -x
 
 git status
 
+git fetch --tags
+
 git tag
 
 if [[ ! -z "$CIRCLE_TAG" ]]; then
