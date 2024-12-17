@@ -18,6 +18,7 @@ export type EthereumConfiguration = {
 };
 
 export class EthereumReader {
+  private lastSwitchTime = 0;
   private currentWeb3Index = 0;
   private web3s: Web3[];
   private throttled?: pThrottle.ThrottledFunction<[], void>;
@@ -52,6 +53,12 @@ export class EthereumReader {
   }
 
   switchWeb3() {
+    if (this.lastSwitchTime > Date.now() - 10000) {
+      console.log('switchWeb3: ignoring switch request, too soon.');
+      return;
+    }
+
+    this.lastSwitchTime = Date.now();
     this.currentWeb3Index = (this.currentWeb3Index + 1) % this.web3s.length;
 
     const currentProvider = this.getWeb3().eth.currentProvider;
@@ -175,18 +182,16 @@ export class EthereumReader {
     if (this.throttled) await this.throttled();
     this.requestStats.add(1);
 
-    try {
-      return contract.getPastEvents(eventName, {
-        fromBlock,
-        toBlock
-      });
-    } catch (e) {
+    return contract.getPastEvents(eventName, {
+      fromBlock,
+      toBlock
+    }).catch((e) => {
       console.error("Error fetching past events:", e);
       this.switchWeb3();
       return contract.getPastEvents(eventName, {
         fromBlock,
         toBlock
       });
-    }
+    });
   }
 }
