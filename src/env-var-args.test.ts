@@ -63,6 +63,12 @@ test('setConfigEnvVars uses environment variables when set', (t) => {
       continue;
     }
 
+    if (key == 'EthereumEndpoint') {
+      t.deepEqual(input[key as keyof ServiceConfiguration], [mockEnv.ETHEREUM_ENDPOINT]);
+      continue;
+    }
+
+    //console.log (key, input[key as keyof ServiceConfiguration], mockEnv[camelCaseToSnakeCase(key) as keyof typeof mockEnv]);
     t.assert(input[key as keyof ServiceConfiguration] === mockEnv[camelCaseToSnakeCase(key) as keyof typeof mockEnv]);
   }
 });
