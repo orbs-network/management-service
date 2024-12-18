@@ -32,6 +32,13 @@ function enrichConfig(conf: ServiceConfiguration) : ServiceConfiguration {
     ...conf,
   }
 
+  // if the EthereumEndpoint is a pointing to the Matic network, do not do the fallback enrichment.
+
+  if (enriched.EthereumEndpoint[0].includes('matic') || conf.EthereumEndpoint[0].includes('polygon')) {
+    console.log ('Matic network detected, not adding a fallback endpoint.');
+    return enriched;
+  }
+
   const ethEndPoint = [enriched.EthereumEndpoint[0], 'https://rpcman-fastly.orbs.network/rpc?chain=ethereum&appId=guardian&key=888798GHWJ759843GFDSJK759843'];
   enriched.EthereumEndpoint = ethEndPoint;
 
