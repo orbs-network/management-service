@@ -9,7 +9,7 @@ test.serial('[integration] BlockSync reads registry for contract addresses', asy
   t.timeout(5 * 60 * 1000);
 
   const ethereum = new EthereumTestDriver(true);
-  const ethereumEndpoint = 'http://localhost:7545';
+  const ethereumEndpoint = ['http://localhost:7545'];
   const finalityBufferBlocks = 5;
 
   // setup Ethereum state

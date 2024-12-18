@@ -5,7 +5,7 @@ export const exampleConfig: ServiceConfiguration = {
   Port: 8080,
   EthereumGenesisContract: '0xD859701C81119aB12A1e62AF6270aD2AE05c7AB3',
   EthereumFirstBlock: 11191390,
-  EthereumEndpoint: 'http://ganache:7545',
+  EthereumEndpoint: ['http://ganache:7545'],
   DeploymentDescriptorUrl: 'https://deployment.orbs.network/mainnet.json',
   ElectionsAuditOnly: false,
   StatusJsonPath: './status/status.json',

@@ -12,7 +12,8 @@ export function setConfigEnvVars(config: ServiceConfiguration): void {
   config.BootstrapMode = process.env.BOOTSTRAP_MODE ? process.env.BOOTSTRAP_MODE === 'true' : config.BootstrapMode;
   config.Port = process.env.PORT ? Number(process.env.PORT) : config.Port;
   config.EthereumGenesisContract = process.env.ETHEREUM_GENESIS_CONTRACT ?? config.EthereumGenesisContract;
-  config.EthereumEndpoint = process.env.ETHEREUM_ENDPOINT ?? config.EthereumEndpoint;
+  // parse ETHEREUM_ENDPOINT, if it has multiple values, split by comma
+  config.EthereumEndpoint = process.env.ETHEREUM_ENDPOINT ? process.env.ETHEREUM_ENDPOINT.split(',') : config.EthereumEndpoint;
   config.DeploymentDescriptorUrl = process.env.DEPLOYMENT_DESCRIPTOR_URL ?? config.DeploymentDescriptorUrl;
   config.ElectionsAuditOnly = process.env.ELECTIONS_AUDIT_ONLY
     ? process.env.ELECTIONS_AUDIT_ONLY === 'true'

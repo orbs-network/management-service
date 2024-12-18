@@ -4,7 +4,7 @@ export interface ServiceConfiguration {
   BootstrapMode: boolean;
   Port: number;
   EthereumGenesisContract: string;
-  EthereumEndpoint: string;
+  EthereumEndpoint: string[];
   /** @deprecated Use `EthereumEndpoint` instead */
   MaticEndpoint?: string;
   DeploymentDescriptorUrl: string;
@@ -45,6 +45,39 @@ export const defaultServiceConfiguration = {
   ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
   FinalityBufferBlocks: 40,
   Verbose: false,
+};
+
+// Define the types for the custom validator function
+validate.validators.array = function (
+  value: unknown,
+  options: { item?: validate.ValidateOption },
+  key: string
+): string | undefined {
+  // Check if the value is an array
+  if (!Array.isArray(value)) {
+    return `${key} must be an array.`;
+  }
+
+  // If there are item-level validation options, validate each item
+  if (options && options.item) {
+    const errors = value
+      .map((item, index) => {
+        const error = validate.single(item, options.item);
+        if (error) {
+          return `Item ${index + 1}: ${error.join(', ')}`;
+        }
+        return undefined;
+      })
+      .filter((error): error is string => !!error); // Narrow the type to strings
+
+    // If there are errors, return them as a single string
+    if (errors.length > 0) {
+      return errors.join('; ');
+    }
+  }
+
+  // Return undefined if there are no errors
+  return undefined;
 };
 
 export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): string[] | undefined {
@@ -101,12 +134,20 @@ export function validateServiceConfiguration(c: Partial<ServiceConfiguration>): 
       numericality: { noStrings: true },
     },
     EthereumEndpoint: {
-      presence: { allowEmpty: false },
-      type: 'string',
-      url: {
-        allowLocal: true,
-      },
-    },
+    presence: true, // Ensure the attribute is present
+    type: "array",  // Ensure it's an array
+    array: {
+      item: {
+        presence: true, // Ensure each item is not empty
+        type: "string", // Ensure each item in the array is a string
+        format: {
+          pattern: /^(https?:\/\/[^\s$.?#].[^\s]*)$/i, // URL regex pattern
+          message: "must be a valid URL"
+        }
+      }
+    }
+  },
+
     EthereumGenesisContract: {
       presence: { allowEmpty: false },
       type: 'string',

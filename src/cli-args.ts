@@ -5,6 +5,14 @@ import * as Logger from './logger';
 
 import { setConfigEnvVars } from './env-var-args';
 
+function ensureEthereumEndpointIsArray(obj: ServiceConfiguration): void {
+  if (!obj.EthereumEndpoint) {
+    obj.EthereumEndpoint = []; // Initialize as an empty array if the field is undefined or null
+  } else if (!Array.isArray(obj.EthereumEndpoint)) {
+    obj.EthereumEndpoint = [obj.EthereumEndpoint]; // Convert to array if it's not already one
+  }
+}
+
 export function parseArgs(argv: string[]): ServiceConfiguration {
   const options = yargs(argv)
     .option('config', {
@@ -27,6 +35,8 @@ export function parseArgs(argv: string[]): ServiceConfiguration {
 
   // Support passing required config values via environment variables
   setConfigEnvVars(config);
+
+  ensureEthereumEndpointIsArray(config);
 
   const validationErrors = validateServiceConfiguration(config);
   if (validationErrors) {
