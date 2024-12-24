@@ -155,8 +155,8 @@ export class EthereumTestDriver {
     return await d.web3.eth.getBlockNumber();
   }
 
-  async getCurrentBlockPreDeploy(ethereumEndpoint: string): Promise<number> {
-    const web3 = new Web3(ethereumEndpoint);
+  async getCurrentBlockPreDeploy(ethereumEndpoint: string[]): Promise<number> {
+    const web3 = new Web3(ethereumEndpoint[0]);
     return await web3.eth.getBlockNumber();
   }
 

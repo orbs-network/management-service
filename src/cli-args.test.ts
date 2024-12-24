@@ -22,7 +22,7 @@ const configPath = 'some/path/config.json';
 
 const minimalConfigValue = {
   EthereumGenesisContract: 'bar',
-  EthereumEndpoint: 'http://localhost:7545',
+  EthereumEndpoint: ['http://localhost:7545'],
   'node-address': 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
 };
 const inputConfigValue = {
@@ -71,7 +71,7 @@ test('parseOptions: environment variables and no config', (t) => {
 
   t.assert((output.ExternalLaunchConfig = {}));
   t.assert((output.StatusJsonPath = './status/status.json'));
-  t.assert((output.EthereumEndpoint = mockEthereumEndpoint));
+  t.assert((output.EthereumEndpoint = [mockEthereumEndpoint]));
   t.assert((output['node-address'] = mockNodeAddress));
 });
 
@@ -87,7 +87,7 @@ test('parseOptions: env vars take precedence', (t) => {
 
   const output = parseArgs(['--config', configPath]);
 
-  t.assert((output.EthereumEndpoint = mockEthereumEndpoint));
+  t.assert((output.EthereumEndpoint = [mockEthereumEndpoint]));
   t.assert((output['node-address'] = mockNodeAddress));
 });
 

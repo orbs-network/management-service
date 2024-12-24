@@ -15,6 +15,10 @@ export abstract class EventFetcher {
     return true;
   }
 
+  resetContract() {
+    this.contract = undefined;
+  }
+
   // every fetcher instance should override this function
   abstract fetchBlock(blockNumber: number, latestAllowedBlock: number): Promise<EventData[]>;
 }

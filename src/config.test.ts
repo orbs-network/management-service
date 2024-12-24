@@ -7,7 +7,7 @@ test('accepts legal config', (t) => {
       BootstrapMode: false,
       Port: 2,
       EthereumGenesisContract: 'foo',
-      EthereumEndpoint: 'http://localhost:7545',
+      EthereumEndpoint: ['http://localhost:7545'],
       EthereumPollIntervalSeconds: 0.1,
       EthereumRequestsPerSecondLimit: 0,
       ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
@@ -34,7 +34,7 @@ test('declines illegal config (1)', (t) => {
       BootstrapMode: false,
       Port: 2,
       EthereumGenesisContract: 'foo',
-      EthereumEndpoint: 'http://localhost:7545',
+      EthereumEndpoint: ['http://localhost:7545'],
       EthereumPollIntervalSeconds: 0.1,
       EthereumRequestsPerSecondLimit: 0,
       ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
@@ -60,7 +60,7 @@ test('declines illegal config (2)', (t) => {
       BootstrapMode: false,
       Port: 2,
       EthereumGenesisContract: 'foo',
-      EthereumEndpoint: 'foo-bar:123',
+      EthereumEndpoint: ['foo-bar:123'],
       EthereumPollIntervalSeconds: 0.1,
       EthereumRequestsPerSecondLimit: 0,
       ElectionsStaleUpdateSeconds: 7 * 24 * 60 * 60,
@@ -77,6 +77,6 @@ test('declines illegal config (2)', (t) => {
       Verbose: true,
       'node-address': 'ecfcccbc1e54852337298c7e90f5ecee79439e67',
     }),
-    ['Ethereum endpoint is not a valid url']
+    ['Ethereum endpoint Item 1: must be a valid URL']
   );
 });
