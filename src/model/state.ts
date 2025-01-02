@@ -174,6 +174,10 @@ export class State {
     }
   }
 
+  public loadSnapshot(newSnapshot: Partial<StateSnapshot>): void {
+    Object.assign(this.snapshot, newSnapshot);
+  }
+
   getSnapshot(): StateSnapshot {
     return this.snapshot;
   }

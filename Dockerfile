@@ -23,6 +23,7 @@ RUN apk add --no-cache git
 RUN npm install
 
 COPY dist ./dist
+COPY initial-state/ethereum.json /opt/orbs/status/ethereum.json
 
 CMD [ "npm", "start" ]
 EXPOSE 8080

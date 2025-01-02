@@ -20,6 +20,7 @@ const SOCKET_TIMEOUT_SEC = 60;
 
 export function serve(serviceConfig: ServiceConfiguration, censoredConfig: ServiceConfiguration) {
   const state = new StateManager(serviceConfig);
+  state.loadStateFromDisk();
   const blockSync = new BlockSync(state, serviceConfig);
   //const imagePoll = new ImagePoll(state, serviceConfig);
   //const dockerComposeReader = new DockerComposeReader(state, serviceConfig);

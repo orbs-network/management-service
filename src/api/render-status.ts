@@ -130,19 +130,22 @@ function getStatusText(snapshot: StateSnapshot) {
 function getErrorText(snapshot: StateSnapshot) {
   const res = [];
   const now = getCurrentClockTime();
-  const refTimeAgo = now - snapshot.CurrentRefTime;
+  let refTimeAgo = now - snapshot.CurrentRefTime;
+
   if (refTimeAgo > ETHEREUM_REF_TIME_ALLOWED_DELAY) {
     res.push(`Ethereum RefTime is too old (${refTimeAgo} sec ago).`);
   }
-  for (const imageName of imageNamesToPollForNewVersions) {
-    // exclude "vm-" prefix
-    if (imageName.substring(0, 3).toLowerCase() !== L3_VM_PREFIX) {
-      const polledAgo = now - (snapshot.CurrentImageVersionsUpdater['main'][imageName]?.LastPollTime ?? 0);
-      if (polledAgo > DOCKER_HUB_POLL_ALLOWED_DELAY) {
-        res.push(`Stable version poll for ${imageName} is too old (${polledAgo} sec ago).`);
-      }
-    }
-  }
+
+  // Polling currently is disabled.
+  // for (const imageName of imageNamesToPollForNewVersions) {
+  //   // exclude "vm-" prefix
+  //   if (imageName.substring(0, 3).toLowerCase() !== L3_VM_PREFIX) {
+  //     const polledAgo = now - (snapshot.CurrentImageVersionsUpdater['main'][imageName]?.LastPollTime ?? 0);
+  //     if (polledAgo > DOCKER_HUB_POLL_ALLOWED_DELAY) {
+  //       res.push(`Stable version poll for ${imageName} is too old (${polledAgo} sec ago).`);
+  //     }
+  //   }
+  // }
 
   return res.join(' ');
 

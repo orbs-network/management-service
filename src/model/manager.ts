@@ -1,9 +1,13 @@
 import { EventData } from 'web3-eth-contract';
 import { State, StateSnapshot, StateConfiguration } from './state';
 import { EventTypes } from '../ethereum/types';
+import fs from 'fs';
+import * as Logger from '../logger';
 
 export class StateManager {
   private current: State;
+  private MODE : string = process.env.MODE || 'production';
+  private MY_CHAIN_ID : string = process.env.CHAIN || 'ethereum';
 
   applyNewEvents(block: number, time: number, events: EventData[]) {
     for (const event of events) {
@@ -79,6 +83,34 @@ export class StateManager {
     }
     // TODO: improve to a more efficient implementation that only returns a subset of events
     return this.current.getSnapshot();
+  }
+
+  loadStateFromDisk () {
+    if (this.MODE != 'dev') {
+      return;
+    }
+
+    try {
+      if (!fs.existsSync('./status/'+this.MY_CHAIN_ID+'.json')) {
+        Logger.log('State file does not exist, starting with empty state.');
+        return;
+      }
+
+      const state = JSON.parse(fs.readFileSync('./status/'+this.MY_CHAIN_ID+'.json', 'utf8'));
+      this.current = new State(this.config);
+      this.current.loadSnapshot(state);
+    } catch (e) {
+      console.error('Failed to load state from disk, starting with empty state.');
+    }
+  }
+
+  saveStateToDisk () {
+    if (this.MODE != 'dev') {
+      return;
+    }
+
+    Logger.log('Saving state to disk');
+    fs.writeFileSync('./status/'+this.MY_CHAIN_ID+'.json', JSON.stringify(this.current.getSnapshot(), null, 2));
   }
 
   createFakeData() {

@@ -16,11 +16,17 @@ export type BlockSyncConfiguration = EthereumConfiguration & {
 export class BlockSync {
   private reader: EthereumReader;
   private lastProcessedBlock: number;
+  private lastSavedSnapshotTime : number;
   private eventFetchers: { [T in EventName]: EventFetcher };
 
   constructor(private state: StateManager, private config: BlockSyncConfiguration) {
     this.reader = new EthereumReader(config, () => this.resetAllContracts());
-    this.lastProcessedBlock = config.EthereumFirstBlock;
+    if (state.getCurrentSnapshot().CurrentRefBlock > config.EthereumFirstBlock) {
+      this.lastProcessedBlock = state.getCurrentSnapshot().CurrentRefBlock;
+    } else {
+      this.lastProcessedBlock = config.EthereumFirstBlock;
+    }
+    this.lastSavedSnapshotTime = Date.now();
     this.eventFetchers = {
       ContractAddressUpdated: new LookaheadEventFetcher('ContractAddressUpdated', this.reader),
       CommitteeChange: new LookaheadEventFetcher('CommitteeChange', this.reader),
@@ -96,6 +102,13 @@ export class BlockSync {
     const blockTime = await this.reader.getRefTime(blockNumber);
     this.state.applyNewEvents(blockNumber, blockTime, sorted);
     this.state.applyNewTimeRef(blockTime, blockNumber);
+
+    const now = Date.now();
+    if (now - this.lastSavedSnapshotTime > 30 * 1000) {
+      this.lastSavedSnapshotTime = now
+      this.state.saveStateToDisk();
+    }
+
     Logger.log(`BlockSync: processed ${sorted.length} events in block ${blockNumber} with time ${blockTime}, (${this.secondsDeltaToTimeString(blockTime)}).`);
   }
 
