@@ -1,15 +1,8 @@
 #!/bin/bash -e
 
-set -x
+#set -x
 
-git status
-
-#git fetch --tags
 git pull --tags
-
-echo boo
-
-git tag
 
 if [[ ! -z "$CIRCLE_TAG" ]]; then
     echo "This is a release run - Updating the .version file to indicate the correct Semver"
