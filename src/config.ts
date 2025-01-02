@@ -8,7 +8,7 @@ export interface ServiceConfiguration {
   /** @deprecated Use `EthereumEndpoint` instead */
   MaticEndpoint?: string;
   DeploymentDescriptorUrl: string;
-  DockerComposeDescriptorUrl: string;
+  // DockerComposeDescriptorUrl: string;
   ElectionsAuditOnly: boolean;
   StatusJsonPath: string;
   StatusAnalyticsJsonPath: string;
@@ -33,7 +33,7 @@ export const defaultServiceConfiguration = {
   EthereumGenesisContract: '0xD859701C81119aB12A1e62AF6270aD2AE05c7AB3',
   EthereumFirstBlock: 11191390,
   DeploymentDescriptorUrl: 'https://deployment.orbs.network/mainnet.json',
-  DockerComposeDescriptorUrl: 'https://raw.githubusercontent.com/orbs-network/v3-node-setup/refs/heads/release/deployment/docker-compose.yml',
+  //DockerComposeDescriptorUrl: 'https://raw.githubusercontent.com/orbs-network/v3-node-setup/refs/heads/release/deployment/docker-compose.yml',
   ElectionsAuditOnly: false,
   StatusJsonPath: './status/status.json',
   StatusAnalyticsJsonPath: './status/analytics.json',

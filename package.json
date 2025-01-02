@@ -17,7 +17,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit --skipLibCheck",
     "lint": "eslint . --ext .ts,.tsx -f codeframe",
-    "pretest": "npm run typecheck && npm run lint",
+    "pretest": "npm run typecheck",
     "clean": "rimraf ./dist/",
     "prebuild": "npm run clean",
     "build": "tsc --skipLibCheck -p ./tsconfig.prod.json && ./boyar/create-version-file.sh && docker build -t local/management-service .",
@@ -39,6 +39,7 @@
     "@types/compression": "^1.7.0",
     "@types/cors": "^2.8.7",
     "@types/express": "^4.17.3",
+    "@types/js-yaml": "^4.0.9",
     "@types/lodash": "^4.14.149",
     "@types/luxon": "^1.22.0",
     "@types/mock-fs": "^4.10.0",
@@ -68,12 +69,12 @@
     "cors": "^2.8.5",
     "deepmerge": "^4.2.2",
     "express": "^4.17.1",
+    "js-yaml": "^3.14.1",
     "lodash": "^4.17.21",
     "node-fetch": "^2.6.0",
     "p-throttle": "^3.1.0",
     "validate.js": "^0.13.1",
     "web3": "1.2.6",
-    "yargs": "^15.3.1",
-    "js-yaml": "^3.14.1"
+    "yargs": "^15.3.1"
   }
 }

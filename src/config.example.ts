@@ -7,7 +7,7 @@ export const exampleConfig: ServiceConfiguration = {
   EthereumFirstBlock: 11191390,
   EthereumEndpoint: ['http://ganache:7545'],
   DeploymentDescriptorUrl: 'https://deployment.orbs.network/mainnet.json',
-  DockerComposeDescriptorUrl: 'https://raw.githubusercontent.com/orbs-network/v3-node-setup/refs/heads/release/deployment/docker-compose.yml',
+  // DockerComposeDescriptorUrl: 'https://raw.githubusercontent.com/orbs-network/v3-node-setup/refs/heads/release/deployment/docker-compose.yml',
   ElectionsAuditOnly: false,
   StatusJsonPath: './status/status.json',
   StatusAnalyticsJsonPath: './status/analytics.json',

@@ -130,7 +130,7 @@ function getStatusText(snapshot: StateSnapshot) {
 function getErrorText(snapshot: StateSnapshot) {
   const res = [];
   const now = getCurrentClockTime();
-  let refTimeAgo = now - snapshot.CurrentRefTime;
+  const refTimeAgo = now - snapshot.CurrentRefTime;
 
   if (refTimeAgo > ETHEREUM_REF_TIME_ALLOWED_DELAY) {
     res.push(`Ethereum RefTime is too old (${refTimeAgo} sec ago).`);

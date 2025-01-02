@@ -2,7 +2,7 @@ import axios from 'axios';
 import {StateManager} from "../model/manager";
 import * as Logger from "../logger";
 import { promises as fs } from 'fs';
-const yaml = require('js-yaml');
+import yaml from 'js-yaml';
 
 interface DockerComposeService {
   [serviceName: string]: any;
