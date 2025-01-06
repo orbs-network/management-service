@@ -91,12 +91,12 @@ export class StateManager {
     }
 
     try {
-      if (!fs.existsSync('./status/'+this.MY_CHAIN_ID+'.json')) {
+      if (!fs.existsSync('./initial-state/'+this.MY_CHAIN_ID+'.json')) {
         Logger.log('State file does not exist, starting with empty state.');
         return;
       }
 
-      const state = JSON.parse(fs.readFileSync('./status/'+this.MY_CHAIN_ID+'.json', 'utf8'));
+      const state = JSON.parse(fs.readFileSync('./initial-state/'+this.MY_CHAIN_ID+'.json', 'utf8'));
       this.current = new State(this.config);
       this.current.loadSnapshot(state);
     } catch (e) {
@@ -110,7 +110,7 @@ export class StateManager {
     }
 
     Logger.log('Saving state to disk');
-    fs.writeFileSync('./status/'+this.MY_CHAIN_ID+'.json', JSON.stringify(this.current.getSnapshot(), null, 2));
+    fs.writeFileSync('./initial-state/'+this.MY_CHAIN_ID+'.json', JSON.stringify(this.current.getSnapshot(), null, 2));
   }
 
   createFakeData() {
