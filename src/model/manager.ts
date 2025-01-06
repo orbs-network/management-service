@@ -99,6 +99,7 @@ export class StateManager {
       const state = JSON.parse(fs.readFileSync('./initial-state/'+this.MY_CHAIN_ID+'.json', 'utf8'));
       this.current = new State(this.config);
       this.current.loadSnapshot(state);
+      Logger.log ('Loaded state from disk');
     } catch (e) {
       console.error('Failed to load state from disk, starting with empty state.');
     }
