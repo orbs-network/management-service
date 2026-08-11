@@ -40,6 +40,14 @@ export class BlockSync {
     if (this.config.BootstrapMode) return; // do nothing in bootstrap mode
 
     const latestAllowedBlock = await this.getLatestBlockUnderFinality();
+    if (latestAllowedBlock < this.lastProcessedBlock) {
+      // provider returned a bogus block number (e.g. an unsynced node reporting 0) -
+      // skip this tick rather than query negative/stale blocks
+      Logger.error(
+        `BlockSync: latestAllowedBlock ${latestAllowedBlock} is behind last processed block ${this.lastProcessedBlock}, skipping run.`
+      );
+      return;
+    }
     Logger.log(`BlockSync: run started at ${this.lastProcessedBlock} allowed to go to ${latestAllowedBlock}.`);
 
     // go over blocks one by one and process their events
