@@ -84,13 +84,26 @@ export class EthereumReader {
     if (this.throttled) await this.throttled();
     this.requestStats.add(1);
 
+    // a provider that is up but not synced can answer eth_blockNumber with 0 -
+    // treat any non-positive result like a failure and try the next provider
+    let blockNumber: number | null = null;
     try {
-      return await this.getWeb3().eth.getBlockNumber();
+      blockNumber = await this.getWeb3().eth.getBlockNumber();
     } catch (error) {
       console.error("Error fetching block number:", error);
-      this.switchWeb3();
-      return await this.getWeb3().eth.getBlockNumber();
     }
+
+    if (blockNumber == null || blockNumber <= 0) {
+      if (blockNumber != null) {
+        console.error(`eth_blockNumber returned ${blockNumber}, switching provider`);
+      }
+      this.switchWeb3();
+      blockNumber = await this.getWeb3().eth.getBlockNumber();
+      if (blockNumber <= 0) {
+        throw new Error(`eth_blockNumber returned ${blockNumber}`);
+      }
+    }
+    return blockNumber;
   }
 
   // orbs GET api dediated to serve block time from cache
